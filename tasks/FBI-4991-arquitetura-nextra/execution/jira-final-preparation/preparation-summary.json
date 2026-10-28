@@ -1,0 +1,20 @@
+{
+  "prepared_at_utc": "2026-10-15T18:46:09.803883+00:00",
+  "verdict": "PREPARED_94_SEMANTIC_JUDGMENTS_PENDING_FINAL_PUBLICATION_AND_ROOT_FRESH_READ",
+  "external_mutations": false,
+  "original_blocks": 63,
+  "proposed_blocks": 76,
+  "prefix_unchanged": true,
+  "gates_allow": true,
+  "gate_metadataSource_enforcement": false,
+  "gate_metadataSource_note": "Current byte-identical .codex/.agents canonical wrappers contain no metadataSource rule; live metadata is preserved as evidence in preview and metadata receipt, not claimed as an enforced script check.",
+  "raw_public_verdict": "FAIL",
+  "functional_assessment": "FUNCTIONAL_PASS_WITH_RECORDED_CONSOLE_ERRORS",
+  "pending": [
+    "incorporate root aggregate receipt for94bounded diagram judgments",
+    "replace earlier v2deployment and QA statements with final corrected release evidence when available",
+    "incorporate actual draftPR URL only after root supplies it",
+    "fresh live precondition read by root before write",
+    "root owns external write and read-back"
+  ]
+}

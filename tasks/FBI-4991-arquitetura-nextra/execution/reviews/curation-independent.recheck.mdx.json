@@ -1,0 +1,244 @@
+{
+  "observed_utc": "2026-10-15T17:23:44.170Z",
+  "scope": "Read-only MDX parse, compile and links of content/referencia against the current content tree.",
+  "files": 59,
+  "errors": [],
+  "receipts": [
+    {
+      "file": "content/referencia/casos/access-policy/index.mdx",
+      "sha256": "a777aaa40ae8802ea9dde9056d160b0bfd7a44847f504e9034cb9f01fbb7af7d"
+    },
+    {
+      "file": "content/referencia/casos/airflow-lock-retry/index.mdx",
+      "sha256": "3cdff5eb231d601c862e1bac9d0919eb70e12e54df14947531da75eb7d871469"
+    },
+    {
+      "file": "content/referencia/casos/cache-policy/index.mdx",
+      "sha256": "c5c0560fe4540041c7c66b0582ce7f03a9e2884a5b37751de19d5281d4155aaa"
+    },
+    {
+      "file": "content/referencia/casos/consensus/index.mdx",
+      "sha256": "6426867cec6d91c3b73bb44c776d4302f4d86fa2e9f9b562cd399df7f91719ea"
+    },
+    {
+      "file": "content/referencia/casos/date-only/index.mdx",
+      "sha256": "8708d571faff32e120ea78aba26f37e5bc532affce42eb50c77d569ec22a6d12"
+    },
+    {
+      "file": "content/referencia/casos/diagnostics/index.mdx",
+      "sha256": "391fdfc7c120b43f4b0a928a290d099a938d0cf94581f88315e475ad0b0372bb"
+    },
+    {
+      "file": "content/referencia/casos/early-refresh/index.mdx",
+      "sha256": "82cbb371e167bf1bbe8b745c0783dfccf4ecf148eface596fe9adec151652398"
+    },
+    {
+      "file": "content/referencia/casos/index.mdx",
+      "sha256": "0bbc6360ccb88b39e11f0170de9f7589cad4bf8b7e52d697ae2eed5efc9e75c5"
+    },
+    {
+      "file": "content/referencia/casos/ledger-projection/index.mdx",
+      "sha256": "98b899faeb376e9b346d2472ac6852638cb213d338714dabe41c231cfe3e7c6d"
+    },
+    {
+      "file": "content/referencia/casos/opportunity-entry/index.mdx",
+      "sha256": "1fb15ae649c451138e5844f1a1f4c756539973bfe9d8942a060d52c9e3327d78"
+    },
+    {
+      "file": "content/referencia/casos/order-boundaries/index.mdx",
+      "sha256": "723c767b6b3dba8dd99efcdcc6e325ca6f3b6a9d74a01c6eae6af3f48d640fd5"
+    },
+    {
+      "file": "content/referencia/casos/order-delivery/index.mdx",
+      "sha256": "987e5d0c64534737fade67d81f5afc1a7262bd6293aa33c8eed45fec6a857d61"
+    },
+    {
+      "file": "content/referencia/casos/query-grain-postgres/index.mdx",
+      "sha256": "370bbd06632519aaa2536ab4b45922bf66177b22646204bfc970aeacf6796e6a"
+    },
+    {
+      "file": "content/referencia/casos/queue-workflow/index.mdx",
+      "sha256": "0fe2c9428d2f165edf11a72187141dd264314243bb4c5a2fe3a894ef3484c8e3"
+    },
+    {
+      "file": "content/referencia/casos/reservation/index.mdx",
+      "sha256": "62b1fa359bc2137545352443c02bb35df2481a67becc3695625102322a86598e"
+    },
+    {
+      "file": "content/referencia/casos/revision-cas-postgres/index.mdx",
+      "sha256": "72c76c713092936e928490262a047ed452b731dd9339a48d05601c49f9793bc3"
+    },
+    {
+      "file": "content/referencia/casos/safe-release/index.mdx",
+      "sha256": "e1bcf3f7f895a5bd1c566b9bb1fcd9cf97aaee4ea42b0bc7d2241281aadb490d"
+    },
+    {
+      "file": "content/referencia/casos/single-flight-cancel/index.mdx",
+      "sha256": "496c9d8bcddc2471cb79218e01371b5d6c7df6e51e0f4fb974f2003a169832b7"
+    },
+    {
+      "file": "content/referencia/casos/storage-partitions/index.mdx",
+      "sha256": "e9ffa350a6d663eca919eab9fc110c61735ce1cc7d5964056e52aab169993aa3"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "sha256": "2cb483d556683bedc96477783f6cb20ca055e765340dca39f4342931e10ff010"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "sha256": "03a077bbe1c7513faf3eb1bdb93a2e0d371ed73b9f75dfe56cd04fef57e9472c"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "sha256": "fc5fa85e90c4698f701aa217a2a2b5e326f5e9a324537dd0ffe91175115aa45b"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "sha256": "adf81a0a5d84a13349c0a352541406ee986e80188ca5cc086a593a188c843650"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "sha256": "869d146f32190c9d0cbdc2578e8c0f68dcf7f7444b7d81e96f43185671c4cfec"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "sha256": "da2a7bb5ca7f63a6d5b83c3533a49535602bd9c1b0052a432aac02005d5fe173"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "sha256": "c74b29cc35c8111bc966075c5278823c55fcaefe27adae92ba5bca6b03c6c01f"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "sha256": "4d05aadfee88512db670fe632a9f177676feebe23cf0d89318a24a84c32e957f"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "sha256": "6745932e92e48e5e59bcaefb933d49b25060b84b4dbee1e03dbd6041be1be71e"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "sha256": "21792731583d43b26825be9cc45957ffad46636841489d129844c6ad6876f033"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "d9c057d7c90ced20f64c76b3ce9def1d08f322f4191097f69496e0c15d0f797e"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "sha256": "f7a65931bb9056a48f9fb3fee50a5b672481d38d2f36c9ffcc2940d7c386b763"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "sha256": "5764d953aa4bbad2b7e82dc4250b1db506ef6c5892d8069877ad523f8c459740"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "sha256": "2603d2c069f96dd7c2e6810184483baeceebd635c16b3bb7223ce996ea92917a"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "sha256": "cb5b73b412737066257f5f0884b85c56799832472756890ca4aad9fadfb33298"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "sha256": "f0e9183c0245d552be01a691ef69bd7363f7c50e88f5b5511ba50d9da7b40679"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "sha256": "efb2b527bbcf5f373ea322cae55f02fa170d8b894dd07c25a97792b3242caa5e"
+    },
+    {
+      "file": "content/referencia/catalogo/index.mdx",
+      "sha256": "8d1ba1380b3c9dc6f8bad92e05e5bcb2e0687014be1ba6782cb1fbecc0b1997a"
+    },
+    {
+      "file": "content/referencia/curadoria/01-arquiteturas-de-aplicacao.mdx",
+      "sha256": "fa340422c69a888cc46a96299f1b34dd5d36c57544046b5841dc875c0822243a"
+    },
+    {
+      "file": "content/referencia/curadoria/02-sistemas-distribuidos-e-consistencia.mdx",
+      "sha256": "f7a35c88c7a954ac960809b91f70478cd92387b0c1a35e662184af14105a5279"
+    },
+    {
+      "file": "content/referencia/curadoria/03-event-driven-messaging.mdx",
+      "sha256": "9baa44ffedcf628c0fca4f735dcfc6acd584d42fc9edb975d61e2d6f0078f0e3"
+    },
+    {
+      "file": "content/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "sha256": "63b035d3ff284388e3b87e3691ec6b1bcef2e27bc9a92ca39d5d60eb668d642b"
+    },
+    {
+      "file": "content/referencia/curadoria/05-banco-de-dados-e-armazenamento.mdx",
+      "sha256": "ce57cd625b467514ff57f4959c87f10b100ee660693a0ebc85afe1b00a80eb01"
+    },
+    {
+      "file": "content/referencia/curadoria/06-cache.mdx",
+      "sha256": "bfb27bf849b5e9e99e51ab92392b49a37f141038755b4f72674b7aaf05d028aa"
+    },
+    {
+      "file": "content/referencia/curadoria/07-resiliencia.mdx",
+      "sha256": "f853c6d469e3907fa15dfb028e8476e02da2096dba0eb93b0f73bd9facd08d8e"
+    },
+    {
+      "file": "content/referencia/curadoria/08-concorrencia.mdx",
+      "sha256": "89eb76cd764fb797be34477014625302fba797929186c41006d51914970b3610"
+    },
+    {
+      "file": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "9180eb34de65056692f08afe4c6d0fefb50047de4e5c3b8a2b279f28927ca5c1"
+    },
+    {
+      "file": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "c971b61a41d9ef35771ecb9071ce43610e62ff410692e944f4ebdb0fdefe91b8"
+    },
+    {
+      "file": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1"
+    },
+    {
+      "file": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "cfd3ad94b2d1e193624b2352da4885c09de64c8ddea83953a7dd3cab05d850af"
+    },
+    {
+      "file": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "45747678a7d8cdca1d74f39aae346234233482b29e59445b2eedf6de8f72f20a"
+    },
+    {
+      "file": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "a58fd8d9c8d07f0c567de8db88d30aa5e37a0ed7418e5ed2dfe1f28f428aa86d"
+    },
+    {
+      "file": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "b66099d181148750ce14ae3cd176300bf8b150c14ce04c9caed36354fe47a193"
+    },
+    {
+      "file": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "538831d8a77f2378cec89718fd5ae31d978b0d3f1f924777663036d3386f7a95"
+    },
+    {
+      "file": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "e146048a8a785cdfc6a1e8339f32bfd8edcbaa3164a7425d924c144b8e5fbc5d"
+    },
+    {
+      "file": "content/referencia/curadoria/index.mdx",
+      "sha256": "80a0416785de3295657ad93680aea08bae6cc111d0f3cd26f56a12e417450460"
+    },
+    {
+      "file": "content/referencia/evidencias.mdx",
+      "sha256": "27c4abe67c866c60cd231e3637243af4ddbdd63407f7b5410fab1eabb3a5b7bc"
+    },
+    {
+      "file": "content/referencia/index.mdx",
+      "sha256": "379bcf7f24434b58d8bb986496b7e68c11935d7825ef253ff616dbc7692a6f93"
+    },
+    {
+      "file": "content/referencia/prioritarios.mdx",
+      "sha256": "508e95f816b4df1363870f113b696dfa8c1e034d2a3452942d66584af9c6443f"
+    },
+    {
+      "file": "content/referencia/skills-e-projetos.mdx",
+      "sha256": "96008bba7d7a3dfd94c919e794d848eb520034394d6253173d994cc23fb4446f"
+    }
+  ]
+}

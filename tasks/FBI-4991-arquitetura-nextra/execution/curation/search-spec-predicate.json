@@ -1,0 +1,12 @@
+{
+  "query": "repo:apache/fineract \"Specification<\" \"toPredicate\"",
+  "observed_utc": "2026-10-15T01:51:16.192013Z",
+  "total_count": 1,
+  "items": [
+    {
+      "repo": "apache/fineract",
+      "path": "fineract-core/src/main/java/org/apache/fineract/infrastructure/core/jpa/CriteriaQueryFactory.java",
+      "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/jpa/CriteriaQueryFactory.java"
+    }
+  ]
+}

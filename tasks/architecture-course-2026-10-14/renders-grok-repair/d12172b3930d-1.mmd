@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Screen as Tela de Seguros
+    participant Api as get_kpi_metrics
+    participant Cache as CacheManager
+    participant Repo as Serviço e repositório
+    Screen->>Api: pede os indicadores do período
+    Api->>Cache: get da chave com os limites
+    alt entrada disponível
+        Cache-->>Api: resultado armazenado
+        Api-->>Screen: indicadores armazenados
+    else entrada ausente
+        Api->>Repo: get_kpi_metrics
+        alt consulta concluída
+            Repo-->>Api: resultado
+            Api->>Cache: set com TTL de 300 s
+            Api-->>Screen: indicadores calculados
+        else consulta falha
+            Repo-->>Api: erro
+            Api-->>Screen: falha da consulta
+        end
+    end

@@ -1,0 +1,24 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/16-workflow-e-processamento",
+  "document_sha256": "6f809d63281eb97af6de0776f635cf72a4aa0edc38657e78b2f6949cbe4c6494",
+  "context_sha256": "ba60ff6913e205da39f6f8f859edd0f7f786ea2a8293b7fa8eab903d8077a8fb",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "l3a",
+    "l3b",
+    "l3c",
+    "l4c",
+    "l6a",
+    "original-catalog",
+    "original-request",
+    "s3",
+    "s4",
+    "s6",
+    "workflow-reference-repair"
+  ]
+}

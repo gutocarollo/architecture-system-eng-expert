@@ -1,0 +1,6 @@
+flowchart LR
+    Writer[Escritor proposto] --> TX[Transação de estado e outbox]
+    TX --> WAL[WAL com decodificação lógica habilitada]
+    WAL --> CDC[Conector CDC]
+    CDC --> Consumer[Consumidor com checkpoint e deduplicação]
+    CDC -. consumidor atrasado .-> Retention[WAL retido e necessidade de recuperação]

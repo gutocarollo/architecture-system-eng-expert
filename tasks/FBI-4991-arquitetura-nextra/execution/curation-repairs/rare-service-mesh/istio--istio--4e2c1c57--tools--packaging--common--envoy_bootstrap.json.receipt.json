@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "tools/packaging/common/envoy_bootstrap.json",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/packaging/common/envoy_bootstrap.json",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/packaging/common/envoy_bootstrap.json",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--tools--packaging--common--envoy_bootstrap.json",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T04:09:57.628524+00:00",
+  "source": "raw_primary",
+  "sha256": "d3a3fe34ac9f314ddd5e6db9c049d8deb405f6088ae398608f85a3d7007c7c28",
+  "line_count": 1125
+}

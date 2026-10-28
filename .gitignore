@@ -43,3 +43,24 @@
 **/__pycache__/
 **/.idea/
 .DS_Store
+/.next/
+/out/
+/public/_pagefind/
+
+/.env.local
+
+/RELATORIO-SESSAO-2026-10-13.md
+
+/node_modules
+
+/.pg-learning/
+
+/tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json
+/tasks/FBI-4991-arquitetura-nextra/execution/curation/sources.json
+/tasks/FBI-4991-arquitetura-nextra/execution/curation/*-tree.json
+/tasks/FBI-4991-arquitetura-nextra/execution/curation/*-tree.json.gz
+
+/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-saga-definition.html
+
+# Sites owns this generated source checkout and its deployment history.
+sites/architecture-course/

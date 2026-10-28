@@ -1,0 +1,18 @@
+sequenceDiagram
+    actor Person as Pessoa sintética
+    participant Entra as Provedor OIDC
+    participant App as Aplicação
+    participant API as API do relatório
+    participant Policy as Política de acesso
+    Person->>Entra: Entrar pelo fluxo contratado
+    Entra-->>App: Identidade autenticada para o cliente
+    App->>API: Pedir report:7 com token de acesso adequado
+    API->>API: Validar assinatura, emissor, público e prazo
+    API->>Policy: Esta pessoa pode ler este relatório?
+    alt Permitido
+        Policy-->>API: Permitir conforme a regra
+        API-->>Person: Entregar o relatório autorizado
+    else Negado ou decisão indisponível
+        Policy-->>API: Não permitir a leitura
+        API-->>Person: Informar que o acesso não foi permitido
+    end

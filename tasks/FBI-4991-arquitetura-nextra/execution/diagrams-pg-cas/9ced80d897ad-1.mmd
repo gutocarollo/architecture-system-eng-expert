@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant A as Escritor A
+  participant P as PostgreSQL
+  participant B as Escritor B
+  A->>P: Ler valor e revisão
+  B->>P: Gravar AZURE-CONFIRMED
+  A->>P: Encerrar versão com revisão antiga
+  P-->>A: Zero linhas encerradas
+  Note over A,P: A precisa reler, e o valor confirmado permanece

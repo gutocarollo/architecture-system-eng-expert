@@ -1,0 +1,23 @@
+{
+  "round": "first-semantic-diagram-pass/1",
+  "mission_total": 100,
+  "mission_weight_affected": 10,
+  "mission_weight_source": "Diagram source correspondence acceptance criterion, unadjudicated91 of94 diagrams. Existing semantic3 and approved code/source lanes excluded.",
+  "unresolved_high": 0,
+  "decision_this_round_can_change": "repair erroneous educational flows or close this explicit acceptance gap",
+  "scores": [
+    5,
+    4,
+    5,
+    3,
+    5
+  ],
+  "quality_factor_pct": 91,
+  "gross_gain_pct_of_whole": 9.1,
+  "opportunity_cost_pct_of_whole": 1,
+  "net_gain_pct_of_whole": 8.1,
+  "expected_loss_if_skipped_pct_of_whole": 7,
+  "round_decision": "DISPATCH",
+  "budget": "First pass of a previously uncovered semantic scope, two parallel lanes. This is not a second terminal audit. One HIGH-only warm recheck if required; no extra fresh terminal.",
+  "stop_condition": "91 real diagram judgments bound to body/doc/source hashes; honest bounded/PENDING when primary support missing."
+}

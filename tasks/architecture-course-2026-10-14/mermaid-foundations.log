@@ -1,0 +1,882 @@
+{
+  "observed_at": "2026-10-14T18:22:02.480Z",
+  "parser_self_test": "PASS",
+  "syntax_only": false,
+  "module_sha256": "8937e64a0bc872c0c908cf8e432511c6ec63720213b54aae32ff46cd9ee56e16",
+  "blocks_total": 41,
+  "blocks": [
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "93b1f6a1b9ea8daccc4b30b5a34f480c7ac1fa721afa5c5514e30da35a21a6ee",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/9f954289515a-1.png",
+        "artifact_sha256": "5638dfa289bc514af9d716c619c3d9981071f8358a2c1fa4c0816befc129e2aa"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "93b1f6a1b9ea8daccc4b30b5a34f480c7ac1fa721afa5c5514e30da35a21a6ee",
+      "fence_index": 2,
+      "line_start": 44,
+      "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/9f954289515a-2.png",
+        "artifact_sha256": "b65facd05d85db92f72085306f1e2092772a0bed6fec98f536b04ce4a37f1058"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "93b1f6a1b9ea8daccc4b30b5a34f480c7ac1fa721afa5c5514e30da35a21a6ee",
+      "fence_index": 3,
+      "line_start": 89,
+      "source_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/9f954289515a-3.png",
+        "artifact_sha256": "6f1f6841bde1bfd3be0a675725c93b541d6d182d8f4b31945cc442d1db56d46b"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "93b1f6a1b9ea8daccc4b30b5a34f480c7ac1fa721afa5c5514e30da35a21a6ee",
+      "fence_index": 4,
+      "line_start": 127,
+      "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/9f954289515a-4.png",
+        "artifact_sha256": "6e7a4b7086145557be7ab15990916726bd9a8b6419da854e936123f1337922db"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "ce62e2d39ec3fbf94240d1b316d34df2301ac83374cc7218bc438cbf2e07c458",
+      "fence_index": 1,
+      "line_start": 18,
+      "source_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/aad756397249-1.png",
+        "artifact_sha256": "b10d5d3ab5894de6f45a8b8532a55913f2e951ebe86e118e147b0fc4b59dda4c"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "ce62e2d39ec3fbf94240d1b316d34df2301ac83374cc7218bc438cbf2e07c458",
+      "fence_index": 2,
+      "line_start": 63,
+      "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/aad756397249-2.png",
+        "artifact_sha256": "4bb6178f7fdbeba233e55f04d417bcd0f878cbfb3fe22974e0e1f91ebbc6cca9"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "ce62e2d39ec3fbf94240d1b316d34df2301ac83374cc7218bc438cbf2e07c458",
+      "fence_index": 3,
+      "line_start": 95,
+      "source_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/aad756397249-3.png",
+        "artifact_sha256": "ad2aba582300d7e0822e4474fcb5d9dd9aec18a627531fd4dc2e214de8c68648"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "ce62e2d39ec3fbf94240d1b316d34df2301ac83374cc7218bc438cbf2e07c458",
+      "fence_index": 4,
+      "line_start": 118,
+      "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/aad756397249-4.png",
+        "artifact_sha256": "242b9a98bdb2c30cd294a3eca62d3f6ae5d3395a66852bdf62b136e1ef1066ba"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "ce62e2d39ec3fbf94240d1b316d34df2301ac83374cc7218bc438cbf2e07c458",
+      "fence_index": 5,
+      "line_start": 149,
+      "source_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/aad756397249-5.png",
+        "artifact_sha256": "9dd13b9ebbe3d6a44a0c5d3f983414ede82d88e533c5889df329271628dd85ce"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "ce62e2d39ec3fbf94240d1b316d34df2301ac83374cc7218bc438cbf2e07c458",
+      "fence_index": 6,
+      "line_start": 173,
+      "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/aad756397249-6.png",
+        "artifact_sha256": "8b4069821f37a118f0495f29a436a2b57847c39df9fe3991fdacea86329011a2"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "ce62e2d39ec3fbf94240d1b316d34df2301ac83374cc7218bc438cbf2e07c458",
+      "fence_index": 7,
+      "line_start": 196,
+      "source_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/aad756397249-7.png",
+        "artifact_sha256": "ebd0591699510b52599eb52e263dd37a0baa7975cfeb73f4751a764c8bcf5bab"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "70de4fdcf3956a746ace2e30551ce076cab101c180e687488653586fe1bd3e54",
+      "fence_index": 1,
+      "line_start": 75,
+      "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/bc32e70a39e6-1.png",
+        "artifact_sha256": "1d6d728cb88c6c0dea4bbe311c107f92f0fa337400a5d2f20f5251a6fcad867f"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "70de4fdcf3956a746ace2e30551ce076cab101c180e687488653586fe1bd3e54",
+      "fence_index": 2,
+      "line_start": 126,
+      "source_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/bc32e70a39e6-2.png",
+        "artifact_sha256": "b22e7f218a9ead2edfcb712e3ef85ed20d15f7f503b049743b70ffd5620ea889"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "70de4fdcf3956a746ace2e30551ce076cab101c180e687488653586fe1bd3e54",
+      "fence_index": 3,
+      "line_start": 147,
+      "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/bc32e70a39e6-3.png",
+        "artifact_sha256": "5be7d8a2ea456377219aa53b3b9e0473c2e10a4e59bbb8f6cddc5e2711f1fe0a"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "b79b33e38f81d2d2158eee2f453406a38ac842e8705a3771ae7a819bdeddda2e",
+      "fence_index": 1,
+      "line_start": 18,
+      "source_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/b344e13b3dca-1.png",
+        "artifact_sha256": "b4927e4b7824ab3889876038797163c029172e4db57fad11d3b774d9eaa49b11"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "b79b33e38f81d2d2158eee2f453406a38ac842e8705a3771ae7a819bdeddda2e",
+      "fence_index": 2,
+      "line_start": 35,
+      "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/b344e13b3dca-2.png",
+        "artifact_sha256": "c0411ccdb68f84d9e7c5320bcc0b5d0aa6baa883369ae885959604306729a393"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "b79b33e38f81d2d2158eee2f453406a38ac842e8705a3771ae7a819bdeddda2e",
+      "fence_index": 3,
+      "line_start": 59,
+      "source_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/b344e13b3dca-3.png",
+        "artifact_sha256": "352414a2aa236e6de7ffe9bc72509158a910ef47abc031b3df6e8dc1594c4bbf"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "b79b33e38f81d2d2158eee2f453406a38ac842e8705a3771ae7a819bdeddda2e",
+      "fence_index": 4,
+      "line_start": 92,
+      "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/b344e13b3dca-4.png",
+        "artifact_sha256": "b8e78988093e4a4c202c73753929601e17365195b27df5b498614e822e4658f6"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "4a0bc76a5691adbea0e7615a848180f4f905ae6b213d34d7ff21ca99a7d9c645",
+      "fence_index": 1,
+      "line_start": 22,
+      "source_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/32915b69f122-1.png",
+        "artifact_sha256": "53456923a68c4a42ae7cf3eb97c1697777d74c0bb1d949a43b1546f796bf5a81"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "4a0bc76a5691adbea0e7615a848180f4f905ae6b213d34d7ff21ca99a7d9c645",
+      "fence_index": 2,
+      "line_start": 41,
+      "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/32915b69f122-2.png",
+        "artifact_sha256": "ea10349abbc19b715da9b66861630dbc45e56eeedcba45225052336adf954aee"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "4a0bc76a5691adbea0e7615a848180f4f905ae6b213d34d7ff21ca99a7d9c645",
+      "fence_index": 3,
+      "line_start": 59,
+      "source_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/32915b69f122-3.png",
+        "artifact_sha256": "d103ea1cb01c10d3012b55a3ad5293e8426aaf9728b257adcbea3acb85530963"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "4a0bc76a5691adbea0e7615a848180f4f905ae6b213d34d7ff21ca99a7d9c645",
+      "fence_index": 4,
+      "line_start": 87,
+      "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/32915b69f122-4.png",
+        "artifact_sha256": "5c2924a2626b3ae81cd685eb450ddd25b1397f20af183444ba5dc4b7c2b50527"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/distributed-work/index.mdx",
+      "document_sha256": "960e40d9205f9565f582d5922c316ca69d8272cc32e87013d0a308491b6e4666",
+      "fence_index": 1,
+      "line_start": 18,
+      "source_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/3814f6f1b38a-1.png",
+        "artifact_sha256": "9b47a3e2ced0ad42bfc8c500baae4eee52e5f06f7480a2711d91c75f86b6e262"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/distributed-work/index.mdx",
+      "document_sha256": "960e40d9205f9565f582d5922c316ca69d8272cc32e87013d0a308491b6e4666",
+      "fence_index": 2,
+      "line_start": 68,
+      "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/3814f6f1b38a-2.png",
+        "artifact_sha256": "e9ae28765c74d2b1c981216396fe9c10fb7638d11001572ba50e7f263f8f4043"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/messages/index.mdx",
+      "document_sha256": "e017756a5accc42f79cfbb45fbac8bf02d9471ff31c23c23a03793849188cb4f",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/138af82e605c-1.png",
+        "artifact_sha256": "5545d15543295c65bc2cf528bebfc51b7d6726159c5b271c81699727231de27e"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/messages/index.mdx",
+      "document_sha256": "e017756a5accc42f79cfbb45fbac8bf02d9471ff31c23c23a03793849188cb4f",
+      "fence_index": 2,
+      "line_start": 45,
+      "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/138af82e605c-2.png",
+        "artifact_sha256": "0c571e32637d0b8d52bcc4fa36b206ad1fe8b94a570a36ace726e58cc05343ca"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/messages/index.mdx",
+      "document_sha256": "e017756a5accc42f79cfbb45fbac8bf02d9471ff31c23c23a03793849188cb4f",
+      "fence_index": 3,
+      "line_start": 73,
+      "source_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/138af82e605c-3.png",
+        "artifact_sha256": "7ee579d9bcada70f505c982bf8992983ad4b1d7a21c90b51f26d4e4c40024367"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/messages/index.mdx",
+      "document_sha256": "e017756a5accc42f79cfbb45fbac8bf02d9471ff31c23c23a03793849188cb4f",
+      "fence_index": 4,
+      "line_start": 107,
+      "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/138af82e605c-4.png",
+        "artifact_sha256": "d18e11cb997cca151951f7a56dfeaa8b6d3590dd9ebdcc8a048f535e28ef0205"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/messages/index.mdx",
+      "document_sha256": "e017756a5accc42f79cfbb45fbac8bf02d9471ff31c23c23a03793849188cb4f",
+      "fence_index": 5,
+      "line_start": 132,
+      "source_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/138af82e605c-5.png",
+        "artifact_sha256": "c8821b403ac7c23324c117035b82792bfb8444a11fbb2f48410a84d19739e2f4"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "40ebbdadc0d69b331005ba7d3583567ff8971b34b256ec6e7add5573b2108240",
+      "fence_index": 1,
+      "line_start": 22,
+      "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/eb9b79419ae1-1.png",
+        "artifact_sha256": "c69598e467c3f0f7ef49eca1c21b2c02421c596c0ec6e757a5e3ae521367969c"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "40ebbdadc0d69b331005ba7d3583567ff8971b34b256ec6e7add5573b2108240",
+      "fence_index": 2,
+      "line_start": 50,
+      "source_sha256": "f4fe20faf96323d569c4e3ce0bee8fdd06b0b73475c08675eb9d414825f821b8",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "f4fe20faf96323d569c4e3ce0bee8fdd06b0b73475c08675eb9d414825f821b8"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "f4fe20faf96323d569c4e3ce0bee8fdd06b0b73475c08675eb9d414825f821b8",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/eb9b79419ae1-2.png",
+        "artifact_sha256": "1f6eb9fef440019163b1edd786af0506a837a1b9e3929d3564e5822b0a2982e2"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "40ebbdadc0d69b331005ba7d3583567ff8971b34b256ec6e7add5573b2108240",
+      "fence_index": 3,
+      "line_start": 79,
+      "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/eb9b79419ae1-3.png",
+        "artifact_sha256": "a4745dd794316e2a49767308bc96fea75726b20f062c5b80a89ecb9ac8e66a93"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "127c54a80e554a10d55963b52b4e7a924bcb12214f90e7739d5adc8c8c597109",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/14d42da14759-1.png",
+        "artifact_sha256": "4b08956a5f8981b5ef3db46306eeae2cba493a7704d9e705963c517ceeff2731"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "127c54a80e554a10d55963b52b4e7a924bcb12214f90e7739d5adc8c8c597109",
+      "fence_index": 2,
+      "line_start": 46,
+      "source_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/14d42da14759-2.png",
+        "artifact_sha256": "eaa6fe9003d3512e4255285c0b0045c806a61a230c7c187a584613222b3eb415"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "127c54a80e554a10d55963b52b4e7a924bcb12214f90e7739d5adc8c8c597109",
+      "fence_index": 3,
+      "line_start": 80,
+      "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/14d42da14759-3.png",
+        "artifact_sha256": "8b6ced7932671cecc9b02d2333ff528d7c2a6978f70320a52cde0cb2ddb14b69"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/workflow/index.mdx",
+      "document_sha256": "ebbd3a808359730709aa9837804dc3c6b142dcd49ca8573dfbe602cd272effde",
+      "fence_index": 1,
+      "line_start": 28,
+      "source_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/42cffa29c7d4-1.png",
+        "artifact_sha256": "9bc0d21f8aedec98bd4116a67d0df3639d721a267c8f6ab47fc54831ffa820c0"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/workflow/index.mdx",
+      "document_sha256": "ebbd3a808359730709aa9837804dc3c6b142dcd49ca8573dfbe602cd272effde",
+      "fence_index": 2,
+      "line_start": 54,
+      "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/42cffa29c7d4-2.png",
+        "artifact_sha256": "e1978c8fabdbba0695bda28a72507c2ba09ef4eb0d413d0e395b92f583bed802"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/workflow/index.mdx",
+      "document_sha256": "ebbd3a808359730709aa9837804dc3c6b142dcd49ca8573dfbe602cd272effde",
+      "fence_index": 3,
+      "line_start": 84,
+      "source_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/42cffa29c7d4-3.png",
+        "artifact_sha256": "274dbc369783138ab6ef6aebb9b62222eef5d740c7f947a26e2fa12ac717086b"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/guias/investigar-impacto.mdx",
+      "document_sha256": "6a936ddbbe4b3fe330ddc1654b3c8520f103d61bd18144b769e9507b8a70324c",
+      "fence_index": 1,
+      "line_start": 116,
+      "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-foundations/233764a6ab9e-1.png",
+        "artifact_sha256": "4326b2903052fadd1423e0ae41572b6e7b97d32b8c38f814b83726509cb1d46d"
+      },
+      "semantic_review": "NOT_RUN"
+    }
+  ],
+  "errors": [
+    {
+      "code": "MERMAID_SYNTAX",
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/read-models/index.mdx",
+      "fence_index": 4,
+      "message": "Parse error on line 10:\n...recisa ser observado    end\n-----------------------^\nExpecting '()', 'SOLID_OPEN_ARROW', 'DOTTED_OPEN_ARROW', 'SOLID_ARROW', 'SOLID_ARROW_TOP', 'SOLID_ARROW_BOTTOM', 'STICK_ARROW_TOP', 'STICK_ARROW_BOTTOM', 'SOLID_ARROW_TOP_DOTTED', 'SOLID_ARROW_BOTTOM_DOTTED', 'STICK_ARROW_TOP_DOTTED', 'STICK_ARROW_BOTTOM_DOTTED', 'SOLID_ARROW_TOP_REVERSE', 'SOLID_ARROW_BOTTOM_REVERSE', 'STICK_ARROW_TOP_REVERSE', 'STICK_ARROW_BOTTOM_REVERSE', 'SOLID_ARROW_TOP_REVERSE_DOTTED', 'SOLID_ARROW_BOTTOM_REVERSE_DOTTED', 'STICK_ARROW_TOP_REVERSE_DOTTED', 'STICK_ARROW_BOTTOM_REVERSE_DOTTED', 'BIDIRECTIONAL_SOLID_ARROW', 'DOTTED_ARROW', 'BIDIRECTIONAL_DOTTED_ARROW', 'SOLID_CROSS', 'DOTTED_CROSS', 'SOLID_POINT', 'DOTTED_POINT', got 'NEWLINE'"
+    },
+    {
+      "code": "MERMAID_SYNTAX",
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/reliable-integration/index.mdx",
+      "fence_index": 4,
+      "message": "Parse error on line 13:\n... a ser nova operação        O->>L: Regi\n-----------------------^\nExpecting '()', 'SOLID_OPEN_ARROW', 'DOTTED_OPEN_ARROW', 'SOLID_ARROW', 'SOLID_ARROW_TOP', 'SOLID_ARROW_BOTTOM', 'STICK_ARROW_TOP', 'STICK_ARROW_BOTTOM', 'SOLID_ARROW_TOP_DOTTED', 'SOLID_ARROW_BOTTOM_DOTTED', 'STICK_ARROW_TOP_DOTTED', 'STICK_ARROW_BOTTOM_DOTTED', 'SOLID_ARROW_TOP_REVERSE', 'SOLID_ARROW_BOTTOM_REVERSE', 'STICK_ARROW_TOP_REVERSE', 'STICK_ARROW_BOTTOM_REVERSE', 'SOLID_ARROW_TOP_REVERSE_DOTTED', 'SOLID_ARROW_BOTTOM_REVERSE_DOTTED', 'STICK_ARROW_TOP_REVERSE_DOTTED', 'STICK_ARROW_BOTTOM_REVERSE_DOTTED', 'BIDIRECTIONAL_SOLID_ARROW', 'DOTTED_ARROW', 'BIDIRECTIONAL_DOTTED_ARROW', 'SOLID_CROSS', 'DOTTED_CROSS', 'SOLID_POINT', 'DOTTED_POINT', got 'NEWLINE'"
+    }
+  ],
+  "status": "FAIL"
+}

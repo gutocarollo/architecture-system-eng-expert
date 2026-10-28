@@ -1,0 +1,14 @@
+flowchart TB
+  subgraph B["Antes"]
+    B1["Uma chamada ao binário"] --> B2["Retorno de falha"]
+    B2 --> B3["RuntimeError encerra a tarefa"]
+  end
+  subgraph A["Depois"]
+    A1["subprocess.run: timeout 300 s"] --> A2{"Falhou com 55P03 e há cota?"}
+    A1 -->|TimeoutExpired| A7["Falha sem nova tentativa"]
+    A2 -->|Sim| A3["Registra tentativa e espera 30 s"]
+    A3 --> A1
+    A2 -->|Não| A4{"Retorno é zero?"}
+    A4 -->|Sim| A5["Interpreta JSON e retorna"]
+    A4 -->|Não| A6["Propaga RuntimeError"]
+  end

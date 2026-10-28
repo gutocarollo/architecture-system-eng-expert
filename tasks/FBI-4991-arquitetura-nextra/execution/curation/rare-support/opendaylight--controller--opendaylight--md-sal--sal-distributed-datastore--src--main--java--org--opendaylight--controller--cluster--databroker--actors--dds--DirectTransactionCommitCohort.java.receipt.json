@@ -1,0 +1,11 @@
+{
+  "repo": "opendaylight/controller",
+  "path": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DirectTransactionCommitCohort.java",
+  "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+  "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DirectTransactionCommitCohort.java",
+  "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DirectTransactionCommitCohort.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:43:59.103074+00:00",
+  "sha256": "5645be53df7603cf1bf0c4fa667c251b30c9cdc9a2fe219b4e38921568a9db95",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--opendaylight--md-sal--sal-distributed-datastore--src--main--java--org--opendaylight--controller--cluster--databroker--actors--dds--DirectTransactionCommitCohort.java"
+}

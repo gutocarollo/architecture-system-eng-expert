@@ -1,0 +1,31 @@
+
+> fazcapital-architecture-course@1.0.0 check:course
+> node scripts/verify-course.mjs --out tasks/architecture-course-2026-10-14/artifacts/course-validation.json
+
+{
+  "status": "REVIEW_REQUIRED",
+  "report": "tasks/architecture-course-2026-10-14/artifacts/course-validation.json",
+  "counts": {
+    "mdx_pages": 52,
+    "markdown_pages": 0,
+    "concepts_expected": 310,
+    "concepts_checked": 310,
+    "concepts_with_dedicated_prose_section_candidate": 309,
+    "concepts_unverifiable_for_human_review": 310,
+    "concepts_missing_dedicated_section": 0,
+    "concepts_with_short_or_composite_section_review": 1,
+    "priorities_expected": 40,
+    "priorities_checked": 40,
+    "priorities_with_explanation_section_candidate": 40,
+    "priorities_with_mermaid_fence_in_section": 40,
+    "priorities_with_mermaid_fence_unverifiable": 0,
+    "priorities_unverifiable_for_human_review": 40,
+    "priorities_with_structural_gaps": 0,
+    "links_checked": 1453,
+    "invalid_links": 0,
+    "dynamic_links_unverifiable": 0,
+    "external_links_unverified": 994,
+    "mermaid_fences": 76
+  },
+  "errors": []
+}

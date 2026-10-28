@@ -1,0 +1,29 @@
+{
+  "prepared_at_utc": "2026-10-15T18:46:09.803883+00:00",
+  "publish_authorized_by_this_preparation": false,
+  "external_mutations_performed": false,
+  "issue_key": "FBI-4991",
+  "expected_current_updated": "2026-10-14T22:13:41.842-0300",
+  "expected_current_adf_sha256_canonical_json": "301f8ec836823eecae8416be324fb966556628bad58c2cc2f052ccd663649b36",
+  "proposed_adf_sha256_canonical_json": "77b9b4031ed80b94e888f2d831ac2e7db12be5977b0bc7a200b0e895533b7267",
+  "preserved_prefix_blocks": 63,
+  "appended_blocks": 13,
+  "only_mutated_field": "customfield_10054",
+  "current_status": "In Progress",
+  "current_resolution": null,
+  "semantic_review_pending": "94 bounded source-linked judgments complete across terminal3 plus lane46 plus lane45; root-owned final aggregate still to incorporate.",
+  "fresh_read_before_write_required": true,
+  "precondition_policy": "Root must reread live issue and compare updated and the canonical JSON hash of customfield10054. On mismatch, rebase appended blocks on new current ADF and rerun both gates. Do not overwrite concurrent edits.",
+  "final_readback_required": [
+    "customfield_10054",
+    "updated",
+    "status",
+    "resolution"
+  ],
+  "pending_draft_pr_url": false,
+  "pr_section_policy": "No PR section is emitted until root supplies an actual draft URL.",
+  "preparation_is_historical": true,
+  "external_mutation_performed_by_root": true,
+  "final_readback_receipt": "../publication/jira-readback-receipt.json",
+  "instruction": "The original precondition was checked before writing. The final74-block ADF is already applied; do not replay this historical precondition or the uncondensed draft."
+}

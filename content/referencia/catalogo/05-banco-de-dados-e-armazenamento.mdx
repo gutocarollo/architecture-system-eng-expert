@@ -1,0 +1,360 @@
+---
+title: "Grupo 5 — Banco de dados e armazenamento"
+description: "As 29 ocorrências do catálogo, preservando papéis de réplica, formas de partição e mecanismos de escrita e leitura."
+diataxis: reference
+---
+
+# Grupo 5 — Banco de dados e armazenamento
+
+Esta referência preserva as 29 ocorrências do grupo 5, inclusive Read Replica nos recortes de replicação e leitura. **PROD** identifica um produto OSS; **REF** identifica aplicação ou sample didático. Os rótulos não afirmam que todas as capacidades estejam habilitadas na Faz. Casos sem código ou runtime identificado são propostas ou exemplos hipotéticos.
+
+A medição de `192.168.254.137/faz_capital`, às 16:08 UTC de 14/10/2026, encontrou PostgreSQL 16.13 e `wal_level=minimal`. As réplicas do banco de metadados Airflow descritas por S6 pertencem a outro sistema. Os [recibos](/referencia/evidencias/) delimitam essa diferença. As skills são localizadores de texto em `~/.codex/skills/<nome>/SKILL.md`; nenhuma é prova de execução. As explicações estão em [durabilidade](/explicacoes/data-durability/), [distribuição](/explicacoes/data-distribution/) e [modelos de leitura](/explicacoes/read-models/).
+
+<span id="g05-e001" />
+
+## Primary/Replica
+
+Um primário recebe escritas e réplicas acompanham segundo o mecanismo escolhido. Uma réplica proposta pode servir consultas ou apoiar promoção quando o primário falha.
+
+O custo é manter cópias, propagação e papéis. Uma réplica atrasada pode responder com estado anterior; promover exige proteger a autoridade de escrita. A base e produto **PROD** são [PostgreSQL standby](https://www.postgresql.org/docs/16/warm-standby.html), sem streaming demonstrado em `.137`. A skill adjacente é `devops-gitops-advanced`.
+
+{/* current-curation:primary-replica */}
+
+A [curadoria de Primary/Replica](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#primary-replica) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e002" />
+
+## Leader/Follower
+
+Um líder exerce um papel coordenador e followers acompanham o estado conforme seu protocolo. Um log replicado pode ter o líder como condutor das novas entradas.
+
+O custo é eleger, acompanhar e recuperar o papel. O termo é mais geral que um primário PostgreSQL; não garante fencing de todo efeito. A base é [Raft](https://raft.github.io/raft.pdf), com [etcd](https://github.com/etcd-io/etcd) como aplicação **PROD** de S6. A skill adjacente é `backend-distributed-locking`.
+
+{/* current-curation:leader-follower */}
+
+A [curadoria de Leader/Follower](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#leader-follower) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e003" />
+
+## Multi-Leader
+
+Em multi-leader, mais de uma origem aceita alterações e as mudanças circulam conforme o protocolo. A base do exemplo é PostgreSQL com captura de deltas e Perl DBI/DBD::Pg; a aplicação OSS **PROD** é [Bucardo](https://bucardo.org/Bucardo/), replicador assíncrono multi-master.
+
+[`Bucardo.pm`](https://github.com/bucardo/bucardo/blob/master/Bucardo.pm) distingue múltiplos bancos com papel `source`, executa a sincronização em `start_kid` e trata conflitos. O custo é reconciliar deltas e gerir atraso. Alterar a mesma chave em duas origens exige uma decisão de conflito; a replicação não cria automaticamente um log linearizável. A referência demonstra o mecanismo de produto, sem afirmar Bucardo ou multi-leader implantados na Faz. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:multi-leader */}
+
+A [curadoria de Multi-Leader](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#multi-leader) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e004" />
+
+## Multi-Primary
+
+Multi-primary permite que mais de um participante aceite escritas sob um contrato de replicação e conflitos. A base é PostgreSQL e o adaptador DBI/DBD::Pg; a aplicação OSS **PROD** é [Bucardo](https://bucardo.org/Bucardo/).
+
+O [`Bucardo.pm`](https://github.com/bucardo/bucardo/blob/master/Bucardo.pm) admite mais de um `source` e escolhe os bancos que recebem deltas. O caminho `code_conflict` permite resolver a mesma chave alterada em mais de uma origem. O custo é coordenação operacional, atraso e reconciliação; receber um commit local não significa que todo peer o tenha aplicado. O papel multi-primary de banco e a noção geral de líder continuam definidos separadamente, ainda que este produto sirva como exemplo dos dois recortes. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:multi-primary */}
+
+A [curadoria de Multi-Primary](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#multi-primary) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e005" />
+
+## Active/Passive
+
+Um participante atende o papel ativo enquanto outro fica preparado para assumir. Um standby proposto pode apoiar retomada do serviço após a perda do ativo.
+
+O custo é manter prontidão e administrar promoção. A cópia passiva não evita automaticamente perda de dados, dois escritores ou falha do mesmo host. A base **PROD** é [PostgreSQL standby](https://www.postgresql.org/docs/16/warm-standby.html). O caso operacional CloudNativePG pertence a [disponibilidade](/explicacoes/availability/), com seus próprios recibos. A skill adjacente é `devops-gitops-advanced`.
+
+{/* current-curation:active-passive */}
+
+A [curadoria de Active/Passive](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#active-passive) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e006" />
+
+## Active/Active
+
+Active/active significa que participantes atendem trabalho ao mesmo tempo; o contrato especifica se são leituras ou escritas. A base do exemplo é PostgreSQL, com a aplicação OSS **PROD** [Bucardo](https://github.com/bucardo/bucardo/blob/master/Bucardo.pm) para múltiplas origens ativas de escrita.
+
+O conjunto de bancos `source` continua recebendo mudanças locais enquanto o processo `start_kid` propaga deltas e trata conflitos. O custo inclui atraso e operação de mais participantes. Esse active/active assíncrono não fornece sozinho ordenação global ou ausência de conflitos. Para apenas atender leituras por cópias, PostgreSQL standby é outra base com outro contrato. A skill adjacente é `devops-gitops-advanced`.
+
+{/* current-curation:active-active */}
+
+A [curadoria de Active/Active](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#active-active) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e007" />
+
+## Read Replica — replicação
+
+Uma cópia replicada pode atender consultas segundo suas regras de recuperação e acesso. Um desenho proposto pode liberar o primário de parte das leituras.
+
+O custo é propagar dados e acompanhar lag. A disponibilidade dessa cópia não garante que a última alteração já esteja visível. A base e produto **PROD** são [PostgreSQL standby](https://www.postgresql.org/docs/16/warm-standby.html). O uso de réplica de leitura em `.137` não foi demonstrado. A skill adjacente é `devops-gitops-advanced`.
+
+{/* current-curation:read-replica */}
+
+A [curadoria de Read Replica](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#read-replica) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e008" />
+
+## Cascading Replication
+
+Uma réplica encaminha alterações para outras cópias, formando uma cascata. O desenho proposto pode reduzir conexões diretas no primário.
+
+O custo é depender do intermediário e observar atraso acumulado. Falha no nó intermediário pode afetar a propagação posterior. A base e produto **PROD** são [PostgreSQL cascading replication](https://www.postgresql.org/docs/16/warm-standby.html#CASCADING-REPLICATION), com capacidade documentada, sem adoção local confirmada. A skill adjacente é `devops-gitops-advanced`.
+
+{/* current-curation:cascading-replication */}
+
+A [curadoria de Cascading Replication](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#cascading-replication) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e009" />
+
+## Synchronous Replication
+
+A confirmação espera uma condição remota configurada. Um desenho hipotético pode exigir persistência em um standby antes de responder sucesso.
+
+O custo é espera e disponibilidade condicionada ao participante requerido. Recebido, persistido e aplicado são estados diferentes; o nome síncrono não escolhe um deles sozinho. A base **PROD** é [PostgreSQL synchronous_commit](https://www.postgresql.org/docs/16/runtime-config-wal.html). A política medida por S6 é do banco Airflow, não de `.137`. A skill adjacente é `devops-gitops-advanced`.
+
+{/* current-curation:synchronous-replication */}
+
+A [curadoria de Synchronous Replication](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#synchronous-replication) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e010" />
+
+## Asynchronous Replication
+
+A confirmação local não espera a condição remota de replicação. Uma cópia proposta recebe as alterações depois que o primário já respondeu.
+
+O custo é administrar lag e a janela de alterações ainda não propagadas. Uma falha definitiva do primário nessa janela pode deixar dados confirmados fora da cópia. A base e produto **PROD** são [PostgreSQL standby](https://www.postgresql.org/docs/16/warm-standby.html). Não houve medição de lag ou implantação desse desenho em `.137`. A skill adjacente é `devops-gitops-advanced`.
+
+{/* current-curation:asynchronous-replication */}
+
+A [curadoria de Asynchronous Replication](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#asynchronous-replication) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e011" />
+
+## Horizontal Partitioning
+
+O particionamento horizontal separa linhas de uma tabela em partes. Um desenho hipotético de movimentos por mês pode facilitar consultas e retenção por período.
+
+O custo é administrar limites e novas partições. O benefício de consulta depende do filtro e do plano; dividir dentro do mesmo banco não é automaticamente sharding. A base e produto **PROD** são [PostgreSQL partitioning](https://www.postgresql.org/docs/16/ddl-partitioning.html). A tabela medida não foi demonstrada como particionada. A skill é `postgresql-table-design`.
+
+{/* current-curation:horizontal-partitioning */}
+
+A [curadoria de Horizontal Partitioning](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#horizontal-partitioning) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e012" />
+
+## Vertical Partitioning
+
+Particionamento vertical separa grupos de atributos de uma entidade, conservando a identidade para reuni-los. A base do exemplo é Rails ActiveRecord/PostgreSQL; a aplicação OSS **PROD histórica** é GitLab 16.11.
+
+[`Ci::BuildMetadata`](https://github.com/gitlabhq/gitlabhq/blob/v16.11.0/app/models/ci/build_metadata.rb) guarda `config_options`, `config_variables` e atributos de execução, ligado ao build por `build_id` e seu contrato de partição. [`Ci::Build`](https://github.com/gitlabhq/gitlabhq/blob/v16.11.0/app/models/ci/build.rb) delega comportamento a metadata, e [`Ci::Processable`](https://github.com/gitlabhq/gitlabhq/blob/v16.11.0/app/models/ci/processable.rb) faz JOIN para consultar esses atributos. O custo é recomposição e coordenação das duas representações. A separação dos atributos é vertical; o `partition_id` do mesmo código trata uma divisão horizontal adicional, não substitui este exemplo. A fonte é versionada, sem afirmar o schema atual do GitLab ou da Faz. A skill é `postgresql-table-design`.
+
+{/* current-curation:vertical-partitioning */}
+
+A [curadoria de Vertical Partitioning](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#vertical-partitioning) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e013" />
+
+## Sharding
+
+Sharding distribui subconjuntos entre unidades de armazenamento com uma regra de localização. Uma proposta pode colocar grupos de contas em bancos distintos.
+
+O custo é roteamento, movimentação e operações entre shards. O volume de 557.731 linhas medido em captação não prova saturação ou necessidade dessa divisão. A base e produto **PROD** são [Vitess sharding](https://vitess.io/docs/23.0/reference/features/sharding/), para MySQL, sem adoção local confirmada. A skill adjacente é `postgresql-table-design`; a adequação ao PostgreSQL precisa de avaliação própria.
+
+{/* current-curation:sharding */}
+
+A [curadoria de Sharding](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#sharding) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e014" />
+
+## Range Sharding
+
+Faixas de uma chave determinam a localização entre shards. Uma proposta pode reservar intervalos de keyspace para unidades distintas.
+
+O custo é manter limites e rebalancear faixas quentes. Intervalos contíguos de uma chave de negócio não garantem distribuição uniforme. A base e produto **PROD** são [Vitess](https://vitess.io/docs/23.0/reference/features/vindexes/), cujas shards cobrem faixas de keyspace IDs; a função da chave até esse ID é outro contrato. A skill adjacente é `postgresql-table-design`.
+
+{/* current-curation:range-sharding */}
+
+A [curadoria de Range Sharding](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#range-sharding) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e015" />
+
+## Hash Sharding
+
+Uma função hash transforma a chave para localizar sua shard. Um exemplo hipotético distribui contas conforme esse resultado, em vez de sua sequência original.
+
+O custo é manter a função e administrar mudanças de distribuição. Consulta por faixa de negócio pode precisar acessar muitas shards. A base e produto **PROD** são [Vitess functional vindexes](https://vitess.io/docs/23.0/reference/features/vindexes/), com funções de mapeamento documentadas. O caso não foi implantado na Faz. A skill adjacente é `postgresql-table-design`.
+
+{/* current-curation:hash-sharding */}
+
+A [curadoria de Hash Sharding](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#hash-sharding) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e016" />
+
+## Directory-Based Sharding
+
+Um diretório conserva associações entre chaves e localização. Um desenho hipotético pode consultar esse mapa para localizar uma conta antes de acessar seus dados.
+
+O custo é manter o mapa compatível com as alterações e movimentações. Uma localização antiga pode encaminhar ao destino errado. A base comparativa **PROD** é [Vitess lookup vindexes](https://vitess.io/docs/23.0/reference/features/vindexes/), com tabelas de associação; isso não prova qualquer política arbitrária de diretório. A skill adjacente é `postgresql-table-design`.
+
+{/* current-curation:directory-based-sharding */}
+
+A [curadoria de Directory-Based Sharding](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#directory-based-sharding) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e017" />
+
+## Geographic Sharding
+
+A divisão geográfica usa uma chave de localização e uma política de colocação. A base é particionamento SQL com tablespaces e placement do YugabyteDB; a aplicação OSS **PROD** é o próprio YugabyteDB.
+
+O [exemplo primário de row-level geo-partitioning](https://docs.yugabyte.com/stable/explore/multi-region-deployments/row-level-geo-partitioning/) define `bank_transactions`, partições por `geo_partition` e tablespaces por região. O [código de testes de tablespaces](https://github.com/yugabyte/yugabyte-db/blob/master/src/yb/yql/pgwrapper/pg_tablespaces-test.cc) exerce criação e mudança de objetos com esse contrato de placement; foi lido, não executado nesta tarefa. O custo é operar regiões, réplicas e transações entre partes. A configuração precisa considerar também índices e cópias; uma chave regional sozinha não prova conformidade ou residência de todos os dados. As skills adjacentes são `postgresql-table-design` e `devops-gitops-advanced`.
+
+{/* current-curation:geographic-sharding */}
+
+A [curadoria de Geographic Sharding](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#geographic-sharding) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e018" />
+
+## Consistent Hashing
+
+O mecanismo associa chaves a posições e reduz remapeamento quando participantes mudam. Um cache hipotético pode mover parte de um intervalo após a entrada de um nó.
+
+O custo é membership, equilíbrio e retomada durante transições. O algoritmo não garante frescor nem consenso; uma chave quente continua podendo concentrar carga. A aplicação **PROD** de referência é [Grafana Loki](https://grafana.com/docs/loki/latest/get-started/components/), com seus anéis documentados. Não há skill específica verificada; `backend-concurrency-mechanics` é apoio adjacente.
+
+{/* current-curation:consistent-hashing */}
+
+A [curadoria de Consistent Hashing](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#consistent-hashing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e019" />
+
+## Write-Ahead Log (WAL)
+
+O motor registra informações de alteração no log antes de persistir as páginas correspondentes. Após crash, pode reaplicar alterações cobertas pelo registro.
+
+O custo é escrita, espaço e retenção. WAL por si só não prova PITR: são necessários backup e log compatíveis. A base e produto **PROD** são [PostgreSQL WAL](https://www.postgresql.org/docs/16/wal-intro.html). `.137` tinha nível `minimal` no horário medido, com limites para replicação e decodificação. A skill adjacente é `postgresql-table-design`.
+
+{/* current-curation:write-ahead-log-wal */}
+
+A [curadoria de Write-Ahead Log (WAL)](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#write-ahead-log-wal) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e020" />
+
+## Append-Only Log
+
+Um append-only log acrescenta registros na ordem definida segundo seu contrato de retenção e correção. A base aplicada é o event store do Marten; a aplicação OSS **REF** é o [Helpdesk de EventSourcing.NetCore](https://github.com/oskardudycz/EventSourcing.NetCore/tree/main/Sample/Helpdesk).
+
+[`DocumentSessionExtensions.Add`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Core/Marten/DocumentSessionExtensions.cs) inicia o stream e salva eventos; atualizações usam `WriteToAggregate` e `AppendOne`. O custo é gerir histórico, versão e consulta. Acrescentar registros não comprova sozinho Event Sourcing de todo um sistema, imutabilidade absoluta ou efeito externo único. A aplicação demonstra um uso concreto do log de eventos; o caso financeiro da trilha continua hipotético. A skill é `backend-event-sourcing`.
+
+{/* current-curation:append-only-log */}
+
+A [curadoria de Append-Only Log](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#append-only-log) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e021" />
+
+## Copy-on-Write
+
+O mecanismo grava novas versões de blocos ou estruturas antes de alterar referências, preservando versões existentes conforme suas regras. Um snapshot pode compartilhar partes ainda não modificadas.
+
+O custo é espaço, referências e manutenção; alterações posteriores podem consumir mais armazenamento. Isso não prova consistência transacional de uma aplicação inteira ou um backup restaurável. A base e produto **PROD** são [Btrfs](https://btrfs.readthedocs.io/en/latest/Introduction.html), sem uso Faz verificado nesta frente. Não há skill CoW específica verificada; `postgresql-table-design` é apoio adjacente limitado.
+
+{/* current-curation:copy-on-write */}
+
+A [curadoria de Copy-on-Write](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#copy-on-write) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e022" />
+
+## Log Structured Storage
+
+Armazenamento por log pode reunir escritas em memtables e produzir arquivos ordenados, posteriormente compactados, como numa LSM. A base OSS é [RocksDB](https://github.com/facebook/rocksdb/wiki/RocksDB-Overview); a aplicação OSS **PROD** é TiKV.
+
+No [`RocksEngine` do TiKV](https://github.com/tikv/tikv/blob/master/components/engine_rocks/src/engine.rs), o engine encapsula `Arc<rocksdb::DB>` e implementa operações de acesso ao banco. Isso liga a biblioteca ao produto que a usa para armazenamento, em vez de citar somente um motor isolado. O custo inclui compactação, estruturas de leitura e espaço temporário. O contrato desse backend não torna todo armazenamento organizado por log equivalente ao WAL do PostgreSQL. A skill adjacente é `postgresql-table-design`, sem promessa de guia específico de LSM.
+
+{/* current-curation:log-structured-storage */}
+
+A [curadoria de Log Structured Storage](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#log-structured-storage) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e023" />
+
+## Write Amplification Control
+
+Controlar amplificação de escrita significa gerir bytes fisicamente escritos em relação à alteração lógica. A base é RocksDB e suas políticas de compactação; a aplicação OSS **PROD** é TiKV.
+
+O [`src/config/mod.rs`](https://github.com/tikv/tikv/blob/master/src/config/mod.rs) constrói opções de column family, incluindo `set_min_write_buffer_number_to_merge`, `set_level_zero_file_num_compaction_trigger`, `set_level_compaction_dynamic_level_bytes` e `set_compaction_style`. Essas opções são controles concretos de flush e compactação usados pelo backend, não um benchmark de melhoria. O custo é equilibrar escrita, leitura, memória e espaço; mudar uma opção pode deslocar o problema. Nenhum ganho foi medido na Faz nesta tarefa. Não há skill específica verificada; `sql-optimization-patterns` é apoio adjacente.
+
+{/* current-curation:write-amplification-control */}
+
+A [curadoria de Write Amplification Control](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#write-amplification-control) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e024" />
+
+## Read Replica — leitura
+
+O caminho de leitura escolhe uma cópia capaz de atender à pergunta. Em um caso hipotético, o dashboard pode aceitar atraso que uma confirmação de saldo não aceita.
+
+O custo é rotear e acompanhar frescor por consulta ou sessão. Ter uma réplica não fornece automaticamente read-your-writes. A base e produto **PROD** são [PostgreSQL standby](https://www.postgresql.org/docs/16/warm-standby.html); uma aplicação específica de leitura por réplica não foi comprovada em `.137`. As skills adjacentes são `backend-cqrs-patterns` e `devops-gitops-advanced`.
+
+{/* current-curation:read-replica */}
+
+A [curadoria de Read Replica](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#read-replica) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e025" />
+
+## Materialized View
+
+Uma view materializada nativa guarda o resultado de uma consulta definida. Um resumo proposto de movimentos por período pode ser renovado sem repetir o cálculo em cada abertura.
+
+O custo é refresh e armazenamento; concorrência de leitura não torna o cálculo incremental. A tabela real `rpt_inflow__movement_adjusted` tinha `relkind=r` no recibo de catálogo. A base e produto **PROD** são [PostgreSQL 16](https://www.postgresql.org/docs/16/sql-refreshmaterializedview.html). A skill adjacente é `projection-patterns`.
+
+{/* current-curation:materialized-view */}
+
+A [curadoria de Materialized View](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#materialized-view) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e026" />
+
+## Indexing
+
+Um índice oferece uma estrutura de acesso aos valores ou relações necessários. Uma consulta proposta por período pode usar um caminho diferente de percorrer todas as linhas.
+
+O custo é espaço e manutenção nas alterações. A existência do índice não garante que o planner o use ou que a consulta fique mais rápida; isso exige plano e medição. A base e produto **PROD** são [PostgreSQL index-only scans](https://www.postgresql.org/docs/16/indexes-index-only-scans.html). Nenhum índice novo foi criado. A skill é `sql-optimization-patterns`.
+
+{/* current-curation:indexing */}
+
+A [curadoria de Indexing](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#indexing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e027" />
+
+## Covering Index
+
+O índice inclui os atributos necessários à consulta, podendo evitar buscar determinados dados da tabela. Um resumo proposto pode ter chave de busca e campos retornados no mesmo índice.
+
+O custo é um índice maior e mais trabalho de escrita. No PostgreSQL, visibilidade das linhas ainda participa da decisão de index-only scan. A base e produto **PROD** são [PostgreSQL covering indexes](https://www.postgresql.org/docs/16/indexes-index-only-scans.html). Não foi medido um ganho aplicado no banco Faz. A skill é `sql-optimization-patterns`.
+
+{/* current-curation:covering-index */}
+
+A [curadoria de Covering Index](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#covering-index) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e028" />
+
+## Denormalization
+
+A desnormalização reúne ou repete informações para servir uma leitura. A base aplicada é o framework de projeções do Marten; a aplicação OSS **REF** é o Helpdesk de EventSourcing.NetCore.
+
+O [`Program.cs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Program.cs) configura representações como `IncidentDetails`, `IncidentShortInfo` e `CustomerIncidentsSummary`, lidas sem reconstruir o aggregate completo em cada consulta. O custo é atualizar essas representações e identificar frescor. Repetir um atributo não pode alterar o grão nem inflar valores financeiros em JOINs. [Azure CQRS](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) fornece o fundamento conceitual, sem ser chamado de framework. A skill é `projection-patterns`.
+
+{/* current-curation:denormalization */}
+
+A [curadoria de Denormalization](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#denormalization) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g05-e029" />
+
+## Precomputation
+
+O pré-cálculo executa trabalho antes da consulta que o utiliza. Um resumo proposto pode guardar a soma por período para evitar repetir a agregação completa.
+
+O custo é armazenar e renovar o resultado. O valor precisa informar origem, grão e versão; um resultado antigo pode ser inadequado à decisão. A base **PROD** é [PostgreSQL materialized views](https://www.postgresql.org/docs/16/sql-refreshmaterializedview.html); [AsyncProjections](https://github.com/oskardudycz/EventSourcing.NetCore/tree/main/Sample/AsyncProjections) é aplicação **REF**. A skill é `projection-patterns`.
+
+{/* current-curation:precomputation */}
+
+A [curadoria de Precomputation](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#precomputation) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

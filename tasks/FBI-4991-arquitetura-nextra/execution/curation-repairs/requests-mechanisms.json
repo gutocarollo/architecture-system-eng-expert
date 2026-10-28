@@ -1,0 +1,111 @@
+[
+  {
+    "repo": "trinodb/trino",
+    "path": "lib/trino-metastore/src/main/java/io/trino/metastore/cache/CachingHiveMetastore.java"
+  },
+  {
+    "repo": "trinodb/trino",
+    "path": "core/trino-parser/src/main/java/io/trino/sql/tree/Node.java"
+  },
+  {
+    "repo": "trinodb/trino",
+    "path": "core/trino-parser/src/main/java/io/trino/sql/tree/LogicalExpression.java"
+  },
+  {
+    "repo": "trinodb/trino",
+    "path": "core/trino-parser/src/main/java/io/trino/sql/tree/Identifier.java"
+  },
+  {
+    "repo": "apache/superset",
+    "path": "docker/pythonpath_dev/superset_config.py"
+  },
+  {
+    "repo": "apache/superset",
+    "path": "superset/common/utils/query_cache_manager.py"
+  },
+  {
+    "repo": "apache/superset",
+    "path": "superset/utils/cache_manager.py"
+  },
+  {
+    "repo": "pallets-eco/cachelib",
+    "path": "src/cachelib/redis.py"
+  },
+  {
+    "repo": "apache/nutch",
+    "path": "src/java/org/apache/nutch/fetcher/Fetcher.java"
+  },
+  {
+    "repo": "apache/nutch",
+    "path": "src/java/org/apache/nutch/fetcher/FetcherThread.java"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/distributor/http.go"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/distributor/distributor.go"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "go.mod"
+  },
+  {
+    "repo": "javaparser/javaparser",
+    "path": "javaparser-core/src/main/java/com/github/javaparser/ast/Node.java"
+  },
+  {
+    "repo": "javaparser/javaparser",
+    "path": "javaparser-core/src/main/java/com/github/javaparser/ast/expr/BinaryExpr.java"
+  },
+  {
+    "repo": "javaparser/javaparser",
+    "path": "javaparser-core/src/main/java/com/github/javaparser/ast/expr/SimpleName.java"
+  },
+  {
+    "repo": "spring-projects/spring-framework",
+    "path": "spring-jdbc/src/main/java/org/springframework/jdbc/datasource/lookup/AbstractRoutingDataSource.java"
+  },
+  {
+    "repo": "spring-projects/spring-framework",
+    "path": "spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractAutowireCapableBeanFactory.java"
+  },
+  {
+    "repo": "spring-projects/spring-framework",
+    "path": "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java"
+  },
+  {
+    "repo": "rails/rails",
+    "path": "activerecord/lib/active_record/connection_handling.rb"
+  },
+  {
+    "repo": "github/scientist",
+    "path": "lib/scientist/experiment.rb"
+  },
+  {
+    "repo": "flippercloud/flipper",
+    "path": "lib/flipper/feature.rb"
+  },
+  {
+    "repo": "spring-projects/spring-batch",
+    "path": "spring-batch-infrastructure/src/main/java/org/springframework/batch/item/support/CompositeItemWriter.java",
+    "ref": "v5.2.3"
+  },
+  {
+    "repo": "kubernetes/kubernetes",
+    "path": "pkg/controller/deployment/recreate.go"
+  },
+  {
+    "repo": "apache/airflow",
+    "path": "chart/values.yaml"
+  },
+  {
+    "repo": "apache/airflow",
+    "path": "chart/templates/scheduler/scheduler-deployment.yaml"
+  },
+  {
+    "repo": "fluent/fluent-bit",
+    "path": "plugins/out_loki/loki.c"
+  }
+]

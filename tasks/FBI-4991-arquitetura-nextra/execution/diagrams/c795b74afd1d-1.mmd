@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant A as Executor A
+    participant Locks as Coordenador de leases
+    participant B as Executor B
+    participant Resource as Recurso com conferência de fence
+    A->>Locks: adquire lease
+    Locks-->>A: token 101
+    Note over A: pausa longa
+    Note over Locks: lease de A expira
+    B->>Locks: assume a operação
+    Locks-->>B: token 102
+    B->>Resource: grava com 102
+    Resource-->>B: aceita e registra geração 102
+    A->>Resource: volta e tenta gravar com 101
+    Resource-->>A: recusa token antigo
+    Note over A,Resource: recuperação exige uma nova decisão válida

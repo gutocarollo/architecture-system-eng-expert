@@ -1,0 +1,320 @@
+---
+title: "Arquiteturas de aplicação: 22 formas de organizar um sistema"
+description: "Definições, casos, benefícios, limites e fontes dos 22 estilos do catálogo."
+diataxis: reference
+---
+
+# Arquiteturas de aplicação: 22 formas de organizar um sistema
+
+Uma arquitetura define como responsabilidades se relacionam e quais mudanças ou falhas ficam isoladas. Esta referência reúne os 22 estilos do catálogo. Eles atuam em escalas diferentes e podem coexistir. Camada lógica, processo e unidade de implantação são dimensões diferentes.
+
+Os casos locais foram lidos no MakersHub `main@e233fb046ec333982cd1547171b0f0bd8d8d92ee` em 14/10/2026. Eles descrevem um checkout local, sem verificação de produção. **OBS** identifica o recorte observado, **HIST** uma mudança em outro commit e **PROP** uma proposta de estudo. **REF** identifica aplicativo ou código didático; **LEGADO** identifica exemplo antigo ou arquivado. Nenhuma contagem de estrelas foi usada.
+
+## Layered / N-Tier
+
+Camadas agrupam responsabilidades por papel e encaminham chamadas por fronteiras definidas. No recorte observado, o fluxo de Call Sprint passa por UI, acesso a dados, API, serviço e repositório.
+
+A separação ajuda o estudante a localizar a regra, o acesso a dados e a apresentação antes de alterar uma funcionalidade. O limite principal é o seguinte: cada camada pode virar passagem sem regra e ainda depender fortemente da seguinte; separação em camadas não prova limites de módulo.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são FastAPI; [backend-layered-architecture](/referencia/skills-e-projetos). A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Full Stack FastAPI sample](https://github.com/fastapi/full-stack-fastapi-template/blob/master/backend/README.md) documenta endpoints, CRUD e modelos como áreas distintas. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:layered-n-tier */}
+
+A [curadoria de Layered / N-Tier](/referencia/curadoria/01-arquiteturas-de-aplicacao/#layered-n-tier) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Modular Monolith
+
+Um processo e uma implantação contêm módulos de negócio com contratos e dependências controladas. Para estudo, a proposta é separar Qualificação, Call Sprint e Indicadores de Seguros em módulos da mesma aplicação, sem alegar que isso já existe.
+
+Uma equipe pode modificar um módulo com menos conhecimento dos demais, mantendo uma operação e uma implantação simples. O limite principal é o seguinte: um módulo ainda pode furar o limite lendo tabelas de outro; dividir pastas não cria isolamento.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são .NET e contratos de módulo; [domain-driven-design](/referencia/skills-e-projetos). A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [modular-monolith-with-ddd](https://github.com/kgrzybek/modular-monolith-with-ddd), cuja documentação descreve módulos e chamadas entre eles. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:modular-monolith */}
+
+A [curadoria de Modular Monolith](/referencia/curadoria/01-arquiteturas-de-aplicacao/#modular-monolith) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Microservices
+
+Serviços implantáveis separadamente possuem contratos de rede e limites de dados e operação próprios. Para estudo, a proposta é só separar Indicadores de Seguros se escala, equipe ou cadência de release independentes justificarem o novo serviço; o fluxo S2 atual é uma rota FastAPI, não uma prova de microserviços.
+
+Quando há necessidade comprovada, equipes podem implantar e escalar capacidades diferentes com cadências próprias. O limite principal é o seguinte: retries, rede, observabilidade distribuída, consistência e operação passam a fazer parte do produto.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são Spring Boot e Spring Cloud; [microservices-patterns](/referencia/skills-e-projetos). A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Spring Petclinic distribuído](https://github.com/spring-petclinic/spring-petclinic-microservices), declarado como versão distribuída com Spring Cloud. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:microservices */}
+
+A [curadoria de Microservices](/referencia/curadoria/01-arquiteturas-de-aplicacao/#microservices) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## SOA
+
+Serviços de negócio com contratos interoperáveis são compartilhados por consumidores diferentes e podem ser coordenados por uma camada corporativa. Para estudo, a proposta é oferecer uma operação de consulta de leads a mais de um canal; a rota de Call Sprint sozinha não constitui SOA.
+
+Um contrato corporativo reutilizável evita que cada canal construa outra integração para a mesma operação de negócio. O limite principal é o seguinte: um barramento, catálogo ou esquema central pode virar gargalo e contrato corporativo rígido; SOA não é apenas “vários endpoints”.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são Apache OFBiz Service Engine; [api-and-interface-design](/referencia/skills-e-projetos) apoia contratos, não é uma skill exclusiva de SOA. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Apache OFBiz](https://github.com/apache/ofbiz-framework) e [manual SOA do projeto](https://nightlies.apache.org/ofbiz/stable/ofbiz/html5/user-manual.html#service-engine). Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:soa */}
+
+A [curadoria de SOA](/referencia/curadoria/01-arquiteturas-de-aplicacao/#soa) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Serverless
+
+A plataforma administra provisionamento e escala da unidade de execução; a aplicação ainda define eventos, contratos, limites e observabilidade. Para estudo, a proposta é recalcular um resumo de Seguros por evento ou agenda, sem propor deploy.
+
+A equipe pode concentrar seu esforço no evento e na função executada, com parte da administração de servidores entregue à plataforma. O limite principal é o seguinte: limites de execução, cold start, acoplamento ao provedor e custo por chamada continuam exigindo desenho.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são AWS Lambda e SAM; [serverless](/referencia/skills-e-projetos). A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [AWS Serverless Ecommerce](https://github.com/aws-samples/aws-serverless-ecommerce-platform) é **LEGADO / arquivado em 2024**: prova a forma e os componentes, não uma recomendação de copiar a plataforma. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:serverless */}
+
+A [curadoria de Serverless](/referencia/curadoria/01-arquiteturas-de-aplicacao/#serverless) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Microkernel / Plugin Architecture
+
+Um núcleo expõe pontos de extensão estáveis; plugins acrescentam capacidades por esses contratos. Para estudo no MakersHub, validadores substituíveis seriam uma proposta apenas se produtos ou equipes realmente precisassem instalar extensões independentes. O benefício é ampliar o produto sem incorporar toda variação ao núcleo. O custo envolve compatibilidade, ciclo de vida, confiança no plugin e dependências entre extensões.
+
+A base concreta de comparação é [Eclipse Equinox](https://equinox.eclipseprojects.io/), que implementa o framework OSGi, junto ao registro de extensões do Eclipse Platform. A aplicação OSS escolhida é o Eclipse com JDT: o [descritor `org.eclipse.jdt.ui/plugin.xml`](https://github.com/eclipse-jdt/eclipse.jdt.ui/blob/c11bc906124cb07c1e5abbf29b4805164754d37c/org.eclipse.jdt.ui/plugin.xml#L700-L712) registra uma view no ponto `org.eclipse.ui.views`, associando o Package Explorer à classe `PackageExplorerPart`. O [código da view](https://github.com/eclipse-jdt/eclipse.jdt.ui/blob/c11bc906124cb07c1e5abbf29b4805164754d37c/org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/packageview/PackageExplorerPart.java#L152) estende `ViewPart` e implementa `createPartControl` em `:484`. Assim, o estudante pode acompanhar o contrato publicado, o registro da extensão e a implementação que acrescenta uma capacidade de navegação Java ao workbench.
+
+Essa prova é do código OSS no commit fixado `c11bc906124cb07c1e5abbf29b4805164754d37c`; não é observação de uma instância Eclipse em execução nem classificação de todo o MakersHub. Documentação de uma API de plugins, sozinha, seria insuficiente: aqui há um plugin consumidor com caminho de código. A skill [superset-plugins](/referencia/skills-e-projetos) é apoio para extensões de outro produto e não uma prova de microkernel nem um guia específico de Eclipse.
+
+{/* current-curation:microkernel-plugin-architecture */}
+
+A [curadoria de Microkernel / Plugin Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#microkernel-plugin-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Hexagonal / Ports & Adapters
+
+O núcleo define portas de entrada e saída; adaptadores traduzem HTTP, banco ou Salesforce sem fazer o núcleo depender deles. Para estudo, a proposta é pôr portas explícitas ao redor do caso qualify e da gravação de roteamento.
+
+A regra pode ser exercitada com adaptadores de teste e continuar válida quando o fornecedor externo mudar. O limite principal é o seguinte: criar uma interface para cada função aumenta cerimônia sem isolar regra relevante.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são Spring Boot; [clean-architecture](/referencia/skills-e-projetos) cobre Ports & Adapters. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Hexagonal Architecture sample](https://github.com/talehkarimov/hexagonal-architecture): o README separa core, adaptadores web e de banco. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:hexagonal-ports-adapters */}
+
+A [curadoria de Hexagonal / Ports & Adapters](/referencia/curadoria/01-arquiteturas-de-aplicacao/#hexagonal-ports-adapters) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Clean Architecture
+
+Entidades e casos de uso ficam dentro; adaptadores e frameworks dependem para dentro, seguindo a regra de dependência. Para estudo, a proposta é um caso de uso de qualificação que não importe FastAPI, SQLAlchemy ou SDK Salesforce.
+
+O centro da aplicação pode ser compreendido e testado sem começar pelo banco, HTTP ou SDK do fornecedor. O limite principal é o seguinte: a regra de dependência exige contratos e composição explícitos; camadas com nomes certos não bastam.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são ASP.NET Core; [clean-architecture](/referencia/skills-e-projetos). A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Ardalis CleanArchitecture](https://github.com/ardalis/CleanArchitecture), template público com projetos centrais e externos. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:clean-architecture */}
+
+A [curadoria de Clean Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#clean-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Onion Architecture
+
+O modelo de domínio ocupa o centro; aplicação, infraestrutura e interface ficam em anéis externos e dependem para dentro. Para estudo, a proposta é pôr elegibilidade de assessor no centro e Salesforce/SQL nas bordas; S2 não provou um modelo de domínio assim.
+
+As regras centrais permanecem explícitas enquanto armazenamento e interface evoluem nas bordas. O limite principal é o seguinte: mapeamento ORM, transações e limites entre anéis podem exigir decisões adicionais.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são .NET; [clean-architecture](/referencia/skills-e-projetos) declara cobertura de Onion. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [dotnet-template-onion](https://github.com/pereiren/dotnet-template-onion) é **LEGADO / exemplo .NET 6** e afirma Onion explicitamente. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:onion-architecture */}
+
+A [curadoria de Onion Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#onion-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Vertical Slice Architecture
+
+O código se agrupa por funcionalidade executável, mantendo perto endpoint, entrada, validação, handler e persistência necessária. Para estudo, a proposta é fatias qualify-d1, call-list e insurance-kpi; não foi observado esse layout no S2.
+
+O estudante encontra perto o código que muda para realizar um caso de uso, reduzindo a busca por arquivos espalhados. O limite principal é o seguinte: código transversal pode duplicar; uma fatia ainda precisa respeitar políticas e dados compartilhados.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são ASP.NET Core e MediatR; [codebase-architecture](/referencia/skills-e-projetos) é orientação adjacente, não guia exclusivo de VSA. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Vertical Slice API Template](https://github.com/mehdihadeli/vertical-slice-api-template), que organiza o exemplo por feature. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:vertical-slice-architecture */}
+
+A [curadoria de Vertical Slice Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#vertical-slice-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## MVC
+
+Controller recebe o evento da view, altera ou consulta o model e encaminha a renderização. Para estudo, a proposta é o clique em Automático chega ao controller, que atualiza o modo do seletor.
+
+A separação torna visível quem recebe a ação, quem conserva o estado e quem apresenta o resultado. O limite principal é o seguinte: o controller pode concentrar estado e regra; a interação entre view e model varia conforme o framework.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são Spring MVC; [frontend-ui-engineering](/referencia/skills-e-projetos) ajuda a construir a UI, sem ser skill específica de MVC. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Spring Petclinic OwnerController](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java) com templates Thymeleaf. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:mvc */}
+
+A [curadoria de MVC](/referencia/curadoria/01-arquiteturas-de-aplicacao/#mvc) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## MVP
+
+A view é passiva; encaminha ações ao presenter, que consulta o model e manda a view renderizar. Para estudo, a proposta é selectMode("automatic") chama o presenter e ele responde com o estado visível.
+
+Uma view passiva permite verificar a decisão de apresentação por meio do presenter, com menor dependência da tela concreta. O limite principal é o seguinte: interface passiva e presenter testável adicionam contratos e código de ligação.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são Android SDK; [frontend-ui-engineering](/referencia/skills-e-projetos) é adjacente, sem skill MVP instalada. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Android architecture samples](https://github.com/esiek/android-architecture) catalogam o app Todo em variante MVP; exemplo educacional **LEGADO**. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:mvp */}
+
+A [curadoria de MVP](/referencia/curadoria/01-arquiteturas-de-aplicacao/#mvp) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## MVVM
+
+A view observa ou vincula um modelo de apresentação que expõe estado e comandos. Para estudo, a proposta é a janela observa mode e chama selectMode; a tela reflete a mudança do modelo.
+
+Duas apresentações podem consumir o mesmo contrato de estado e comandos, desde que a sincronização seja deliberada. O limite principal é o seguinte: binding reativo e invalidação de estado podem ocultar o caminho da ação e aumentar o custo de depuração.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são AndroidX ViewModel e LiveData; [react-state-management](/referencia/skills-e-projetos) trata estado React, não define MVVM. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Android architecture samples](https://github.com/esiek/android-architecture) catalogam o mesmo app Todo em variantes MVVM; exemplo educacional **LEGADO**. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:mvvm */}
+
+A [curadoria de MVVM](/referencia/curadoria/01-arquiteturas-de-aplicacao/#mvvm) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## PAC
+
+Cada agente de interação reúne Presentation, Abstraction e Control; agentes se coordenam hierarquicamente e Presentation não acessa Abstraction diretamente. Para estudo, a proposta é painel financeiro composto por agentes independentes de filtro e indicadores.
+
+Áreas de uma interface complexa podem coordenar suas interações sem compartilhar diretamente todo o estado interno. O limite principal é o seguinte: a hierarquia e a comunicação entre controles custam mais que uma view simples.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são WakaPAC; **gap:** não encontrei SKILL.md específica de PAC. [frontend-ui-engineering](/referencia/skills-e-projetos) é apenas apoio de interface. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [WakaPAC](https://github.com/quellabs/wakapac) e [seus exemplos](https://github.com/quellabs/wakapac/tree/main/examples) provam um runtime/demo PAC; não provam adoção por aplicação financeira de produção. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:pac */}
+
+A [curadoria de PAC](/referencia/curadoria/01-arquiteturas-de-aplicacao/#pac) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Component-Based Architecture
+
+O sistema se compõe de componentes com contratos de entrada e saída; isso descreve composição, não fronteiras de domínio. No caso histórico, InsuranceProposalsAnalysisCard.tsx recebeu tratamento de data no commit **7101d3a4babe95081b0b41d35ec305c08bf8a577**.
+
+Componentes com entradas e saídas claras podem ser compostos e reutilizados em telas diferentes. O limite principal é o seguinte: reuso pode acoplar aparência e comportamento; a pasta de componentes não define módulo de negócio.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são React e Next.js; [component-family-consistency](/referencia/skills-e-projetos) cuida de famílias visuais, não da arquitetura inteira. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Vercel Next.js Commerce](https://github.com/vercel/commerce/tree/main/components), aplicativo público composto por componentes React. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:component-based-architecture */}
+
+A [curadoria de Component-Based Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#component-based-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Space-Based Architecture
+
+Unidades de processamento executam perto de um conjunto de dados particionado e replicado em memória; persistência pode ocorrer de forma assíncrona. Não é sinônimo de cache Redis. Para estudo, a proposta é só estudar para um caminho transacional de alta contenção após medir o gargalo; a consulta de KPIs em Seguros não basta como justificativa.
+
+Executar perto de uma partição de dados pode reduzir movimento de dados e aliviar um caminho central, quando a carga justifica o custo. O limite principal é o seguinte: replicação, reconciliação com o banco e consistência elevam custo e risco operacional.
+
+A base de estudo é o [Apache Ignite](https://github.com/apache/ignite). O exemplo oficial [CacheAffinityExample.java](https://github.com/apache/ignite/blob/master/examples/src/main/java/org/apache/ignite/examples/datagrid/CacheAffinityExample.java) possui um `main`, configura `CacheMode.PARTITIONED`, popula o cache e usa `affinityRun` com `localPeek` para executar junto aos dados. Esse código é **REF**: demonstra o mecanismo de colocação de computação e dados, sem provar uma aplicação financeira completa ou execução em produção. A leitura do fonte bruto retornou HTTP 200 em 14/10/2026 às 17:04 UTC; o exemplo não foi executado nesta autoria.
+
+Não foi localizada uma skill específica de Space-Based. A skill [architecture-optimization](/referencia/skills-e-projetos) oferece apoio geral. O exemplo XAP anteriormente listado é **LEGADO** e seu link de código não estava disponível na verificação do auxiliar; ele não sustenta a referência atual.
+
+{/* current-curation:space-based-architecture */}
+
+A [curadoria de Space-Based Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#space-based-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Cell-Based Architecture
+
+O sistema se replica em células independentes, cada qual com dados e recursos isolados; um roteador direciona cada cliente à sua célula. Para estudo, a proposta é isolar populações de tenants apenas se objetivos de falha e operação justificarem; S2 não prova roteamento por célula nem isolamento multi-tenant.
+
+Uma falha pode ficar restrita à população atendida pela célula, se dados e recursos tiverem isolamento real. O limite principal é o seguinte: cada célula aumenta roteamento, monitoramento, atualização e capacidade duplicada; operações entre células ficam difíceis.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são AWS CDK e roteamento por tenant; [multi-tenant-architecture](/referencia/skills-e-projetos) cobre isolamento de tenant, não o padrão Cell-Based inteiro. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [AWS SaaS Cell-Based Architecture](https://github.com/aws-samples/aws-saas-cell-based-architecture), workshop com criação de células e roteamento. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:cell-based-architecture */}
+
+A [curadoria de Cell-Based Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#cell-based-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Actor Model
+
+Cada actor mantém estado próprio, processa uma mensagem por vez e conversa com outros actors por mensagens assíncronas. Para estudo, a proposta é serializar alterações de um lead por identidade de actor só se a regra de ordenação for confirmada.
+
+A identidade de um actor permite organizar ações sobre seu estado por mensagens, sem compartilhar memória mutável diretamente. O limite principal é o seguinte: um actor ocupado vira ponto quente; mensagens não criam transação atômica entre actors.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são Microsoft Orleans; [backend-concurrency-mechanics](/referencia/skills-e-projetos) apoia mecânica de concorrência, não é guia específico de Actor. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [Orleans](https://github.com/dotnet/orleans) implementa virtual actors; [samples](https://github.com/dotnet/orleans/tree/main/samples) inclui aplicações oficiais. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:actor-model */}
+
+A [curadoria de Actor Model](/referencia/curadoria/01-arquiteturas-de-aplicacao/#actor-model) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Peer-to-Peer
+
+Pares podem consumir e fornecer recursos diretamente, formando uma rede sem servidor central obrigatório no caminho de cada troca. Em um exercício hipotético, a proposta é sincronizar conteúdo público e não autoritativo entre pares desconectados; não trocar estado de leads ou apólices dessa forma.
+
+Pares podem disponibilizar recursos mesmo quando o caminho central não participa de cada troca. O limite principal é o seguinte: descoberta de pares, identidade, abuso, conflitos e revogação precisam de desenho próprio.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são libp2p; **gap:** não encontrei SKILL.md específica de P2P. [architecture-patterns](/referencia/skills-e-projetos) é apoio geral, não uma competência de redes P2P. A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [IPFS Kubo](https://github.com/ipfs/kubo) usa libp2p e descreve uma rede P2P; [configuração de peers](https://github.com/ipfs/kubo/blob/master/docs/config.md#bootstrap) mostra a descoberta inicial. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+{/* current-curation:peer-to-peer */}
+
+A [curadoria de Peer-to-Peer](/referencia/curadoria/01-arquiteturas-de-aplicacao/#peer-to-peer) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Blackboard Architecture
+
+Uma arquitetura Blackboard reúne um estado compartilhado, participantes especializados que leem e acrescentam conhecimento e um controle que escolhe quais participantes podem agir. No exercício financeiro, uma conciliação hipotética poderia combinar contribuições sobre a mesma ordem; esse exemplo não descreve uma arquitetura interna real da XP.
+
+A base pública é [BehaviorTree.CPP, com o contrato `Blackboard`](https://github.com/BehaviorTree/BehaviorTree.CPP/blob/03ec870a07b384f0766bbfe81f77c64a9f994a2b/include/behaviortree_cpp/blackboard.h). A aplicação OSS é o sistema de navegação robótica [Navigation2, cujo motor recebe o Blackboard ao criar a árvore](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_behavior_tree/src/behavior_tree_engine.cpp#L107-L119). O caso permite seguir um valor concreto: [`ComputePathToPoseAction.on_success` escreve `path`](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_behavior_tree/plugins/action/compute_path_to_pose_action.cpp#L62-L67), e [`FollowPathAction.on_tick` lê esse mesmo `path`](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_behavior_tree/plugins/action/follow_path_action.cpp#L31-L37). A [árvore de navegação](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_bt_navigator/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml#L9-L41) liga os dois nós à chave compartilhada e declara seus caminhos de recuperação. Os arquivos foram lidos nas revisões identificadas pelos links; o ambiente ROS não foi executado nesta curadoria.
+
+O estado comum, as operações especializadas e o controle da execução estão identificados no código. Esta aplicação usa um Blackboard controlado por uma árvore de comportamento. O planejamento da ordem está explícito na árvore; o exemplo não demonstra um escalonador oportunista que classifica hipóteses e escolhe autonomamente qualquer fonte de conhecimento. Essa fronteira evita tratar toda árvore ou todo dicionário compartilhado como uma arquitetura Blackboard completa.
+
+O benefício é permitir que o planejador publique um caminho e o controlador o utilize sem reconstruir o resultado. O custo é conservar os tipos, a validade, a autoria e a sincronização desse estado. O contrato da base está no mesmo recorte de código; os recibos de licença e os limites por conceito estão na [curadoria completa](/referencia/curadoria/01-arquiteturas-de-aplicacao/#blackboard-architecture). O projeto NCATS Blackboard, antes citado, permanece no arquivo de descoberta como referência histórica; a curadoria não o recomenda como código OSS reutilizável porque não comprovou uma licença no SHA examinado.
+
+{/* current-curation:blackboard-architecture */}
+
+A [curadoria de Blackboard Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#blackboard-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Pipe and Filter
+
+Pipe and Filter organiza transformações em etapas com contratos de entrada e saída. Os filtros processam registros; conexões ou filas transportam resultados para a etapa seguinte. No exercício proposto de apólices, as etapas poderiam normalizar dados e agrupar um período. O `Promise.all` de consultas encontrado em Seguros executa requisições em paralelo e não comprova esse pipeline.
+
+A base é o [Apache NiFi](https://github.com/apache/nifi), e o exemplo **REF** concreto é o fluxo oficial [`Generate_and_Update.json`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-connector-mock-bundle/nifi-connector-mock-test-bundle/nifi-connector-mock-test-connectors/src/main/resources/flows/Generate_and_Update.json). Ele declara **três processadores e duas conexões**: `GenerateFlowFile` envia `success` a `LookupAttribute`; os resultados `matched` e `unmatched` seguem deste para `UpdateAttribute`. O arquivo pertence ao bundle de conectores de teste do projeto. É uma aplicação de referência do mecanismo, sem alegação de fluxo financeiro ou execução em produção.
+
+A transformação também possui código para acompanhar. [`LookupAttribute.onTrigger`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/LookupAttribute.java#L180-L232) lê FlowFiles, procura valores, acrescenta atributos e transfere cada resultado para uma relação. [`UpdateAttribute.onTrigger`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-update-attribute-bundle/nifi-update-attribute-processor/src/main/java/org/apache/nifi/processors/attributes/UpdateAttribute.java#L472) obtém o FlowFile e atualiza seus atributos; a gravação está em `:767`. O fluxo e os dois fontes foram lidos no commit `9e6c18893f1b1df713dac55d98c2b2944d235844`, sem executar o sample.
+
+O benefício é tornar etapas e roteamento inspecionáveis sem reescrever a transformação inteira. O custo envolve ordem, filas, backpressure, dados inválidos e repetição de efeitos externos. Duas conexões no exemplo não comprovam entrega durável ou recuperação após falha. A skill [data-streaming](/referencia/skills-e-projetos) orienta esse desenho, e o [Developer Guide](https://github.com/apache/nifi/blob/main/nifi-docs/src/main/asciidoc/developer-guide.adoc) complementa o código do fluxo.
+
+{/* current-curation:pipe-and-filter */}
+
+A [curadoria de Pipe and Filter](/referencia/curadoria/01-arquiteturas-de-aplicacao/#pipe-and-filter) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Event-Driven Architecture
+
+Um produtor publica fatos de negócio por contrato; consumidores reagem sem o produtor executar cada consequência diretamente. Para estudo, a proposta é depois de confirmar uma qualificação, publicar evento durável para consumidores; S2 observou persistência de intenção e integração Salesforce, não um broker ou EDA.
+
+Novos consumidores podem reagir a um fato de negócio sem acrescentar cada consequência ao produtor original. O limite principal é o seguinte: entrega duplicada, atraso, evolução de schema e rastreamento atravessam serviços.
+
+A base técnica e a instrução de trabalho indicadas para este estudo são Watermill com Kafka ou RabbitMQ; [backend-message-queue](/referencia/skills-e-projetos). A skill é apoio de análise ou implementação; ela não comprova o estilo no MakersHub.
+
+A referência pública é [ThreeDotsLabs Event-Driven Example](https://github.com/ThreeDotsLabs/event-driven-example) integra webhooks de GitHub com Grafana e Slack por Watermill e mensagens. Os samples e workshops servem como **REF**; a classificação **LEGADO**, quando presente, limita seu uso à aprendizagem histórica.
+
+Para comparar decisões sobre o mesmo caso, leia [as fronteiras do código](/explicacoes/code-boundaries) e [a referência de DDD](/referencia/catalogo/10-ddd-domain-driven-design). Os três desenhos MVC, MVP e MVVM usam o mesmo seletor de Call Sprint.
+
+{/* current-curation:event-driven-architecture */}
+
+A [curadoria de Event-Driven Architecture](/referencia/curadoria/01-arquiteturas-de-aplicacao/#event-driven-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

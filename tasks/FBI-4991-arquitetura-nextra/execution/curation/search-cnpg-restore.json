@@ -1,0 +1,17 @@
+{
+  "query": "repo:cloudnative-pg/cloudnative-pg \"bootstrap.Recovery\" path:internal",
+  "observed_utc": "2026-10-15T01:59:00.302967Z",
+  "total_count": 2,
+  "items": [
+    {
+      "repo": "cloudnative-pg/cloudnative-pg",
+      "path": "internal/controller/cluster_create.go",
+      "url": "https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/controller/cluster_create.go"
+    },
+    {
+      "repo": "cloudnative-pg/cloudnative-pg",
+      "path": "internal/webhook/v1/cluster_webhook.go",
+      "url": "https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/webhook/v1/cluster_webhook.go"
+    }
+  ]
+}

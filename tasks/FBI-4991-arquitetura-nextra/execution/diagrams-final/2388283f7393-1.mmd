@@ -1,0 +1,10 @@
+flowchart TD
+    P["Provedor fictício: AUTHORISED e 10000 cents"] --> B["Antes: consumidor compara direto com accepted"]
+    B --> X["Ordem não reconhecida; regra externa se espalha"]
+    P --> A["financial.py::order_boundaries traduz a entrada"]
+    A --> D["Contrato local: accepted e amount 100"]
+    D --> V{"Valor é positivo?"}
+    V -->|não| R["Recusa antes da escrita"]
+    V -->|sim| S["Estratégia escolhida calcula a taxa"]
+    S --> O["Porta de escrita recebe ordem válida"]
+    O --> T["Trocar adapter ou estratégia conserva o consumidor"]

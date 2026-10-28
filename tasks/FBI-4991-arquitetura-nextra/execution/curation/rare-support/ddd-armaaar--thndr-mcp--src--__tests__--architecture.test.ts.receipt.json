@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/__tests__/architecture.test.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:04:19.905213+00:00",
+  "sha256": "4cca0fe29fcb1f51a749dc9a5a6ebc3d58fa8c66903fa8a57b8cd7dfe5ff401f",
+  "line_count": 235,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--__tests__--architecture.test.ts"
+}

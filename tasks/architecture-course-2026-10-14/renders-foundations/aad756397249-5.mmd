@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor User as Operador
+    participant View as View do seletor
+    participant Controller
+    participant Model
+    User->>View: escolhe Automático
+    View->>Controller: selectMode(automatic)
+    Controller->>Model: define o modo solicitado
+    alt Entrada reconhecida
+        Model-->>Controller: modo atual
+        Controller->>View: apresenta o modo atual
+    else Escolha recusada
+        Model-->>Controller: motivo da recusa
+        Controller->>View: conserva o modo e explica a recusa
+    end

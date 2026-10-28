@@ -1,0 +1,8 @@
+{
+  "observed_at": "2026-10-15T17:22:39.911536+00:00",
+  "user_choice": "B",
+  "behavior": "Anyone holding the shared password may access the course without a ChatGPT account.",
+  "protection": "Server-side signed session before private R2 access for HTML and all assets/search.",
+  "audience_transition": "Keep owner-private until verification, then set Sites audience public as approved in option B.",
+  "secret_policy": "Configure runtime secrets in Sites; keep password in macOS Keychain and out of source/logs."
+}

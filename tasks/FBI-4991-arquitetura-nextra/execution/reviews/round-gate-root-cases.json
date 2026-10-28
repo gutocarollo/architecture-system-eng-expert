@@ -1,0 +1,22 @@
+{
+  "round": "initial-new-root-cases/1",
+  "mission_total": 100,
+  "mission_weight_affected": 50,
+  "mission_weight_source": "Historical/practical examples 35 + learning navigation 15; reference curation30, history10, publication5, catalog5 complete the mission.",
+  "unresolved_high": "Not reviewed yet",
+  "decision_this_round_can_change": "repair",
+  "scores": [
+    5,
+    4,
+    5,
+    4,
+    5
+  ],
+  "quality_factor_pct": 93,
+  "gross_gain_pct_of_whole": 46.5,
+  "opportunity_cost_pct_of_whole": 1,
+  "net_gain_pct_of_whole": 45.5,
+  "expected_loss_if_skipped_pct_of_whole": 20,
+  "round_decision": "DISPATCH",
+  "stop_condition": "One independent source/runtime review of the three root cases; one HIGH-only warm recheck if needed; preserve original teaching PASS."
+}

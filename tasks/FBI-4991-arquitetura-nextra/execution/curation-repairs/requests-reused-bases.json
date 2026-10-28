@@ -1,0 +1,42 @@
+[
+  {
+    "repo": "google/guava",
+    "path": "guava/src/com/google/common/cache/LocalCache.java"
+  },
+  {
+    "repo": "python/cpython",
+    "path": "Lib/concurrent/futures/thread.py"
+  },
+  {
+    "repo": "golang/sync",
+    "path": "singleflight/singleflight.go"
+  },
+  {
+    "repo": "resilience4j/resilience4j",
+    "path": "resilience4j-circuitbreaker/src/main/java/io/github/resilience4j/circuitbreaker/internal/CircuitBreakerStateMachine.java"
+  },
+  {
+    "repo": "apache/camel",
+    "path": "core/camel-core-processor/src/main/java/org/apache/camel/processor/Pipeline.java"
+  },
+  {
+    "repo": "ThreeDotsLabs/watermill",
+    "path": "message/router.go"
+  },
+  {
+    "repo": "temporalio/sdk-java",
+    "path": "temporal-sdk/src/main/java/io/temporal/workflow/Saga.java"
+  },
+  {
+    "repo": "medusajs/medusa",
+    "path": "packages/core/workflows-sdk/src/utils/composer/create-step.ts"
+  },
+  {
+    "repo": "medusajs/medusa",
+    "path": "packages/core/core-flows/src/cart/steps/find-or-create-customer.ts"
+  },
+  {
+    "repo": "medusajs/medusa",
+    "path": "packages/modules/order/src/services/order-module-service.ts"
+  }
+]

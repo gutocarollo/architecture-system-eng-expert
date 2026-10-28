@@ -1,0 +1,667 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-10-15T03:29:05.770820+00:00",
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "purpose": "Author repair recommendations only. Do not apply until the independent first pass over all 310 concepts finishes.",
+  "rows": [
+    {
+      "concept_id": "websocket",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "application_scope": "Home Assistant WebSocket API server and its registered command/event handlers.",
+      "mechanism": "Home Assistant registra a rota WebSocket e cria WebSocketResponse do aiohttp. O handler prepara a conexão, valida a autenticação da sessão, recebe frames de comandos e entrega os dados ao dispatcher. Uma assinatura de eventos liga o barramento do aplicativo à fila de saída da conexão, que envia frames TEXT ao cliente. Assim, a aplicação usa uma conexão persistente para receber comandos e transmitir resultados e eventos.",
+      "limits": "O recorte é o protocolo da API WebSocket do Home Assistant. O handshake normal exige autenticação da sessão; a revisão também aceita a entrada Unix do Supervisor já autenticada pelo middleware. Conexões, filas e assinaturas são encerradas na limpeza, e a fila tem limites. Não se atribui durabilidade ou replay dos eventos após uma desconexão. O código usa internals de aiohttp, por isso a dependência 3.14.5 foi conferida na revisão do aplicativo. Não houve implantação nem ensaio de rede nesta pesquisa.",
+      "version_contract": {
+        "repo": "home-assistant/core",
+        "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+        "path": "pyproject.toml",
+        "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/pyproject.toml",
+        "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/pyproject.toml",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T03:20:11.639620+00:00",
+        "sha256": "f3ae7b4b0c38e6299f68a80241b262845f5d6ce31a9c37ccae14117b8a9d6a45",
+        "line_count": 910,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/046604ed6096af65037b13139ca530ebcd38e29c17ef71463f36b1d6f4a81b36.txt",
+        "evidence": [
+          {
+            "start_line": 28,
+            "end_line": 34,
+            "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/pyproject.toml#L28-L34",
+            "excerpt": "  # module level in `bootstrap.py` and its requirements thus need to be in\n  # requirements.txt to ensure they are always installed\n  \"aiogithubapi==26.0.0\",\n  \"aiohttp==3.14.5\",\n  \"aiohttp_cors==0.8.1\",\n  \"aiohttp-fast-zlib==0.3.0\",\n  \"aiohttp-asyncmdnsresolver==0.2.0\",",
+            "excerpt_sha256": "2697e98f4efb09ec986b682d636607cf8d6eb5403180fe61f5977f5efc99955f",
+            "claim": "A dependência fixa aiohttp==3.14.5; a base foi lida no SHA da tag correspondente."
+          }
+        ],
+        "license": {
+          "repo": "home-assistant/core",
+          "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+          "path": "LICENSE.md",
+          "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+          "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:11.639753+00:00",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "line_count": 201,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0b44e119da93500fb6ca16db8a7bd3a2d1fb1fdd87c48547e3ab8d1d70a0a8dc.txt",
+          "status": "READ",
+          "license_spdx": "Apache-2.0"
+        }
+      },
+      "base": [
+        {
+          "repo": "aio-libs/aiohttp",
+          "revision": "f17c631bddcfd4ec712342db28f1d3381a3fec71",
+          "path": "aiohttp/web_ws.py",
+          "version": "3.14.5",
+          "url": "https://github.com/aio-libs/aiohttp/blob/f17c631bddcfd4ec712342db28f1d3381a3fec71/aiohttp/web_ws.py",
+          "raw_url": "https://raw.githubusercontent.com/aio-libs/aiohttp/f17c631bddcfd4ec712342db28f1d3381a3fec71/aiohttp/web_ws.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:21:19.421257+00:00",
+          "sha256": "b75db90128267f0a01331859c68fde05e71314c4dde2d48ba4435e39fd010f35",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/f55a9687781e44b896bb66f934bb664598bdb63b4b43ecfa26c1563d9d19ed5c.txt",
+          "line_count": 798,
+          "evidence": [
+            {
+              "start_line": 274,
+              "end_line": 283,
+              "url": "https://github.com/aio-libs/aiohttp/blob/f17c631bddcfd4ec712342db28f1d3381a3fec71/aiohttp/web_ws.py#L274-L283",
+              "excerpt": "    async def prepare(self, request: BaseRequest) -> AbstractStreamWriter:\n        # make pre-check to don't hide it by do_handshake() exceptions\n        if self._payload_writer is not None:\n            return self._payload_writer\n\n        protocol, writer = self._pre_start(request)\n        payload_writer = await super().prepare(request)\n        assert payload_writer is not None\n        self._post_start(request, protocol, writer)\n        await payload_writer.drain()",
+              "excerpt_sha256": "fe0a7994c97c5520b55f70321391968ea6c2a52de904831afe39afc4fd1992e7",
+              "claim": "prepare monta o protocolo e prepara a resposta WebSocket."
+            },
+            {
+              "start_line": 286,
+              "end_line": 318,
+              "url": "https://github.com/aio-libs/aiohttp/blob/f17c631bddcfd4ec712342db28f1d3381a3fec71/aiohttp/web_ws.py#L286-L318",
+              "excerpt": "    def _handshake(\n        self, request: BaseRequest\n    ) -> tuple[\"CIMultiDict[str]\", str | None, int, bool]:\n        headers = request.headers\n        if \"websocket\" != headers.get(hdrs.UPGRADE, \"\").lower().strip():\n            raise HTTPBadRequest(\n                text=(\n                    f\"No WebSocket UPGRADE hdr: {headers.get(hdrs.UPGRADE)}\\n Can \"\n                    '\"Upgrade\" only to \"WebSocket\".'\n                )\n            )\n\n        if not request._message.upgrade:\n            raise HTTPBadRequest(\n                text=f\"No CONNECTION upgrade hdr: {headers.get(hdrs.CONNECTION)}\"\n            )\n\n        # find common sub-protocol between client and server\n        protocol: str | None = None\n        if hdrs.SEC_WEBSOCKET_PROTOCOL in headers:\n            req_protocols = [\n                str(proto.strip())\n                for proto in headers[hdrs.SEC_WEBSOCKET_PROTOCOL].split(\",\")\n            ]\n\n            for proto in req_protocols:\n                if proto in self._protocols:\n                    protocol = proto\n                    break\n            else:\n                # No overlap found: Return no protocol as per spec\n                ws_logger.warning(\n                    \"%s: Client protocols %r don’t overlap server-known ones %r\",",
+              "excerpt_sha256": "12c5ef27b14bb653030da212950fb41a0de2ac3877a7dabd8bf785382ecb3b6c",
+              "claim": "O handshake verifica os cabeçalhos de upgrade do protocolo."
+            },
+            {
+              "start_line": 371,
+              "end_line": 380,
+              "url": "https://github.com/aio-libs/aiohttp/blob/f17c631bddcfd4ec712342db28f1d3381a3fec71/aiohttp/web_ws.py#L371-L380",
+              "excerpt": "        self._loop = request._loop\n\n        headers, protocol, compress, notakeover = self._handshake(request)\n\n        self.set_status(101)\n        self.headers.update(headers)\n        self.force_close()\n        self._compress = compress\n        transport = request._protocol.transport\n        if transport is None:",
+              "excerpt_sha256": "e466b6ffbd0d761a383255006422ed6a01d9df3773a3402ce52d52f0967cbe4c",
+              "claim": "O início do protocolo altera o status da resposta para 101."
+            }
+          ],
+          "license": {
+            "repo": "aio-libs/aiohttp",
+            "revision": "f17c631bddcfd4ec712342db28f1d3381a3fec71",
+            "path": "LICENSE.txt",
+            "version": "3.14.5",
+            "url": "https://github.com/aio-libs/aiohttp/blob/f17c631bddcfd4ec712342db28f1d3381a3fec71/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/aio-libs/aiohttp/f17c631bddcfd4ec712342db28f1d3381a3fec71/LICENSE.txt",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:21:19.421257+00:00",
+            "sha256": "2e4be5fc6c4c72a466fcb665d726e049a6891981fe536c4f04b6366749461d23",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/f8c8105781933f2394ca3404ec25bf323a5eb63353de665f370a94dfcbd4e518.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "home-assistant/core",
+          "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+          "path": "homeassistant/components/websocket_api/__init__.py",
+          "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/__init__.py",
+          "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/__init__.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:11.639538+00:00",
+          "sha256": "c487dc70fae3dd65112dbb5847effb4775dadf2d3861335ba5803663ee75a552",
+          "line_count": 70,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/38dfc89f70ddf51bbc08ffe5fa097b0b39446150ec2522bb687fa26d9127f2ec.txt",
+          "evidence": [
+            {
+              "start_line": 64,
+              "end_line": 70,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/__init__.py#L64-L70",
+              "excerpt": "\n\nasync def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:\n    \"\"\"Initialize the websocket API.\"\"\"\n    hass.http.register_view(http.WebsocketAPIView())\n    commands.async_register_commands(hass, async_register_command)\n    return True",
+              "excerpt_sha256": "8fd8a24823cc42eb1e7017f4a1c563d5e7c1b7b31534dee3740768940287951a",
+              "claim": "O setup do produto registra a view e os handlers de comandos."
+            }
+          ],
+          "license": {
+            "repo": "home-assistant/core",
+            "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+            "path": "LICENSE.md",
+            "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:11.639753+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0b44e119da93500fb6ca16db8a7bd3a2d1fb1fdd87c48547e3ab8d1d70a0a8dc.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "home-assistant/core",
+          "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+          "path": "homeassistant/components/websocket_api/const.py",
+          "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/const.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:27:22.904587+00:00",
+          "sha256": "8c797be2529ba7ff0d6d29b98ce9b84fe845fabc77520aecf743ba00efd1602a",
+          "line_count": 58,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/f930ebe5de9b30e53d8cdce7b6e290cb1e3e9f690f7b8b517b18ac9f5b5dfbd4.txt",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 20,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/const.py#L1-L20",
+              "excerpt": "\"\"\"Websocket constants.\"\"\"\n\nfrom collections.abc import Awaitable, Callable\nfrom typing import TYPE_CHECKING, Any, Final\n\nfrom homeassistant.core import HomeAssistant\n\nif TYPE_CHECKING:\n    from .connection import ActiveConnection\n\n\ntype WebSocketCommandHandler = Callable[\n    [HomeAssistant, ActiveConnection, dict[str, Any]], None\n]\ntype AsyncWebSocketCommandHandler = Callable[\n    [HomeAssistant, ActiveConnection, dict[str, Any]], Awaitable[None]\n]\n\nDOMAIN: Final = \"websocket_api\"\nURL: Final = \"/api/websocket\"",
+              "excerpt_sha256": "743a05c5c795cb30d5fd60165b9b280723154a503ae049aa3662a5ea7f021186",
+              "claim": "O contrato do componente define a rota da API; a documentação oficial confirma /api/websocket."
+            }
+          ],
+          "license": {
+            "repo": "home-assistant/core",
+            "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+            "path": "LICENSE.md",
+            "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:11.639753+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0b44e119da93500fb6ca16db8a7bd3a2d1fb1fdd87c48547e3ab8d1d70a0a8dc.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "home-assistant/core",
+          "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+          "path": "homeassistant/components/websocket_api/http.py",
+          "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py",
+          "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:11.639385+00:00",
+          "sha256": "68aba32731adfea02364a1bb7121580f6cab8d51df60dad81fac094dba12cb2f",
+          "line_count": 587,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/6643b343e5ea6a85c437fbde4bdfc179328d4899c807530ac10d7e95b01aed48.txt",
+          "evidence": [
+            {
+              "start_line": 48,
+              "end_line": 57,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py#L48-L57",
+              "excerpt": "class WebsocketAPIView(HomeAssistantView):\n    \"\"\"View to serve a websockets endpoint.\"\"\"\n\n    name: str = \"websocketapi\"\n    url: str = URL\n    requires_auth: bool = False\n\n    async def get(self, request: web.Request) -> web.WebSocketResponse:\n        \"\"\"Handle an incoming websocket connection.\"\"\"\n        return await WebSocketHandler(request.app[KEY_HASS], request).async_handle()",
+              "excerpt_sha256": "20dbdaf71da223b4744dc9b69a5ae505756d532cd7e2b41bd9f1ec900cc76938",
+              "claim": "A view registrada chama o handler do aplicativo."
+            },
+            {
+              "start_line": 96,
+              "end_line": 100,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py#L96-L100",
+              "excerpt": "        # decode_text=False so orjson decodes the raw TEXT bytes directly\n        # instead of decoding to str first and re-scanning.\n        self._wsock = web.WebSocketResponse(heartbeat=55, decode_text=False)\n        self._handle_task: asyncio.Task | None = None\n        self._writer_task: asyncio.Task | None = None",
+              "excerpt_sha256": "cffb3f7d2a19d5992ce90ac2d4aa52d8b3fa4987f102449452d066244339bb92",
+              "claim": "O handler cria WebSocketResponse do aiohttp."
+            },
+            {
+              "start_line": 313,
+              "end_line": 358,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py#L313-L358",
+              "excerpt": "    async def async_handle(self) -> web.WebSocketResponse:\n        \"\"\"Handle a websocket response.\"\"\"\n        request = self._request\n        wsock = self._wsock\n        logger = self._logger\n        hass = self._hass\n\n        try:\n            async with asyncio.timeout(10):\n                await wsock.prepare(request)\n        except ConnectionResetError:\n            # Likely the client disconnected before we prepared the websocket\n            logger.debug(\n                \"%s: Connection reset by peer while preparing WebSocket\",\n                self.description,\n            )\n            return wsock\n        except TimeoutError:\n            logger.warning(\"Timeout preparing request from %s\", request.remote)\n            return wsock\n\n        logger.debug(\"%s: Connected from %s\", self.description, request.remote)\n        self._handle_task = asyncio.current_task()\n\n        unsub_stop = hass.bus.async_listen(\n            EVENT_HOMEASSISTANT_STOP, self._async_handle_hass_stop\n        )\n        cancel_logging_listener = hass.bus.async_listen(\n            EVENT_LOGGING_CHANGED, self._async_logging_changed\n        )\n\n        writer = wsock._writer  # noqa: SLF001\n        if TYPE_CHECKING:\n            assert writer is not None\n\n        send_bytes_text = partial(writer.send_frame, opcode=WSMsgType.TEXT)\n        auth = AuthPhase(\n            logger, hass, self._send_message, self._cancel, request, send_bytes_text\n        )\n        connection: ActiveConnection | None = None\n        disconnect_warn: str | None = None\n\n        try:\n            connection = await self._async_handle_auth_phase(auth, send_bytes_text)\n            self._async_increase_writer_limit(writer)\n            await self._async_websocket_command_phase(connection)",
+              "excerpt_sha256": "47bc603adca3f49eeccce135f44e6c33da4badec123ef5f1f2d2f593c7528996",
+              "claim": "O handler prepara a conexão e encadeia autenticação e comandos."
+            },
+            {
+              "start_line": 395,
+              "end_line": 445,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py#L395-L445",
+              "excerpt": "\n        if is_supervisor_unix_socket_request(request):\n            # Unix socket requests are pre-authenticated by the HTTP\n            # auth middleware — skip the token exchange.\n            connection = await auth.async_handle_supervisor_unix_socket()\n        else:\n            await send_bytes_text(AUTH_REQUIRED_MESSAGE)\n\n            # Auth Phase\n            try:\n                msg = await self._wsock.receive(AUTH_MESSAGE_TIMEOUT)\n            except TimeoutError as err:\n                raise Disconnect(\n                    \"Did not receive auth message within\"\n                    f\" {AUTH_MESSAGE_TIMEOUT} seconds\"\n                ) from err\n\n            if msg.type in (WSMsgType.CLOSE, WSMsgType.CLOSED, WSMsgType.CLOSING):\n                raise Disconnect(\"Received close message during auth phase\")\n\n            if msg.type is not WSMsgType.TEXT:\n                if msg.type is WSMsgType.ERROR:\n                    # msg.data is the exception\n                    raise Disconnect(\n                        f\"Received error message during auth phase: {msg.data}\"\n                    )\n                raise Disconnect(\n                    f\"Received non-Text message of type {msg.type} during auth phase\"\n                )\n\n            try:\n                auth_msg_data = json_loads(msg.data)\n            except ValueError as err:\n                raise Disconnect(\"Received invalid JSON during auth phase\") from err\n\n            if self._debug:\n                self._logger.debug(\"%s: Received %s\", self.description, auth_msg_data)\n            connection = await auth.async_handle(auth_msg_data)\n\n        # As the webserver is now started before the start\n        # event we do not want to block for websocket responses\n        #\n        # We only start the writer queue after the auth phase is completed\n        # since there is no need to queue messages before the auth phase\n        self._connection = connection\n        self._writer_task = create_eager_task(self._writer(connection, send_bytes_text))\n        self._hass.data[DATA_CONNECTIONS] = self._hass.data.get(DATA_CONNECTIONS, 0) + 1\n        async_dispatcher_send(self._hass, SIGNAL_WEBSOCKET_CONNECTED)\n\n        self._authenticated = True\n        return connection",
+              "excerpt_sha256": "79dcf0040dde67697b0615c0c08c1f63f49eec24142bd47e9f03b4bc90026efc",
+              "claim": "A fase de autenticação recebe o primeiro frame e produz a conexão autenticada."
+            },
+            {
+              "start_line": 150,
+              "end_line": 179,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py#L150-L179",
+              "excerpt": "        loop = self._loop\n        debug = logger.debug\n        can_coalesce = connection.can_coalesce\n        ready_message_count = len(message_queue)\n        # Exceptions if Socket disconnected or cancelled by connection handler\n        try:\n            while not wsock.closed:\n                if not message_queue:\n                    self._ready_future = loop.create_future()\n                    ready_message_count = await self._ready_future\n\n                if self._closing:\n                    return\n\n                if not can_coalesce:\n                    # coalesce may be enabled later in the connection\n                    can_coalesce = connection.can_coalesce\n\n                if not can_coalesce or ready_message_count == 1:\n                    message = message_queue.popleft()\n                    if self._debug:\n                        debug(\"%s: Sending %s\", self.description, message)\n                    await send_bytes_text(message)\n                    continue\n\n                coalesced_messages = b\"\".join((b\"[\", b\",\".join(message_queue), b\"]\"))\n                message_queue.clear()\n                if self._debug:\n                    debug(\"%s: Sending %s\", self.description, coalesced_messages)\n                await send_bytes_text(coalesced_messages)",
+              "excerpt_sha256": "51e7ac3406c9f2d82c3aa0d02635108a1c70b7b52f975ff5505ca430e23a56fa",
+              "claim": "A fila de saída envia mensagens como frames TEXT."
+            },
+            {
+              "start_line": 486,
+              "end_line": 536,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py#L486-L536",
+              "excerpt": "    async def _async_websocket_command_phase(\n        self, connection: ActiveConnection\n    ) -> None:\n        \"\"\"Handle the command phase of the websocket connection.\"\"\"\n        wsock = self._wsock\n        async_handle_str = connection.async_handle\n        async_handle_binary = connection.async_handle_binary\n\n        # Command phase\n        while not wsock.closed:\n            msg = await wsock.receive()\n            msg_type = msg.type\n            msg_data = msg.data\n\n            if msg_type in CLOSE_MSG_TYPES:\n                break\n\n            if msg_type is WSMsgType.BINARY:\n                if len(msg_data) < 1:\n                    raise Disconnect(\"Received invalid binary message.\")\n\n                handler = msg_data[0]\n                payload = msg_data[1:]\n                async_handle_binary(handler, payload)\n                continue\n\n            if msg_type is not WSMsgType.TEXT:\n                if msg_type is WSMsgType.ERROR:\n                    # msg.data is the exception\n                    raise Disconnect(\n                        f\"Received error message during command phase: {msg.data}\"\n                    )\n                raise Disconnect(f\"Received non-Text message of type {msg_type}.\")\n\n            try:\n                command_msg_data = json_loads(msg_data)\n            except ValueError as ex:\n                raise Disconnect(\"Received invalid JSON.\") from ex\n\n            if self._debug:\n                self._logger.debug(\n                    \"%s: Received %s\", self.description, command_msg_data\n                )\n\n            # command_msg_data is always deserialized from JSON as a list\n            if type(command_msg_data) is not list:\n                async_handle_str(command_msg_data)\n                continue\n\n            for split_msg in command_msg_data:\n                async_handle_str(split_msg)",
+              "excerpt_sha256": "07d226b0db77ca12ffc99be9efeda3880f96e71de1360d64d2f2c692e3a596e2",
+              "claim": "O laço recebe frames e chama o dispatcher da conexão."
+            }
+          ],
+          "license": {
+            "repo": "home-assistant/core",
+            "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+            "path": "LICENSE.md",
+            "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:11.639753+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0b44e119da93500fb6ca16db8a7bd3a2d1fb1fdd87c48547e3ab8d1d70a0a8dc.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "home-assistant/core",
+          "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+          "path": "homeassistant/components/websocket_api/auth.py",
+          "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/auth.py",
+          "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/auth.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:22:40.197225+00:00",
+          "sha256": "01add93e382bb5e4d6b60173e0d6be2d3ba0a6303fc3db51bd3b25a24e057f3f",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/bdd5f4f325673cf773a2e4d88760a41f146f1d14cde415d42a46eb730bd9704e.txt",
+          "line_count": 129,
+          "evidence": [
+            {
+              "start_line": 97,
+              "end_line": 122,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/auth.py#L97-L122",
+              "excerpt": "        if (access_token := valid_msg.get(\"access_token\")) and (\n            refresh_token := self._hass.auth.async_validate_access_token(access_token)\n        ):\n            if user_access_error := async_user_not_allowed_do_auth(\n                self._hass, refresh_token.user, self._request\n            ):\n                await self._send_bytes_text(auth_invalid_message(user_access_error))\n                await process_wrong_login(self._request)\n                raise Disconnect\n\n            conn = ActiveConnection(\n                self._logger,\n                self._hass,\n                self._send_message,\n                refresh_token.user,\n                refresh_token,\n                remote=self._request.remote,\n            )\n            conn.subscriptions[\"auth\"] = (\n                self._hass.auth.async_register_revoke_token_callback(\n                    refresh_token.id, self._cancel_ws\n                )\n            )\n            await self._send_bytes_text(AUTH_OK_MESSAGE)\n            self._logger.debug(\"Auth OK\")\n            process_success_login(self._request)",
+              "excerpt_sha256": "63e894c7ab8de43dc59b763f63a90fbd748c715801ed8e09a7383a6c37fea74f",
+              "claim": "A fase valida o access token, cria ActiveConnection e responde AUTH_OK."
+            }
+          ],
+          "license": {
+            "repo": "home-assistant/core",
+            "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+            "path": "LICENSE.md",
+            "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:11.639753+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0b44e119da93500fb6ca16db8a7bd3a2d1fb1fdd87c48547e3ab8d1d70a0a8dc.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "home-assistant/core",
+          "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+          "path": "homeassistant/components/websocket_api/connection.py",
+          "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/connection.py",
+          "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/connection.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:11.639467+00:00",
+          "sha256": "a54ade029fa8ae3308e23444d6394347a7901f65e742ae6206f258f20c0c16f4",
+          "line_count": 332,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/095b4f0e7f5ec20addd212cb06004e01966c29b1154acab89807140def66ec29.txt",
+          "evidence": [
+            {
+              "start_line": 199,
+              "end_line": 255,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/connection.py#L199-L255",
+              "excerpt": "    @callback\n    def async_handle(self, msg: JsonValueType) -> None:\n        \"\"\"Handle a single incoming message.\"\"\"\n        if (\n            # Not using isinstance as we don't care about children\n            # as these are always coming from JSON\n            type(msg) is not dict\n            or (\n                not (cur_id := msg.get(\"id\"))\n                or type(cur_id) is not int\n                or cur_id < 0\n                or not (type_ := msg.get(\"type\"))\n                or type(type_) is not str\n            )\n        ):\n            msg = async_redact_data(msg, REDACT_KEYS)\n            self.logger.error(\"Received invalid command: %s\", msg)\n            id_ = msg.get(\"id\") if isinstance(msg, dict) else 0\n            self.send_message(\n                messages.error_message(\n                    id_,  # type: ignore[arg-type]\n                    const.ERR_INVALID_FORMAT,\n                    \"Message incorrectly formatted.\",\n                )\n            )\n            return\n\n        if cur_id <= self.last_id:\n            self.send_message(\n                messages.error_message(\n                    cur_id, const.ERR_ID_REUSE, \"Identifier values have to increase.\"\n                )\n            )\n            return\n\n        if not (handler_schema := self.handlers.get(type_)):\n            self.logger.info(\"Received unknown command: %s\", type_)\n            self.send_message(\n                messages.error_message(\n                    cur_id, const.ERR_UNKNOWN_COMMAND, \"Unknown command.\"\n                )\n            )\n            return\n\n        handler, schema = handler_schema\n\n        try:\n            if schema is False:\n                if len(msg) > 2:\n                    raise probatio.Invalid(\"extra keys not allowed\")  # noqa: TRY301\n                handler(self.hass, self, msg)\n            else:\n                handler(self.hass, self, schema(msg))\n        except Exception as err:  # noqa: BLE001\n            self.async_handle_exception(msg, err)\n\n        self.last_id = cur_id",
+              "excerpt_sha256": "9c8e191a5c1ecadf53a864c8a7e6e2a5508bad47920b94bda1d722cfe30c2c92",
+              "claim": "O dispatcher valida o comando, resolve o handler pelo tipo e o executa."
+            }
+          ],
+          "license": {
+            "repo": "home-assistant/core",
+            "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+            "path": "LICENSE.md",
+            "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:11.639753+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0b44e119da93500fb6ca16db8a7bd3a2d1fb1fdd87c48547e3ab8d1d70a0a8dc.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "home-assistant/core",
+          "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+          "path": "homeassistant/components/websocket_api/commands.py",
+          "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/commands.py",
+          "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/commands.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:11.639579+00:00",
+          "sha256": "cf9d889cff448ec9ed19e668ca168cb03c6c970413956b95594d9ac7857e338f",
+          "line_count": 1399,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/223c162aa3462b3b49258b058765a4d566fe4c8e894cd952d5dc0e2490adac11.txt",
+          "evidence": [
+            {
+              "start_line": 192,
+              "end_line": 224,
+              "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/commands.py#L192-L224",
+              "excerpt": "def handle_subscribe_events(\n    hass: HomeAssistant, connection: ActiveConnection, msg: dict[str, Any]\n) -> None:\n    \"\"\"Handle subscribe events command.\"\"\"\n    event_type = msg[\"event_type\"]\n\n    if event_type not in SUBSCRIBE_ALLOWLIST and not connection.user.is_admin:\n        _LOGGER.error(\n            \"Refusing to allow %s to subscribe to event %s\",\n            connection.user.name,\n            event_type,\n        )\n        raise Unauthorized(user_id=connection.user.id)\n\n    message_id_as_bytes = str(msg[\"id\"]).encode()\n\n    if event_type == EVENT_STATE_CHANGED:\n        forward_events = partial(\n            _forward_events_check_permissions,\n            connection.send_message,\n            connection.user,\n            message_id_as_bytes,\n        )\n    else:\n        forward_events = partial(\n            _forward_events_unconditional, connection.send_message, message_id_as_bytes\n        )\n\n    connection.subscriptions[msg[\"id\"]] = hass.bus.async_listen(\n        event_type, forward_events\n    )\n\n    connection.send_result(msg[\"id\"])",
+              "excerpt_sha256": "9aa43735c5a090d8d8e47b3feecb28c48645c68447a7f22b1e83ebbf4f39d02d",
+              "claim": "A assinatura conecta eventos reais do aplicativo à saída WebSocket e confirma o comando."
+            }
+          ],
+          "license": {
+            "repo": "home-assistant/core",
+            "revision": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+            "path": "LICENSE.md",
+            "url": "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "raw_url": "https://raw.githubusercontent.com/home-assistant/core/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:11.639753+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0b44e119da93500fb6ca16db8a7bd3a2d1fb1fdd87c48547e3ab8d1d70a0a8dc.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        }
+      ],
+      "primary_documentation": [
+        {
+          "url": "https://developers.home-assistant.io/docs/api/websocket/",
+          "claim": "A documentação primária descreve a rota, as fases de autenticação/comandos e a transmissão de eventos.",
+          "access_method": "web.open in this research phase; code captures retain exact HTTP observation times."
+        }
+      ]
+    },
+    {
+      "concept_id": "at-least-once-delivery",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "application_scope": "Apache Pulsar persistent broker, Shared subscription and Java client acknowledgment/redelivery path.",
+      "mechanism": "Pulsar conserva as mensagens entregues e ainda não confirmadas na coleção de pending acks. Com ackTimeout configurado, o cliente reúne os IDs vencidos e envia ao broker um pedido de redelivery. O servidor resolve o consumidor, encaminha o pedido à assinatura e acrescenta as posições ao replay. O dispatcher relê essas posições do cursor e as entrega novamente. Quando recebe o ACK, o broker registra a confirmação no cursor persistente e limpa as pendências correspondentes. Ao remover um consumidor enquanto outros continuam disponíveis, suas pendências também voltam ao replay.",
+      "limits": "A correspondência é a entrega repetível de mensagens em tópico persistente e assinatura Shared, delimitada pelo backlog disponível e pelo ciclo de ACK. Ack timeout depende de configuração; desconexão e pedidos de redelivery são caminhos distintos. Expiração, exclusão, disponibilidade de consumidores e políticas de retry/dead letter afetam a continuidade da entrega. O ACK de transporte não prova a conclusão de um pagamento, uma gravação externa ou exatamente uma execução de negócio. Não houve teste de falha nem implantação nesta pesquisa.",
+      "base": [
+        {
+          "repo": "apache/pulsar",
+          "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+          "path": "pulsar-client/src/main/java/org/apache/pulsar/client/impl/UnAckedMessageTracker.java",
+          "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-client/src/main/java/org/apache/pulsar/client/impl/UnAckedMessageTracker.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-client/src/main/java/org/apache/pulsar/client/impl/UnAckedMessageTracker.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:12.017855+00:00",
+          "sha256": "ecccb1903dee99f6b5693fcd57c5badac9cc69c8a82ab389704c9f1d6e4b2d25",
+          "line_count": 307,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/b1d2dedd1840a85df0d96ee361816059e597110d09c44eda756f4ccfc0aa5f30.txt",
+          "evidence": [
+            {
+              "start_line": 139,
+              "end_line": 178,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-client/src/main/java/org/apache/pulsar/client/impl/UnAckedMessageTracker.java#L139-L178",
+              "excerpt": "            timeout = client.timer().newTimeout(new TimerTask() {\n                @Override\n                public void run(Timeout t) throws Exception {\n                    if (t.isCancelled()) {\n                        return;\n                    }\n\n                    Set<MessageId> messageIds = TL_MESSAGE_IDS_SET.get();\n                    messageIds.clear();\n\n                    writeLock.lock();\n                    try {\n                        HashSet<MessageId> headPartition = timePartitions.removeFirst();\n                        if (!headPartition.isEmpty()) {\n                            consumerAckTimeoutsCounter.add(headPartition.size());\n                            log.info().attr(\"consumerBase\", consumerBase)\n                                    .attr(\"count\", headPartition.size())\n                                    .log(\"messages will be re-delivered\");\n                            headPartition.forEach(messageId -> {\n                                if (messageId instanceof ChunkMessageIdImpl) {\n                                    addChunkedMessageIdsAndRemoveFromSequenceMap(messageId, messageIds, consumerBase);\n                                } else {\n                                    messageIds.add(messageId);\n                                }\n                                messageIdPartitionMap.remove(messageId);\n                            });\n                        }\n\n                        headPartition.clear();\n                        timePartitions.addLast(headPartition);\n                    } finally {\n                        try {\n                            timeout = client.timer().newTimeout(this, tickDurationInMs, TimeUnit.MILLISECONDS);\n                        } finally {\n                            writeLock.unlock();\n\n                            if (!messageIds.isEmpty()) {\n                                consumerBase.onAckTimeoutSend(messageIds);\n                                consumerBase.redeliverUnacknowledgedMessages(messageIds);\n                            }",
+              "excerpt_sha256": "10e1e93b4623ebd29630581860aee0688e2dbc77b3484d3520415b7979afc124",
+              "claim": "O timer local seleciona mensagens vencidas e pede sua redelivery."
+            }
+          ],
+          "license": {
+            "repo": "apache/pulsar",
+            "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:12.050080+00:00",
+            "sha256": "8ba56c6b25c502a185d6f7059946e2f517774452c8ea7f621e05cefeff2c3cc2",
+            "line_count": 239,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7cda87499031ca9770c23bee3dc49293f8738ee32db9f2bfb0f8fcf3d58b49f1.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "apache/pulsar",
+          "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+          "path": "pulsar-client/src/main/java/org/apache/pulsar/client/impl/ConsumerImpl.java",
+          "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-client/src/main/java/org/apache/pulsar/client/impl/ConsumerImpl.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-client/src/main/java/org/apache/pulsar/client/impl/ConsumerImpl.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:12.037439+00:00",
+          "sha256": "b253712bb426b615ea7082b733e8664e32ed5ef8e766ff8fa6d2b2cd1ed9145e",
+          "line_count": 3419,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/71804adb1c6fb95b38532aeece1d93ac2c82bce36f818aa5d2f304422cd35090.txt",
+          "evidence": [
+            {
+              "start_line": 2302,
+              "end_line": 2323,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-client/src/main/java/org/apache/pulsar/client/impl/ConsumerImpl.java#L2302-L2323",
+              "excerpt": "    public void redeliverUnacknowledgedMessages(Set<MessageId> messageIds) {\n        if (messageIds.isEmpty()) {\n            return;\n        }\n\n        if (conf.getSubscriptionType() != SubscriptionType.Shared\n                && conf.getSubscriptionType() != SubscriptionType.Key_Shared) {\n            // We cannot redeliver single messages if subscription type is not Shared\n            redeliverUnacknowledgedMessages();\n            return;\n        }\n        ClientCnx cnx = cnx();\n        if (isConnected() && cnx.getRemoteEndpointProtocolVersion() >= ProtocolVersion.v2.getValue()) {\n            int messagesFromQueue = removeExpiredMessagesFromQueue(messageIds);\n            Iterables.partition(messageIds, MAX_REDELIVER_UNACKNOWLEDGED).forEach(ids -> {\n                getRedeliveryMessageIdData(ids).thenAccept(messageIdData -> {\n                    if (!messageIdData.isEmpty()) {\n                        ByteBuf cmd = Commands.newRedeliverUnacknowledgedMessages(consumerId, messageIdData);\n                        cnx.ctx().writeAndFlush(cmd, cnx.ctx().voidPromise());\n                    }\n                });\n            });",
+              "excerpt_sha256": "581c5a9f5a6aff1ec2d8818b5c3f233e9e0d3b73c0064f58aca4cfef0ad6ab1b",
+              "claim": "O cliente Shared transforma os IDs em comando enviado à conexão do broker."
+            }
+          ],
+          "license": {
+            "repo": "apache/pulsar",
+            "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:12.050080+00:00",
+            "sha256": "8ba56c6b25c502a185d6f7059946e2f517774452c8ea7f621e05cefeff2c3cc2",
+            "line_count": 239,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7cda87499031ca9770c23bee3dc49293f8738ee32db9f2bfb0f8fcf3d58b49f1.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "apache/pulsar",
+          "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+          "path": "pulsar-broker/src/main/java/org/apache/pulsar/broker/service/Consumer.java",
+          "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/Consumer.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/Consumer.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:11.967468+00:00",
+          "sha256": "45d9767bd122cb8c966f782cd5040dfcf8a8b9d8985dd46d774c1ad463ac379b",
+          "line_count": 1633,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/961ff834a26e165566336cf7e1cd1f945b05500f31e385173f6015067d490922.txt",
+          "evidence": [
+            {
+              "start_line": 400,
+              "end_line": 418,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/Consumer.java#L400-L418",
+              "excerpt": "                        stickyKeyHash = stickyKeyHashes.get(i);\n                    }\n                    boolean sendingAllowed;\n                    long[] ackSet = batchIndexesAcks == null ? null : batchIndexesAcks.getAckSet(i);\n                    int remainingUnacked;\n                    if (ackSet != null) {\n                        remainingUnacked = LongArrayAckSets.cardinality(ackSet);\n                        unackedMessages -= (batchSize - remainingUnacked);\n                    } else {\n                        remainingUnacked = batchSize;\n                    }\n                    sendingAllowed =\n                            pendingAcks.addPendingAckIfAllowed(entry.getLedgerId(), entry.getEntryId(),\n                                    remainingUnacked, stickyKeyHash);\n                    if (!sendingAllowed) {\n                        // sending isn't allowed when pending acks doesn't accept adding the entry\n                        // this happens when Key_Shared draining hashes contains the stickyKeyHash\n                        // because of race conditions, it might be resolved at the time of sending\n                        totalEntries--;",
+              "excerpt_sha256": "7f27a796a8f6534113f33bdbc6cf26ad9de1fa8b5825df7d00103b9b9b9fdea8",
+              "claim": "O envio registra as posições pendentes de ACK."
+            },
+            {
+              "start_line": 737,
+              "end_line": 747,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/Consumer.java#L737-L747",
+              "excerpt": "        // Non-transactional\n        CompletableFuture<Void> ackFuture = subscription.acknowledgeMessageAsync(\n                nonTxnPositions, AckType.Individual, properties);\n        if (requirePersistedAck) {\n            return ackFuture.thenApply(unused -> {\n                applyPendingAckCompletions(pendingAckCompletions);\n                return finalTotalAckCount;\n            });\n        }\n        ackFuture.thenRun(() -> applyPendingAckCompletions(pendingAckCompletions));\n        return CompletableFuture.completedFuture(finalTotalAckCount);",
+              "excerpt_sha256": "ca833b21526ab861508b4ceae0383906ad9ceb0d2530cbe6b0cd61957b365eeb",
+              "claim": "O ACK individual é entregue à assinatura e sua conclusão pode limpar os pending acks."
+            }
+          ],
+          "license": {
+            "repo": "apache/pulsar",
+            "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:12.050080+00:00",
+            "sha256": "8ba56c6b25c502a185d6f7059946e2f517774452c8ea7f621e05cefeff2c3cc2",
+            "line_count": 239,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7cda87499031ca9770c23bee3dc49293f8738ee32db9f2bfb0f8fcf3d58b49f1.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "apache/pulsar",
+          "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+          "path": "pulsar-broker/src/main/java/org/apache/pulsar/broker/service/ServerCnx.java",
+          "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/ServerCnx.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/ServerCnx.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:11.987103+00:00",
+          "sha256": "59ac3e0e1d3aceecd95f7a39585a238542a1e85a9a74f2dbea0de610421aff43",
+          "line_count": 5148,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/2927c6399489f5cefd22ea785d14a4c68b1d9acfaa8619b99b44b0bde08cf249.txt",
+          "evidence": [
+            {
+              "start_line": 2967,
+              "end_line": 3013,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/ServerCnx.java#L2967-L3013",
+              "excerpt": "    protected void handleAck(CommandAck ack) {\n        checkArgument(state == State.Connected);\n        CompletableFuture<Consumer> consumerFuture = consumers.get(ack.getConsumerId());\n        final boolean hasRequestId = ack.hasRequestId();\n        final long requestId = hasRequestId ? ack.getRequestId() : 0;\n        final long consumerId = ack.getConsumerId();\n        // It is necessary to make a copy of the CommandAck instance for the interceptor.\n        final CommandAck copyOfAckForInterceptor = brokerInterceptor != null ? new CommandAck().copyFrom(ack) : null;\n\n        if (consumerFuture != null && consumerFuture.isDone() && !consumerFuture.isCompletedExceptionally()) {\n            Consumer consumer = consumerFuture.getNow(null);\n            Subscription subscription = consumer.getSubscription();\n            // Message acks are silently ignored during topic transfer. Note that the transferring flag is only set when\n            // the Extensible Load Manager is enabled.\n            if (subscription.getTopic().isTransferring()) {\n                var pulsar = getBrokerService().getPulsar();\n                var ignoredAckCount = ack.getMessageIdsCount();\n                var ignoredAckTotalCount = ExtensibleLoadManagerImpl.get(pulsar).getIgnoredAckCount().\n                        addAndGet(ignoredAckCount);\n                log.debug()\n                        .attr(\"subscription\", subscription)\n                        .attr(\"consumerId\", consumerId)\n                        .attr(\"ignoredAckCount\", ignoredAckCount)\n                        .attr(\"ignoredAckTotalCount\", ignoredAckTotalCount)\n                        .log(\"Ignoring message acks during topic transfer. Total ignored ack count\");\n                return;\n            }\n            consumer.messageAcked(ack, hasRequestId).thenRun(() -> {\n                if (hasRequestId) {\n                    writeAndFlush(Commands.newAckResponse(\n                            requestId, null, null, consumerId));\n                }\n                if (brokerInterceptor != null) {\n                    try {\n                        brokerInterceptor.messageAcked(this, consumer, copyOfAckForInterceptor);\n                    } catch (Throwable t) {\n                        log.error().exception(t).log(\"Exception occur when intercept message acked.\");\n                    }\n                }\n            }).exceptionally(e -> {\n                if (hasRequestId) {\n                    writeAndFlush(Commands.newAckResponse(requestId,\n                            BrokerServiceException.getClientErrorCode(e),\n                            e.getMessage(), consumerId));\n                }\n                return null;\n            });",
+              "excerpt_sha256": "b46301421449ad3b69fd79fc66b3260cf0894cf2563677c93f9cca018e09d555",
+              "claim": "O handler de ACK resolve o consumidor e registra a confirmação."
+            },
+            {
+              "start_line": 3044,
+              "end_line": 3065,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/ServerCnx.java#L3044-L3065",
+              "excerpt": "    @Override\n    protected void handleRedeliverUnacknowledged(CommandRedeliverUnacknowledgedMessages redeliver) {\n        checkArgument(state == State.Connected);\n        log.debug()\n                .attr(\"consumerId\", redeliver.getConsumerId())\n                .attr(\"consumerEpoch\", redeliver.hasConsumerEpoch() ? redeliver.getConsumerEpoch() : null)\n                .log(\"redeliverUnacknowledged from consumer\");\n\n        CompletableFuture<Consumer> consumerFuture = consumers.get(redeliver.getConsumerId());\n\n        if (consumerFuture != null && consumerFuture.isDone() && !consumerFuture.isCompletedExceptionally()) {\n            Consumer consumer = consumerFuture.getNow(null);\n            if (redeliver.getMessageIdsCount() > 0 && Subscription.isIndividualAckMode(consumer.subType())) {\n                consumer.redeliverUnacknowledgedMessages(redeliver.getMessageIdsList());\n            } else {\n                if (redeliver.hasConsumerEpoch()) {\n                    consumer.redeliverUnacknowledgedMessages(redeliver.getConsumerEpoch());\n                } else {\n                    consumer.redeliverUnacknowledgedMessages(DEFAULT_CONSUMER_EPOCH);\n                }\n            }\n        }",
+              "excerpt_sha256": "d5e16223a8fe9854c5ff8a4edf2888511835476d95f0b8c29570419c1218c476",
+              "claim": "O comando de redelivery recebido na conexão chega ao consumidor correto."
+            }
+          ],
+          "license": {
+            "repo": "apache/pulsar",
+            "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:12.050080+00:00",
+            "sha256": "8ba56c6b25c502a185d6f7059946e2f517774452c8ea7f621e05cefeff2c3cc2",
+            "line_count": 239,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7cda87499031ca9770c23bee3dc49293f8738ee32db9f2bfb0f8fcf3d58b49f1.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "apache/pulsar",
+          "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+          "path": "pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentSubscription.java",
+          "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentSubscription.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentSubscription.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:12.017661+00:00",
+          "sha256": "2c2d8ce3595e88a3acea53d042c515b48f6cae5b4d4f1b3158773ccef4b97b0b",
+          "line_count": 1800,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/12eb73680384b4a545e6239618f826b53c3108fa4255b1c970773279d2581b22.txt",
+          "evidence": [
+            {
+              "start_line": 508,
+              "end_line": 519,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentSubscription.java#L508-L519",
+              "excerpt": "        } else {\n            log.debug()\n                    .attr(\"positions\", positions)\n                    .log(\"Individual acks on\");\n            AckCallback callback = new AckCallback(previousMarkDeletePosition, future);\n            cursor.asyncDelete(positions, callback, callback);\n            if (config.isTransactionCoordinatorEnabled()) {\n                positions.forEach(position -> {\n                    if ((cursor.isMessageDeleted(position))) {\n                        pendingAckHandle.clearIndividualPosition(position);\n                    }\n                });",
+              "excerpt_sha256": "6361fdef3fe27869a3eae59069084f52f412caf77cff6c6bfc5e5db35c3dfd2b",
+              "claim": "A confirmação individual marca as posições no cursor persistente."
+            },
+            {
+              "start_line": 1633,
+              "end_line": 1645,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentSubscription.java#L1633-L1645",
+              "excerpt": "    public void redeliverUnacknowledgedMessages(Consumer consumer, long consumerEpoch) {\n        Dispatcher dispatcher = getDispatcher();\n        if (dispatcher != null) {\n            dispatcher.redeliverUnacknowledgedMessages(consumer, consumerEpoch);\n        }\n    }\n\n    @Override\n    public void redeliverUnacknowledgedMessages(Consumer consumer, List<Position> positions) {\n        Dispatcher dispatcher = getDispatcher();\n        if (dispatcher != null) {\n            dispatcher.redeliverUnacknowledgedMessages(consumer, positions);\n        }",
+              "excerpt_sha256": "a0cd76c7c18a8165dfbb8863baca7b6a9620c40e7bbe8691f45fed656ca08b6c",
+              "claim": "A assinatura delega o pedido de redelivery ao seu dispatcher."
+            }
+          ],
+          "license": {
+            "repo": "apache/pulsar",
+            "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:12.050080+00:00",
+            "sha256": "8ba56c6b25c502a185d6f7059946e2f517774452c8ea7f621e05cefeff2c3cc2",
+            "line_count": 239,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7cda87499031ca9770c23bee3dc49293f8738ee32db9f2bfb0f8fcf3d58b49f1.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "apache/pulsar",
+          "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+          "path": "pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java",
+          "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:20:12.000221+00:00",
+          "sha256": "a36b75da63e54df4af2bd941ad0cff5fba19feaf9a5122bf5bf9f73254d7b12a",
+          "line_count": 1554,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/b34c172effa5e1e328903c00b4ec0a8d7760d3f0bb8b37a2c60c6e2eadf8ff55.txt",
+          "evidence": [
+            {
+              "start_line": 243,
+              "end_line": 275,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java#L243-L275",
+              "excerpt": "    public synchronized void removeConsumer(Consumer consumer) throws BrokerServiceException {\n        if (removeConsumerInstance(consumer)) {\n            // decrement unack-message count for removed consumer. Only the removal that actually\n            // unregisters the consumer may debit it, otherwise removing an already-removed consumer\n            // debits the same messages again and drives the subscription counter negative.\n            addUnAckedMessages(-consumer.getUnackedMessages());\n            removeConsumerInstanceFromList(consumer);\n            log.info()\n                    .attr(\"consumer\", consumer)\n                    .attr(\"pendingAcks\", consumer.getPendingAcks().size())\n                    .log(\"Removed consumer with pending acks\");\n            if (consumerList.isEmpty()) {\n                clearComponentsAfterRemovedAllConsumers();\n            } else {\n                log.debug(\"Consumers are left, reading more entries\");\n                MutableBoolean notifyAddedToReplay = new MutableBoolean(false);\n                consumer.getPendingAcks().forEachAndClose((ledgerId, entryId, batchSize, stickyKeyHash) -> {\n                    boolean addedToReplay = addMessageToReplay(ledgerId, entryId, stickyKeyHash);\n                    if (addedToReplay) {\n                        notifyAddedToReplay.setTrue();\n                    }\n                });\n                // Restore the invariant that the dispatcher total equals the sum of the removal balances of the\n                // remaining consumers. Exclude Flow permits that have not updated the dispatcher total yet.\n                int availablePermits = consumer.getAvailablePermitsForDispatcherRemoval();\n                totalAvailablePermits -= availablePermits;\n                log.debug()\n                        .attr(\"availablePermits\", availablePermits)\n                        .attr(\"totalAvailablePermits\", totalAvailablePermits)\n                        .log(\"Decreased totalAvailablePermits\");\n                if (notifyAddedToReplay.booleanValue()) {\n                    notifyRedeliveryMessageAdded();\n                }",
+              "excerpt_sha256": "b603411b9dddde73824890b32a924adb84a85fe20f7336fe6ad5093ade5846b3",
+              "claim": "A saída de um consumidor recoloca seus pending acks no replay quando há outros consumidores."
+            },
+            {
+              "start_line": 405,
+              "end_line": 420,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java#L405-L420",
+              "excerpt": "            Set<Position> messagesToReplayNow =\n                    canReplayMessages() ? getMessagesToReplayNow(messagesToRead, bytesToRead) : Collections.emptySet();\n            if (!messagesToReplayNow.isEmpty()) {\n                log.debug()\n                        .attr(\"messagesToReplay\", messagesToReplayNow.size())\n                        .attr(\"consumerCount\", consumerList.size())\n                        .log(\"Schedule replay of messages for consumers\");\n                havePendingReplayRead = true;\n                updateMinReplayedPosition();\n                onReadStarted(ReadType.Replay);\n                Set<? extends Position> deletedMessages = topic.isDelayedDeliveryEnabled()\n                        ? asyncReplayEntriesInOrder(messagesToReplayNow)\n                        : asyncReplayEntries(messagesToReplayNow);\n                // clear already acked positions from replay bucket\n                deletedMessages.forEach(position -> redeliveryMessages.remove(position.getLedgerId(),\n                        position.getEntryId()));",
+              "excerpt_sha256": "ab7b7fb7eee72a8a916e286f0d68e935056e321c3656ef45c940a6f534ae80fa",
+              "claim": "As posições de replay alimentam uma nova leitura de mensagens."
+            },
+            {
+              "start_line": 621,
+              "end_line": 627,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java#L621-L627",
+              "excerpt": "    protected Set<? extends Position> asyncReplayEntries(Set<? extends Position> positions) {\n        return cursor.asyncReplayEntries(positions, this, ReadType.Replay);\n    }\n\n    protected Set<? extends Position> asyncReplayEntriesInOrder(Set<? extends Position> positions) {\n        return cursor.asyncReplayEntries(positions, this, ReadType.Replay, true);\n    }",
+              "excerpt_sha256": "14c6ddcd229b4a4b5caadeb8dc79b0da7f55cadc35a3161488bb2f26bbd31668",
+              "claim": "O cursor recebe a chamada asyncReplayEntries."
+            },
+            {
+              "start_line": 909,
+              "end_line": 926,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java#L909-L926",
+              "excerpt": "\n            EntryBatchSizes batchSizes = EntryBatchSizes.get(entriesForThisConsumer.size());\n            EntryBatchIndexesAcks batchIndexesAcks = EntryBatchIndexesAcks.get(entriesForThisConsumer.size());\n\n            totalEntries += filterEntriesForConsumer(metadataArray, start,\n                    entriesForThisConsumer, batchSizes, sendMessageInfo, batchIndexesAcks, cursor,\n                    readType == ReadType.Replay, c);\n            totalEntriesProcessed += entriesForThisConsumer.size();\n            // read before sendMessages: it hands batchIndexesAcks to the consumer's event loop, which recycles it\n            int totalAckedIndexCount = batchIndexesAcks.getTotalAckedIndexCount();\n\n            c.sendMessages(entriesForThisConsumer, batchSizes, batchIndexesAcks, sendMessageInfo.getTotalMessages(),\n                    sendMessageInfo.getTotalBytes(), sendMessageInfo.getTotalChunkedMessages(), redeliveryTracker);\n\n            int msgSent = sendMessageInfo.getTotalMessages();\n            remainingMessages -= msgSent;\n            start += maxEntriesInThisBatch;\n            entriesToDispatch -= maxEntriesInThisBatch;",
+              "excerpt_sha256": "f4ad791005f8782e82f6a0604f0365312e3bcbcbb42da2e49650c5c16b54e595",
+              "claim": "O dispatcher reenvia as entradas ao consumidor selecionado."
+            },
+            {
+              "start_line": 1185,
+              "end_line": 1219,
+              "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java#L1185-L1219",
+              "excerpt": "    public synchronized void redeliverUnacknowledgedMessages(Consumer consumer, long consumerEpoch) {\n        log.debug()\n                .attr(\"consumer\", consumer)\n                .attr(\"redeliveryMessages\", redeliveryMessages)\n                .log(\"- Redelivering unacknowledged messages for consumer\");\n        MutableBoolean addedToReplay = new MutableBoolean(false);\n        consumer.getPendingAcks().forEach((ledgerId, entryId, batchSize, stickyKeyHash) -> {\n            if (addMessageToReplay(ledgerId, entryId, stickyKeyHash)) {\n                redeliveryTracker.incrementAndGetRedeliveryCount((PositionFactory.create(ledgerId, entryId)));\n                addedToReplay.setTrue();\n            }\n        });\n        if (addedToReplay.booleanValue()) {\n            notifyRedeliveryMessageAdded();\n        }\n    }\n\n    @Override\n    public synchronized void redeliverUnacknowledgedMessages(Consumer consumer, List<Position> positions) {\n        log.debug()\n                .attr(\"consumer\", consumer)\n                .attr(\"positions\", positions)\n                .log(\"- Redelivering unacknowledged messages for consumer\");\n        MutableBoolean addedToReplay = new MutableBoolean(false);\n        positions.forEach(position -> {\n            // TODO: We want to pass a sticky key hash as a third argument to guarantee the order of the messages\n            // on Key_Shared subscription, but it's difficult to get the sticky key here\n            if (addMessageToReplay(position.getLedgerId(), position.getEntryId())) {\n                redeliveryTracker.incrementAndGetRedeliveryCount(position);\n                addedToReplay.setTrue();\n            }\n        });\n        if (addedToReplay.booleanValue()) {\n            notifyRedeliveryMessageAdded();\n        }",
+              "excerpt_sha256": "393c9c7e56e7f2329cc822f0d338c080941340a41ec0b9e89992dab3537befcd",
+              "claim": "O pedido de redelivery acrescenta posições pendentes e notifica o dispatcher."
+            }
+          ],
+          "license": {
+            "repo": "apache/pulsar",
+            "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/apache/pulsar/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:20:12.050080+00:00",
+            "sha256": "8ba56c6b25c502a185d6f7059946e2f517774452c8ea7f621e05cefeff2c3cc2",
+            "line_count": 239,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7cda87499031ca9770c23bee3dc49293f8738ee32db9f2bfb0f8fcf3d58b49f1.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        }
+      ],
+      "primary_documentation": [
+        {
+          "url": "https://pulsar.apache.org/docs/next/concepts-messaging/#message-redelivery",
+          "claim": "A documentação distingue ACK, redelivery por timeout, falha de consumidor, backlog e expiração; a prova decisiva usa o código fixado.",
+          "access_method": "web.open/find in this research phase; the next documentation is contextual, not a claimed versioned runtime receipt."
+        }
+      ]
+    }
+  ],
+  "frozen_files_mutated": false,
+  "review_boundary": "Independent verdict remains owned by /root/curation_independent."
+}

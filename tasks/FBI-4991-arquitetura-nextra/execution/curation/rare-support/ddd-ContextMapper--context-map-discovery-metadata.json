@@ -1,0 +1,14 @@
+{
+  "repository": "ContextMapper/context-map-discovery",
+  "default_branch": "master",
+  "sha": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "description": "A Reverse Engineering Library to Generate CML Context Maps from Existing Source",
+  "observed_utc": "2026-10-15T02:06:09.474884+00:00"
+}

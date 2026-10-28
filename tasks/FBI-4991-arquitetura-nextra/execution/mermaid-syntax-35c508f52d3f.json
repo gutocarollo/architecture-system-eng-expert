@@ -1,0 +1,1891 @@
+{
+  "observed_at": "2026-10-15T03:52:12.884Z",
+  "parser_self_test": "PASS",
+  "syntax_only": true,
+  "module_sha256": "8937e64a0bc872c0c908cf8e432511c6ec63720213b54aae32ff46cd9ee56e16",
+  "blocks_total": 94,
+  "blocks": [
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/api-integration/index.mdx",
+      "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/api-integration/index.mdx",
+      "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+      "fence_index": 2,
+      "line_start": 58,
+      "source_sha256": "32db76f76373a4efa0da118cb1dc980e54ee4e919ee6c0ce9bcc9b0d38dc81bb",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "32db76f76373a4efa0da118cb1dc980e54ee4e919ee6c0ce9bcc9b0d38dc81bb"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "32db76f76373a4efa0da118cb1dc980e54ee4e919ee6c0ce9bcc9b0d38dc81bb"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/api-integration/index.mdx",
+      "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+      "fence_index": 3,
+      "line_start": 94,
+      "source_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "fence_index": 1,
+      "line_start": 22,
+      "source_sha256": "b8ed0e4a799e477e9e774181eadd67f0ea7bebbd26aa96c0b03689135789ae09",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "b8ed0e4a799e477e9e774181eadd67f0ea7bebbd26aa96c0b03689135789ae09"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "b8ed0e4a799e477e9e774181eadd67f0ea7bebbd26aa96c0b03689135789ae09"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "fence_index": 2,
+      "line_start": 46,
+      "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "fence_index": 3,
+      "line_start": 59,
+      "source_sha256": "eecbec62887bf56eca7d94f837f121a2ed93f5596cccedda41d793053f274685",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "eecbec62887bf56eca7d94f837f121a2ed93f5596cccedda41d793053f274685"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "eecbec62887bf56eca7d94f837f121a2ed93f5596cccedda41d793053f274685"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "fence_index": 4,
+      "line_start": 85,
+      "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "fence_index": 5,
+      "line_start": 114,
+      "source_sha256": "ffe58dadfe859bbaafea505c6bda5bb370b75794d1504a7ee42e8e5e3d8fa0e3",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ffe58dadfe859bbaafea505c6bda5bb370b75794d1504a7ee42e8e5e3d8fa0e3"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "ffe58dadfe859bbaafea505c6bda5bb370b75794d1504a7ee42e8e5e3d8fa0e3"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "fence_index": 6,
+      "line_start": 129,
+      "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "fence_index": 1,
+      "line_start": 22,
+      "source_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "fence_index": 2,
+      "line_start": 48,
+      "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "fence_index": 3,
+      "line_start": 93,
+      "source_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "fence_index": 4,
+      "line_start": 131,
+      "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "fence_index": 1,
+      "line_start": 22,
+      "source_sha256": "2aa8db08e05f013bc4306c82d3576157859c57a207b142516a3f1c5661edd35c",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2aa8db08e05f013bc4306c82d3576157859c57a207b142516a3f1c5661edd35c"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "2aa8db08e05f013bc4306c82d3576157859c57a207b142516a3f1c5661edd35c"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "fence_index": 2,
+      "line_start": 58,
+      "source_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "fence_index": 3,
+      "line_start": 84,
+      "source_sha256": "c01d88a7d10adae928b88206221179a9c90e6a7a27a614405e2a27f7dc8cbff2",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "c01d88a7d10adae928b88206221179a9c90e6a7a27a614405e2a27f7dc8cbff2"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "c01d88a7d10adae928b88206221179a9c90e6a7a27a614405e2a27f7dc8cbff2"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "fence_index": 4,
+      "line_start": 116,
+      "source_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "c8da31eb15e34278f65f71aa34894503ffb3c437c62da0a23834b5ed3476ba42",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "c8da31eb15e34278f65f71aa34894503ffb3c437c62da0a23834b5ed3476ba42"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "c8da31eb15e34278f65f71aa34894503ffb3c437c62da0a23834b5ed3476ba42"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "fence_index": 2,
+      "line_start": 49,
+      "source_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "fence_index": 3,
+      "line_start": 93,
+      "source_sha256": "f333c0aa7d1e326d7d3bde909225e2cd245ae9829dd57b0e8ca105f2f669fc99",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "f333c0aa7d1e326d7d3bde909225e2cd245ae9829dd57b0e8ca105f2f669fc99"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "f333c0aa7d1e326d7d3bde909225e2cd245ae9829dd57b0e8ca105f2f669fc99"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "fence_index": 4,
+      "line_start": 117,
+      "source_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "fence_index": 5,
+      "line_start": 148,
+      "source_sha256": "ecd020f58e4ecaeb739a0c5c8678df69376a68fb6d5af331ac368c8dc1a0d143",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ecd020f58e4ecaeb739a0c5c8678df69376a68fb6d5af331ac368c8dc1a0d143"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "ecd020f58e4ecaeb739a0c5c8678df69376a68fb6d5af331ac368c8dc1a0d143"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/access-policy/index.mdx",
+      "document_sha256": "c38e421bcf2d5574ac22a1940230f687fb8dbbf9e26527d5ca32e12965bf89b8",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/airflow-lock-retry/index.mdx",
+      "document_sha256": "e4a952446236f026cc5f710286fed053ecc2e0c036fc1f6b5730d1e6ec8f559b",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/cache-policy/index.mdx",
+      "document_sha256": "ff960e8095f0515230a8f2946f429030ea6659c52033b06dce763e3cd65fec25",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "98baba5d9ce4cf1214e48e75fa3c4f4018a111706263895028c935bcac6bdd3d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "98baba5d9ce4cf1214e48e75fa3c4f4018a111706263895028c935bcac6bdd3d"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "98baba5d9ce4cf1214e48e75fa3c4f4018a111706263895028c935bcac6bdd3d"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/consensus/index.mdx",
+      "document_sha256": "942512b4ae79d96f96b0e62c22226adef15ee45188b6191bd8e1806cc81ce750",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/date-only/index.mdx",
+      "document_sha256": "61482e552c25c5094b5aa6d0189b85eef7ad1f0b0a3826928a621916d9921454",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "692b1452171a642e705d0b0349d69e50fd0ecc3c7671f98f5147814f98945d0d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "692b1452171a642e705d0b0349d69e50fd0ecc3c7671f98f5147814f98945d0d"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "692b1452171a642e705d0b0349d69e50fd0ecc3c7671f98f5147814f98945d0d"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/diagnostics/index.mdx",
+      "document_sha256": "c062c1456a037844f0e44e8027c5241e8ab7f00b5e9404c2868d0cdfee1fa4c4",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/early-refresh/index.mdx",
+      "document_sha256": "f9ac95ec12625770cb5f3ec68cd9767664aec2ca5a7c6980ccbea56c3b56e4a4",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "f0a0a3c59f3b737095ef3583ca1d7408c7c93bfe32aeb2a81afffa57ec6e2153",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "f0a0a3c59f3b737095ef3583ca1d7408c7c93bfe32aeb2a81afffa57ec6e2153"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "f0a0a3c59f3b737095ef3583ca1d7408c7c93bfe32aeb2a81afffa57ec6e2153"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/ledger-projection/index.mdx",
+      "document_sha256": "25fd1903aa70d88669cae9cb54e8a2e0d25944c4f2dcb79d7cefa16beab13e74",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/opportunity-entry/index.mdx",
+      "document_sha256": "b613139a97f583a38306f5fee68a41dbad4de3c88a8f6ddc1e0b9696d926fe11",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "fe64816589e6f1ace1e9a0e8b1aff534e95f335b9fa4c07447a2100fe2f06bf8",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "fe64816589e6f1ace1e9a0e8b1aff534e95f335b9fa4c07447a2100fe2f06bf8"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "fe64816589e6f1ace1e9a0e8b1aff534e95f335b9fa4c07447a2100fe2f06bf8"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/order-boundaries/index.mdx",
+      "document_sha256": "4d5dc484c87cb62673d6d0b62a1b434abed38ff9009e0b8844d963d2eea46232",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/order-delivery/index.mdx",
+      "document_sha256": "160e503736eb4cb31e4f65912f94bc574aef9d0c373a1fe95423ba6935ab5d78",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "d404918dac26c1741fc9ee5b37d387ffa7edc80a4d2de78a7fbfa35f16cb0c44",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d404918dac26c1741fc9ee5b37d387ffa7edc80a4d2de78a7fbfa35f16cb0c44"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "d404918dac26c1741fc9ee5b37d387ffa7edc80a4d2de78a7fbfa35f16cb0c44"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/query-grain-postgres/index.mdx",
+      "document_sha256": "f207f19d948104b50ba03fa5b2d0fa369f829d9fdd1cb1614ad6dea14229fae1",
+      "fence_index": 1,
+      "line_start": 16,
+      "source_sha256": "4c3ded42b140641ea69f2779ebbb56a66f3561dce85d4047288e86d93b2ffc77",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "4c3ded42b140641ea69f2779ebbb56a66f3561dce85d4047288e86d93b2ffc77"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "4c3ded42b140641ea69f2779ebbb56a66f3561dce85d4047288e86d93b2ffc77"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/queue-workflow/index.mdx",
+      "document_sha256": "2a254250d96b29a1ec12a8afed3b29ab4472c98d0d1c3a3bf58a929f6fda1cb0",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/reservation/index.mdx",
+      "document_sha256": "d54ae4b1433243cf3b6bb69571f163de36d56547c8e71f6f1e6b15198c63e4e9",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "494850f082978d0a95db54e7f4f5101f14d490549f87ac4f8fa11be2c81b46e2",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "494850f082978d0a95db54e7f4f5101f14d490549f87ac4f8fa11be2c81b46e2"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "494850f082978d0a95db54e7f4f5101f14d490549f87ac4f8fa11be2c81b46e2"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/revision-cas-postgres/index.mdx",
+      "document_sha256": "2835f761a468a3ea804d16965818a0330f09420fac5fa4d7265bfd079cf1f362",
+      "fence_index": 1,
+      "line_start": 16,
+      "source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/safe-release/index.mdx",
+      "document_sha256": "b2a27050fe08d62a4707ee7922ea58610eb9464ce0d30ad47c2902ea2b7c86a4",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "document_sha256": "2235302b3237c994f2ff678b8807493bdfa57b01881cc2e6390a158f2302ca7a",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "870da4dc8cf9a705e44abbbc49bd5c41b6146593c9d77be96569fb107a0f0034",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "870da4dc8cf9a705e44abbbc49bd5c41b6146593c9d77be96569fb107a0f0034"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "870da4dc8cf9a705e44abbbc49bd5c41b6146593c9d77be96569fb107a0f0034"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/storage-partitions/index.mdx",
+      "document_sha256": "84e5fd9b484a6d65153624ca84fdf367eab3c516093e50d56739f74667739398",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "fence_index": 2,
+      "line_start": 65,
+      "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "fence_index": 3,
+      "line_start": 97,
+      "source_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "fence_index": 4,
+      "line_start": 120,
+      "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "fence_index": 5,
+      "line_start": 151,
+      "source_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "fence_index": 6,
+      "line_start": 175,
+      "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "fence_index": 7,
+      "line_start": 198,
+      "source_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+      "fence_index": 1,
+      "line_start": 77,
+      "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+      "fence_index": 2,
+      "line_start": 128,
+      "source_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+      "fence_index": 3,
+      "line_start": 149,
+      "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/concurrency/index.mdx",
+      "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+      "fence_index": 1,
+      "line_start": 32,
+      "source_sha256": "70c3413069072c222438965e7d39e81249c0c2a1d33bc856a1cc01f385848a04",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "70c3413069072c222438965e7d39e81249c0c2a1d33bc856a1cc01f385848a04"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "70c3413069072c222438965e7d39e81249c0c2a1d33bc856a1cc01f385848a04"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/concurrency/index.mdx",
+      "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+      "fence_index": 2,
+      "line_start": 63,
+      "source_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "fence_index": 2,
+      "line_start": 37,
+      "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "fence_index": 3,
+      "line_start": 61,
+      "source_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "fence_index": 4,
+      "line_start": 94,
+      "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "fence_index": 2,
+      "line_start": 43,
+      "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "fence_index": 3,
+      "line_start": 61,
+      "source_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "fence_index": 4,
+      "line_start": 89,
+      "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/distributed-work/index.mdx",
+      "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/distributed-work/index.mdx",
+      "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+      "fence_index": 2,
+      "line_start": 70,
+      "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "fence_index": 1,
+      "line_start": 26,
+      "source_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "fence_index": 2,
+      "line_start": 47,
+      "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "fence_index": 3,
+      "line_start": 75,
+      "source_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "fence_index": 4,
+      "line_start": 109,
+      "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "fence_index": 5,
+      "line_start": 134,
+      "source_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/observability/index.mdx",
+      "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+      "fence_index": 1,
+      "line_start": 30,
+      "source_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/observability/index.mdx",
+      "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+      "fence_index": 2,
+      "line_start": 72,
+      "source_sha256": "23078a287ca4a10a47bd2b4b1b25bcd683c4bdce551db019d925ca685038873a",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "23078a287ca4a10a47bd2b4b1b25bcd683c4bdce551db019d925ca685038873a"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "23078a287ca4a10a47bd2b4b1b25bcd683c4bdce551db019d925ca685038873a"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "fence_index": 2,
+      "line_start": 52,
+      "source_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "fence_index": 3,
+      "line_start": 82,
+      "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "fence_index": 4,
+      "line_start": 97,
+      "source_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "fence_index": 1,
+      "line_start": 22,
+      "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "fence_index": 2,
+      "line_start": 48,
+      "source_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "fence_index": 3,
+      "line_start": 82,
+      "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "fence_index": 4,
+      "line_start": 103,
+      "source_sha256": "0ff8488de2b1999055352402198880539bf611ee3a56617d71b371788afde22b",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "0ff8488de2b1999055352402198880539bf611ee3a56617d71b371788afde22b"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "0ff8488de2b1999055352402198880539bf611ee3a56617d71b371788afde22b"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "fence_index": 2,
+      "line_start": 42,
+      "source_sha256": "1dcd4775735b86f0671ffa1c2db397c029d9e3c16de41ac026bb4e695c7f5866",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "1dcd4775735b86f0671ffa1c2db397c029d9e3c16de41ac026bb4e695c7f5866"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "1dcd4775735b86f0671ffa1c2db397c029d9e3c16de41ac026bb4e695c7f5866"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "fence_index": 3,
+      "line_start": 66,
+      "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "fence_index": 4,
+      "line_start": 87,
+      "source_sha256": "8908c7b14ac9dc63eda70aa6014c1f6db4ee63bcb55812dea7a20e034b5c80c0",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "8908c7b14ac9dc63eda70aa6014c1f6db4ee63bcb55812dea7a20e034b5c80c0"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "8908c7b14ac9dc63eda70aa6014c1f6db4ee63bcb55812dea7a20e034b5c80c0"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "fence_index": 5,
+      "line_start": 107,
+      "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/security/index.mdx",
+      "document_sha256": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "b7dfc92e4153777fa7c644a8eb5f9ddd0a690acb00e3d83de7da0158e2993e5b",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "b7dfc92e4153777fa7c644a8eb5f9ddd0a690acb00e3d83de7da0158e2993e5b"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "b7dfc92e4153777fa7c644a8eb5f9ddd0a690acb00e3d83de7da0158e2993e5b"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/security/index.mdx",
+      "document_sha256": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+      "fence_index": 2,
+      "line_start": 61,
+      "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/workflow/index.mdx",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "fence_index": 1,
+      "line_start": 30,
+      "source_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/workflow/index.mdx",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "fence_index": 2,
+      "line_start": 56,
+      "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/workflow/index.mdx",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "fence_index": 3,
+      "line_start": 86,
+      "source_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/investigar-impacto.mdx",
+      "document_sha256": "6a936ddbbe4b3fe330ddc1654b3c8520f103d61bd18144b769e9507b8a70324c",
+      "fence_index": 1,
+      "line_start": 116,
+      "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/idempotency.mdx",
+      "document_sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+      "fence_index": 1,
+      "line_start": 82,
+      "source_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/optimistic-concurrency.mdx",
+      "document_sha256": "f8de20c0e3249b2bcf075f4cc4765581f810feff6e3a94f4430d1e5ae3f580ec",
+      "fence_index": 1,
+      "line_start": 79,
+      "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/outbox.mdx",
+      "document_sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+      "fence_index": 1,
+      "line_start": 101,
+      "source_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/read-projection.mdx",
+      "document_sha256": "5821c113f9b8fa07790b34a8efa0748742d024b4e6ce5ec49bc4a194aea63fd7",
+      "fence_index": 1,
+      "line_start": 91,
+      "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/single-flight.mdx",
+      "document_sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+      "fence_index": 1,
+      "line_start": 141,
+      "source_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/state-machine.mdx",
+      "document_sha256": "2b174b3488d04994be136f1d4652dae9baff8c964c4bfc508bce6695a62db985",
+      "fence_index": 1,
+      "line_start": 86,
+      "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80"
+      },
+      "render": {
+        "status": "NOT_RUN",
+        "tool": "none",
+        "version": "none",
+        "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80"
+      },
+      "semantic_review": "NOT_RUN"
+    }
+  ],
+  "errors": [],
+  "status": "PASS"
+}

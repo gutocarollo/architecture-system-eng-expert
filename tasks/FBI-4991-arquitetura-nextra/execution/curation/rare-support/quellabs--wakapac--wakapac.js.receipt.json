@@ -1,0 +1,12 @@
+{
+  "repo": "quellabs/wakapac",
+  "path": "wakapac.js",
+  "revision": "2f0746785c42b22f6fcd5d7f30ddc125ee281fe9",
+  "url": "https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/wakapac.js",
+  "raw_url": "https://raw.githubusercontent.com/quellabs/wakapac/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/wakapac.js",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:46:55.916149+00:00",
+  "sha256": "d4ab5945275a56e1efe97ef0845b9b6241c97551f07b860769a889ac81507484",
+  "line_count": 12766,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/quellabs--wakapac--wakapac.js"
+}

@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "pkg/bootstrap/instance.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/bootstrap/instance.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/bootstrap/instance.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--bootstrap--instance.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T04:11:05.236359+00:00",
+  "sha256": "269715cd0b3245851f132c4948e826a26c9ab0e5f907a07c50854790fcd9f7c8",
+  "line_count": 153,
+  "source": "raw_primary"
+}

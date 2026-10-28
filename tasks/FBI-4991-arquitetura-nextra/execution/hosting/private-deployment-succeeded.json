@@ -1,0 +1,15 @@
+{
+  "id": "appgdep_6ad110f579848191a6e4b00873d9521b",
+  "project_id": "appgprj_6ad10a8b63b081919c3eabac313e64ab",
+  "title": "Arquitetura na prática — Faz Capital",
+  "version_id": "appgprj_6ad10a8b63b081919c3eabac313e64ab~appgver_f1b7e33689f88191bb6225e7aad6acd1",
+  "type": "publish",
+  "status": "succeeded",
+  "url": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+  "has_mcp": false,
+  "screenshot_asset_pointer": null,
+  "provider_deployment_id": "site---6ad10a8b63b081919c3eabac313e64ab",
+  "failure_message": null,
+  "env_set_revision": 3,
+  "updated_at": "2026-10-15T17:44:40.179401+00:00"
+}

@@ -1,0 +1,13 @@
+{
+  "repo": "spring-projects/spring-security",
+  "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+  "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java",
+  "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java",
+  "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--TokenExchangeGrantRequest.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.777173+00:00",
+  "sha256": "c7cf109f089fd20f47763f66da74eae33519825f7cad181d1b8e63ea9a61706b",
+  "line_count": 119,
+  "source": "raw_primary"
+}

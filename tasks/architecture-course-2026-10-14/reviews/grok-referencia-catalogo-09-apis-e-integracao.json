@@ -1,0 +1,16 @@
+{
+  "document_id": "referencia/catalogo/09-apis-e-integracao",
+  "document_sha256": "ca5b9544200e552fa75b32e3dd84620ab709726b76e5fdbc6a031560c760d6cc",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "s5",
+    "l5c",
+    "original-request"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "context_sha256": "d6b691ad58186912358c476b03cf3b83d6b76cf696c36802e3620f4a56f6f705"
+}

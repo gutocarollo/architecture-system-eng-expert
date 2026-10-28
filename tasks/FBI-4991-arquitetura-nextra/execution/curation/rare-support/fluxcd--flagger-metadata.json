@@ -1,0 +1,13 @@
+{
+  "repository": "fluxcd/flagger",
+  "default_branch": "main",
+  "sha": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "observed_utc": "2026-10-15T01:42:43.698262+00:00"
+}

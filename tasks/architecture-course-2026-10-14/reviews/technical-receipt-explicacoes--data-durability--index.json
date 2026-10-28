@@ -1,0 +1,21 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "explicacoes/data-durability/index",
+  "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+  "context_sha256": "2f08928ddcf3aa3ead500638f3d27c9d1bbb3b50b8a938a0f7d3ede4df754f41",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "l4c",
+    "l6a",
+    "original-catalog",
+    "original-request",
+    "s4",
+    "s4-reference-repair",
+    "s6",
+    "s6-reference-repair"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "observed_utc": "2026-10-15T01:58:27.012147+00:00",
+  "cwd": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/space-based-reassessment.json",
+  "sha256": "2d32823010bf391c567727d7c343fab18514126e67be217378ccf8072ebe0669",
+  "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_BOUNDED_INFRASTRUCTURE",
+  "product_revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+  "source_count": 9
+}

@@ -1,0 +1,700 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-15T02:26:00.756101+00:00",
+  "scope": "Follow-on delimitado a Customer/Supplier e Conformist.",
+  "rows": [
+    {
+      "concept_id": "customer-supplier",
+      "decision": "RECOMMEND_SOURCE_MATCH_NOVA_NEUTRON_LIVE_MIGRATION_BINDINGS",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "supersedes": "A conclusão KEEP_PENDING_ORGANIZATIONAL_CONTRACT da linha Customer/Supplier no pacote ddd-patterns-evidence.json; o novo caso é Nova/Neutron, não thndr-mcp.",
+      "bounded_relationship": {
+        "customer_downstream": "Nova, contexto de computação e migração de instâncias.",
+        "supplier_upstream": "Neutron, contexto de redes e vínculos de portas.",
+        "model_owner": "Neutron controla o sub-recurso bindings, seu estado ativo/inativo e a ação activate, publicados por neutron-lib.",
+        "customer_control": "Nova controla quando preparar o destino, iniciar a migração, ativar o vínculo e realizar rollback; o plano Neutron prevê atender os caminhos de rollback que Nova decidir implementar."
+      },
+      "mechanism": "Nova precisava conhecer a ligação de rede do destino antes de mover a instância, preservando a ligação ativa na origem. A proposta do Neutron transformou essa necessidade em mudanças de API, modelo de dados e ML2, com responsável e plano de testes. O RFE correspondente registra Fix Released. A especificação aprovada do Nova prevê a adoção da API. No código atual, o conductor prepara as portas no destino; o cliente cria o binding por host e depois pede sua ativação. O Neutron cria o segundo vínculo como inativo, preserva o ativo e oferece a ação que troca a ligação selecionada. Assim, há uma necessidade downstream incorporada ao plano e ao contrato do fornecedor, além de chamadas entre serviços.",
+      "limits": "A interpretação Customer/Supplier vale para essa evolução histórica de port binding para migração. Não caracteriza toda a governança OpenStack nem prova execução em produção. A proposta Neutron encontrada está hoje em backlog/pike; não foi tratada como uma especificação Rocky aprovada. O pedido concluído, o plano aprovado do Nova e a implementação atual constituem as provas adicionais. A sintaxe publicada evoluiu: o código atual usa host, enquanto trechos antigos da proposta usam host_id.",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "openstack/neutron-lib",
+          "path": "neutron_lib/api/definitions/portbindings_extended.py",
+          "revision": "6893d1d8c22bac71813422563beb9374e3b902e0",
+          "url": "https://github.com/openstack/neutron-lib/blob/6893d1d8c22bac71813422563beb9374e3b902e0/neutron_lib/api/definitions/portbindings_extended.py",
+          "raw_url": "https://raw.githubusercontent.com/openstack/neutron-lib/6893d1d8c22bac71813422563beb9374e3b902e0/neutron_lib/api/definitions/portbindings_extended.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:21:33.429137+00:00",
+          "sha256": "5ee66cd9b774faa60c6ed8ddcd627f43835244af22bb09a1e410a5d104b34667",
+          "line_count": 132,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron-lib--neutron_lib--api--definitions--portbindings_extended.py",
+          "claim": "A biblioteca pública define o contrato que o fornecedor mantém: binding-extended, host, status e activate por PUT.",
+          "evidence": [
+            {
+              "start_line": 47,
+              "end_line": 68,
+              "url": "https://github.com/openstack/neutron-lib/blob/6893d1d8c22bac71813422563beb9374e3b902e0/neutron_lib/api/definitions/portbindings_extended.py#L47-L68",
+              "excerpt": "47: # Name of the extension\n48: NAME = \"Port Bindings Extended\"\n49: \n50: # Extension alias\n51: ALIAS = 'binding-extended'\n52: \n53: # Extension description\n54: DESCRIPTION = \"Expose port bindings of a virtual port to external application\"\n55: \n56: # Action name for activating a port binding\n57: ACTIVATE_BINDING = 'activate'\n58: \n59: # Timestamp of last update of this extension\n60: UPDATED_TIMESTAMP = \"2017-07-17T10:00:00-00:00\"\n61: \n62: # Extension attributes\n63: HOST = 'host'\n64: VIF_TYPE = 'vif_type'\n65: VIF_DETAILS = 'vif_details'\n66: VNIC_TYPE = 'vnic_type'\n67: PROFILE = 'profile'\n68: STATUS = 'status'"
+            },
+            {
+              "start_line": 75,
+              "end_line": 85,
+              "url": "https://github.com/openstack/neutron-lib/blob/6893d1d8c22bac71813422563beb9374e3b902e0/neutron_lib/api/definitions/portbindings_extended.py#L75-L85",
+              "excerpt": "75: SUB_RESOURCE_ATTRIBUTE_MAP: SubResourceAttributeMap = {\n76:     COLLECTION_NAME: {\n77:         'parent': {\n78:             'collection_name': PARENT_COLLECTION_NAME,\n79:             'member_name': PARENT_RESOURCE_NAME},\n80:         'parameters': {\n81:             HOST: {'allow_post': True, 'allow_put': True,\n82:                    'is_visible': True, 'primary_key': True,\n83:                    'is_filter': True},\n84:             VIF_TYPE: {'allow_post': False, 'allow_put': False,\n85:                        'default': constants.ATTR_NOT_SPECIFIED,"
+            },
+            {
+              "start_line": 104,
+              "end_line": 120,
+              "url": "https://github.com/openstack/neutron-lib/blob/6893d1d8c22bac71813422563beb9374e3b902e0/neutron_lib/api/definitions/portbindings_extended.py#L104-L120",
+              "excerpt": "104:             STATUS: {'allow_post': False, 'allow_put': False,\n105:                      'is_visible': True, 'is_filter': True},\n106:             PROJECT_ID: {'allow_post': True, 'allow_put': False,\n107:                          'required_by_policy': True,\n108:                          'validate': {\n109:                              'type:string': db_const.PROJECT_ID_FIELD_SIZE},\n110:                          'is_visible': True},\n111:         }\n112:     }\n113: }\n114: \n115: # activate is an action\n116: ACTION_MAP: ActionMap = {\n117:     RESOURCE_NAME: {\n118:         ACTIVATE_BINDING: 'PUT',\n119:     },\n120: }"
+            }
+          ],
+          "license": {
+            "repo": "openstack/neutron-lib",
+            "path": "LICENSE",
+            "revision": "6893d1d8c22bac71813422563beb9374e3b902e0",
+            "url": "https://github.com/openstack/neutron-lib/blob/6893d1d8c22bac71813422563beb9374e3b902e0/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/openstack/neutron-lib/6893d1d8c22bac71813422563beb9374e3b902e0/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:21:33.397527+00:00",
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "line_count": 176,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron-lib--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+          }
+        }
+      ],
+      "accepted_requirement_and_delivery": {
+        "url": "https://api.launchpad.net/1.0/bugs/1580880/bug_tasks",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T02:21:00.156477+00:00",
+        "sha256": "7244d27cb36caa27df81b437a6bd16fc28d43caf67e518cfa629a28297eac781",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-neutron-rfe-bug-tasks.json",
+        "scope": "Estado do item público no Launchpad, consultado nesta passada; não é estado de um serviço implantado.",
+        "task": {
+          "title": "Bug #1580880 in neutron: \"[RFE] Distributed Portbinding for all port types\"",
+          "status": "Fix Released",
+          "target_link": "https://api.launchpad.net/1.0/neutron",
+          "self_link": "https://api.launchpad.net/1.0/neutron/+bug/1580880",
+          "date_fix_released": "2019-02-10T14:31:16.224675+00:00",
+          "date_fix_committed": "2019-02-10T14:31:16.224675+00:00"
+        }
+      },
+      "design_sources": [
+        {
+          "kind": "FILE",
+          "repo": "openstack/neutron-specs",
+          "path": "specs/backlog/pike/portbinding_information_for_nova.rst",
+          "revision": "9dbe354683f2420170c694395d40901e6072c8cb",
+          "url": "https://github.com/openstack/neutron-specs/blob/9dbe354683f2420170c694395d40901e6072c8cb/specs/backlog/pike/portbinding_information_for_nova.rst",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:20:19.403631+00:00",
+          "sha256": "c589c87579fd660862729b134d14ceb4e72679eeb5068dd6b3dbae7771d59615",
+          "line_count": 788,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron-specs--specs--backlog--pike--portbinding_information_for_nova.rst",
+          "claim": "O fornecedor descreve a necessidade do cliente, deriva o trabalho, assume suporte aos caminhos de migração escolhidos pelo cliente e nomeia responsável e testes.",
+          "evidence": [
+            {
+              "start_line": 27,
+              "end_line": 46,
+              "url": "https://github.com/openstack/neutron-specs/blob/9dbe354683f2420170c694395d40901e6072c8cb/specs/backlog/pike/portbinding_information_for_nova.rst#L27-L46",
+              "excerpt": "27: \n28: Today, port binding occurs on the target compute host during migration,\n29: considered now in the post_live_migration stage.  This, unfortunately, is\n30: too late in the process as there are cases where Nova requires this\n31: information in the pre_live_migration stage.  We simply cannot move the port\n32: binding to the pre_live_migration stage as the original port binding would be\n33: deleted, causing issues due to the instance being active still on the original\n34: host.  Further details are contained in the 'Alternatives' section.\n35: \n36: Problem Description\n37: ===================\n38: \n39: For live migration improvements, it is required that Neutron allows port\n40: binding on the target compute host during the pre_live_migration stage, without\n41: removing the original port binding on the source compute.\n42: \n43: The proposal is to have a port binding on the source AND target compute hosts\n44: where only one port binding is active.  After instance migration is complete,\n45: the target port binding is activated and the source port binding is\n46: deactivated, but not deleted.  The original port binding on the source compute"
+            },
+            {
+              "start_line": 98,
+              "end_line": 150,
+              "url": "https://github.com/openstack/neutron-specs/blob/9dbe354683f2420170c694395d40901e6072c8cb/specs/backlog/pike/portbinding_information_for_nova.rst#L98-L150",
+              "excerpt": "98: \n99: Proposed Change\n100: ===============\n101: \n102: For migration, Nova will require the port binding information from the target\n103: compute during the pre_live_migration stage.  This can be achieved by allowing\n104: a compute port to be bound to the migration source and the migration target\n105: host.\n106: \n107: This can be achieved by the following steps:\n108: \n109: #1 Expand upon existing API entities under port, allowing CRUD bindings.\n110: \n111: #2 Update ML2 to support the changes.\n112: \n113: #3 Update the DB to support the changes.\n114: \n115: Usage by Nova\n116: -------------\n117: \n118: Nova will utilize the expanded API, and the potential flow is as follows:\n119: \n120: * pre_live_migration: Create the inactive binding for target host.\n121: \n122: * live_migration_operation: Use information gathered from the inactive\n123:   binding to modify the instance definition.\n124: \n125: * live_migration_operation: Once the instance is active, set the inactive\n126:   binding to active, and the previous active binding to inactive.\n127: \n128: * post_live_migration: Remove the inactive binding on the source\n129:   compute host.\n130: \n131: .. image:: /images/pike/nova-live-migration-flow.png\n132: \n133: * If rollback is performed after the instance is active on target: From a\n134:   Neutron standpoint, if the binding is active on the target host, Nova will\n135:   need to set the source binding back to active::\n136: \n137:     PUT /v2.0/ports/{port_id}/bindings/{host_id}/activate\n138: \n139: For more details on the Nova implementation , see the related Nova\n140: Blueprint `[3]`_ and its Spec `[4]`_.  Neutron will not dictate the implemented\n141: capabilities of Nova live migration and will support either path, to rollback\n142: or to not rollback.\n143: \n144: Binding API Extension for Ports\n145: -------------------------------\n146: \n147: .. _list_binding:\n148: \n149: List Bindings\n150: ~~~~~~~~~~~~~"
+            },
+            {
+              "start_line": 694,
+              "end_line": 698,
+              "url": "https://github.com/openstack/neutron-specs/blob/9dbe354683f2420170c694395d40901e6072c8cb/specs/backlog/pike/portbinding_information_for_nova.rst#L694-L698",
+              "excerpt": "694: Developer Impact\n695: ----------------\n696: \n697: Impact to Nova live migration, and is directly in support of their efforts.\n698: "
+            },
+            {
+              "start_line": 714,
+              "end_line": 725,
+              "url": "https://github.com/openstack/neutron-specs/blob/9dbe354683f2420170c694395d40901e6072c8cb/specs/backlog/pike/portbinding_information_for_nova.rst#L714-L725",
+              "excerpt": "714: Implementation\n715: ==============\n716: \n717: Assignee(s)\n718: -----------\n719: \n720: Primary assignee:\n721: * `Jakub Libosvar <https://launchpad.net/~libosvar>`_\n722: \n723: Please add your name here and attend the `ML2 Subteam Meeting\n724: <https://wiki.openstack.org/wiki/Meetings/Neutron-ML2-Subteam>`_ if you'd\n725: like to contribute."
+            },
+            {
+              "start_line": 732,
+              "end_line": 751,
+              "url": "https://github.com/openstack/neutron-specs/blob/9dbe354683f2420170c694395d40901e6072c8cb/specs/backlog/pike/portbinding_information_for_nova.rst#L732-L751",
+              "excerpt": "732: Testing\n733: =======\n734: \n735: Tempest Tests\n736: -------------\n737: \n738: Addition of a scenario test, `test_bindings.py`, to walk through the creation\n739: of a source migration instance, creation of the inactive binding on a secondary\n740: host, creation of a secondary target migration instance, activating the\n741: inactive binding, deactivating the source migration active binding, and then\n742: validating connectivity is still working.\n743: \n744: Functional Tests\n745: ----------------\n746: \n747: Additional functional tests will be added to `ml2/test_plugin.py` to expand\n748: on the current port binding tests. This will accommodate for a status check\n749: in the case of adding an inactive binding.\n750: \n751: API Tests"
+            }
+          ],
+          "license": {
+            "status": "READ_FILE_HEADER",
+            "spdx": "CC-BY-3.0",
+            "url": "https://github.com/openstack/neutron-specs/blob/9dbe354683f2420170c694395d40901e6072c8cb/specs/backlog/pike/portbinding_information_for_nova.rst#L1-L5",
+            "artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron-specs--specs--backlog--pike--portbinding_information_for_nova.rst",
+            "excerpt": "..\n This work is licensed under a Creative Commons Attribution 3.0 Unported\n License.\n\n http://creativecommons.org/licenses/by/3.0/legalcode"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "openstack/nova-specs",
+          "path": "specs/queens/approved/neutron-new-port-binding-api.rst",
+          "revision": "c4e4a56535d69ab626c3a995707f17fab07d6d75",
+          "url": "https://github.com/openstack/nova-specs/blob/c4e4a56535d69ab626c3a995707f17fab07d6d75/specs/queens/approved/neutron-new-port-binding-api.rst",
+          "raw_url": "https://raw.githubusercontent.com/openstack/nova-specs/c4e4a56535d69ab626c3a995707f17fab07d6d75/specs/queens/approved/neutron-new-port-binding-api.rst",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:21:33.369477+00:00",
+          "sha256": "a78b5ccd35d2ab1e13ba72c87d0a5538ab748ce9405fab10c7a7c8b893198ea2",
+          "line_count": 379,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--nova-specs--specs--queens--approved--neutron-new-port-binding-api.rst",
+          "claim": "O cliente tem plano aprovado de adoção, responsável, itens de trabalho e dependência explícita das mudanças do Neutron.",
+          "evidence": [
+            {
+              "start_line": 8,
+              "end_line": 15,
+              "url": "https://github.com/openstack/nova-specs/blob/c4e4a56535d69ab626c3a995707f17fab07d6d75/specs/queens/approved/neutron-new-port-binding-api.rst#L8-L15",
+              "excerpt": "8: Use Neutron's new port binding API\n9: ===================================\n10: \n11: Make use of Neutron's new port binding API in all cases where port binding\n12: occurs. In the special case of move operations, the new API will allow us to\n13: model both source and destination hosts having a port binding\n14: which is not accounted for during live migration today.\n15: "
+            },
+            {
+              "start_line": 91,
+              "end_line": 112,
+              "url": "https://github.com/openstack/nova-specs/blob/c4e4a56535d69ab626c3a995707f17fab07d6d75/specs/queens/approved/neutron-new-port-binding-api.rst#L91-L112",
+              "excerpt": "91: Proposed change\n92: ===============\n93: \n94: There is no additional configuration for deployers.\n95: The use of multiple bindings will be enabled automatically.\n96: We decide whether to use the new or old API flow, if both compute nodes\n97: support this feature and based on the available Neutron API extensions.\n98: We cache extensions support in the usual way utilizing the existing\n99: neutron_extensions_cache.\n100: \n101: Note: The new neutron API extension will be implemented in the ml2 plugin\n102: layer, above the ml2 driver layer so if the extension is exposed it will be\n103: supported for all ml2 drivers. Monolithic plugins will have to implement\n104: the extension separately and will continue to use the old workflow until\n105: their maintainers support the new neutron extension.\n106: \n107: The old interaction model should be removed when sufficient time has elapsed\n108: for all neutron backends to support this model with an aim of completing this\n109: in two cycles. We should keep this in mind in how the code is structured.\n110: Given we are also looking at removing nova-network, we should see if this can\n111: be added as a new set of network API calls, that are only for neutron, making\n112: the existing calls needed for nova-network be no-ops for Neutron."
+            },
+            {
+              "start_line": 326,
+              "end_line": 354,
+              "url": "https://github.com/openstack/nova-specs/blob/c4e4a56535d69ab626c3a995707f17fab07d6d75/specs/queens/approved/neutron-new-port-binding-api.rst#L326-L354",
+              "excerpt": "326: None\n327: \n328: Implementation\n329: ==============\n330: \n331: Assignee(s)\n332: -----------\n333: \n334: Primary assignee:\n335:   Sean Mooney (sean-k-mooney)\n336: \n337: Work Items\n338: ----------\n339: \n340: * Add the source/dest host version checks in conductor and the new\n341:   compute RPC API method for creating the port binding on the destination\n342:   host prior to initiating the live migration on the source host.\n343: * Check for the new migrate_data attribute in the various compute methods\n344:   related to live migration to determine if we are old or new flow.\n345: \n346: Dependencies\n347: ============\n348: \n349: * Neutron API changes, see spec: https://specs.openstack.org/openstack/neutron-specs/specs/pike/portbinding_information_for_nova.html\n350: \n351: Testing\n352: =======\n353: \n354: Need functional tests for the new path."
+            }
+          ],
+          "license": {
+            "status": "READ_FILE_HEADER",
+            "spdx": "CC-BY-3.0",
+            "url": "https://github.com/openstack/nova-specs/blob/c4e4a56535d69ab626c3a995707f17fab07d6d75/specs/queens/approved/neutron-new-port-binding-api.rst#L1-L5",
+            "artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--nova-specs--specs--queens--approved--neutron-new-port-binding-api.rst",
+            "excerpt": "..\n This work is licensed under a Creative Commons Attribution 3.0 Unported\n License.\n\n http://creativecommons.org/licenses/by/3.0/legalcode"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "openstack/nova",
+          "path": "nova/conductor/tasks/live_migrate.py",
+          "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+          "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/conductor/tasks/live_migrate.py",
+          "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/conductor/tasks/live_migrate.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:23:22.475178+00:00",
+          "sha256": "3a660091c537195c77e9c9ac78e7508bc1f2537b31dd738af49b58e23a9ff1bf",
+          "line_count": 615,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--nova--nova--conductor--tasks--live_migrate.py",
+          "claim": "A etapa real de migração verifica a extensão e prepara os bindings de destino antes de seguir.",
+          "evidence": [
+            {
+              "start_line": 386,
+              "end_line": 392,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/conductor/tasks/live_migrate.py#L386-L392",
+              "excerpt": "386:         # Check to see that neutron supports the binding-extended API.\n387:         if self.network_api.has_port_binding_extension(self.context):\n388:             bindings = self._bind_ports_on_destination(\n389:                 destination, provider_mapping)\n390:             self._update_migrate_vifs_from_bindings(self.migrate_data.vifs,\n391:                                                     bindings)\n392: "
+            },
+            {
+              "start_line": 403,
+              "end_line": 435,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/conductor/tasks/live_migrate.py#L403-L435",
+              "excerpt": "403:     def _bind_ports_on_destination(self, destination, provider_mappings):\n404:         LOG.debug('Start binding ports on destination host: %s', destination,\n405:                   instance=self.instance)\n406:         # Bind ports on the destination host; returns a dict, keyed by\n407:         # port ID, of a new destination host port binding dict per port\n408:         # that was bound. This information is then stuffed into the\n409:         # migrate_data.\n410:         try:\n411:             # NOTE(adrianc): migrate_data.vifs was partially filled\n412:             # by destination compute if compute is new enough.\n413:             # if that is the case, it may have updated the required port\n414:             # profile for the destination node (e.g new PCI address if SR-IOV)\n415:             # perform port binding against the requested profile\n416:             ports_profile = {}\n417:             for mig_vif in self.migrate_data.vifs:\n418:                 profile = mig_vif.profile if 'profile_json' in mig_vif else {}\n419:                 # NOTE(gibi): provider_mappings also contribute to the\n420:                 # binding profile of the ports if the port has resource\n421:                 # request. So we need to merge the profile information from\n422:                 # both sources.\n423:                 profile.update(\n424:                     self._get_port_profile_from_provider_mapping(\n425:                         mig_vif.port_id, provider_mappings))\n426:                 if profile:\n427:                     ports_profile[mig_vif.port_id] = profile\n428: \n429:             bindings = self.network_api.bind_ports_to_host(\n430:                 context=self.context, instance=self.instance, host=destination,\n431:                 vnic_types=None, port_profiles=ports_profile)\n432:         except exception.PortBindingFailed as e:\n433:             # Port binding failed for that host, try another one.\n434:             raise exception.MigrationPreCheckError(\n435:                 reason=e.format_message())"
+            }
+          ],
+          "license": {
+            "repo": "openstack/nova",
+            "path": "LICENSE",
+            "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+            "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:19:28.396497+00:00",
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "line_count": 176,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--nova--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "openstack/nova",
+          "path": "nova/network/neutron.py",
+          "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+          "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/network/neutron.py",
+          "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/network/neutron.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:19:28.482560+00:00",
+          "sha256": "dd40582cb142f6d1c698486cc003f4d144697e605b94731af903e33204496ada",
+          "line_count": 3989,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--nova--nova--network--neutron.py",
+          "claim": "O cliente detecta a extensão, cria o vínculo por host e solicita sua ativação pelo contrato do fornecedor.",
+          "evidence": [
+            {
+              "start_line": 1499,
+              "end_line": 1510,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/network/neutron.py#L1499-L1510",
+              "excerpt": "1499:     def has_port_binding_extension(self, context=None, client=None):\n1500:         \"\"\"Check if the neutron 'binding-extended' extension is enabled.\n1501: \n1502:         This extensions exposes port bindings of a virtual port to external\n1503:         application.\n1504: \n1505:         This extension allows nova to bind a port to multiple hosts at the same\n1506:         time, like during live migration.\n1507:         \"\"\"\n1508:         return self._has_extension(\n1509:             constants.PORT_BINDING_EXTENDED, context, client\n1510:         )"
+            },
+            {
+              "start_line": 1561,
+              "end_line": 1582,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/network/neutron.py#L1561-L1582",
+              "excerpt": "1561:         bindings_by_port_id: dict[str, ty.Any] = {}\n1562:         for vif in network_info:\n1563:             # Now bind each port to the destination host and keep track of each\n1564:             # port that is bound to the resulting binding so we can rollback in\n1565:             # the event of a failure, or return the results if everything is OK\n1566:             port_id = vif['id']\n1567:             binding = dict(host=host)\n1568:             if vnic_types is None or port_id not in vnic_types:\n1569:                 binding['vnic_type'] = vif['vnic_type']\n1570:             else:\n1571:                 binding['vnic_type'] = vnic_types[port_id]\n1572: \n1573:             if port_profiles is None or port_id not in port_profiles:\n1574:                 binding['profile'] = vif['profile']\n1575:             else:\n1576:                 binding['profile'] = port_profiles[port_id]\n1577: \n1578:             data = {'binding': binding}\n1579:             try:\n1580:                 binding = client.create_port_binding(port_id, data)['binding']\n1581:             except neutron_client_exc.NeutronClientException:\n1582:                 # Something failed, so log the error and rollback any"
+            },
+            {
+              "start_line": 3215,
+              "end_line": 3224,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/network/neutron.py#L3215-L3224",
+              "excerpt": "3215: \n3216:             try:\n3217:                 # This is a bit weird in that we don't PUT and update the\n3218:                 # status to ACTIVE, it's more like a POST action method in the\n3219:                 # compute API.\n3220:                 client.activate_port_binding(vif['id'], dest_host)\n3221:                 LOG.debug(\n3222:                     'Activated binding for port %s and host %s',\n3223:                     vif['id'], dest_host)\n3224:             except neutron_client_exc.NeutronClientException as exc:"
+            }
+          ],
+          "license": {
+            "repo": "openstack/nova",
+            "path": "LICENSE",
+            "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+            "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:19:28.396497+00:00",
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "line_count": 176,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--nova--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "openstack/neutron",
+          "path": "neutron/extensions/portbindings_extended.py",
+          "revision": "800aee95214df9437daa8946e1cefe37648e555d",
+          "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/neutron/extensions/portbindings_extended.py",
+          "raw_url": "https://raw.githubusercontent.com/openstack/neutron/800aee95214df9437daa8946e1cefe37648e555d/neutron/extensions/portbindings_extended.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:23:22.474775+00:00",
+          "sha256": "9918ebce71232c12d35e0712457976c1f7fa32d6d06a29674072564349ddabb3",
+          "line_count": 77,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron--neutron--extensions--portbindings_extended.py",
+          "claim": "A extensão registra os recursos e a ação pública no plugin efetivo.",
+          "evidence": [
+            {
+              "start_line": 49,
+              "end_line": 76,
+              "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/neutron/extensions/portbindings_extended.py#L49-L76",
+              "excerpt": "49:     @classmethod\n50:     def get_resources(cls):\n51:         plugin = directory.get_plugin()\n52: \n53:         params = pbe_ext.SUB_RESOURCE_ATTRIBUTE_MAP[\n54:             pbe_ext.COLLECTION_NAME]['parameters']\n55:         parent = pbe_ext.SUB_RESOURCE_ATTRIBUTE_MAP[\n56:             pbe_ext.COLLECTION_NAME]['parent']\n57:         controller = base.create_resource(\n58:             pbe_ext.COLLECTION_NAME,\n59:             pbe_ext.RESOURCE_NAME,\n60:             plugin,\n61:             params,\n62:             member_actions=pbe_ext.ACTION_MAP[pbe_ext.RESOURCE_NAME],\n63:             parent=parent,\n64:             allow_pagination=True,\n65:             allow_sorting=True,\n66:         )\n67:         exts = [\n68:             extensions.ResourceExtension(\n69:                 pbe_ext.COLLECTION_NAME,\n70:                 controller,\n71:                 parent,\n72:                 member_actions=pbe_ext.ACTION_MAP[pbe_ext.RESOURCE_NAME],\n73:                 attr_map=params,\n74:             ),\n75:         ]\n76: "
+            }
+          ],
+          "license": {
+            "repo": "openstack/neutron",
+            "path": "LICENSE",
+            "revision": "800aee95214df9437daa8946e1cefe37648e555d",
+            "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/openstack/neutron/800aee95214df9437daa8946e1cefe37648e555d/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:19:28.421010+00:00",
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "line_count": 176,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "openstack/neutron",
+          "path": "neutron/plugins/ml2/plugin.py",
+          "revision": "800aee95214df9437daa8946e1cefe37648e555d",
+          "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/neutron/plugins/ml2/plugin.py",
+          "raw_url": "https://raw.githubusercontent.com/openstack/neutron/800aee95214df9437daa8946e1cefe37648e555d/neutron/plugins/ml2/plugin.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:19:28.477271+00:00",
+          "sha256": "e4b76f74706fcc0f5aa944b042cc3e3c5732710feedde42166198fe16cb46313",
+          "line_count": 2984,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron--neutron--plugins--ml2--plugin.py",
+          "claim": "O fornecedor mantém os vínculos ativos/inativos e implementa a ação de ativação no ML2; a confirmação troca explicitamente os estados dos vínculos antigo e novo.",
+          "evidence": [
+            {
+              "start_line": 830,
+              "end_line": 845,
+              "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/neutron/plugins/ml2/plugin.py#L830-L845",
+              "excerpt": "830:                        [portbindings.VIF_TYPE_UNBOUND,\n831:                         portbindings.VIF_TYPE_BINDING_FAILED]) and\n832:                       orig_binding.host == cur_binding.host and\n833:                       orig_binding.vnic_type == cur_binding.vnic_type and\n834:                       orig_binding.profile == cur_binding.profile)\n835: \n836:             if commit:\n837:                 # Update the port's binding state with our binding\n838:                 # results.\n839:                 if new_binding.status == const.INACTIVE:\n840:                     cur_context_binding.status = const.ACTIVE\n841:                     cur_binding.status = const.INACTIVE\n842:                 else:\n843:                     cur_context_binding.vif_type = new_binding.vif_type\n844:                     cur_context_binding.vif_details = new_binding.vif_details\n845:                 if update_binding_levels:"
+            },
+            {
+              "start_line": 2800,
+              "end_line": 2828,
+              "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/neutron/plugins/ml2/plugin.py#L2800-L2828",
+              "excerpt": "2800:     def create_port_binding(self, context, port_id, binding):\n2801:         attrs = binding[pbe_ext.RESOURCE_NAME]\n2802:         with db_api.CONTEXT_WRITER.using(context):\n2803:             port = ports_obj.Port.get_object(context, id=port_id)\n2804:             port_db = port.db_obj\n2805:             self._validate_port_supports_multiple_bindings(port_db)\n2806:             if self._get_binding_for_host(port_db.port_bindings,\n2807:                                           attrs[pbe_ext.HOST]):\n2808:                 raise exc.PortBindingAlreadyExists(\n2809:                     port_id=port_id, host=attrs[pbe_ext.HOST])\n2810:             status = const.ACTIVE\n2811:             is_active_binding = True\n2812:             active_binding = p_utils.get_port_binding_by_status_and_host(\n2813:                 port_db.port_bindings, const.ACTIVE)\n2814:             if active_binding:\n2815:                 status = const.INACTIVE\n2816:                 is_active_binding = False\n2817:             network = self.get_network(context, port_db['network_id'])\n2818:             port_dict = self._make_port_dict(port_db)\n2819:             new_binding = models.PortBinding(\n2820:                 port_id=port_id,\n2821:                 vif_type=portbindings.VIF_TYPE_UNBOUND,\n2822:                 status=status)\n2823:             mech_context = driver_context.PortContext(self, context, port_dict,\n2824:                                                       network, new_binding,\n2825:                                                       None)\n2826:             changes, original_host = self._process_port_binding_attributes(\n2827:                 mech_context._binding, self._get_port_binding_attrs(attrs))\n2828:             if is_active_binding:"
+            },
+            {
+              "start_line": 2918,
+              "end_line": 2942,
+              "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/neutron/plugins/ml2/plugin.py#L2918-L2942",
+              "excerpt": "2918:         with db_api.CONTEXT_WRITER.using(context):\n2919:             # TODO(mlavalle) Next two lines can be removed when bug #1770267 is\n2920:             # fixed\n2921:             if isinstance(port_id, dict):\n2922:                 port_id = port_id['port_id']\n2923:             port = ports_obj.Port.get_object(context, id=port_id)\n2924:             port_db = port.db_obj\n2925:             self._validate_port_supports_multiple_bindings(port_db)\n2926:             active_binding = p_utils.get_port_binding_by_status_and_host(\n2927:                 port_db.port_bindings, const.ACTIVE)\n2928:             if host == (active_binding and active_binding.host):\n2929:                 raise exc.PortBindingAlreadyActive(port_id=port_id,\n2930:                                                    host=host)\n2931:             inactive_binding = p_utils.get_port_binding_by_status_and_host(\n2932:                 port_db.port_bindings, const.INACTIVE, host=host)\n2933:             if not inactive_binding or inactive_binding.host != host:\n2934:                 raise exc.PortBindingNotFound(port_id=port_id, host=host)\n2935:             network = self.get_network(context, port_db['network_id'])\n2936:             port_dict = self._make_port_dict(port_db)\n2937:             levels = db.get_binding_level_objs(context, port_id,\n2938:                                                active_binding.host)\n2939:             original_context = driver_context.PortContext(self, context,\n2940:                                                           port_dict, network,\n2941:                                                           active_binding,\n2942:                                                           levels)"
+            },
+            {
+              "start_line": 2949,
+              "end_line": 2977,
+              "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/neutron/plugins/ml2/plugin.py#L2949-L2977",
+              "excerpt": "2949:             levels = db.get_binding_level_objs(context, port_id,\n2950:                                                inactive_binding.host)\n2951:             bind_context = driver_context.PortContext(self, context, port_dict,\n2952:                                                       network,\n2953:                                                       inactive_binding, levels)\n2954:         for count in range(MAX_BIND_TRIES):\n2955:             cur_context, _, try_again = self._commit_port_binding(\n2956:                 original_context, bind_context, need_notify=True,\n2957:                 update_binding_levels=False)\n2958:             if not try_again:\n2959:                 self.notifier.binding_deactivate(context, port_id,\n2960:                                                  active_binding.host,\n2961:                                                  network['id'])\n2962:                 self.notifier.binding_activate(context, port_id,\n2963:                                                inactive_binding.host)\n2964:                 return self._make_port_binding_dict(cur_context._binding,\n2965:                                                     port=port)\n2966:         raise exc.PortBindingError(port_id=port_id, host=host)\n2967: \n2968:     @utils.transaction_guard\n2969:     @db_api.retry_if_session_inactive()\n2970:     def delete_port_binding(self, context, host, port_id):\n2971:         ports_obj.PortBinding.delete_objects(context,\n2972:                                              host=host,\n2973:                                              port_id=port_id)\n2974:         db.clear_binding_levels(context,\n2975:                                 port_id=port_id,\n2976:                                 host=host)\n2977: "
+            }
+          ],
+          "license": {
+            "repo": "openstack/neutron",
+            "path": "LICENSE",
+            "revision": "800aee95214df9437daa8946e1cefe37648e555d",
+            "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/openstack/neutron/800aee95214df9437daa8946e1cefe37648e555d/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:19:28.421010+00:00",
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "line_count": 176,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+          }
+        }
+      ],
+      "framework_category": "neutron-lib é a biblioteca de contrato da implementação. O padrão estratégico é demonstrado pelo planejamento coordenado e pelo contrato aplicado; não se afirma que uma biblioteca produza sozinha a relação entre equipes."
+    },
+    {
+      "concept_id": "conformist",
+      "decision": "KEEP_PENDING_DISCOVERY_APPLICATION_HOST_NOT_PROVED",
+      "independent_review": "PENDING",
+      "previous_evidence_preserved": "A relação DiscoveryLibrary→LanguageCore explicitada na tese e implementada no serializer continua documentada no pacote anterior. Esta passada verificou somente a lacuna de aplicativo hospedeiro.",
+      "checked_hosts": [
+        {
+          "repo": "ContextMapper/context-mapper-dsl",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "surface": "Registro de comandos Eclipse plugin.xml, manifesto OSGi e build raiz."
+        },
+        {
+          "repo": "ContextMapper/vscode-extension",
+          "revision": "cd0363ec33de4f41cc311a715ed5afd01ff8c7f3",
+          "surface": "Registro de comandos src/extension.ts, manifesto da extensão e build do servidor de linguagem."
+        },
+        {
+          "repo": "ContextMapper/context-mapper-cli",
+          "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+          "surface": "main e subcommands, dependências de build e comandos anunciados no README."
+        }
+      ],
+      "result": "Nos nove arquivos de registro/build explicitamente examinados, não ocorreram ContextMapDiscoverer, ContextMapSerializer ou context-map-discovery. O CLI registra validate e generate; VS Code registra geração, transformações e quick fixes. A documentação oficial de descoberta mantém a classificação prototype e ensina uso direto como biblioteca. Nenhum desses fatos prova ausência global de consumidores; eles não fornecem o chamador real que faltava ao critério.",
+      "scope_query": {
+        "observed_utc": "2026-10-15T02:24:28.133076+00:00",
+        "scope": "Somente os arquivos de registro e build explicitamente listados; não é uma afirmação sobre todo o ecossistema.",
+        "terms": [
+          "ContextMapDiscoverer",
+          "ContextMapSerializer",
+          "context-map-discovery"
+        ],
+        "sources": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--org.contextmapper.dsl.ui--plugin.xml",
+            "sha256": "3f44c978fb0f6c12b6ba917e81ccc06562a6e92708765234054b66c4ad8a4b7d",
+            "hits": []
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--org.contextmapper.dsl.ui--META-INF--MANIFEST.MF",
+            "sha256": "271c022cbaea0ede859584f3f472a2b60101651e19586b78d30b8d9c75ddeaaa",
+            "hits": []
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--build.gradle",
+            "sha256": "81b80507a785dc429570a1043970f48f25d5c558db8104297355dc01515d71f9",
+            "hits": []
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--src--extension.ts",
+            "sha256": "a1aea68c7c55debf3e832fb522a4d54b187f7dfe67c74e6835c78877a0414d0f",
+            "hits": []
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--package.json",
+            "sha256": "810185776ac0c3647f619423a2a45fdce238fb2f7f9b039ab7668768a3ae7471",
+            "hits": []
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--build.gradle",
+            "sha256": "949ab9f83604f478721c414db6f3dff97c31b60dacd06c3fdff28f70c5e356fd",
+            "hits": []
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--src--main--java--org--contextmapper--cli--ContextMapperCLI.java",
+            "sha256": "ec80e85492c4debfd3ae11318ee5d5783cca7de8b390969a2ab5dbf7999c34ce",
+            "hits": []
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--build.gradle",
+            "sha256": "fb579f7ecaa7d622a0277db6dde24c9e1345aef2e926a40d6c7a12c4c9a22536",
+            "hits": []
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--README.md",
+            "sha256": "af517e18278dfa742424a67bd7a1d1b1e612238c54b83f7dbdc7680014b2c328",
+            "hits": []
+          }
+        ],
+        "total_hits": 0
+      },
+      "official_documentation": {
+        "url": "https://contextmapper.org/docs/reverse-engineering/",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T02:21:35.388650+00:00",
+        "sha256": "d2ad6381a85fd1d6157cda52ab49407a76b71d92122fb1afc89b862832da2257",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-contextmapper-discovery.html",
+        "text_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-contextmapper-discovery.txt",
+        "excerpt_lines": [
+          90,
+          98
+        ],
+        "excerpt": "90: Usage\n91: The latest version of the discovery library is available through Maven Central:\n92: You can find all information about the library, how to use it, and how to extend it with new discovery strategies in our Github repository:\n93: https://github.com/ContextMapper/context-map-discovery\n94: Note that this is a prototype and limited in the discovery strategies already implemented. Additional strategies will have to be implemented in the future.\n95: Lakeside Mutual Case Study\n96: The following example illustrates how the discovery library works. We applied it to the\n97: Lakeside Mutual\n98: project, a fictitious insurance company. It is a sample application to demonstrate microservices. With our"
+      },
+      "sources": [
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-dsl",
+          "path": "org.contextmapper.dsl.ui/plugin.xml",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/plugin.xml",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/plugin.xml",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:19:28.477530+00:00",
+          "sha256": "3f44c978fb0f6c12b6ba917e81ccc06562a6e92708765234054b66c4ad8a4b7d",
+          "line_count": 1010,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--org.contextmapper.dsl.ui--plugin.xml",
+          "claim": "Os comandos Eclipse escolhidos geram representações e contratos; nenhum deles é um chamador de descoberta demonstrado.",
+          "evidence": [
+            {
+              "start_line": 840,
+              "end_line": 866,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/plugin.xml#L840-L866",
+              "excerpt": "840: \t<extension point=\"org.eclipse.ui.handlers\">\n841: \t\t<handler class=\"org.contextmapper.dsl.ui.ContextMappingDSLExecutableExtensionFactory:org.contextmapper.dsl.ui.handler.ContextMapGenerationHandler\"\n842: \t\t\tcommandId=\"org.contextmapper.dsl.ui.handler.ContextMapGenerationCommand\">\n843: \t\t</handler>\n844: \t\t<handler class=\"org.contextmapper.dsl.ui.ContextMappingDSLExecutableExtensionFactory:org.contextmapper.dsl.ui.handler.PlantUMLGenerationHandler\"\n845: \t\t\tcommandId=\"org.contextmapper.dsl.ui.handler.PlantUMLGenerationCommand\">\n846: \t\t</handler>\n847: \t\t<handler class=\"org.contextmapper.dsl.ui.ContextMappingDSLExecutableExtensionFactory:org.contextmapper.dsl.ui.handler.SketchMinerGenerationHandler\"\n848: \t\t\tcommandId=\"org.contextmapper.dsl.ui.handler.SketchMinerGenerationCommand\">\n849: \t\t</handler>\n850: \t\t<handler class=\"org.contextmapper.dsl.ui.ContextMappingDSLExecutableExtensionFactory:org.contextmapper.dsl.ui.handler.XMIGenerationHandler\"\n851: \t\t\tcommandId=\"org.contextmapper.dsl.ui.handler.XMIGenerationCommand\">\n852: \t\t</handler>\n853: \t\t<handler class=\"org.contextmapper.dsl.ui.ContextMappingDSLExecutableExtensionFactory:org.contextmapper.dsl.ui.handler.MDSLGenerationHandler\"\n854: \t\t\tcommandId=\"org.contextmapper.dsl.ui.handler.MDSLGenerationCommand\">\n855: \t\t</handler>\n856: \t\t<handler class=\"org.contextmapper.dsl.ui.ContextMappingDSLExecutableExtensionFactory:org.contextmapper.dsl.ui.handler.GenericTextFileGenerationHandler\"\n857: \t\t\tcommandId=\"org.contextmapper.dsl.ui.handler.GenericTextFileGenerationCommand\">\n858: \t\t</handler>\n859: \t</extension>\n860: \t<extension point=\"org.eclipse.ui.commands\">\n861: \t\t<command name=\"Generate Graphical Context Map\" id=\"org.contextmapper.dsl.ui.handler.ContextMapGenerationCommand\"></command>\n862: \t\t<command name=\"Generate PlantUML Diagrams\" id=\"org.contextmapper.dsl.ui.handler.PlantUMLGenerationCommand\"></command>\n863: \t\t<command name=\"Generate Sketch Miner Diagrams\" id=\"org.contextmapper.dsl.ui.handler.SketchMinerGenerationCommand\"></command>\n864: \t\t<command name=\"Save Model as XMI\" id=\"org.contextmapper.dsl.ui.handler.XMIGenerationCommand\"></command>\n865: \t\t<command name=\"Generate MDSL Service Contracts\" id=\"org.contextmapper.dsl.ui.handler.MDSLGenerationCommand\"></command>\n866: \t\t<command name=\"Generate Text File with Freemarker Template\" id=\"org.contextmapper.dsl.ui.handler.GenericTextFileGenerationCommand\"></command>"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-mapper-dsl",
+            "path": "LICENSE",
+            "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+            "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.804849+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-dsl",
+          "path": "org.contextmapper.dsl.ui/META-INF/MANIFEST.MF",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/META-INF/MANIFEST.MF",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/META-INF/MANIFEST.MF",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:19:28.397700+00:00",
+          "sha256": "271c022cbaea0ede859584f3f472a2b60101651e19586b78d30b8d9c75ddeaaa",
+          "line_count": 31,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--org.contextmapper.dsl.ui--META-INF--MANIFEST.MF",
+          "claim": "O manifesto do plugin foi consultado como parte da busca delimitada por uma dependência da biblioteca de descoberta.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 31,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/META-INF/MANIFEST.MF#L1-L31",
+              "excerpt": "1: Manifest-Version: 1.0\n2: Automatic-Module-Name: org.contextmapper.dsl.ui\n3: Bundle-ManifestVersion: 2\n4: Bundle-Name: org.contextmapper.dsl.ui\n5: Bundle-Vendor: Context Mapper\n6: Bundle-Version: 6.12.1.qualifier\n7: Bundle-SymbolicName: org.contextmapper.dsl.ui; singleton:=true\n8: Bundle-ActivationPolicy: lazy\n9: Require-Bundle: org.contextmapper.dsl,\n10:  org.contextmapper.dsl.ide,\n11:  org.eclipse.xtext.ui,\n12:  org.eclipse.xtext.ui.shared,\n13:  org.eclipse.xtext.ui.codetemplates.ui,\n14:  org.eclipse.ui.editors;bundle-version=\"3.5.0\",\n15:  org.eclipse.ui.ide;bundle-version=\"3.5.0\",\n16:  org.eclipse.ui,\n17:  org.eclipse.compare,\n18:  org.eclipse.xtext.builder,\n19:  org.eclipse.xtext.xbase.lib;bundle-version=\"2.14.0\",\n20:  org.eclipse.xtend.lib;bundle-version=\"2.14.0\";resolution:=optional\n21: Import-Package: org.apache.log4j,\n22:  org.eclipse.xtext.xbase.ui.hover\n23: Bundle-RequiredExecutionEnvironment: JavaSE-11\n24: Export-Package: org.contextmapper.dsl.ui.contentassist,\n25:  org.contextmapper.dsl.ui.quickfix,\n26:  org.contextmapper.dsl.ui.internal,\n27:  org.contextmapper.tactic.dsl.ui.quickfix,\n28:  org.contextmapper.tactic.dsl.ui.contentassist,\n29:  org.contextmapper.servicecutter.dsl.ui.quickfix,\n30:  org.contextmapper.servicecutter.dsl.ui.contentassist\n31: Bundle-Activator: org.contextmapper.dsl.ui.internal.DslActivator"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-mapper-dsl",
+            "path": "LICENSE",
+            "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+            "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.804849+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/vscode-extension",
+          "path": "src/extension.ts",
+          "revision": "cd0363ec33de4f41cc311a715ed5afd01ff8c7f3",
+          "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/src/extension.ts",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/vscode-extension/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/src/extension.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:21:33.381906+00:00",
+          "sha256": "a1aea68c7c55debf3e832fb522a4d54b187f7dfe67c74e6835c78877a0414d0f",
+          "line_count": 81,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--src--extension.ts",
+          "claim": "O entrypoint inicia o servidor de linguagem e registra seus comandos reais, sem demonstrar a chamada de descoberta.",
+          "evidence": [
+            {
+              "start_line": 15,
+              "end_line": 41,
+              "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/src/extension.ts#L15-L41",
+              "excerpt": "15: export function activate(context: ExtensionContext) {\n16:     let launcher = os.platform() === 'win32' ? 'context-mapper-lsp.bat' : 'context-mapper-lsp';\n17:     let script = context.asAbsolutePath(path.join('lsp', 'bin', launcher));\n18: \n19:     let serverOptions: ServerOptions = {\n20:         run: { command: script, options: { shell: true } },\n21:         debug: { command: script, args: ['-log'], options: { env: createDebugEnv(), shell: true } }\n22:     };\n23: \n24:     let clientOptions: LanguageClientOptions = {\n25:         documentSelector: ['cml', 'scl'],\n26:         synchronize: {\n27:             fileEvents: workspace.createFileSystemWatcher('**/*.*')\n28:         }\n29:     };\n30: \n31:     // Create the language client and start the client.\n32:     let lc = new LanguageClient('CML Language Server', serverOptions, clientOptions);\n33: \n34:     // Register generator commands\n35:     context.subscriptions.push(\n36:         // CML\n37:         commands.registerCommand(\"cml.generate.puml.proxy\", generators.generatePlantUML()),\n38:         commands.registerCommand(\"cml.generate.sketchminer.proxy\", generators.generateSketchMinerDiagrams()),\n39:         commands.registerCommand(\"cml.generate.mdsl.proxy\", generators.generateMDSL()),\n40:         commands.registerCommand(\"cml.generate.generic.text.file.proxy\", generators.generateGenericTextFile()),\n41:         commands.registerCommand(\"cml.generate.contextmap.proxy\", generators.generateContextMap())"
+            },
+            {
+              "start_line": 44,
+              "end_line": 72,
+              "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/src/extension.ts#L44-L72",
+              "excerpt": "44:     // Register transformation commands\n45:     context.subscriptions.push(\n46:         commands.registerCommand(\"cml.ar.deriveSubdomainFromURs.proxy\", transformations.deriveSubdomainFromUserRequirements()),\n47:         commands.registerCommand(\"cml.ar.deriveBoundedContextFromSDs.proxy\", transformations.deriveBoundedContextFromSubdomains()),\n48:         commands.registerCommand(\"cml.ar.deriveFrontendBackendSystemsFromFeatureBC.proxy\", transformations.deriveFrontendAndBackendSystemFromFeatureBC()),\n49:         commands.registerCommand(\"cml.ar.splitSystemContextIntoSubsystems.proxy\", transformations.splitSystemContextIntoSubsystems()),\n50:         commands.registerCommand(\"cml.ar.extractAggregatesByVolatility.proxy\", transformations.extractAggregatesByVolatility()),\n51:         commands.registerCommand(\"cml.ar.extractAggregatesByCohesion.proxy\", transformations.extractAggregatesByCohesion()),\n52:         commands.registerCommand(\"cml.ar.mergeAggregates.proxy\", transformations.mergeAggregates()),\n53:         commands.registerCommand(\"cml.ar.mergeBoundedContexts.proxy\", transformations.mergeBoundedContexts()),\n54:         commands.registerCommand(\"cml.ar.suspendPartnership.proxy\", transformations.suspendPartnership()),\n55:         commands.registerCommand(\"cml.ar.createValueForStakeholder.proxy\", transformations.executeGenericCommandWithSingleStringArg(\"cml.ar.createValueForStakeholder\")),\n56:         commands.registerCommand(\"cml.ar.addEthicalValueAssessment.proxy\", transformations.executeGenericCommandWithSingleStringArg(\"cml.ar.addEthicalValueAssessment\")),\n57:         commands.registerCommand(\"cml.ar.wrapValueInCluster.proxy\", transformations.executeGenericCommandWithSingleStringArg(\"cml.ar.wrapValueInCluster\")),\n58:         commands.registerCommand(\"cml.ar.createStakeholderForUserStoryRole.proxy\", transformations.executeGenericCommandWithSingleStringArg(\"cml.ar.createStakeholderForUserStoryRole\")),\n59:         commands.registerCommand(\"cml.ar.createValueRegisterForBoundedContext.proxy\", transformations.executeGenericCommandWithSingleStringArg(\"cml.ar.createValueRegisterForBoundedContext\")),\n60:     );\n61: \n62:     // Register quickfix commands\n63:     context.subscriptions.push(\n64:         commands.registerCommand(\"cml.quickfix.command.splitStoryByVerb.proxy\", quickfixCommands.splitStoryByVerb()),\n65:         commands.registerCommand(\"cml.flow.open.sketch.miner\", quickfixCommands.openFlowInSketchMiner()),\n66:         commands.registerCommand(\"cml.coordination.open.sketch.miner\", quickfixCommands.openCoordinationInSketchMiner())\n67:     );\n68: \n69:     lc.setTrace(Trace.Verbose);\n70:     lc.start();\n71: }\n72: "
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/vscode-extension",
+            "path": "LICENSE",
+            "revision": "cd0363ec33de4f41cc311a715ed5afd01ff8c7f3",
+            "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:22:38.865422+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/vscode-extension",
+          "path": "build.gradle",
+          "revision": "cd0363ec33de4f41cc311a715ed5afd01ff8c7f3",
+          "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/build.gradle",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/vscode-extension/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/build.gradle",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:21:33.418846+00:00",
+          "sha256": "949ab9f83604f478721c414db6f3dff97c31b60dacd06c3fdff28f70c5e356fd",
+          "line_count": 170,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--build.gradle",
+          "claim": "A distribuição embutida é context-mapper-lsp.",
+          "evidence": [
+            {
+              "start_line": 23,
+              "end_line": 31,
+              "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/build.gradle#L23-L31",
+              "excerpt": "23: \n24: configurations {\n25:     cmlLSPTar\n26: }\n27: \n28: dependencies {\n29:     cmlLSPTar \"org.contextmapper:context-mapper-lsp:${cmlVersion}@tar\"\n30: }\n31: "
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/vscode-extension",
+            "path": "LICENSE",
+            "revision": "cd0363ec33de4f41cc311a715ed5afd01ff8c7f3",
+            "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:22:38.865422+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-cli",
+          "path": "src/main/java/org/contextmapper/cli/ContextMapperCLI.java",
+          "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+          "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/src/main/java/org/contextmapper/cli/ContextMapperCLI.java",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-cli/b819362eed75e7dfb0332fa1acdda56f9029b91d/src/main/java/org/contextmapper/cli/ContextMapperCLI.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:23:22.475097+00:00",
+          "sha256": "ec80e85492c4debfd3ae11318ee5d5783cca7de8b390969a2ab5dbf7999c34ce",
+          "line_count": 31,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--src--main--java--org--contextmapper--cli--ContextMapperCLI.java",
+          "claim": "A aplicação CLI real registra somente ValidateCommand e GenerateCommand nesse entrypoint.",
+          "evidence": [
+            {
+              "start_line": 6,
+              "end_line": 15,
+              "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/src/main/java/org/contextmapper/cli/ContextMapperCLI.java#L6-L15",
+              "excerpt": "6: @Command(\n7:     name = \"cm\",\n8:     versionProvider = VersionProvider.class,\n9:     description = \"Context Mapper CLI\",\n10:     subcommands = {\n11:         ValidateCommand.class,\n12:         GenerateCommand.class\n13:     },\n14:     mixinStandardHelpOptions = true,\n15:     usageHelpAutoWidth = true)"
+            },
+            {
+              "start_line": 23,
+              "end_line": 30,
+              "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/src/main/java/org/contextmapper/cli/ContextMapperCLI.java#L23-L30",
+              "excerpt": "23:     public static int runCLI(String[] args) {\n24:         return new CommandLine(new ContextMapperCLI()).execute(args);\n25:     }\n26: \n27:     public static void main(String[] args) {\n28:         int exitCode = runCLI(args);\n29:         System.exit(exitCode);\n30:     }"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-mapper-cli",
+            "path": "LICENSE",
+            "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+            "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:22:39.503215+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-cli",
+          "path": "build.gradle",
+          "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+          "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/build.gradle",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-cli/b819362eed75e7dfb0332fa1acdda56f9029b91d/build.gradle",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:21:33.388839+00:00",
+          "sha256": "fb579f7ecaa7d622a0277db6dde24c9e1345aef2e926a40d6c7a12c4c9a22536",
+          "line_count": 175,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--build.gradle",
+          "claim": "O build consultado declara context-mapper-dsl e Picocli, sem uma chamada demonstrada à biblioteca de descoberta.",
+          "evidence": [
+            {
+              "start_line": 18,
+              "end_line": 34,
+              "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/build.gradle#L18-L34",
+              "excerpt": "18:     mavenCentral()\n19: }\n20: \n21: dependencies {\n22:     implementation \"org.contextmapper:context-mapper-dsl:${cmlVersion}\"\n23:     implementation \"info.picocli:picocli:${picocliVersion}\"\n24: \n25:     testImplementation \"org.junit.jupiter:junit-jupiter-api:${jUnitVersion}\"\n26:     testImplementation \"org.junit.jupiter:junit-jupiter-params:${jUnitVersion}\"\n27:     testImplementation \"org.assertj:assertj-core:${assertJVersion}\"\n28:     testImplementation \"org.mockito:mockito-core:${mockitoVersion}\"\n29:     testImplementation \"org.mockito:mockito-junit-jupiter:${mockitoVersion}\"\n30: }\n31: \n32: application {\n33:     mainClass = 'org.contextmapper.cli.ContextMapperCLI'\n34:     applicationName = 'cm'"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-mapper-cli",
+            "path": "LICENSE",
+            "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+            "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:22:39.503215+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION"
+          }
+        }
+      ],
+      "remaining_gate": "Localizar uma aplicação publicada e seu chamador efetivo de context-map-discovery, ou um caso de produto diferente com adoção e controle do modelo upstream documentados. Esta investigação não reclassifica a biblioteca protótipo como aplicativo."
+    }
+  ],
+  "summary": {
+    "recommended_source_matches": 1,
+    "kept_pending_with_verified_boundary": 1
+  },
+  "proof_level": "Leitura de decisões, item público de planejamento, código e licenças. Nenhum teste ou serviço foi executado.",
+  "write_scope": "Somente execution/curation/rare-support/ddd-followon*."
+}

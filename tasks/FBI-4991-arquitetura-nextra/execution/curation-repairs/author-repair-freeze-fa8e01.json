@@ -1,0 +1,155 @@
+{
+  "observed_utc": "2026-10-15T04:29:01.732400+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "32b80d5fc8eda42e2aa9b496d82c30b574120e68",
+  "freeze_kind": "AUTHOR_REPAIR_CANDIDATE_FOR_WARM_RECHECK",
+  "summary": {
+    "canonical_concepts": 310,
+    "author_source_matches": 310,
+    "pending_concepts": 0,
+    "independently_reviewed_concepts": 259,
+    "independent_recheck_pending": 51,
+    "not_applicable_exemptions": 0,
+    "issues_by_kind": {}
+  },
+  "files": {
+    "matrix.json": {
+      "sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+      "bytes": 5539459
+    },
+    "matrix.json.gz": {
+      "sha256": "8c7017605762dc5ef42ece7cb78a1acd518e7ee5520853606229e72d7bca3c26",
+      "bytes": 991255
+    },
+    "sources.json": {
+      "sha256": "92e84d82698cf214adfdca6209a81f03118d424db58bf7b1b5cefbb4ed6cc326",
+      "bytes": 3122315
+    },
+    "sources.json.gz": {
+      "sha256": "7a491af0e21918083ac89b604fbb387b89def9586e6c324f60885e5ad57f1449",
+      "bytes": 618932
+    },
+    "source-selections.json": {
+      "sha256": "6d8cf355fd6fcf5283f7522294d0a2ffe81f67d399ca765fcc89c9be50d2859d",
+      "bytes": 377465
+    },
+    "repair-selections.json": {
+      "sha256": "6ff5e1960d46a32b309b8a7fb1aef16cfdaff1da217919458c2039343116e832",
+      "bytes": 127730
+    },
+    "author-adjudications.json": {
+      "sha256": "0cacb4009b59e711aa7db7a5a84e0f41fb0317c8ee370eb10dc84e87b69db16f",
+      "bytes": 496551
+    },
+    "review-baseline.json": {
+      "sha256": "5f678cd0b31d0f07650e05f97a14fb723958fd90e9f8328a97603b030d5494c6",
+      "bytes": 235067
+    },
+    "adjudication_gate.py": {
+      "sha256": "15e7f7e29558c0d4b4102e0d1dc4c8c450228e6a6578999dc981f67253de7600",
+      "bytes": 6944
+    },
+    "semantic_fingerprints.py": {
+      "sha256": "ce7acc4c0105b8f214554beffc1c913896789697d3864ab6f8ea389f539edebf",
+      "bytes": 1179
+    },
+    "build_matrix.py": {
+      "sha256": "0e735391a55b275e3cf6d18cda65804861360d8a90c8f3925c6829e87c64f31d",
+      "bytes": 25231
+    },
+    "select_sources.py": {
+      "sha256": "889a4fd81f0c189474f6a294b7091c2de279005eb485cdff5fb6594b81bc7cb6",
+      "bytes": 148055
+    },
+    "verify_curation.py": {
+      "sha256": "0b2e6058f84539c0b11ca4e9c2d5277253b24fdab3106552230395fd672a20a1",
+      "bytes": 7269
+    },
+    "check_adjudication_gate.py": {
+      "sha256": "ddaacf1342bbecef2876436170aa50788514c007070153fad40e1d5439b2ba46",
+      "bytes": 4255
+    }
+  },
+  "structural_validation": {
+    "observed_utc": "2026-10-15T04:28:33.417456+00:00",
+    "scope": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+    "canonical_concepts": 310,
+    "priority_entries": 40,
+    "active_source_locators": 753,
+    "source_artifacts_checked": 749,
+    "license_revisions_checked": 192,
+    "matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+    "structural_integrity": "PASS",
+    "requested_gate": "PASS",
+    "semantic_pending": [],
+    "independent_pending_count": 51,
+    "errors_by_kind": {},
+    "errors": [],
+    "note": "Integrity, HTTP status and lexical locators do not establish semantic correctness or independent approval."
+  },
+  "positive_guard": {
+    "checks": 321,
+    "failures": 0
+  },
+  "semantic_comparison": {
+    "unchanged": 259,
+    "changed": 51,
+    "unexpected": 0
+  },
+  "independent_recheck_concepts": [
+    "aggregate",
+    "aggregate-root",
+    "anti-corruption-layer",
+    "at-least-once-delivery",
+    "branch-by-abstraction",
+    "cdc-migration",
+    "centralized-logging",
+    "chain-of-responsibility",
+    "choreography",
+    "circuit-breaker",
+    "compensating-transaction",
+    "composite",
+    "consistent-hashing",
+    "context-map",
+    "dark-launch",
+    "database-decomposition",
+    "denormalization",
+    "distributed-cache",
+    "distributed-tracing",
+    "domain-policy",
+    "domain-service",
+    "dual-write-migration",
+    "expand-contract",
+    "factory",
+    "feature-flags",
+    "finite-state-machine",
+    "graphql-federation",
+    "materialized-view",
+    "mvc",
+    "orchestration-saga",
+    "parallel-run",
+    "pipeline",
+    "precomputation",
+    "range-sharding",
+    "recreate-deployment",
+    "refresh-ahead",
+    "rest",
+    "saga",
+    "scatter-gather",
+    "service-extraction",
+    "service-mesh",
+    "service-to-service-identity",
+    "single-flight",
+    "state",
+    "state-machine",
+    "template-method",
+    "thread-pool",
+    "token-exchange",
+    "transitional-architecture",
+    "websocket",
+    "zero-trust"
+  ],
+  "publication": "NOT_PUBLISHED",
+  "note": "This is the repaired author candidate. It carries 259 unchanged first-pass decisions and awaits warm recheck of the 51 HIGH repairs. It does not certify semantic acceptance of those repairs."
+}

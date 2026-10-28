@@ -1,0 +1,11 @@
+flowchart TD
+    I["Crédito 1000, crédito 100, débito 200"] --> B["Antes: saldo substituído sem histórico"]
+    B --> X["Alteração perdida deixa 800"]
+    I --> A["financial.py::ledger_projection conserva os fatos"]
+    A --> L["Replay soma 1000 mais 100 menos 200"]
+    L --> R["Posição reconstruída: 900"]
+    A --> Q{"Projeção consumiu os eventos seguintes?"}
+    Q -->|não| S["Consulta ainda mostra 1000; faltam dois fatos"]
+    S --> C["Consome fatos e avança para 900"]
+    Q -->|sim| R
+    A --> W["SQLite WAL e rollback: prova local separada"]

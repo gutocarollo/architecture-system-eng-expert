@@ -1,0 +1,254 @@
+/*
+ * Copyright 2015 Ben Manes. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.github.benmanes.caffeine.cache;
+
+import static com.github.benmanes.caffeine.cache.Caffeine.calculateHashMapCapacity;
+import static com.github.benmanes.caffeine.cache.Caffeine.hasMethodOverride;
+import static com.github.benmanes.caffeine.cache.Caffeine.toUnchecked;
+import static com.github.benmanes.caffeine.cache.LocalAsyncCache.composeResult;
+import static java.util.Objects.requireNonNull;
+
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
+
+import org.jspecify.annotations.Nullable;
+
+import com.google.errorprone.annotations.Var;
+
+/**
+ * This class provides a skeletal implementation of the {@link LoadingCache} interface to minimize
+ * the effort required to implement a {@link LocalCache}.
+ *
+ * @author ben.manes@gmail.com (Ben Manes)
+ */
+interface LocalLoadingCache<K, V> extends LocalManualCache<K, V>, LoadingCache<K, V> {
+  Logger logger = System.getLogger(LocalLoadingCache.class.getName());
+
+  /** Returns the {@link AsyncCacheLoader} used by this cache. */
+  AsyncCacheLoader<? super K, V> cacheLoader();
+
+  /** Returns the {@link CacheLoader#load} as a mapping function. */
+  Function<K, @Nullable V> mappingFunction();
+
+  /** Returns the {@link CacheLoader#loadAll} as a mapping function, if implemented. */
+  @Nullable Function<Set<? extends K>, Map<K, V>> bulkMappingFunction();
+
+  @Override
+  default V get(K key) {
+    return cache().computeIfAbsent(key, mappingFunction());
+  }
+
+  @Override
+  default Map<K, V> getAll(Iterable<? extends K> keys) {
+    Function<Set<? extends K>, Map<K, V>> mappingFunction = bulkMappingFunction();
+    return (mappingFunction == null)
+        ? loadSequentially(keys)
+        : getAll(keys, mappingFunction);
+  }
+
+  /** Sequentially loads each missing entry. */
+  default Map<K, V> loadSequentially(Iterable<? extends K> keys) {
+    var result = new LinkedHashMap<K, @Nullable V>(calculateHashMapCapacity(keys));
+    for (K key : keys) {
+      result.put(requireNonNull(key), null);
+    }
+
+    @Var int count = 0;
+    int size = result.size();
+    try {
+      for (var iter = result.entrySet().iterator(); iter.hasNext();) {
+        Map.Entry<K, @Nullable V> entry = iter.next();
+        count++;
+
+        V value = get(entry.getKey());
+        if (value == null) {
+          iter.remove();
+        } else {
+          entry.setValue(value);
+        }
+      }
+    } catch (Throwable t) {
+      cache().statsCounter().recordMisses(size - count);
+      throw t;
+    }
+    @SuppressWarnings({"NullableProblems", "NullAway"})
+    Map<K, V> unmodifiable = Collections.unmodifiableMap(result);
+    return unmodifiable;
+  }
+
+  @Override
+  default CompletableFuture<V> refresh(K key) {
+    requireNonNull(key);
+    return new RefreshOperation<>(this, key).execute();
+  }
+
+  @Override
+  default CompletableFuture<Map<K, V>> refreshAll(Iterable<? extends K> keys) {
+    var result = new LinkedHashMap<K, CompletableFuture<V>>(
+        calculateHashMapCapacity(keys));
+    for (K key : keys) {
+      result.computeIfAbsent(key, this::refresh);
+    }
+    @SuppressWarnings("NullAway")
+    Map<K, CompletableFuture<@Nullable V>> futures = result;
+    return composeResult(futures);
+  }
+
+  /** Returns a mapping function that adapts to {@link CacheLoader#load}. */
+  static <K, V> Function<K, @Nullable V> newMappingFunction(CacheLoader<? super K, V> cacheLoader) {
+    return key -> {
+      try {
+        return cacheLoader.load(key);
+      } catch (Exception e) {
+        throw toUnchecked(e);
+      }
+    };
+  }
+
+  /** Returns a mapping function that adapts to {@link CacheLoader#loadAll}, if implemented. */
+  static <K, V> @Nullable Function<Set<? extends K>, Map<K, V>> newBulkMappingFunction(
+      CacheLoader<? super K, V> cacheLoader) {
+    if (!hasLoadAll(cacheLoader)) {
+      return null;
+    }
+    return keysToLoad -> {
+      try {
+        @SuppressWarnings("unchecked")
+        var loaded = (Map<K, V>) cacheLoader.loadAll(keysToLoad);
+        return loaded;
+      } catch (Exception e) {
+        throw toUnchecked(e);
+      }
+    };
+  }
+
+  /** Returns whether the supplied cache loader has bulk load functionality. */
+  static boolean hasLoadAll(CacheLoader<?, ?> cacheLoader) {
+    return hasMethodOverride(CacheLoader.class, cacheLoader, "loadAll", Set.class);
+  }
+
+  /** A manual refresh operation. */
+  final class RefreshOperation<K, V> {
+    private final AsyncCacheLoader<? super K, V> cacheLoader;
+    private final LocalCache<K, V> cache;
+    private final Object keyReference;
+    private final K key;
+
+    private @Nullable CompletableFuture<? extends V> reloading;
+    private @Nullable V oldValue;
+    private long startTime;
+
+    RefreshOperation(LocalLoadingCache<K, V> loadingCache, K key) {
+      this.keyReference = loadingCache.cache().referenceKey(key);
+      this.cacheLoader = loadingCache.cacheLoader();
+      this.cache = loadingCache.cache();
+      this.key = key;
+    }
+
+    /** Returns an existing refresh or starts one and registers its completion. */
+    @SuppressWarnings("FutureReturnValueIgnored")
+    CompletableFuture<V> execute() {
+      var future = register();
+      if (reloading != null) {
+        reloading.whenComplete(this::complete);
+      }
+      @SuppressWarnings("unchecked")
+      var castedFuture = (CompletableFuture<V>) future;
+      return requireNonNull(castedFuture);
+    }
+
+    /** Coalesces an in-flight refresh or loads the entry's next value. */
+    private @Nullable CompletableFuture<?> register() {
+      return cache.refreshes().compute(keyReference, (k, existing) -> {
+        if ((existing != null) && !Async.isReady(existing) && !cache.isPendingEviction(key)) {
+          return existing;
+        }
+
+        try {
+          startTime = cache.statsTicker().read();
+          oldValue = cache.getIfPresentQuietly(key);
+          var refreshFuture = (oldValue == null)
+              ? cacheLoader.asyncLoad(key, cache.executor())
+              : cacheLoader.asyncReload(key, oldValue, cache.executor());
+          reloading = requireNonNull(refreshFuture, "Null future");
+          return refreshFuture;
+        } catch (Exception e) {
+          throw toUnchecked(e);
+        }
+      });
+    }
+
+    /** Applies the refresh result and records the load's outcome. */
+    private void complete(@Nullable V newValue, @Nullable Throwable error) {
+      long loadTime = cache.statsTicker().read() - startTime;
+      if (error != null) {
+        if (!(error instanceof CancellationException) && !(error instanceof TimeoutException)) {
+          logger.log(Level.WARNING, "Exception thrown during refresh", error);
+        }
+        cache.refreshes().remove(keyReference, reloading);
+        cache.statsCounter().recordLoadFailure(loadTime);
+        return;
+      }
+
+      try {
+        commit(newValue);
+        if (newValue == null) {
+          cache.statsCounter().recordLoadFailure(loadTime);
+        } else {
+          cache.statsCounter().recordLoadSuccess(loadTime);
+        }
+      } catch (Throwable t) {
+        logger.log(Level.WARNING, "Exception thrown during refresh", t);
+        cache.refreshes().remove(keyReference, reloading);
+        cache.statsCounter().recordLoadFailure(loadTime);
+      }
+    }
+
+    /** Installs the refreshed value if still owned, otherwise notifies its disposal. */
+    private void commit(@Nullable V newValue) {
+      var discard = new boolean[1];
+      var hints = new LocalCache.RemapHints();
+      var value = cache.compute(key, (K k, @Nullable V currentValue) -> {
+        // Keep the refresh registered until the write clears it to avoid refreshAfterWrite
+        // readers from prematurely scheduling another reload
+        boolean owned = (cache.refreshes().get(keyReference) == reloading);
+        if (owned && (currentValue == oldValue)) {
+          return newValue;
+        }
+        // When a successor refresh owns the registration, leave it intact so a stale
+        // completion's by-key discard cannot steal the successor's token (its fresh value
+        // would then be discarded in turn)
+        hints.preserveRefresh = !owned;
+        hints.preserveTimestamps = true;
+        discard[0] = (currentValue != newValue);
+        return currentValue;
+      }, cache.expiry(), /* recordLoad= */ false, hints);
+
+      if (discard[0] && (newValue != null)) {
+        var cause = (value == null) ? RemovalCause.EXPLICIT : RemovalCause.REPLACED;
+        cache.notifyRemoval(key, newValue, cause);
+      }
+    }
+  }
+}

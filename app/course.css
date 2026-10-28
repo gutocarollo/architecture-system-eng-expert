@@ -1,0 +1,55 @@
+/* Layout and motion reuse the MakersHub Help Center's brand.css contract. */
+html:root {
+  --nextra-content-width: 100rem;
+}
+
+.nextra-toc.x\:w-64 {
+  width: 13rem;
+}
+
+@media (width >= 48rem) {
+  article.x\:md\:px-12 {
+    padding-inline: 2rem;
+  }
+}
+
+.nextra-sidebar li > div[style*='transition-duration'] {
+  transition-duration: 300ms !important;
+  transition-timing-function: ease !important;
+}
+
+.nextra-sidebar li svg {
+  transition: transform 300ms ease !important;
+}
+
+.nextra-sidebar a,
+.nextra-sidebar button,
+ul.nextra-mask a {
+  transition:
+    background-color 250ms ease,
+    color 250ms ease,
+    border-color 250ms ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+main table {
+  width: 100%;
+}
+
+main :is(th, td) {
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .nextra-sidebar *,
+  ul.nextra-mask * {
+    transition: none !important;
+  }
+}

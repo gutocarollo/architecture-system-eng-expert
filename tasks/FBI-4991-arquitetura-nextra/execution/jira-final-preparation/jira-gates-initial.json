@@ -1,0 +1,34 @@
+[
+  {
+    "gate": "catalog",
+    "script": "/Users/augustocarollo/.codex/skills/jira-fbi/scripts/jira-fbi-gate.mjs",
+    "sha256": "243100a2c1627ea8488b8d67d4f631f86f40ebb05d024cccf2f77e998218be53",
+    "validated_at_utc": "2026-10-15T18:26:15.938811+00:00",
+    "input": "jira-update-preview.json",
+    "input_sha256": "5064f25c560a52429bb4af9a157af794e2d06366fca482233514af4543f526eb",
+    "execution": "actual JSON preview supplied through stdin",
+    "exit_code": 0,
+    "output": null,
+    "stderr": "",
+    "allowed": false
+  },
+  {
+    "gate": "adf",
+    "script": "/Users/augustocarollo/.codex/skills/jira-fbi/scripts/claude-hook-wrapper.cjs",
+    "sha256": "9124b9ac1b9ef58ec7d1fa4d76b86338764e97371d2a273b72bab2a9058bc9b9",
+    "validated_at_utc": "2026-10-15T18:26:15.991318+00:00",
+    "input": "jira-update-preview.json",
+    "input_sha256": "5064f25c560a52429bb4af9a157af794e2d06366fca482233514af4543f526eb",
+    "execution": "actual JSON preview supplied through stdin",
+    "exit_code": 0,
+    "output": {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "deny",
+        "permissionDecisionReason": "BLOQUEADO por jira-fbi: customfield_10054 inválido. placeholder encontrado: O curso reúne 181 documentos MDX no Nextra, 18 jornadas e 90 destinos de aprendizado. Sete casos têm origem histórica, sendo seis do MakersHub e um do Airflow; os outros onze são casos financeiros explicitamente hipotéticos. A curadoria de 310 conceitos foi confrontada com julgamentos independentes vinculados às fontes. O recibo de curadoria registra zero pendências de rechecagem, com 14 classificações de nível médio preservadas como limite ou backlog. A contagem de documentos e destinos descreve o material entregue e não certifica, por si só, todos os critérios de aceite.; Markdown cru encontrado: 19. Um recibo identifica o endereço publicado, a versão de código, a versão nativa, a revisão da política de acesso, o manifesto e o horário da verificação. Ele demonstra que uma pessoa sem conta ChatGPT entra com a senha correta, recebe rejeição com senha incorreta, usa a busca e baixa os exercícios; demonstra também que os caminhos do manifesto continuam inacessíveis sem sessão antes e depois do aquecimento do cache e após a saída. As respostas de bloqueio esperadas e as falhas incidentais permanecem identificadas no resultado. Esse critério acrescenta a entrega protegida aos requisitos anteriores e não os substitui.; chaves Jira sem link ADF: FBI-4991, SHA-256."
+      }
+    },
+    "stderr": "",
+    "allowed": false
+  }
+]

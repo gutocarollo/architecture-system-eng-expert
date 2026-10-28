@@ -1,0 +1,22 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "explicacoes/reliable-integration/index",
+  "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+  "context_sha256": "6c99707c893f2c0e98771aa92fa04ea106a473cb2e918389ad9a7abfab49e5f4",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "idempotency-code",
+    "l4a",
+    "l4b",
+    "l4c",
+    "original-catalog",
+    "original-request",
+    "pending-intent-code",
+    "s4",
+    "s4-reference-repair"
+  ]
+}

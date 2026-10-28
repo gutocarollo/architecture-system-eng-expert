@@ -1,0 +1,80 @@
+{
+  "observed_at_utc": "2026-10-15T18:13:29.021291+00:00",
+  "reviewer": "/root/terminal_delivery",
+  "model": "gpt-6.1-sol",
+  "native_type": "default",
+  "effort": "xhigh",
+  "contract": "independent adversarial terminal",
+  "documents_actually_read": 3,
+  "diagrams": [
+    {
+      "diagram_id": "diagram-34",
+      "document_id": "explicacoes/casos/query-grain-postgres/index",
+      "document_path": "content/explicacoes/casos/query-grain-postgres/index.mdx",
+      "document_sha256": "f207f19d948104b50ba03fa5b2d0fa369f829d9fdd1cb1614ad6dea14229fae1",
+      "fence_index": 1,
+      "diagram_source_sha256": "4c3ded42b140641ea69f2779ebbb56a66f3561dce85d4047288e86d93b2ffc77",
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "4c3ded42b140641ea69f2779ebbb56a66f3561dce85d4047288e86d93b2ffc77",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/4c6d1c6069b6-1.png",
+        "artifact_sha256": "1f20f02897aa21e110c54fc1c9e8c2d4568a539f04189ac055931d570d5b034f"
+      },
+      "inspected_source_sha256": {
+        "labs/postgres-lineage/grain-before.sql.template": "5d5e8c0c94f62ec4ef61d437e51afc43c258956e77b3a297d4dfa6ca339329c8",
+        "labs/postgres-lineage/grain-after.sql.template": "5763e281efee82243efd47520d27432fe59913720a0bb2ef2b5a25a147d13874"
+      },
+      "semantic_verdict": "PASS_BOUNDED",
+      "basis": "A junção anterior combina uma comissão por conta e mês com linhas por assessor. O CTE custody_per agrupa mês e conta e usa MAX no contrato de custódia repetida. O desenho representa a duplicação e o agrupamento do kernel entregue; o texto delimita a regra de MAX e não certifica ROA.",
+      "execution_boundary": "Source correspondence and rendered PNG inspected in this terminal; prior independent root-cases receipt is preserved, not a new PostgreSQL production execution."
+    },
+    {
+      "diagram_id": "diagram-37",
+      "document_id": "explicacoes/casos/revision-cas-postgres/index",
+      "document_path": "content/explicacoes/casos/revision-cas-postgres/index.mdx",
+      "document_sha256": "2835f761a468a3ea804d16965818a0330f09420fac5fa4d7265bfd079cf1f362",
+      "fence_index": 1,
+      "diagram_source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b",
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-pg-cas/9ced80d897ad-1.png",
+        "artifact_sha256": "9a79f6f9f7613039a8d362c45ed2d78bc9f96a7a4cfe139ca771d7f4a9af65e7"
+      },
+      "inspected_source_sha256": {
+        "labs/postgres-lineage/revision-after.sql.template": "7705f280f959ae8bcf09016a9f1085d0ceb4918a78777c666e54143e7a7e34de"
+      },
+      "semantic_verdict": "PASS_BOUNDED",
+      "basis": "O predicado compara _employee_id e xmin com source_revision antes de encerrar a versão atual, com RETURNING. A sequência representa a revisão que fica obsoleta após a confirmação de outro escritor; o texto declara a necessidade de reler e o limite transitório de xmin.",
+      "execution_boundary": "Source correspondence and rendered PNG inspected in this terminal; prior independent root-cases receipt is preserved, not a new PostgreSQL production execution."
+    },
+    {
+      "diagram_id": "diagram-24",
+      "document_id": "explicacoes/casos/airflow-lock-retry/index",
+      "document_path": "content/explicacoes/casos/airflow-lock-retry/index.mdx",
+      "document_sha256": "e4a952446236f026cc5f710286fed053ecc2e0c036fc1f6b5730d1e6ec8f559b",
+      "fence_index": 1,
+      "diagram_source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-airflow-retry/fc01d0e06b14-1.png",
+        "artifact_sha256": "34dd2124c80bf0a8940691f297f7fa9578e7f40b0bca503b22e8ce35d74fb99a"
+      },
+      "inspected_source_sha256": {
+        "labs/airflow-lock-retry/after.py": "3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731"
+      },
+      "semantic_verdict": "PASS_BOUNDED",
+      "basis": "O loop repete apenas retorno diferente de zero com 55P03, respeita duas novas tentativas e espera fixa de 30 segundos. TimeoutExpired se propaga; o desenho representa esse ramo, o parse JSON no sucesso e RuntimeError na falha final. A descrição não transforma isso em backoff exponencial ou prazo global.",
+      "execution_boundary": "Source correspondence and rendered PNG inspected in this terminal; prior independent root-cases receipt is preserved, not a new PostgreSQL production execution."
+    }
+  ],
+  "remaining_diagrams": "91 bindings checked; no terminal semantic verdict issued for the other diagrams.",
+  "packet_not_mutated": true
+}

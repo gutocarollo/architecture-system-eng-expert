@@ -1,0 +1,61 @@
+{
+  "recorded_at": "2026-10-14T19:47:18.717555+00:00",
+  "dispatch_id": "gen-1792006436-QbpJQoV4TCVABnjYu1y8",
+  "response_sha256": "47cda8e321660d903d9903b613c5bec594a5185eed0fb86345295734b4a0a0a4",
+  "binding_owner": "Root mechanical receipt adapter",
+  "scope": "The unchanged model verdict is bound to the exact current document and the evidence IDs actually named by the reviewer. The submitted digest covered the full supplied context; this adapter calculates the canonical projection for the selected IDs. No vote or finding was changed.",
+  "bindings": [
+    {
+      "document_id": "explicacoes/cache/index",
+      "submitted_context_sha256": "85b0a98abf9025aef9c26d0d0c1280fde02cfe49b85b9b9963f052e72c34ff3b",
+      "projected_selected_evidence_sha256": "cdbf14134f65102d37bcb6209e4abf2731e9066866903b3ca098cb7f320fd4f7",
+      "evidence_ids": [
+        "s5",
+        "l5a",
+        "insurance-api",
+        "insurance-service",
+        "insurance-repository",
+        "cache-code",
+        "singleflight-code",
+        "nextbilling-code",
+        "s5-high-repair"
+      ]
+    },
+    {
+      "document_id": "explicacoes/capacity/index",
+      "submitted_context_sha256": "080e1abf0c877fa3626e8c60910799d32963055d6f534752803732eb656edf6a",
+      "projected_selected_evidence_sha256": "bd0f970323f695965131efbc2e4e3ab7612be61262c2bf65a7d40021c7f321f5",
+      "evidence_ids": [
+        "s5",
+        "l5b",
+        "airflow-client-code",
+        "task-worker-code",
+        "nextbilling-code",
+        "s5-high-repair"
+      ]
+    },
+    {
+      "document_id": "referencia/catalogo/06-cache",
+      "submitted_context_sha256": "bccc91508ebbea9028ae703172f87f44dc50d92136f24c33b43f471d16cc90db",
+      "projected_selected_evidence_sha256": "2668c4e10278e0d79d5574163d0556a704de902b2cdea2d951ccbd0bf8a11853",
+      "evidence_ids": [
+        "s5",
+        "l5c",
+        "insurance-api",
+        "s5-high-repair",
+        "redisson-community-map",
+        "redisson-community-use",
+        "original-request"
+      ]
+    }
+  ],
+  "relation_scope_normalization": {
+    "document_id": "referencia/catalogo/06-cache",
+    "original_adjudicated_ids": [
+      "insurance-api-service",
+      "insurance-service-repository"
+    ],
+    "document_ids": [],
+    "reason": "The reviewer also named the insurance call relations from the explanation; this catalog has no declared relation IDs. The mechanical receipt retains only the document scope and adds no approval."
+  }
+}

@@ -1,0 +1,2573 @@
+{
+  "schema_version": 1,
+  "policy": "Fixed fixture contracts for each probe; runners never regenerate these expected values.",
+  "probes": {
+    "provider-contract": {
+      "case_id": "order-boundaries",
+      "before": {
+        "booked": false
+      },
+      "after": {
+        "booked": true,
+        "amount": 100.0
+      },
+      "invariant": "The adapter translates an external language at one boundary."
+    },
+    "replace-policy": {
+      "case_id": "order-boundaries",
+      "before": [
+        10.0,
+        10.0
+      ],
+      "after": [
+        10.0,
+        20.0
+      ],
+      "invariant": "A strategy is supplied to the domain operation; the caller can exchange it."
+    },
+    "validate-before-side-effect": {
+      "case_id": "order-boundaries",
+      "before": {
+        "invalid_writes": 1
+      },
+      "after": {
+        "invalid_writes": 0
+      },
+      "invariant": "The command checks an invariant before invoking its write port."
+    },
+    "deduplicate": {
+      "case_id": "order-delivery",
+      "before": {
+        "debit": 250,
+        "effects": 3
+      },
+      "after": {
+        "debit": 150,
+        "effects": 2
+      },
+      "invariant": "Repeated delivery of the same semantic operation has one effect in this store."
+    },
+    "commit-intention": {
+      "case_id": "order-delivery",
+      "before": {
+        "orders": 1,
+        "published": 0
+      },
+      "after": {
+        "orders": 1,
+        "recoverable_events": 1
+      },
+      "invariant": "One local transaction preserves both an order and its delivery intention."
+    },
+    "compensate": {
+      "case_id": "order-delivery",
+      "before": {
+        "balance_after_failed_allocation": 900
+      },
+      "after": {
+        "balance_after_failed_allocation": 1000
+      },
+      "invariant": "A compensating credit offsets the prior debit when allocation fails."
+    },
+    "version-conflict": {
+      "case_id": "reservation",
+      "before": {
+        "balance": 800,
+        "lost_credit": 100
+      },
+      "after": {
+        "stale_rejected": true,
+        "balance_after_reread": 900
+      },
+      "invariant": "The stale editor cannot silently overwrite a preceding credit."
+    },
+    "fence": {
+      "case_id": "reservation",
+      "before": {
+        "last_writer": "expired-A",
+        "value": 101
+      },
+      "after": {
+        "last_writer": "B",
+        "value": 102,
+        "stale_101_rejected": true
+      },
+      "invariant": "The destination compares an ordered generation, including delayed writers."
+    },
+    "resource-key": {
+      "case_id": "reservation",
+      "before": {
+        "accepted_with_actor_keys": 2
+      },
+      "after": {
+        "accepted_with_slot_key": 1
+      },
+      "invariant": "The shared slot, rather than the caller, is the protected identity."
+    },
+    "majority-partition": {
+      "case_id": "consensus",
+      "before": {
+        "leaders": 2
+      },
+      "after": {
+        "leaders": 1,
+        "minority_writes": 0
+      },
+      "invariant": "Only a partition with two of three members can authorize a new write."
+    },
+    "quorum-overlap": {
+      "case_id": "consensus",
+      "before": {
+        "intersection_lower_bound": 0
+      },
+      "after": {
+        "intersection_lower_bound": 1
+      },
+      "invariant": "For three replicas, read two and write two have at least one common member."
+    },
+    "causal-versions": {
+      "case_id": "consensus",
+      "before": {
+        "last_write_only": "A",
+        "lost_branch": "B"
+      },
+      "after": {
+        "concurrent_detected": true,
+        "merged_vector": {
+          "A": 1,
+          "B": 1
+        }
+      },
+      "invariant": "A vector exposes concurrent branches before application-specific reconciliation."
+    },
+    "logical-clock": {
+      "case_id": "consensus",
+      "before": {
+        "receive_clock": 4
+      },
+      "after": {
+        "receive_clock": 9
+      },
+      "invariant": "A receive event advances beyond the causal sender clock."
+    },
+    "prepared-participant": {
+      "case_id": "consensus",
+      "before": {
+        "prepared_then_timeout": "commit_guessed"
+      },
+      "after": {
+        "prepared_then_timeout": "wait_for_decision"
+      },
+      "invariant": "A prepared participant cannot invent the coordinator decision."
+    },
+    "gossip-membership": {
+      "case_id": "consensus",
+      "before": {
+        "known_members": {
+          "A": 1,
+          "B": 1,
+          "C": 1
+        }
+      },
+      "after": {
+        "known_members": {
+          "A": 3,
+          "B": 3,
+          "C": 3
+        },
+        "all_agree": true
+      },
+      "invariant": "Repeated peer exchanges disseminate membership without a central broadcaster."
+    },
+    "stateless-request": {
+      "case_id": "consensus",
+      "before": {
+        "second_worker_user": null
+      },
+      "after": {
+        "worker_users": [
+          "SYNTHETIC-USER",
+          "SYNTHETIC-USER"
+        ],
+        "local_session_counts": [
+          0,
+          0
+        ]
+      },
+      "invariant": "Application instances obtain session state outside local request-process memory, so routing to another instance preserves the request context."
+    },
+    "route-enrich-aggregate": {
+      "case_id": "queue-workflow",
+      "before": {
+        "one_untyped_batch": 6
+      },
+      "after": {
+        "trade": 3,
+        "statement": 3,
+        "enriched": 6
+      },
+      "invariant": "A router chooses a destination; an enricher adds context and an aggregator can count each result."
+    },
+    "retry-dlq": {
+      "case_id": "queue-workflow",
+      "before": {
+        "poison_attempts": 6,
+        "dead_letters": 0
+      },
+      "after": {
+        "poison_attempts": 3,
+        "dead_letters": 1,
+        "delivered": 1
+      },
+      "invariant": "A poison message exhausts three attempts and is retained outside the normal queue."
+    },
+    "admission": {
+      "case_id": "queue-workflow",
+      "before": {
+        "buffered": 120,
+        "rejected": 0
+      },
+      "after": {
+        "buffered": 20,
+        "rejected": 100
+      },
+      "invariant": "Admission limits queued work before consuming unbounded memory."
+    },
+    "consumer-topology": {
+      "case_id": "queue-workflow",
+      "before": {
+        "workers_each_execute_all": 6
+      },
+      "after": {
+        "shared_queue_effects": 2,
+        "worker_effects": [
+          1,
+          1
+        ]
+      },
+      "invariant": "Competing consumers divide work while separate subscriptions each receive the facts they need."
+    },
+    "resequence-state": {
+      "case_id": "queue-workflow",
+      "before": {
+        "states": [
+          "settled",
+          "reserved",
+          "accepted"
+        ],
+        "invalid_first": "settled"
+      },
+      "after": {
+        "states": [
+          "accepted",
+          "reserved",
+          "settled"
+        ],
+        "final": "settled",
+        "invalid_first_rejected": true
+      },
+      "invariant": "Sequence metadata enables ordering and a state machine rejects an invalid transition."
+    },
+    "retry-budget": {
+      "case_id": "queue-workflow",
+      "before": {
+        "attempt_times": [
+          0,
+          0,
+          0
+        ],
+        "final": "overload"
+      },
+      "after": {
+        "delays": [
+          1,
+          2,
+          4
+        ],
+        "jittered_delays": [
+          1.1,
+          2.2,
+          4.3
+        ],
+        "attempts": 3,
+        "final": "open-circuit"
+      },
+      "invariant": "Budgeted attempts, exponential delay and fixed jitter spread work; the open circuit refuses more calls."
+    },
+    "dag-dependencies": {
+      "case_id": "queue-workflow",
+      "before": {
+        "order": [
+          "publish",
+          "extract",
+          "transform"
+        ]
+      },
+      "after": {
+        "order": [
+          "extract",
+          "transform",
+          "publish"
+        ]
+      },
+      "invariant": "A task becomes eligible only after its prerequisites finish."
+    },
+    "message-filter": {
+      "case_id": "queue-workflow",
+      "before": {
+        "accepted": 3,
+        "invalid_accepted": 1
+      },
+      "after": {
+        "accepted": 2,
+        "invalid_accepted": 0,
+        "valid_amount": 150
+      },
+      "invariant": "A filter drops the invalid item while preserving the two valid orders."
+    },
+    "message-splitter": {
+      "case_id": "queue-workflow",
+      "before": {
+        "handler_items": 1,
+        "individual_orders": 0
+      },
+      "after": {
+        "handler_items": 2,
+        "individual_orders": 2,
+        "amount": 150,
+        "batch_ids": [
+          "BATCH-1"
+        ]
+      },
+      "invariant": "A splitter converts one batch envelope into individual messages and retains their correlation."
+    },
+    "cache-key": {
+      "case_id": "cache-policy",
+      "before": {
+        "tenant_B_reads": "tenant-A"
+      },
+      "after": {
+        "tenant_B_reads": "tenant-B"
+      },
+      "invariant": "Tenant and query scope belong in a key before a cached result is shared."
+    },
+    "cache-expiry": {
+      "case_id": "cache-policy",
+      "before": {
+        "stale_returned": true
+      },
+      "after": {
+        "stale_returned": false,
+        "decision": "reload"
+      },
+      "invariant": "TTL creates an explicit validity boundary and expiration returns control to the producer."
+    },
+    "write-policy": {
+      "case_id": "cache-policy",
+      "before": {
+        "write_behind_crash_durable_balance": 1000
+      },
+      "after": {
+        "write_through_durable_balance": 1100
+      },
+      "invariant": "Acknowledging after durable write avoids losing a buffered credit during this crash."
+    },
+    "cache-levels": {
+      "case_id": "cache-policy",
+      "before": {
+        "worker_A": 1,
+        "worker_B": 2
+      },
+      "after": {
+        "worker_A": 2,
+        "worker_B": 2
+      },
+      "invariant": "Invalidation permits the local level to reload from its shared owner."
+    },
+    "cache-aside": {
+      "case_id": "cache-policy",
+      "before": {
+        "source_calls": 3,
+        "values": [
+          1000,
+          1000,
+          1000
+        ],
+        "cache_populated": true
+      },
+      "after": {
+        "source_calls": 1,
+        "values": [
+          1000,
+          1000,
+          1000
+        ],
+        "cache_populated": true
+      },
+      "invariant": "A cache-aside miss loads from the source and populates the key; later reads hit that key."
+    },
+    "negative-cache": {
+      "case_id": "cache-policy",
+      "before": {
+        "source_calls": 3,
+        "results": [
+          null,
+          null,
+          null
+        ],
+        "absence_cached": false
+      },
+      "after": {
+        "source_calls": 1,
+        "results": [
+          null,
+          null,
+          null
+        ],
+        "absence_cached": true
+      },
+      "invariant": "A known absence is represented by a cached sentinel and suppresses repeated source lookups."
+    },
+    "cache-warming": {
+      "case_id": "cache-policy",
+      "before": {
+        "request_path_source_calls": 1,
+        "value": 1000
+      },
+      "after": {
+        "request_path_source_calls": 0,
+        "value": 1000
+      },
+      "invariant": "Preloading a known key moves its initial fetch before the first user read."
+    },
+    "replay-events": {
+      "case_id": "ledger-projection",
+      "before": {
+        "mutable_balance_without_history": 800
+      },
+      "after": {
+        "replayed_balance": 900,
+        "events": 3
+      },
+      "invariant": "An append-only record can replay the credits and debit into a read position."
+    },
+    "projection-checkpoint": {
+      "case_id": "ledger-projection",
+      "before": {
+        "projection": 1000,
+        "lag_events": 2
+      },
+      "after": {
+        "projection": 900,
+        "lag_events": 0
+      },
+      "invariant": "A projection advances only after consuming its missing events."
+    },
+    "durable-transaction": {
+      "case_id": "ledger-projection",
+      "before": {
+        "partial_update_visible": 110000
+      },
+      "after": {
+        "rolled_back_cents": 100000,
+        "sqlite_journal_mode": "wal"
+      },
+      "invariant": "A local transaction rolls back an incomplete change while SQLite uses its WAL mode."
+    },
+    "snapshot-replay": {
+      "case_id": "ledger-projection",
+      "before": {
+        "events_to_replay": 3
+      },
+      "after": {
+        "events_to_replay": 1,
+        "balance": 900
+      },
+      "invariant": "A snapshot plus its following events reconstructs the same state with less replay."
+    },
+    "shard-route": {
+      "case_id": "storage-partitions",
+      "before": {
+        "partitions_scanned": 3
+      },
+      "after": {
+        "partitions_scanned": 1,
+        "row_7_amount": 70
+      },
+      "invariant": "A stable key and routing rule direct a lookup to its owning shard."
+    },
+    "grain-join": {
+      "case_id": "storage-partitions",
+      "before": {
+        "sum_after_one_to_many_join": 800
+      },
+      "after": {
+        "sum_at_account_grain": 300
+      },
+      "invariant": "Aggregating children at the intended grain avoids multiplying the monetary value."
+    },
+    "hash-remap": {
+      "case_id": "storage-partitions",
+      "before": {
+        "shards": 3,
+        "moved_keys": 0
+      },
+      "after": {
+        "shards": 4,
+        "modulo_moved_keys": 76
+      },
+      "invariant": "Adding a modulo shard can move many key owners; a consistent ring aims to limit remapping."
+    },
+    "covering-index": {
+      "case_id": "storage-partitions",
+      "before": {
+        "query_plan": "SCAN position"
+      },
+      "after": {
+        "query_plan": "SEARCH position USING COVERING INDEX position_lookup (account_key=?)"
+      },
+      "invariant": "The lookup changes from scanning to an index that includes the selected value."
+    },
+    "expand-contract": {
+      "case_id": "safe-release",
+      "before": {
+        "old_reader_value": null
+      },
+      "after": {
+        "old_reader_value": 1000,
+        "new_reader_value": 100000
+      },
+      "invariant": "Expanding first keeps the old field while the new reader learns the new field."
+    },
+    "progressive-route": {
+      "case_id": "safe-release",
+      "before": {
+        "new_version_exposure": 100
+      },
+      "after": {
+        "new_version_exposure": 5,
+        "rollback_route": "old"
+      },
+      "invariant": "A controlled route limits the first new-version population and can redirect it."
+    },
+    "shadow-parity": {
+      "case_id": "safe-release",
+      "before": {
+        "silent_new_result": 1000
+      },
+      "after": {
+        "visible_primary": 10,
+        "shadow_mismatch": true
+      },
+      "invariant": "A shadow computation compares results while the primary owns the user-visible effect."
+    },
+    "desired-state": {
+      "case_id": "safe-release",
+      "before": {
+        "actual": {
+          "image": "v1",
+          "replicas": 1
+        }
+      },
+      "after": {
+        "reconciled": {
+          "image": "v2",
+          "replicas": 2
+        }
+      },
+      "invariant": "A reconciler compares declared state with observed state before applying a change."
+    },
+    "ab-cohorts": {
+      "case_id": "safe-release",
+      "before": {
+        "visible_cohorts": [
+          "A"
+        ],
+        "fees": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "after": {
+        "visible_cohorts": [
+          "A",
+          "B"
+        ],
+        "fees": [
+          1,
+          2,
+          1,
+          2
+        ],
+        "assignment_stable": true
+      },
+      "invariant": "Both A and B are user-visible treatments assigned to distinct stable cohorts."
+    },
+    "object-authorization": {
+      "case_id": "access-policy",
+      "before": {
+        "cross_tenant_allowed": true
+      },
+      "after": {
+        "cross_tenant_allowed": false
+      },
+      "invariant": "Role, attributes and ownership must be checked against the specific resource."
+    },
+    "credential-boundary": {
+      "case_id": "access-policy",
+      "before": {
+        "expired_token_accepted": true
+      },
+      "after": {
+        "accepted": false
+      },
+      "invariant": "Expiration and audience constrain where and when a credential is accepted."
+    },
+    "rotate-key": {
+      "case_id": "access-policy",
+      "before": {
+        "old_key_accepted": true
+      },
+      "after": {
+        "old_key_accepted": false
+      },
+      "invariant": "Retiring a key makes a credential issued by that key inadmissible to this verifier."
+    },
+    "least-network-path": {
+      "case_id": "access-policy",
+      "before": {
+        "direct_browser_ledger": true
+      },
+      "after": {
+        "direct_browser_ledger": false
+      },
+      "invariant": "Explicit allowed edges reduce paths that bypass the application owner."
+    },
+    "correlate-retries": {
+      "case_id": "diagnostics",
+      "before": {
+        "trace_one_request_spans": 2
+      },
+      "after": {
+        "operation_spans": 3,
+        "requests": 2
+      },
+      "invariant": "An operation identity relates two request attempts without confusing them."
+    },
+    "measure-signals": {
+      "case_id": "diagnostics",
+      "before": {
+        "looks_healthy_from_average_only": true
+      },
+      "after": {
+        "spans": 3,
+        "requests": 2,
+        "operations": 1,
+        "failed_requests": 1,
+        "max_span_duration_ms": 800,
+        "request_error_ratio": 0.5,
+        "observation_window_seconds": 1,
+        "request_rate_per_second": 2.0
+      },
+      "invariant": "Rate, errors and duration expose a slow failed dependency hidden by a vague status."
+    },
+    "probe-business-path": {
+      "case_id": "diagnostics",
+      "before": {
+        "health_endpoint": "ok",
+        "order_path": "unmeasured"
+      },
+      "after": {
+        "health_endpoint": "ok",
+        "synthetic_order": "provider_failed"
+      },
+      "invariant": "A synthetic business-path check can fail while the process health endpoint stays green."
+    },
+    "replica-lag": {
+      "case_id": "consensus",
+      "before": {
+        "replica_version": 1,
+        "primary_version": 2
+      },
+      "after": {
+        "replica_version": 2,
+        "primary_version": 2,
+        "balance": 1100
+      },
+      "invariant": "An asynchronous replica may serve an older committed value and converges only after applying the update."
+    },
+    "session-read-version": {
+      "case_id": "consensus",
+      "before": {
+        "read_version": 1,
+        "regressed": true
+      },
+      "after": {
+        "read_version": 2,
+        "regressed": false,
+        "balance": 1100
+      },
+      "invariant": "A session requires at least the version already observed or written and routes away from an older replica."
+    },
+    "priority-queue": {
+      "case_id": "queue-workflow",
+      "before": {
+        "processing_order": [
+          "standard",
+          "urgent",
+          "low"
+        ]
+      },
+      "after": {
+        "processing_order": [
+          "urgent",
+          "standard",
+          "low"
+        ]
+      },
+      "invariant": "Priority metadata, with a stable sequence tie-breaker, changes which queued task is selected first."
+    },
+    "delayed-queue": {
+      "case_id": "queue-workflow",
+      "before": {
+        "dispatched_before_due": true
+      },
+      "after": {
+        "dispatched_before_due": false,
+        "dispatch_time": 5
+      },
+      "invariant": "Eligibility depends on a not-before time, so a task remains delayed until the clock reaches its due time."
+    },
+    "demand-backpressure": {
+      "case_id": "queue-workflow",
+      "before": {
+        "maximum_buffer": 6,
+        "processed": 6
+      },
+      "after": {
+        "maximum_buffer": 2,
+        "processed": 6,
+        "rejected": 0
+      },
+      "invariant": "The producer advances only while downstream capacity is available; six tasks finish without buffering all six."
+    },
+    "rate-window": {
+      "case_id": "queue-workflow",
+      "before": {
+        "accepted": 4,
+        "rejected": 0
+      },
+      "after": {
+        "accepted": 3,
+        "rejected": 1,
+        "per_second_limit": 2
+      },
+      "invariant": "A fixed time window admits at most two calls in each second."
+    },
+    "timeout-boundary": {
+      "case_id": "queue-workflow",
+      "before": {
+        "waiting_state": "pending_without_bound"
+      },
+      "after": {
+        "waiting_state": "timeout"
+      },
+      "invariant": "A real asynchronous wait is cancelled by its timeout instead of remaining pending."
+    },
+    "deadline-budget": {
+      "case_id": "queue-workflow",
+      "before": {
+        "child_budget": 10,
+        "overruns_parent": true
+      },
+      "after": {
+        "child_budget": 3,
+        "overruns_parent": false
+      },
+      "invariant": "The child inherits the remaining parent budget instead of starting an independent longer deadline."
+    },
+    "subscription-fanout": {
+      "case_id": "queue-workflow",
+      "before": {
+        "one_shared_queue_total_deliveries": 2
+      },
+      "after": {
+        "audit": [
+          "EVENT-1",
+          "EVENT-2"
+        ],
+        "risk": [
+          "EVENT-1",
+          "EVENT-2"
+        ],
+        "total_deliveries": 4
+      },
+      "invariant": "Independent subscriptions each receive the two events, unlike one work queue that divides the two tasks."
+    },
+    "event-payload": {
+      "case_id": "queue-workflow",
+      "before": {
+        "source_lookups": 1,
+        "amount": 100
+      },
+      "after": {
+        "source_lookups": 0,
+        "amount": 100,
+        "status": "accepted"
+      },
+      "invariant": "A notification identifies what changed; a carried-state event lets this consumer act without fetching the source."
+    },
+    "consistent-ring": {
+      "case_id": "storage-partitions",
+      "before": {
+        "modulo_moved_keys": 76,
+        "keys": 100
+      },
+      "after": {
+        "ring_moved_keys": 24,
+        "keys": 100,
+        "existing_owner_kept": 76
+      },
+      "invariant": "A hash ring assigns a key to its next virtual-node owner; adding D moves only the keys whose next owner becomes D."
+    },
+    "transactional-inbox": {
+      "case_id": "order-delivery",
+      "before": {
+        "effects": 3,
+        "debit": 250
+      },
+      "after": {
+        "inbox_rows": 2,
+        "effects": 2,
+        "debit": 150
+      },
+      "invariant": "A transaction records message consumption and its monetary effect together, with a unique message key."
+    },
+    "cqrs-handlers": {
+      "case_id": "ledger-projection",
+      "before": {
+        "write_balance": 1100,
+        "query_balance": 1000,
+        "query_version": 1
+      },
+      "after": {
+        "write_balance": 1100,
+        "query_balance": 1100,
+        "query_version": 2,
+        "query_contract": "display_balance,position_version"
+      },
+      "invariant": "A command handler validates and updates the write model; a query handler reads a separate projection contract, which advances by events."
+    },
+    "value-object": {
+      "case_id": "order-boundaries",
+      "before": {
+        "negative_constructed": true,
+        "mutable": true
+      },
+      "after": {
+        "equal_values": true,
+        "distinct_instances": true,
+        "invalid_rejected": true,
+        "immutable": true
+      },
+      "invariant": "A monetary value compares by its components, rejects an invalid amount and is immutable without an entity identity."
+    },
+    "message-translation": {
+      "case_id": "order-boundaries",
+      "before": {
+        "consumer_has_order_id": false,
+        "amount_unit": "cents"
+      },
+      "after": {
+        "consumer_has_order_id": true,
+        "amount": 100.0,
+        "amount_unit": "BRL",
+        "status": "accepted"
+      },
+      "invariant": "The translator creates the consumer schema and changes both field names and the amount unit."
+    },
+    "read-through": {
+      "case_id": "cache-policy",
+      "before": {
+        "caller_source_calls": 3,
+        "cache_api_owns_loading": false
+      },
+      "after": {
+        "caller_source_calls": 0,
+        "loader_calls": 1,
+        "cache_api_owns_loading": true,
+        "values": [
+          1000,
+          1000,
+          1000
+        ]
+      },
+      "invariant": "The caller uses only cache.read; the cache API invokes its loader on a miss and stores the result."
+    },
+    "oauth-code-pkce": {
+      "case_id": "access-policy",
+      "before": {
+        "code_without_binding_can_be_replayed": true
+      },
+      "after": {
+        "wrong_verifier_rejected": true,
+        "wrong_redirect_rejected": true,
+        "code_reuse_rejected": true,
+        "resource_subject": "SYNTHETIC-USER",
+        "resource_scope": "order:read"
+      },
+      "invariant": "The local authorization-code model binds verifier and redirect, permits one code redemption and issues an audience/scope-limited signed access token.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    "oidc-id-token-validation": {
+      "case_id": "access-policy",
+      "before": {
+        "claims_read_without_signature_or_client_binding": true
+      },
+      "after": {
+        "verified_subject": "SYNTHETIC-USER",
+        "wrong_nonce_rejected": true,
+        "wrong_audience_rejected": true,
+        "tampered_signature_rejected": true
+      },
+      "invariant": "The ID-token validation property checks issuer, audience, nonce, expiration and the configured HS256 signature before accepting the subject.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    "signed-key-rotation": {
+      "case_id": "access-policy",
+      "before": {
+        "old_token_accepted_during_overlap": true
+      },
+      "after": {
+        "new_token_accepted": true,
+        "old_token_rejected_after_retirement": true,
+        "tampered_new_token_rejected": true
+      },
+      "invariant": "A signed credential remains valid through the overlap and becomes inadmissible after its signing key is removed from trust.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    "signed-service-identity": {
+      "case_id": "access-policy",
+      "before": {
+        "self_declared_service_header_accepted": true
+      },
+      "after": {
+        "unauthenticated_client_rejected": true,
+        "authenticated_service_subject": "order-service",
+        "resource_audience": "order-api",
+        "permission_scope": "order:read"
+      },
+      "invariant": "The resource authenticates a signed service principal and validates its intended audience/scope rather than trusting a caller-supplied service label.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    "downscoped-token-exchange": {
+      "case_id": "access-policy",
+      "before": {
+        "original_token_wrong_resource_rejected": true
+      },
+      "after": {
+        "exchanged_audience": "order-api",
+        "exchanged_scope": "order:read",
+        "subject": "SYNTHETIC-USER",
+        "actor": "gateway-service",
+        "expires": 5
+      },
+      "invariant": "The exchanged credential is bound to the target resource and a narrower delegated scope, preserving subject and actor identities.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    "verify-internal-request": {
+      "case_id": "access-policy",
+      "before": {
+        "internal_origin_alone_grants_access": true
+      },
+      "after": {
+        "internal_rogue_rejected": true,
+        "verified_service_allowed": true,
+        "internal_flag_bypasses_verification": false
+      },
+      "invariant": "Network location does not replace per-request identity and resource-policy verification in the tested boundary.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    "bastion-admin-hop": {
+      "case_id": "access-policy",
+      "before": {
+        "unrestricted_direct_admin_path": true
+      },
+      "after": {
+        "direct_path_allowed": false,
+        "authorized_two_hops": true,
+        "hops": [
+          [
+            "workstation",
+            "bastion"
+          ],
+          [
+            "bastion",
+            "ledger-admin"
+          ]
+        ],
+        "non_admin_rejected": true
+      },
+      "invariant": "Administrative access is funneled through an authenticated jump boundary and direct access to the protected target is denied.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    "mutual-tls-peer-certs": {
+      "case_id": "access-policy",
+      "before": {
+        "client_without_certificate_accepted": true
+      },
+      "after": {
+        "client_without_certificate_accepted": false,
+        "trusted_client_accepted": true,
+        "client_authenticated_by_server": true,
+        "server_authenticated_by_client": true,
+        "payload_exchange_completed": true
+      },
+      "invariant": "Real SSLContext handshakes reject a client missing its certificate when mutual verification is required and authenticate both trusted peers before exchanging data.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    "distributed-cache-owner": {
+      "case_id": "cache-policy",
+      "before": {
+        "independent_worker_cache_source_calls": 2
+      },
+      "after": {
+        "shared_owner_source_calls": 1,
+        "worker_values": [
+          1000,
+          1000
+        ],
+        "owner_partitions": 2
+      },
+      "invariant": "Different logical workers use the same partition owner and share its populated cache entry, unlike independent per-worker caches.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "paxos-accepted-carry": {
+      "case_id": "consensus",
+      "before": {
+        "new_round_proposal": "ORDER-B",
+        "would_replace_chosen_value": true
+      },
+      "after": {
+        "new_round_proposal": "ORDER-A",
+        "accepted_nodes": 2,
+        "ballot": 8
+      },
+      "invariant": "A prepare quorum reports accepted values; the proposer carries the value at the highest accepted ballot rather than inventing a different value.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "raft-log-prefix": {
+      "case_id": "consensus",
+      "before": {
+        "blind_append_accepts_mismatched_prefix": true
+      },
+      "after": {
+        "mismatched_prefix_rejected": true,
+        "length_after_rejection": 2,
+        "retry_accepted": true,
+        "matches_leader": true,
+        "log_terms": [
+          1,
+          3,
+          3
+        ]
+      },
+      "invariant": "The follower checks the previous index/term before appending; a retry from a matching prefix replaces conflicting suffix entries.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "election-one-vote": {
+      "case_id": "consensus",
+      "before": {
+        "candidates_with_unrestricted_votes": 2
+      },
+      "after": {
+        "A_votes": 2,
+        "C_votes": 1,
+        "elected_candidates": 1,
+        "B_voted_for": "A"
+      },
+      "invariant": "A voter remembers its vote in the term and refuses a second different candidate in that term.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "three-phase-precommit": {
+      "case_id": "consensus",
+      "before": {
+        "two_phase_prepared_timeout": "wait_for_coordinator"
+      },
+      "after": {
+        "phases_before_timeout": [
+          "canCommit",
+          "preCommit"
+        ],
+        "all_precommitted": true,
+        "decision_under_synchronous_no_partition_assumption": "commit",
+        "decision_if_partition_possible": "wait"
+      },
+      "invariant": "The extra precommit state distinguishes the modeled 3PC decision from an uncertain 2PC prepare, under the explicit timing and no-partition assumptions.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "hybrid-clock-receive": {
+      "case_id": "consensus",
+      "before": {
+        "naive_physical_receive_time": 1005
+      },
+      "after": {
+        "hybrid_wall": 1010,
+        "hybrid_logical": 4,
+        "causal_order_preserved": true
+      },
+      "invariant": "The receive rule combines the physical maximum with a logical counter when the received wall component wins.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "synchronous-replica-ack": {
+      "case_id": "consensus",
+      "before": {
+        "writer_ack_before_replica_applied": true
+      },
+      "after": {
+        "ack_while_replica_behind": false,
+        "ack_after_replica_applied": true,
+        "read_version_after_ack": 2
+      },
+      "invariant": "The writer acknowledgement is ordered after this replica applies the write, providing the tested after-ack visibility property.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "cascading-replication": {
+      "case_id": "consensus",
+      "before": {
+        "C_before_B_relay": 1
+      },
+      "after": {
+        "A_version": 2,
+        "B_version": 2,
+        "C_version": 2,
+        "C_source": "B"
+      },
+      "invariant": "Replication follows A to B to C, exposing the intermediate replica as the source of the final replica.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "multi-writer-reconcile": {
+      "case_id": "consensus",
+      "before": {
+        "last_absolute_balance_wins": 1050,
+        "lost_credit": 100
+      },
+      "after": {
+        "sites_accepting_writes": 2,
+        "merged_balance": 1150,
+        "unique_credits": 2
+      },
+      "invariant": "Both sites accept writes and reconciliation preserves distinct additive credits instead of choosing one absolute snapshot.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "standby-recovery-work": {
+      "case_id": "consensus",
+      "before": {
+        "failed_primary_available": false
+      },
+      "after": {
+        "recovery_steps": {
+          "cold": [
+            "restore",
+            "start",
+            "catch-up",
+            "promote"
+          ],
+          "warm": [
+            "catch-up",
+            "promote"
+          ],
+          "hot": [
+            "promote"
+          ]
+        },
+        "all_promoted": true,
+        "all_versions": [
+          2,
+          2,
+          2
+        ]
+      },
+      "invariant": "Standby readiness changes the restore/start/catch-up work required before the role transition.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "automatic-failover-detection": {
+      "case_id": "consensus",
+      "before": {
+        "primary_responded_at": 0,
+        "automatic_successor": null
+      },
+      "after": {
+        "heartbeat_stale": true,
+        "successor": "B",
+        "successor_version": 2,
+        "old_primary_healthy": false
+      },
+      "invariant": "A failure detector based on heartbeat age triggers the modeled role transition automatically.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "failure-domain-spread": {
+      "case_id": "consensus",
+      "before": {
+        "survivors_after_zone_A_loss": 0,
+        "survivors_after_region_R1_loss": 0
+      },
+      "after": {
+        "survivors_after_zone_A_loss": 1,
+        "survivors_after_region_R1_loss": 1
+      },
+      "invariant": "Replica placement across different failure domains leaves one instance after the declared zone or region outage.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "golden-use-resource-signals": {
+      "case_id": "diagnostics",
+      "before": {
+        "process_health": "ok",
+        "resource_saturation_measured": false
+      },
+      "after": {
+        "traffic_requests_per_second": 2.0,
+        "maximum_duration_ms": 800,
+        "failed_requests": 1,
+        "queued_requests": 3,
+        "active_slots": 2,
+        "slot_capacity": 2,
+        "cpu_utilization": 0.8
+      },
+      "invariant": "The sample distinguishes healthy process status from traffic/latency/errors/saturation and from resource utilization/saturation/errors.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "opentelemetry-sdk-export": {
+      "case_id": "diagnostics",
+      "before": {
+        "exported_spans": 0,
+        "traceparent_propagated": false
+      },
+      "after": {
+        "exported_spans": 2,
+        "failed_spans": 1,
+        "parent_matches": true,
+        "request_ids": 1,
+        "same_trace": true,
+        "span_names": [
+          "gateway",
+          "provider"
+        ],
+        "traceparent_propagated": true
+      },
+      "invariant": "The real SDK exports two parent/child spans in one trace, propagates context and records one failed span for one request.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "mvc-controller-model-view": {
+      "case_id": "order-boundaries",
+      "before": {
+        "view_writes": 1
+      },
+      "after": {
+        "view_writes": 0,
+        "controller_writes": 1,
+        "rendered": [
+          "Balance 1100"
+        ]
+      },
+      "invariant": "The controller changes the model and selects a view; the view renders a DTO and never owns the write.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "mvp-passive-view": {
+      "case_id": "order-boundaries",
+      "before": {
+        "view_source_reads": 1,
+        "display": "1100"
+      },
+      "after": {
+        "view_source_reads": 0,
+        "presenter_source_reads": 1,
+        "display": "R$ 1100,00"
+      },
+      "invariant": "The presenter loads and prepares the model result; a passive view only receives the display value.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "mvvm-binding": {
+      "case_id": "order-boundaries",
+      "before": {
+        "view_after_plain_assignment": "1000"
+      },
+      "after": {
+        "view_after_bound_assignment": "1100",
+        "view_model_balance": 1100,
+        "binding_callbacks": 1
+      },
+      "invariant": "A binding propagates an observable view-model property change into the view.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "pac-agent-controls": {
+      "case_id": "order-boundaries",
+      "before": {
+        "shared_view_last_child_value": 50
+      },
+      "after": {
+        "parent_total": 150,
+        "parent_display": "150",
+        "controls_visited": [
+          "orders",
+          "fees",
+          "parent"
+        ]
+      },
+      "invariant": "Each agent owns abstraction, presentation and control; parent control coordinates the child agents.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "inward-ports-and-layers": {
+      "case_id": "order-boundaries",
+      "before": {
+        "domain_imports_storage_driver": true
+      },
+      "after": {
+        "domain_imports_storage_driver": false,
+        "saved_per_adapter": {
+          "memory-A": 1,
+          "memory-B": 1
+        },
+        "call_order": [
+          "presentation",
+          "application",
+          "domain"
+        ]
+      },
+      "invariant": "Ordered invocation exhibits layers; the domain depends on its port and two replaceable adapters implement that port, exhibiting the inward dependency property of Clean/Onion/Hexagonal designs.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "module-public-contract": {
+      "case_id": "order-boundaries",
+      "before": {
+        "cross_module_internal_writes": 1
+      },
+      "after": {
+        "cross_module_internal_writes": 0,
+        "public_calls": [
+          "orders.public.place",
+          "positions.public.project"
+        ],
+        "order_feature_parts": [
+          "validate",
+          "place",
+          "persist"
+        ],
+        "single_process": true
+      },
+      "invariant": "Public component contracts separate modules in one process; the order feature groups the steps of one vertical use case.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "microkernel-plugin": {
+      "case_id": "order-boundaries",
+      "before": {
+        "premium_available": false
+      },
+      "after": {
+        "premium_available": true,
+        "fee": 5.0,
+        "core_dispatch_branches_added": 0
+      },
+      "invariant": "A stable kernel invokes a registered extension through a shared contract.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "blackboard-specialists": {
+      "case_id": "order-boundaries",
+      "before": {
+        "allocation": null
+      },
+      "after": {
+        "allocation": "reserved",
+        "rounds": 2,
+        "risk_approved": true
+      },
+      "invariant": "Independent specialists read and contribute to a shared problem state until their prerequisites become available.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "actor-mailbox-writer": {
+      "case_id": "order-boundaries",
+      "before": {
+        "counter_after_two_stale_writers": 1
+      },
+      "after": {
+        "counter": 2,
+        "mailbox_empty": true,
+        "state_writer_count": 1
+      },
+      "invariant": "A private state owner serializes messages and provides a single writer for this actor.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "event-driven-handler": {
+      "case_id": "order-boundaries",
+      "before": {
+        "projection_before_event_dispatch": 1000
+      },
+      "after": {
+        "projection_after_event_dispatch": 1100,
+        "producer_balance": 1100,
+        "producer_direct_projection_writes": 0
+      },
+      "invariant": "The producer emits a fact and a subscribed handler reacts to it asynchronously in the local schedule.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "service-boundaries": {
+      "case_id": "order-boundaries",
+      "before": {
+        "shared_failure_stops_balance_read": true
+      },
+      "after": {
+        "balance_results": [
+          1100,
+          1100
+        ],
+        "read_after_other_service_failure": 1100,
+        "public_operations": [
+          "credit",
+          "read",
+          "read"
+        ]
+      },
+      "invariant": "An explicit business service owns its store and operation contract; the other service failure does not mutate or prevent its operation in this controlled schedule.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "serverless-invocation": {
+      "case_id": "order-boundaries",
+      "before": {
+        "next_fresh_local_balance": 1000
+      },
+      "after": {
+        "invocation_balances": [
+          1100,
+          1100
+        ],
+        "local_counters": [
+          1,
+          1
+        ],
+        "state_owner": "external_port"
+      },
+      "invariant": "The handler tolerates fresh invocation memory and keeps authoritative state outside that ephemeral environment.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "space-based-grid": {
+      "case_id": "order-boundaries",
+      "before": {
+        "central_store_failure_processed": 0
+      },
+      "after": {
+        "grid_partitions": 3,
+        "processed": 12,
+        "value_sum": 90,
+        "per_partition": [
+          4,
+          4,
+          4
+        ],
+        "external_database_calls": 0
+      },
+      "invariant": "A partitioned memory grid owns data and co-locates processing; the same owner partitions can serve shared cache reads to different logical workers.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "cell-failure-boundary": {
+      "case_id": "order-boundaries",
+      "before": {
+        "shared_failure_successes": 0
+      },
+      "after": {
+        "isolated_cell_successes": 1,
+        "responses": [
+          "accepted-B"
+        ]
+      },
+      "invariant": "Independent cells contain one failure while the other cell completes its own request.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    "aggregate-root-invariant": {
+      "case_id": "order-boundaries",
+      "before": {
+        "bypassed_total": 130,
+        "exceeds_limit": true
+      },
+      "after": {
+        "protected_total": 50,
+        "second_add_refused": true,
+        "public_children_are_tuple": true
+      },
+      "invariant": "The root owns the public mutation operation and checks the invariant spanning its children before accepting the next item.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "domain-service-transfer": {
+      "case_id": "order-boundaries",
+      "before": {
+        "credit_without_debit_total": 1100
+      },
+      "after": {
+        "source_balance": 900,
+        "target_balance": 100,
+        "conserved_total": 1000
+      },
+      "invariant": "A domain operation involving two entities preserves the stated transfer invariant without belonging naturally to either entity alone.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "repository-storage-contract": {
+      "case_id": "order-boundaries",
+      "before": {
+        "domain_storage_shapes": [
+          "dictionary",
+          "row-list"
+        ]
+      },
+      "after": {
+        "domain_account_type": "Account",
+        "balances_from_each_adapter": [
+          1100,
+          1100
+        ]
+      },
+      "invariant": "The repository presents a domain collection contract while storage representation changes behind it.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "application-service-order": {
+      "case_id": "order-boundaries",
+      "before": {
+        "save_before_validation_calls": 1
+      },
+      "after": {
+        "accepted": false,
+        "operations": [
+          "load",
+          "reject"
+        ],
+        "balance": 1000,
+        "save_calls": 0
+      },
+      "invariant": "The application service coordinates the use case and calls domain behavior before persistence instead of embedding a write before validation.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "domain-factory-validity": {
+      "case_id": "order-boundaries",
+      "before": {
+        "raw_invalid_amount": -100
+      },
+      "after": {
+        "created_amount": 100,
+        "created_source": "A",
+        "created_target": "B",
+        "invalid_construction_rejected": true
+      },
+      "invariant": "A factory centralizes the valid construction of the domain object and rejects invalid combinations.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "specification-reuse": {
+      "case_id": "order-boundaries",
+      "before": {
+        "query_candidates": [
+          "A",
+          "B"
+        ],
+        "validator_candidates": [
+          "A"
+        ]
+      },
+      "after": {
+        "query_candidates": [
+          "A"
+        ],
+        "validator_candidates": [
+          "A"
+        ],
+        "same_predicate_result": true
+      },
+      "invariant": "One named criterion is reused across selection and validation, eliminating the duplicated inconsistent predicate in this fixture.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "context-contract-change": {
+      "case_id": "order-boundaries",
+      "before": {
+        "uncoordinated_change_breaks_consumers": [
+          "portfolio-screen",
+          "order-check"
+        ],
+        "old_shared_available": 1000
+      },
+      "after": {
+        "portfolio_available": 1000,
+        "trading_order_900_allowed": false,
+        "trading_available": 800,
+        "impacted_consumers": [
+          "order-check",
+          "portfolio-screen",
+          "trading-adapter"
+        ],
+        "broken_after_context_adaptation": 0
+      },
+      "invariant": "An actual schema change exposes affected consumers; bounded contexts give available different meanings, and the supplier/consumer agreement restores explicit contracts and a shared vocabulary within each context.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "conformist-contract": {
+      "case_id": "order-boundaries",
+      "before": {
+        "local_consumer_assumes_accepted": false
+      },
+      "after": {
+        "consumer_uses_upstream_state": true,
+        "translation_layer_added": false
+      },
+      "invariant": "The downstream deliberately adopts the upstream vocabulary and schema, including its coupling cost.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "separate-ways-change": {
+      "case_id": "order-boundaries",
+      "before": {
+        "unrelated_context_fee_after_shared_mutation": 2.0
+      },
+      "after": {
+        "changed_context_fee": 2.0,
+        "independent_context_fee": 1.0,
+        "integration_edges": 0
+      },
+      "invariant": "Choosing separate ways prevents an unrelated context from inheriting the other context change through a shared mutable object.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "shared-kernel-impact": {
+      "case_id": "order-boundaries",
+      "before": {
+        "independent_rounding_results": [
+          1,
+          2
+        ]
+      },
+      "after": {
+        "shared_results": [
+          1,
+          1
+        ],
+        "consumers_affected_by_shared_rule_change": 2,
+        "changed_results": [
+          2,
+          2
+        ]
+      },
+      "invariant": "The shared kernel makes a small domain rule genuinely shared and exposes the joint impact of changing it.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "open-host-service": {
+      "case_id": "order-boundaries",
+      "before": {
+        "clients_broken_by_internal_schema": 2
+      },
+      "after": {
+        "client_balances": [
+          1000.0,
+          1000.0
+        ],
+        "public_contract_version": 1,
+        "internal_field_exposed": false
+      },
+      "invariant": "A stable public service contract supports multiple consumers while internal representation changes behind it.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    "rest-resource-methods": {
+      "case_id": "order-boundaries",
+      "before": {
+        "GET_with_unconditional_write_calls": 1
+      },
+      "after": {
+        "GET_status": 200,
+        "GET_amount": 100,
+        "GET_writes": 0,
+        "POST_status": 201,
+        "total_writes": 1,
+        "unsupported_method_status": 405
+      },
+      "invariant": "Resource paths, method semantics and response status are explicit; GET does not become an operation that writes.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "rpc-operation-contract": {
+      "case_id": "order-boundaries",
+      "before": {
+        "unmatched_reply_request_id": "OTHER"
+      },
+      "after": {
+        "request_id": "REQUEST-1",
+        "reply_request_id": "REQUEST-1",
+        "result": {
+          "reserved_amount": 100
+        },
+        "operation": "reserve"
+      },
+      "invariant": "The dispatcher invokes an explicit operation and returns its result to the matching requester.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "gateway-route-offload": {
+      "case_id": "order-boundaries",
+      "before": {
+        "unprotected_guest_backend_calls": 1
+      },
+      "after": {
+        "guest_status": 403,
+        "guest_backend_calls": 0,
+        "routed_backends": [
+          "orders",
+          "positions"
+        ],
+        "forwarded_method": "POST",
+        "forwarded_amount": 100,
+        "entry_auth_checks": 3,
+        "position_status": 200
+      },
+      "invariant": "The entry point routes requests, offloads authentication checks and forwards the accepted method/payload to the selected backend.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "bff-composed-view": {
+      "case_id": "order-boundaries",
+      "before": {
+        "frontend_round_trips_per_view": 2
+      },
+      "after": {
+        "frontend_round_trips_per_view": 1,
+        "mobile": {
+          "balance": 1100,
+          "pending_count": 1
+        },
+        "web_order_count": 2,
+        "backend_calls_for_two_views": 4
+      },
+      "invariant": "A server-side composition calls two owners and returns a client-specific view, reducing client round trips without pretending the backend calls disappear.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "federated-entity-key": {
+      "case_id": "order-boundaries",
+      "before": {
+        "join_by_unrelated_display_label": null
+      },
+      "after": {
+        "entity_type": "Account",
+        "composed_account": {
+          "account_id": "SYNTHETIC-1",
+          "balance": 1100,
+          "open_orders": 2
+        },
+        "subgraph_owners": [
+          "portfolio",
+          "orders"
+        ]
+      },
+      "invariant": "Entity-reference resolution joins fields owned by different subgraphs through the declared entity key instead of a display label.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "hypermedia-affordance": {
+      "case_id": "order-boundaries",
+      "before": {
+        "hardcoded_client_attempts_cancel_after_settlement": true
+      },
+      "after": {
+        "representation_state": "settled",
+        "cancel_link": null,
+        "client_attempts_cancel": false
+      },
+      "invariant": "The representation exposes state-dependent action links and the client follows an available relation rather than hardcoding every transition.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "poll-vs-long-poll": {
+      "case_id": "order-boundaries",
+      "before": {
+        "periodic_requests_until_ready": 3,
+        "value": "position-ready"
+      },
+      "after": {
+        "long_poll_requests": 1,
+        "value": "position-ready"
+      },
+      "invariant": "Polling issues repeated requests; long polling holds one request until the result becomes available.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "sse-event-resume": {
+      "case_id": "order-boundaries",
+      "before": {
+        "reconnect_without_cursor_events": 2
+      },
+      "after": {
+        "content_type": "text/event-stream",
+        "resumed_event_ids": [
+          2
+        ],
+        "resumed_balance": 1100,
+        "messages_are_server_to_client": true
+      },
+      "invariant": "SSE event records carry IDs and data; a server can honor the last received ID when selecting the resumed stream.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "websocket-duplex-frames": {
+      "case_id": "order-boundaries",
+      "before": {
+        "server_push_requires_new_poll": true
+      },
+      "after": {
+        "client_to_server": "reserve:ORDER-1",
+        "server_to_client": "position:1100",
+        "client_frame_masked": true,
+        "new_client_poll_for_server_message": false
+      },
+      "invariant": "Two independent text-frame directions share the duplex model; client frames are masked and server frames are decoded without a new poll.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "signed-webhook-callback": {
+      "case_id": "order-boundaries",
+      "before": {
+        "polling_receiver_callback_effects": 0
+      },
+      "after": {
+        "callback_status": 200,
+        "repeat_status": 200,
+        "invalid_signature_status": 401,
+        "effects": [
+          100
+        ]
+      },
+      "invariant": "The provider pushes the event to a callback; signature verification precedes the receiver effect and the event identity suppresses a repeat.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "sidecar-outbound-policy": {
+      "case_id": "order-boundaries",
+      "before": {
+        "old_policy_status": 403
+      },
+      "after": {
+        "updated_statuses": [
+          200,
+          200
+        ],
+        "identities": [
+          "order-service",
+          "position-service"
+        ],
+        "policy_versions": [
+          2,
+          2
+        ],
+        "workload_business_code_changed": false
+      },
+      "invariant": "A companion outbound proxy adds transport policy and identity; distributing the same policy to both companion proxies exhibits one mesh control/data-plane property.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    "tcc-resource-states": {
+      "case_id": "order-delivery",
+      "before": {
+        "immediate_debit_after_peer_refusal": 900
+      },
+      "after": {
+        "cancelled_cash": 1000,
+        "cancelled_units": 1,
+        "confirmed": {
+          "cash": 900,
+          "units": 0,
+          "state": "confirmed"
+        }
+      },
+      "invariant": "Try holds resources; Confirm consumes the hold, while Cancel releases the same held resources.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "at-most-once-loss": {
+      "case_id": "order-delivery",
+      "before": {
+        "retry_without_dedup_effects": 2
+      },
+      "after": {
+        "ack_lost_effects_without_retry": 1,
+        "delivery_lost_effects_without_retry": 0,
+        "maximum_attempts": 1
+      },
+      "invariant": "At most one attempt avoids repeat delivery in this fixture but can lose the operation entirely.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "cdc-committed-change": {
+      "case_id": "order-delivery",
+      "before": {
+        "independent_target_cents_after_second_write_failure": 100000
+      },
+      "after": {
+        "captured_committed_changes": 1,
+        "rolled_back_changes": 0,
+        "target_cents": 110000
+      },
+      "invariant": "A database trigger captures only the committed after-image visible to the feed reader, allowing a destination to catch up instead of relying on a second independent application write.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "outbox-cdc-feed": {
+      "case_id": "order-delivery",
+      "before": {
+        "order_saved_external_delivery_intention_lost": true
+      },
+      "after": {
+        "captured_outbox_events": [
+          "EVENT-1"
+        ],
+        "resume_after_sequence": 1
+      },
+      "invariant": "The transactional outbox is the captured table, and its committed insert becomes the CDC feed item.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "bulkhead-independent-pools": {
+      "case_id": "queue-workflow",
+      "before": {
+        "order_allowed_while_quotes_fill_global_pool": false
+      },
+      "after": {
+        "order_allowed_with_separate_pool": true,
+        "quote_capacity": 2,
+        "order_capacity": 1
+      },
+      "invariant": "A saturated dependency consumes only its own budget; the independent order pool retains capacity.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "watchdog-restart": {
+      "case_id": "queue-workflow",
+      "before": {
+        "healthy": false,
+        "generation": 1
+      },
+      "after": {
+        "healthy_after_restart": true,
+        "generation": 2
+      },
+      "invariant": "The supervisor detects the failed local state and rearms it through a replacement generation.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "fallback-limited-function": {
+      "case_id": "queue-workflow",
+      "before": {
+        "dependency_failure_result": "error"
+      },
+      "after": {
+        "response": {
+          "balance": 1000,
+          "fresh": false,
+          "writes_enabled": false
+        },
+        "source": "last-known-cache"
+      },
+      "invariant": "The fallback preserves a deliberately reduced read function and labels the stale result instead of silently claiming full service.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "chaos-delivery-experiment": {
+      "case_id": "queue-workflow",
+      "before": {
+        "effects_after_injected_drop": 0
+      },
+      "after": {
+        "injected_faults": [
+          "delivery_dropped"
+        ],
+        "orders": 1,
+        "effects_after_recovery": 1,
+        "debit": 100,
+        "steady_invariant_restored": true
+      },
+      "invariant": "A declared steady-state invariant is observed before/after an intentional fault and recovery experiment.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "stream-offset-resume": {
+      "case_id": "queue-workflow",
+      "before": {
+        "replay_all_after_first_effect": 230
+      },
+      "after": {
+        "resume_offsets": [
+          1,
+          2
+        ],
+        "position_after_resume": 130,
+        "last_offset": 2
+      },
+      "invariant": "An ordered event log and an explicit consumer position let the consumer resume the remaining events.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "batch-stream-emission": {
+      "case_id": "queue-workflow",
+      "before": {
+        "batch_outputs_at_end": [
+          130
+        ]
+      },
+      "after": {
+        "incremental_outputs": [
+          100,
+          80,
+          130
+        ],
+        "final_position": 130,
+        "updates_before_last_event": 2
+      },
+      "invariant": "Batch emits after the chosen finite input set completes; stream processing updates the result as each event arrives.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "mapreduce-grouping": {
+      "case_id": "queue-workflow",
+      "before": {
+        "ungrouped_partial_values": [
+          100,
+          20,
+          50
+        ]
+      },
+      "after": {
+        "grouped_totals": {
+          "buy": 150,
+          "sell": 20
+        },
+        "mapped_records": 3
+      },
+      "invariant": "The map/group/reduce stages aggregate values per key instead of confusing all partial values with one total.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "lambda-disjoint-views": {
+      "case_id": "queue-workflow",
+      "before": {
+        "batch_plus_overlapping_all_stream": 210
+      },
+      "after": {
+        "batch_cutoff_offset": 1,
+        "batch_value": 80,
+        "speed_after_cutoff": 50,
+        "merged_position": 130
+      },
+      "invariant": "Batch and speed-layer views cover disjoint input positions before being merged, preventing double counting at their boundary.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "kappa-one-log-replay": {
+      "case_id": "queue-workflow",
+      "before": {
+        "buggy_projection_before_replay": 170
+      },
+      "after": {
+        "replayed_position": 130,
+        "position_after_new_event": 140,
+        "processing_implementations": 1,
+        "log_offsets": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invariant": "One retained event log and one processing path support replay and ongoing processing rather than a separate batch algorithm.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "choreographed-compensation": {
+      "case_id": "queue-workflow",
+      "before": {
+        "debit_without_reaction_to_failed_allocation": 900
+      },
+      "after": {
+        "final_balance": 1000,
+        "event_trace": [
+          "order-placed",
+          "funds-reserved",
+          "allocation-failed",
+          "compensated"
+        ],
+        "top_level_step_coordinator": false
+      },
+      "invariant": "Local subscribers emit the next facts and a compensation handler reacts to the failure, exhibiting choreographed saga collaboration.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "fire-forget-return": {
+      "case_id": "queue-workflow",
+      "before": {
+        "caller_waiting_for_failed_handler": true
+      },
+      "after": {
+        "caller_result": "accepted",
+        "trace": [
+          "caller-returned",
+          "worker-failed"
+        ],
+        "caller_completed_before_failure": true
+      },
+      "invariant": "The caller does not await the later handler result, so its successful return does not prove eventual delivery or business completion.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "fanin-source-correlation": {
+      "case_id": "queue-workflow",
+      "before": {
+        "single_source_messages": 2
+      },
+      "after": {
+        "merged_messages": 3,
+        "source_counts": {
+          "orders": 2,
+          "settlements": 1
+        },
+        "identities": [
+          "ORDER-1",
+          "ORDER-2",
+          "SETTLEMENT-1"
+        ]
+      },
+      "invariant": "Multiple input streams converge into one correlated output without discarding source ownership.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "durable-workflow-resume": {
+      "case_id": "queue-workflow",
+      "before": {
+        "restart_from_beginning_credit_attempts": 2
+      },
+      "after": {
+        "phase_loaded_after_reopen": "credited",
+        "final_phase": "complete",
+        "effect_keys": [
+          "credit:ORDER-1",
+          "notify:ORDER-1"
+        ],
+        "credit_effects": 1
+      },
+      "invariant": "A persisted workflow identity and phase drive recovery after process-state loss, skipping the completed local step.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    "lease-expiry-owner": {
+      "case_id": "reservation",
+      "before": {
+        "B_can_acquire_unexpired_static_lock": false
+      },
+      "after": {
+        "B_acquired_after_expiry": true,
+        "owner": "B",
+        "old_owner_release_allowed": false,
+        "expires": 11
+      },
+      "invariant": "Expiry makes the abandoned authorization reclaimable, while owner comparison prevents an old owner from releasing the new lease.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "shared-arbiter-lock": {
+      "case_id": "reservation",
+      "before": {
+        "independent_local_locks_allow_both": true
+      },
+      "after": {
+        "second_connection_allowed": false,
+        "wrong_owner_deleted_rows": 0,
+        "held_claims": 1
+      },
+      "invariant": "Both participants use one atomic unique-key arbiter instead of independent local locks; ownership is checked at release.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "pessimistic-writer-lock": {
+      "case_id": "reservation",
+      "before": {
+        "uncoordinated_stale_balance": 105000
+      },
+      "after": {
+        "second_writer_blocked_before_release": true,
+        "balance_after_serial_writes": 115000
+      },
+      "invariant": "The writer obtains exclusion before changing the record; the second writer cannot begin its write transaction until release.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "copy-on-write-snapshot": {
+      "case_id": "reservation",
+      "before": {
+        "reader_original_after_shared_mutation": 1100
+      },
+      "after": {
+        "reader_original": 1000,
+        "writer_new_copy": 1100,
+        "different_objects": true
+      },
+      "invariant": "A writer changes a new copy instead of mutating the snapshot held by the old reader.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "semaphore-permits": {
+      "case_id": "reservation",
+      "before": {
+        "unbounded_simultaneous_tasks": 4
+      },
+      "after": {
+        "maximum_simultaneous_tasks": 2,
+        "completed": 4,
+        "active_at_end": 0
+      },
+      "invariant": "A real asyncio semaphore bounds concurrent entry to two and releases its permits after each task.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    "reused-thread-workers": {
+      "case_id": "reservation",
+      "before": {
+        "new_worker_per_task": 4
+      },
+      "after": {
+        "threads_used": 2,
+        "tasks_completed": 4,
+        "partials": [
+          2,
+          4,
+          6,
+          8
+        ],
+        "joined_total": 20
+      },
+      "invariant": "The executor reuses two workers, forks four computations and joins their four results into one total.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    "idle-worker-steal": {
+      "case_id": "reservation",
+      "before": {
+        "idle_B_completed": 0,
+        "A_remaining_work": 2
+      },
+      "after": {
+        "A_completed": [
+          1
+        ],
+        "B_completed": [
+          2
+        ],
+        "unique_completed": 2
+      },
+      "invariant": "An idle worker steals eligible queued work from another worker while task ownership changes exactly once in this schedule.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    "reader-writer-exclusion": {
+      "case_id": "reservation",
+      "before": {
+        "uncoordinated_writer_during_two_reads": true
+      },
+      "after": {
+        "simultaneous_readers": 2,
+        "writer_blocked_during_reads": true,
+        "writer_acquired_after_release": true,
+        "reader_blocked_during_write": true
+      },
+      "invariant": "Concurrent readers are compatible with each other and incompatible with an exclusive writer in the finite state model.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    "spinlock-active-attempts": {
+      "case_id": "reservation",
+      "before": {
+        "owner_paused_initially_held": true
+      },
+      "after": {
+        "active_attempts": 4,
+        "acquired_after_scheduled_release": true,
+        "blocking_sleep_calls": 0
+      },
+      "invariant": "The contender repeatedly tests the lock state without blocking, consuming execution steps while the owner is paused.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    "cas-system-progress": {
+      "case_id": "reservation",
+      "before": {
+        "mutex_owner_paused_blocks_all": true
+      },
+      "after": {
+        "counter": 2,
+        "A_completed": 2,
+        "B_completed": 0,
+        "B_retry_needed": true
+      },
+      "invariant": "The CAS retry pattern permits system progress while one contender stalls; this schedule also shows why that is not a per-thread bounded completion guarantee.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    "bounded-spsc-steps": {
+      "case_id": "reservation",
+      "before": {
+        "retry_loop_steps_have_no_per_operation_bound": true
+      },
+      "after": {
+        "put_results": [
+          true,
+          true,
+          false
+        ],
+        "take_values": [
+          10,
+          20,
+          null
+        ],
+        "maximum_steps": 4
+      },
+      "invariant": "With one producer, one consumer and atomic ordered index publication, each straight-line operation returns success/full/empty in at most four modeled steps without a retry loop.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    "reactive-demand-contract": {
+      "case_id": "reservation",
+      "before": {
+        "unrequested_push_count": 4
+      },
+      "after": {
+        "delivered_before_request": 0,
+        "after_request_two": [
+          1,
+          2
+        ],
+        "delivered_after_request_three_and_cancel": [
+          1,
+          2,
+          3
+        ],
+        "unconsumed": 1
+      },
+      "invariant": "Demand gates delivery and cancellation stops subsequent onNext-style emissions in this local publisher/subscriber contract.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    "rolling-recreate-capacity": {
+      "case_id": "safe-release",
+      "before": {
+        "recreate_ready_history": [
+          2,
+          0,
+          2
+        ],
+        "minimum_ready": 0
+      },
+      "after": {
+        "rolling_ready_history": [
+          2,
+          1,
+          2,
+          1,
+          2
+        ],
+        "minimum_ready": 1,
+        "new_instances": 2
+      },
+      "invariant": "Recreate produces a zero-ready interval in this schedule, while a one-at-a-time rolling replacement preserves one ready instance.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "blue-green-route": {
+      "case_id": "safe-release",
+      "before": {
+        "visible_version": 1
+      },
+      "after": {
+        "visible_after_switch": 2,
+        "visible_after_rollback": 1,
+        "blue_still_ready": true,
+        "provisioned_environments": 2
+      },
+      "invariant": "Traffic changes between two already-provisioned environments and can return to the previous ready environment.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "versioned-desired-reconcile": {
+      "case_id": "safe-release",
+      "before": {
+        "observed": {
+          "image": "v1",
+          "replicas": 0
+        }
+      },
+      "after": {
+        "planned_fields": [
+          "image",
+          "replicas"
+        ],
+        "selected_revision": "revision-2",
+        "drift_before_reconcile": {
+          "image": "v2",
+          "replicas": 0
+        },
+        "after_reconcile": {
+          "image": "v2",
+          "replicas": 2
+        }
+      },
+      "invariant": "A versioned desired-state source drives the plan and reconciliation instead of allowing manual runtime drift to become the desired source.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "immutable-replacement": {
+      "case_id": "safe-release",
+      "before": {
+        "in_place_image_change_owner": "instance-1"
+      },
+      "after": {
+        "old_instance_unchanged": true,
+        "new_active_id": "instance-2",
+        "new_active_image": "v2",
+        "old_image_retained": "v1"
+      },
+      "invariant": "The new infrastructure instance is created as a replacement while the prior instance remains unchanged.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "strangler-abstraction-route": {
+      "case_id": "safe-release",
+      "before": {
+        "orders_owner": "legacy",
+        "result": 100
+      },
+      "after": {
+        "calls": [
+          [
+            "/orders",
+            "legacy"
+          ],
+          [
+            "/orders",
+            "new"
+          ],
+          [
+            "/positions",
+            "legacy"
+          ]
+        ],
+        "new_order_result": 100,
+        "legacy_position_result": 50,
+        "client_contract_preserved": true
+      },
+      "invariant": "An abstraction preserves the caller contract while routing one extracted capability to its new owner, leaving the rest on the legacy path during transition.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "decomposed-data-owners": {
+      "case_id": "safe-release",
+      "before": {
+        "shared_rows": 2,
+        "applications_share_same_mutable_table": true
+      },
+      "after": {
+        "order_value": 150,
+        "position_value": 1000,
+        "separate_stores": true,
+        "owner_count": 2
+      },
+      "invariant": "Data is split into stores with explicit capability owners, exposing the need for an integration contract between the formerly shared consumers.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    "directory-shard": {
+      "case_id": "storage-partitions",
+      "before": {
+        "lookup_in_default_A": null
+      },
+      "after": {
+        "directory_owner": "B",
+        "value": 700
+      },
+      "invariant": "An explicit directory maps an entity key to its owning shard, independently of a hash function.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "range-boundary": {
+      "case_id": "storage-partitions",
+      "before": {
+        "inclusive_upper_boundary_owners": [
+          0,
+          1
+        ]
+      },
+      "after": {
+        "half_open_boundary_owners": [
+          1
+        ],
+        "key": 100
+      },
+      "invariant": "Half-open ranges assign the boundary key to exactly one shard rather than overlapping owners.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "geographic-owner": {
+      "case_id": "storage-partitions",
+      "before": {
+        "all_accounts_owner": "US"
+      },
+      "after": {
+        "account_region": "BR",
+        "BR_rows": 1,
+        "US_rows": 0
+      },
+      "invariant": "A geographic attribute chooses the data owner rather than a key hash.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "vertical-attributes": {
+      "case_id": "storage-partitions",
+      "before": {
+        "position_read_columns": [
+          "account_key",
+          "cents",
+          "contact_label"
+        ]
+      },
+      "after": {
+        "position_read_columns": [
+          "account_key",
+          "cents"
+        ],
+        "contact_columns": [
+          "account_key",
+          "contact_label"
+        ],
+        "rejoin_preserves_row": true
+      },
+      "invariant": "Vertical partitions divide attributes while preserving the key needed to reconstruct the logical entity.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "log-structured-latest": {
+      "case_id": "storage-partitions",
+      "before": {
+        "in_place_record_history": 1
+      },
+      "after": {
+        "append_records": 2,
+        "latest_value": 1100,
+        "latest_version": 2
+      },
+      "invariant": "Updates append records and reads resolve the latest version, exposing the read/compaction work introduced by a log-structured representation.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "coalesced-snapshot-writes": {
+      "case_id": "storage-partitions",
+      "before": {
+        "physical_snapshot_writes": 10
+      },
+      "after": {
+        "physical_batch_writes": 1,
+        "latest_snapshot": 1009,
+        "updates_in_acknowledged_batch": 10
+      },
+      "invariant": "Coalescing repeated overwrites of one snapshot reduces physical writes before the batch acknowledgement.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "owner-latest-read": {
+      "case_id": "consensus",
+      "before": {
+        "read_from_uncoordinated_stale_replica_after_write": 1000
+      },
+      "after": {
+        "read_before_write": 1000,
+        "read_after_completed_write": 1100,
+        "latest_version": 2,
+        "ordered_history": [
+          [
+            "read",
+            1,
+            1000
+          ],
+          [
+            "write",
+            2,
+            1100
+          ],
+          [
+            "read",
+            2,
+            1100
+          ]
+        ]
+      },
+      "invariant": "Every read in this single-owner schedule observes the latest preceding completed write, independently of a client session hint.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    "at-least-once-ack-retry": {
+      "case_id": "order-delivery",
+      "before": {
+        "acknowledged": false,
+        "attempts": 1
+      },
+      "after": {
+        "acknowledged": true,
+        "attempts": 2,
+        "deliveries": 2,
+        "unique_event_ids": 1
+      },
+      "invariant": "Retry after an ambiguous acknowledgement restores acknowledgement while admitting repeat delivery of the same event.",
+      "source_file": "labs/architecture/models_distribution.py"
+    }
+  }
+}

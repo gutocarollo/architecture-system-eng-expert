@@ -1,0 +1,26 @@
+{
+  "case_id": "airflow-lock-retry",
+  "repository": "fazcapital/airflow",
+  "path": "dags/inflow__xp__stg_to_fct.py",
+  "function": "task_run_60_days_rule_hs",
+  "before": "febaf1be978aad59c29f38d1bd74f357f8e942b5",
+  "after": "55dfe8acb362e6854d1af4e7dd7d17e6497af9bd",
+  "snapshots": {
+    "before": {
+      "sha256": "3d07e99ef91f60205e06466e6468674e4713482f0d52d163ee06079c3bde7753",
+      "source_file_sha256": "87b745c73fedb2065756e18114421b1bfb2d90f1838a6ca354af2264f984d3a4",
+      "source_blob": "5f6641421f6adbf6b7206d4bb3dca0261a84c00b",
+      "start_line": 226,
+      "end_line": 270,
+      "normalization": "Dedent the selected nested function; preserve its body and historical comments verbatim."
+    },
+    "after": {
+      "sha256": "3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731",
+      "source_file_sha256": "e9ecd6338d6c22af7f55b4017b610e7a705ab3268864b5a770ac52220a1735f5",
+      "source_blob": "2fa3dd686111f73b3148674454c203015269f1bd",
+      "start_line": 226,
+      "end_line": 288,
+      "normalization": "Dedent the selected nested function; preserve its body and historical comments verbatim."
+    }
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "measured_at_utc": "2026-10-14T20:28:29.265996+00:00",
+  "packet_sha256": "2735ced3d2249a581cedd3aef2c099e1a690ef85f96fc69b623cc8d8f8f3190a",
+  "receipt_count": 20,
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "schema_validation": "jsonschema Draft202012Validator",
+  "semantic_fences_bound": 39,
+  "receipts": [
+    {
+      "document_id": "explicacoes/availability/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--availability--index.json",
+      "receipt_sha256": "45f1ccb67e3ab8757f59108d02a3a96f74c8e18c40dc3e0e00c18a95cf85524b",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--availability--index.json",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "context_sha256": "6f37adf5329f1d3e27cbff11f7e3a47c81f216c1e2e27146ada699bdf0460f50"
+    },
+    {
+      "document_id": "explicacoes/data-distribution/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--data-distribution--index.json",
+      "receipt_sha256": "b23d7d2b960f251ed4307c6d4a54a2e396f16ef223404644c40f04aab860cf37",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--data-distribution--index.json",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "context_sha256": "c58ca1b97d6dda4d28533ae09e2ebc3eb84f0679ed4672b290e4558ef2007e4a"
+    },
+    {
+      "document_id": "explicacoes/data-durability/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--data-durability--index.json",
+      "receipt_sha256": "6fd47cd80e330ac33efa9a76bdde5b75e0e8ba1ae4489ffca89c8194cb65d477",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--data-durability--index.json",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "context_sha256": "2f08928ddcf3aa3ead500638f3d27c9d1bbb3b50b8a938a0f7d3ede4df754f41"
+    },
+    {
+      "document_id": "explicacoes/distributed-work/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--distributed-work--index.json",
+      "receipt_sha256": "0dbeaa5cd9095be04677d1d98da77202a86a5bea52c09919ed9e44dafebc8c68",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--distributed-work--index.json",
+      "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+      "context_sha256": "1654333c1a01208d1008d58c02b36dfc34e95c3fa78a6e2012839dba2c443f3f"
+    },
+    {
+      "document_id": "explicacoes/messages/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--messages--index.json",
+      "receipt_sha256": "2fd52b9af9fec0a88c801c65990b280ab9a33df7f9f5dd553ada488d3b443e5a",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--messages--index.json",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "context_sha256": "adf957b98ca6a7a7a8f54fd62838b9cbc5ab87ad0cfa4c679a909a4366313a73"
+    },
+    {
+      "document_id": "explicacoes/read-models/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--read-models--index.json",
+      "receipt_sha256": "aef880fd4e57e1b598f01384e6a9cd81c0dfe0dc129ef6e639c2886a8c20eb3f",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--read-models--index.json",
+      "document_sha256": "6bc44cc3081e0ead62a977ade0cd53240f639308b7f5f725761f0a097d738126",
+      "context_sha256": "1c76e68802c95157c6618aeef53fe2b4579c3f0bf11795fd08e09525fe74c424"
+    },
+    {
+      "document_id": "explicacoes/reliable-integration/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--reliable-integration--index.json",
+      "receipt_sha256": "11dbaebb50ecfa206a32c2f38e55f3e54ffd5dc45b30ec5c97dc93b6b1f9bc3d",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--reliable-integration--index.json",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "context_sha256": "6c99707c893f2c0e98771aa92fa04ea106a473cb2e918389ad9a7abfab49e5f4"
+    },
+    {
+      "document_id": "explicacoes/safe-change/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--safe-change--index.json",
+      "receipt_sha256": "c6af90d012aa3e1869af13bf4111eca09de9b7b42353cca534c9279855bf545b",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--safe-change--index.json",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "context_sha256": "544a99b86abbd040b42d8e69bb89cb68017faff26a1e23b81c21730c0a19b27d"
+    },
+    {
+      "document_id": "explicacoes/security/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--security--index.json",
+      "receipt_sha256": "e5fb5ab1aa45895ac8cb57508226ef3fc17f7b5812201bfe9ba2e02381e6696d",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--security--index.json",
+      "document_sha256": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+      "context_sha256": "5977b182d032341f8415e525968d1820d8a0b1da6fe0790cde151f195aaae783"
+    },
+    {
+      "document_id": "explicacoes/workflow/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-explicacoes--workflow--index.json",
+      "receipt_sha256": "6a33b8a7b008d80a84e534d7fc95b5e0dce74d9a19c4e87090e3e5aa7e4d3a71",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-explicacoes--workflow--index.json",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "context_sha256": "27a131cb783cafc3be9bd0ebbd881f99060f476e44833d4f3627c9dcb2f1ff30"
+    },
+    {
+      "document_id": "guias/recuperar-pipeline",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-guias--recuperar-pipeline.json",
+      "receipt_sha256": "164891c77119759e82039d4964f082c1699f3ce228e3414c399f0b6870652c69",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-guias--recuperar-pipeline.json",
+      "document_sha256": "b7bebd9830f6e0f0d155a6c29bb4f980aa68b3f9a10ef4a3dc0b01f296207bd6",
+      "context_sha256": "836a98862fcf414b73177311b78826eeddab583b771f57f61d3f8b35bd6e1d68"
+    },
+    {
+      "document_id": "referencia/catalogo/02-sistemas-distribuidos-e-consistencia",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--02-sistemas-distribuidos-e-consistencia.json",
+      "receipt_sha256": "633f041e33cbe0a1ec321202ac0d5d7be4021fa52d673ecbf71045cc57590f45",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--02-sistemas-distribuidos-e-consistencia.json",
+      "document_sha256": "72fb697a5e03e3e2f077322d4e73de5d37fbdc86231fa14f808b629b82a6e041",
+      "context_sha256": "0ab0235684c914a04c56d8145055283f69cff5ce038478a86b563c01b029c19d"
+    },
+    {
+      "document_id": "referencia/catalogo/03-event-driven-messaging",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--03-event-driven-messaging.json",
+      "receipt_sha256": "60897e33772a7ab9989a4df17537f818b64f52ebc0f94ee4405869ae470ab9cf",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--03-event-driven-messaging.json",
+      "document_sha256": "70f11bce55452388b8336feb9da707fab309a7cdf8586006b5f334646cfb181e",
+      "context_sha256": "91d424fa88458a3d8fc4271e6aaa0ef647fdef6c74616698137cd09c312a1d06"
+    },
+    {
+      "document_id": "referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--04-cqrs-event-sourcing-e-modelos-de-leitura.json",
+      "receipt_sha256": "b27aa5c3911b2e8295d1467a1d1528020e47b6affbae1d141fb1f7e73a760274",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--04-cqrs-event-sourcing-e-modelos-de-leitura.json",
+      "document_sha256": "e78f0062cd624be9232cbd49a168eb95fbc2fbabbf3928e1b6966c223de49a6f",
+      "context_sha256": "295c83b42b1140d226d4d8462833b01b3608b4ffbe132bfdde4520f0be38104f"
+    },
+    {
+      "document_id": "referencia/catalogo/05-banco-de-dados-e-armazenamento",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--05-banco-de-dados-e-armazenamento.json",
+      "receipt_sha256": "299067f1694f8c5ed346de099af69513ac2387a29a8d76e47272346a5e49ef0a",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--05-banco-de-dados-e-armazenamento.json",
+      "document_sha256": "7a1b0ab4b2c6d6c92dcb417b87d927eded00417be45052662462b957ab718d12",
+      "context_sha256": "5bf3775332c512f03135482f87ba414b23ee24c02949bb81d010a36c2d811e66"
+    },
+    {
+      "document_id": "referencia/catalogo/11-padroes-para-decompor-sistemas",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--11-padroes-para-decompor-sistemas.json",
+      "receipt_sha256": "573afd41a67a288194853d326e90cd773a1ff16f0a0098ec95dbec84ccf37cba",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--11-padroes-para-decompor-sistemas.json",
+      "document_sha256": "60245767c4ea6659deb33e1ecb8be25dca48bfc70aec3a15546b2e345db1b7cf",
+      "context_sha256": "e677356b9b9b27e52e244f44da6902199f83d02736b7483bb2016765cdae0a76"
+    },
+    {
+      "document_id": "referencia/catalogo/12-deploy-e-releases",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--12-deploy-e-releases.json",
+      "receipt_sha256": "12756cdb59ea9aae831c9da3ff938d19cbfdd8edfd608bfec618d117d6f24147",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--12-deploy-e-releases.json",
+      "document_sha256": "3f279fbf7555b85c6893d48586c391a073bcce0dec1aaed2e9fb51387fe45722",
+      "context_sha256": "983d2a4d17cf6fa20ebcb3eb81b1fe868e7e35b8395c6df3cc40a6523ac67f07"
+    },
+    {
+      "document_id": "referencia/catalogo/13-alta-disponibilidade",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--13-alta-disponibilidade.json",
+      "receipt_sha256": "428332bf0e616061c17d3f60665289b02a13fae27fe3be389a5712596caad1f5",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--13-alta-disponibilidade.json",
+      "document_sha256": "36127277b02007a4f942f2ac372d4107410e1cfdbdf3d4fc248b4e0bfbe5f76f",
+      "context_sha256": "ef92a216285c265d9763ec051c732b3c56878a7fcc8667dfaea7ab560e797820"
+    },
+    {
+      "document_id": "referencia/catalogo/14-seguranca",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--14-seguranca.json",
+      "receipt_sha256": "3aff61bea03a850afaa1fb566eef4a5c5b49198b1e6772086904abc149d8924a",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--14-seguranca.json",
+      "document_sha256": "a3796d6b8fc46e40e5cc319f37a7bc162914e348002ecddf295a82cc8487dad0",
+      "context_sha256": "37dad030d3dcd9c6aebf215036f77961e7fd3991b7b0cea7280d2e23644d1b3b"
+    },
+    {
+      "document_id": "referencia/catalogo/16-workflow-e-processamento",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/technical-receipt-referencia--catalogo--16-workflow-e-processamento.json",
+      "receipt_sha256": "97923f391b7a130afd328613c4ae905dac3c084d3974421d3591d3f825a1381e",
+      "context_path": "tasks/architecture-course-2026-10-14/reviews/technical-context-referencia--catalogo--16-workflow-e-processamento.json",
+      "document_sha256": "6f809d63281eb97af6de0776f635cf72a4aa0edc38657e78b2f6949cbe4c6494",
+      "context_sha256": "ba60ff6913e205da39f6f8f859edd0f7f786ea2a8293b7fa8eab903d8077a8fb"
+    }
+  ]
+}

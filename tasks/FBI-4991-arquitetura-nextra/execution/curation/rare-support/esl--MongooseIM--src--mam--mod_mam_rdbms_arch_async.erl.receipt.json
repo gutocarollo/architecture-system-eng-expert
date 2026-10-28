@@ -1,0 +1,12 @@
+{
+  "repo": "esl/MongooseIM",
+  "path": "src/mam/mod_mam_rdbms_arch_async.erl",
+  "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+  "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/mam/mod_mam_rdbms_arch_async.erl",
+  "raw_url": "https://raw.githubusercontent.com/esl/MongooseIM/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/mam/mod_mam_rdbms_arch_async.erl",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:46:55.759283+00:00",
+  "sha256": "ef1e8a86b57ad54242f6a39e6266efe7353b94c14383ce4c8cdf6bea8a9053c2",
+  "line_count": 134,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/esl--MongooseIM--src--mam--mod_mam_rdbms_arch_async.erl"
+}

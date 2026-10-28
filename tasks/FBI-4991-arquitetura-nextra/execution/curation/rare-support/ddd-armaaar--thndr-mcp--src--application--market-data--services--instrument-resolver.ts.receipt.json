@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/application/market-data/services/instrument-resolver.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/market-data/services/instrument-resolver.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:04:19.594724+00:00",
+  "sha256": "3d3e7b1460bd3688a203b9da45e0d6c5e27e2573569300b3ab7ad3662bfdd643",
+  "line_count": 53,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--application--market-data--services--instrument-resolver.ts"
+}

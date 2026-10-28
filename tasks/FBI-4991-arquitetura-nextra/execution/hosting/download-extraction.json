@@ -1,0 +1,10 @@
+{
+  "observed_at": "2026-10-15T17:37:11.889020+00:00",
+  "archive_sha256": "dede7fea7e6de82fa0e4897c83167fb7bd9293f79a0cbf8d5db46908f24af11f",
+  "extraction": "/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/fbi4991-labs-download-94ssdz5j/architecture-labs",
+  "files_verified": 96,
+  "hash_errors": [],
+  "has_git_directory": false,
+  "setup_exit": 0,
+  "run_exit": 1
+}

@@ -1,0 +1,32 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: o dia da emissão muda no caminho
+
+Este mapa conecta os conceitos ao mesmo problema. A coluna Emissão recebe a string 2026-10-05. O commit FBI-4840 documenta que a interface mostrava o dia 04 em São Paulo. O valor representa um dia do calendário; o construtor anterior o interpretava como meia-noite UTC, que ainda corresponde ao dia 04 no fuso UTC−3.
+
+Comece pela [jornada](/jornadas/date-only/), execute o [tutorial](/tutoriais/casos/date-only/) e use a [referência](/referencia/casos/date-only/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/date-only/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="published-language" />
+
+## Published Language
+
+O conceito Published Language é formato compartilhado e documentado de mensagens entre contextos.
+
+No caso desta família, faça a seguinte observação: Formate 2026-10-05 e 2026-10-05T00:00:00Z em São Paulo. Conserve o dia civil e a conversão do instante.
+
+```sh
+TZ=America/Sao_Paulo node labs/architecture/date-only/run.mjs
+```
+
+O código desta observação está em `labs/architecture/date-only/run.mjs`. O identificador do probe é `historical-date`.
+
+O vínculo é uma transferência semântica a partir do código histórico. O código histórico permite estudar Published Language por transferência semântica; ele não foi classificado como uma implementação integral de DDD. O roteiro executa o helper e o formatter extraído, com Node e Typescript. Ele não consulta Salesforce, não renderiza o card e não prova a versão frontend de produção.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/date-only/) permite continuar com o mesmo problema.
+

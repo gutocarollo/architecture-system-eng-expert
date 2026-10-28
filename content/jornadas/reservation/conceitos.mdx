@@ -1,0 +1,721 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: dois operadores disputam o mesmo recurso
+
+Este mapa conecta os conceitos ao mesmo problema. Ana e Bruno são operadores fictícios que leem R$ 1.000 na versão 7. Ana registra um crédito de R$ 100 e chega à versão 8. Bruno ainda calcula seu débito de R$ 200 sobre a versão 7. Sem conferir a versão, ele grava R$ 800 e perde o crédito de Ana; ao reler o saldo, o resultado correto da intenção permitida é R$ 900.
+
+Comece pela [jornada](/jornadas/reservation/), execute o [tutorial](/tutoriais/casos/reservation/) e use a [referência](/referencia/casos/reservation/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/reservation/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="compare-and-swap-cas" />
+
+## Compare-and-Swap / CAS
+
+CAS altera um valor somente se ele ainda coincide com o esperado.
+
+No caso desta família, faça a seguinte observação: Compare a escrita baseada na versão 7 com a versão 8 já gravada. Releia e refaça 1.100 − 200 = R$ 900.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe version-conflict
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `version-conflict`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "balance": 800,
+    "lost_credit": 100
+  },
+  "after": {
+    "stale_rejected": true,
+    "balance_after_reread": 900
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A conferência é um modelo determinístico local. Ela não prova um lock distribuído, um algoritmo lock-free ou wait-free, justiça de um RWLock ou atomicidade entre processos.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e029) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="copy-on-write" />
+
+## Copy-on-Write
+
+O mecanismo grava novas versões de blocos ou estruturas antes de alterar referências, preservando versões existentes conforme suas regras.
+
+No caso desta família, faça a seguinte observação: Mantenha um leitor com o snapshot anterior, copie antes da escrita e altere a nova cópia. Confira que o leitor continua em 1.000 enquanto a cópia chega a 1.100.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe copy-on-write-snapshot
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `copy-on-write-snapshot`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "reader_original_after_shared_mutation": 1100
+  },
+  "after": {
+    "reader_original": 1000,
+    "writer_new_copy": 1100,
+    "different_objects": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The fixture is a flat dictionary; deep object graphs, memory reclamation and lock-free publication require additional contracts.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="distributed-lock" />
+
+## Distributed Lock
+
+Um mecanismo compartilhado coordena exclusividade entre processos ou máquinas.
+
+No caso desta família, faça a seguinte observação: Use duas conexões independentes ao mesmo coordenador SQLite. Dispute a chave ORDER-1 e tente liberar a chave com o dono errado.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe shared-arbiter-lock
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `shared-arbiter-lock`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "independent_local_locks_allow_both": true
+  },
+  "after": {
+    "second_connection_allowed": false,
+    "wrong_owner_deleted_rows": 0,
+    "held_claims": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. SQLite is local to this machine. The experiment proves shared-arbiter coordination, not a networked lease service under partitions.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e026) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="fencing" />
+
+## Fencing
+
+O destino da escrita rejeita um participante cuja autoridade expirou ou foi substituída.
+
+No caso desta família, faça a seguinte observação: Faça a geração 101 voltar depois da 102 e confira a rejeição no destino, em vez de confiar somente na expiração do coordenador.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe fence
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `fence`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "last_writer": "expired-A",
+    "value": 101
+  },
+  "after": {
+    "last_writer": "B",
+    "value": 102,
+    "stale_101_rejected": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Fencing; não implementa o padrão completo. A conferência é um modelo determinístico local. Ela não prova um lock distribuído, um algoritmo lock-free ou wait-free, justiça de um RWLock ou atomicidade entre processos.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="fencing-token" />
+
+## Fencing Token
+
+Um token ordenável permite que o destino rejeite um escritor cuja autoridade ficou antiga.
+
+No caso desta família, faça a seguinte observação: Faça a geração 101 voltar depois da 102 e confira a rejeição no destino, em vez de confiar somente na expiração do coordenador.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe fence
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `fence`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "last_writer": "expired-A",
+    "value": 101
+  },
+  "after": {
+    "last_writer": "B",
+    "value": 102,
+    "stale_101_rejected": true
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A conferência é um modelo determinístico local. Ela não prova um lock distribuído, um algoritmo lock-free ou wait-free, justiça de um RWLock ou atomicidade entre processos.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e028) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="fork-join" />
+
+## Fork/Join
+
+Divide uma computação em subtarefas e combina suas saídas.
+
+No caso desta família, faça a seguinte observação: Submeta quatro tarefas a duas threads reutilizadas, aguarde as respostas e reúna os resultados parciais. Confira a quantidade de executores e o total composto.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe reused-thread-workers
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `reused-thread-workers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "new_worker_per_task": 4
+  },
+  "after": {
+    "threads_used": 2,
+    "tasks_completed": 4,
+    "partials": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "joined_total": 20
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. No process pool, distributed worker, work durability or network scatter/gather is claimed.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="lease" />
+
+## Lease
+
+Uma lease concede autoridade por um prazo renovável.
+
+No caso desta família, faça a seguinte observação: Avance o relógio além da validade de A, deixe B adquirir a autorização e tente liberar a lease com a identidade antiga de A.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe lease-expiry-owner
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `lease-expiry-owner`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "B_can_acquire_unexpired_static_lock": false
+  },
+  "after": {
+    "B_acquired_after_expiry": true,
+    "owner": "B",
+    "old_owner_release_allowed": false,
+    "expires": 11
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The model uses a controlled clock; expiration is not destination fencing and does not stop an old external side effect.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e027) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="lock-free" />
+
+## Lock-Free
+
+Garante progresso do conjunto de operações sob as premissas do algoritmo, sem depender da liberação de uma trava por um participante parado.
+
+No caso desta família, faça a seguinte observação: Faça A e B lerem o mesmo contador, deixe A ganhar o CAS e pause B depois de sua falha. Confira que A ainda consegue concluir outra operação.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe cas-system-progress
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `cas-system-progress`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "mutex_owner_paused_blocks_all": true
+  },
+  "after": {
+    "counter": 2,
+    "A_completed": 2,
+    "B_completed": 0,
+    "B_retry_needed": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The CAS primitive is atomic by model assumption. This is a concrete progress/starvation schedule, not a universal proof for a native-memory implementation.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="optimistic-concurrency-control" />
+
+## Optimistic Concurrency Control
+
+A atualização é aceita se a versão ou condição esperada ainda coincide.
+
+No caso desta família, faça a seguinte observação: Compare a escrita baseada na versão 7 com a versão 8 já gravada. Releia e refaça 1.100 − 200 = R$ 900.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe version-conflict
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `version-conflict`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "balance": 800,
+    "lost_credit": 100
+  },
+  "after": {
+    "stale_rejected": true,
+    "balance_after_reread": 900
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A conferência é um modelo determinístico local. Ela não prova um lock distribuído, um algoritmo lock-free ou wait-free, justiça de um RWLock ou atomicidade entre processos.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e024) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="pessimistic-locking" />
+
+## Pessimistic Locking
+
+Um lock reserva acesso incompatível antes de concluir a operação.
+
+No caso desta família, faça a seguinte observação: Mantenha BEGIN IMMEDIATE aberto no primeiro escritor. Confira a recusa imediata da segunda conexão, finalize a primeira e repita a segunda escrita.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe pessimistic-writer-lock
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `pessimistic-writer-lock`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "uncoordinated_stale_balance": 105000
+  },
+  "after": {
+    "second_writer_blocked_before_release": true,
+    "balance_after_serial_writes": 115000
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is SQLite database-writer exclusion, not PostgreSQL row locking or a recommendation to hold locks during network calls.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e025) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="reactive-streams" />
+
+## Reactive Streams
+
+Define troca assíncrona com demanda e backpressure entre participantes.
+
+No caso desta família, faça a seguinte observação: Solicite dois elementos e depois mais um. Cancele antes do quarto e confira que uma solicitação posterior não reativa a assinatura cancelada.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe reactive-demand-contract
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `reactive-demand-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unrequested_push_count": 4
+  },
+  "after": {
+    "delivered_before_request": 0,
+    "after_request_two": [
+      1,
+      2
+    ],
+    "delivered_after_request_three_and_cancel": [
+      1,
+      2,
+      3
+    ],
+    "unconsumed": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. No Reactive Streams library, asynchronous serialization rule or full TCK conformance is claimed.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="reader-writer-lock" />
+
+## Reader/Writer Lock
+
+Permite leitores simultâneos e exige exclusividade para escritor segundo a política.
+
+No caso desta família, faça a seguinte observação: Adquira duas leituras, tente a escrita, libere as leituras e depois tente ler durante a escrita. Confira as duas formas diferentes de exclusão.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe reader-writer-exclusion
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `reader-writer-exclusion`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "uncoordinated_writer_during_two_reads": true
+  },
+  "after": {
+    "simultaneous_readers": 2,
+    "writer_blocked_during_reads": true,
+    "writer_acquired_after_release": true,
+    "reader_blocked_during_write": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is a serialized lock-state schedule, not a thread-safe RWLock implementation or a fairness proof.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="reservation-pattern" />
+
+## Reservation Pattern
+
+Uma reserva torna um recurso temporariamente indisponível antes da conclusão definitiva.
+
+No caso desta família, faça a seguinte observação: Envie dois operadores para o mesmo assessor e horário; compare a identidade do usuário com a identidade do recurso disputado.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe resource-key
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `resource-key`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "accepted_with_actor_keys": 2
+  },
+  "after": {
+    "accepted_with_slot_key": 1
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A conferência é um modelo determinístico local. Ela não prova um lock distribuído, um algoritmo lock-free ou wait-free, justiça de um RWLock ou atomicidade entre processos.
+
+A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="scatter-gather" />
+
+## Scatter/Gather
+
+Um coordenador distribui solicitações a vários destinos e coleta respostas conforme um critério de conclusão.
+
+No caso desta família, faça a seguinte observação: Submeta quatro tarefas a duas threads reutilizadas, aguarde as respostas e reúna os resultados parciais. Confira a quantidade de executores e o total composto.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe reused-thread-workers
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `reused-thread-workers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "new_worker_per_task": 4
+  },
+  "after": {
+    "threads_used": 2,
+    "tasks_completed": 4,
+    "partials": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "joined_total": 20
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. No process pool, distributed worker, work durability or network scatter/gather is claimed.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="semaphore" />
+
+## Semaphore
+
+Permite um número definido de executantes.
+
+No caso desta família, faça a seguinte observação: Execute quatro tarefas que cedem a execução enquanto seguram a permissão. Confira no máximo duas dentro da seção e quatro conclusões.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe semaphore-permits
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `semaphore-permits`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unbounded_simultaneous_tasks": 4
+  },
+  "after": {
+    "maximum_simultaneous_tasks": 2,
+    "completed": 4,
+    "active_at_end": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The semaphore is local to this event loop and does not limit the producer buffer or sum capacity across processes.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="spinlock" />
+
+## Spinlock
+
+Tenta adquirir uma proteção com repetição ativa, podendo combinar espera conforme a implementação.
+
+No caso desta família, faça a seguinte observação: Execute tentativas ativas enquanto a trava está ocupada e programe sua liberação depois da terceira tentativa. Conte quatro tentativas até a aquisição.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe spinlock-active-attempts
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `spinlock-active-attempts`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "owner_paused_initially_held": true
+  },
+  "after": {
+    "active_attempts": 4,
+    "acquired_after_scheduled_release": true,
+    "blocking_sleep_calls": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The model uses serialized test-and-set steps, not a hardware spinlock, CPU benchmark or permission to spin while waiting for HTTP.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="thread-pool" />
+
+## Thread Pool
+
+Reutiliza threads para executar unidades de trabalho.
+
+No caso desta família, faça a seguinte observação: Submeta quatro tarefas a duas threads reutilizadas, aguarde as respostas e reúna os resultados parciais. Confira a quantidade de executores e o total composto.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe reused-thread-workers
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `reused-thread-workers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "new_worker_per_task": 4
+  },
+  "after": {
+    "threads_used": 2,
+    "tasks_completed": 4,
+    "partials": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "joined_total": 20
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. No process pool, distributed worker, work durability or network scatter/gather is claimed.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="wait-free" />
+
+## Wait-Free
+
+Cada operação termina em um número limitado de passos sob as premissas do modelo, independentemente do progresso de outros participantes.
+
+No caso desta família, faça a seguinte observação: Preencha a fila SPSC de duas posições, tente a terceira inclusão e faça três retiradas. Confira que até a recusa por cheia e o resultado vazio terminam em até quatro passos do modelo.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe bounded-spsc-steps
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `bounded-spsc-steps`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "retry_loop_steps_have_no_per_operation_bound": true
+  },
+  "after": {
+    "put_results": [
+      true,
+      true,
+      false
+    ],
+    "take_values": [
+      10,
+      20,
+      null
+    ],
+    "maximum_steps": 4
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The bounded-step argument belongs to this SPSC atomic-index model; Python execution time, allocation, native memory ordering and multiple producers are not covered.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="work-stealing" />
+
+## Work Stealing
+
+Um executor ocioso retira trabalho elegível de outra fila.
+
+No caso desta família, faça a seguinte observação: Deixe B ocioso enquanto A tem duas tarefas. Faça B retirar uma tarefa elegível da outra ponta da fila de A e confira uma execução de cada tarefa.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe idle-worker-steal
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `idle-worker-steal`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "idle_B_completed": 0,
+    "A_remaining_work": 2
+  },
+  "after": {
+    "A_completed": [
+      1
+    ],
+    "B_completed": [
+      2
+    ],
+    "unique_completed": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The deques are manipulated sequentially; a real concurrent deque requires its own atomicity and memory-order guarantees.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+
+<span id="worker-pool" />
+
+## Worker Pool
+
+Reutiliza executantes para tasks, possivelmente em processos ou máquinas diferentes.
+
+No caso desta família, faça a seguinte observação: Submeta quatro tarefas a duas threads reutilizadas, aguarde as respostas e reúna os resultados parciais. Confira a quantidade de executores e o total composto.
+
+```sh
+python3 labs/architecture/financial.py reservation --probe reused-thread-workers
+```
+
+O código desta observação está em `labs/architecture/models_concurrency.py`. O identificador do probe é `reused-thread-workers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "new_worker_per_task": 4
+  },
+  "after": {
+    "threads_used": 2,
+    "tasks_completed": 4,
+    "partials": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "joined_total": 20
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. No process pool, distributed worker, work durability or network scatter/gather is claimed.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
+

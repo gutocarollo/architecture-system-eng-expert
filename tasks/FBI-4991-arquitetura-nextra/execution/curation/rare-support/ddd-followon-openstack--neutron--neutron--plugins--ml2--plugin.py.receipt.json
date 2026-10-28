@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/neutron",
+  "path": "neutron/plugins/ml2/plugin.py",
+  "revision": "800aee95214df9437daa8946e1cefe37648e555d",
+  "url": "https://github.com/openstack/neutron/blob/800aee95214df9437daa8946e1cefe37648e555d/neutron/plugins/ml2/plugin.py",
+  "raw_url": "https://raw.githubusercontent.com/openstack/neutron/800aee95214df9437daa8946e1cefe37648e555d/neutron/plugins/ml2/plugin.py",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:19:28.477271+00:00",
+  "sha256": "e4b76f74706fcc0f5aa944b042cc3e3c5732710feedde42166198fe16cb46313",
+  "line_count": 2984,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron--neutron--plugins--ml2--plugin.py"
+}

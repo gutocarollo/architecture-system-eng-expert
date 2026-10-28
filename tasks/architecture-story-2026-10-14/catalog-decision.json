@@ -1,0 +1,206 @@
+{
+  "catalog_status": "blocked",
+  "audit": {
+    "schema_version": 4,
+    "issue_key": "CREATE",
+    "registry_sha256": "770e1b4e13bad6c9eaf0aba6496976c7a95e1043deba55c76620cd85cb4ab6fb",
+    "proposal_sha256": "f0c0eec315d5f22498fa258227ed88bbda0c059ae86f75228008309ea7ddfcbe",
+    "decisions": {
+      "system": {
+        "state": "not_applicable",
+        "values": [],
+        "reason": "O curso e sua busca pertencem ao repositório de documentação. MakersHub, Airflow, PostgreSQL e FazGraph fornecem exemplos consultados; nenhum sistema operacional do catálogo é alterado.",
+        "source": "direct-task-scope-and-current-source",
+        "evidence_families": [
+          "jira-self",
+          "code"
+        ]
+      },
+      "businessContexts": {
+        "state": "not_applicable",
+        "values": [],
+        "reason": "O trabalho ensina conceitos de arquitetura; citar produtos e jornadas em exemplos não altera esses produtos ou jornadas.",
+        "source": "direct-task-scope-and-current-source",
+        "evidence_families": [
+          "jira-self",
+          "code"
+        ]
+      },
+      "businessCapabilities": {
+        "state": "not_applicable",
+        "values": [],
+        "reason": "O trabalho explica ações de negócio em exemplos, sem modificar nenhuma ação sobre leads, assessores, comissões ou feedback.",
+        "source": "direct-task-scope-and-current-source",
+        "evidence_families": [
+          "jira-self",
+          "code"
+        ]
+      },
+      "repositories": {
+        "state": "unresolved",
+        "values": [],
+        "reason": "O alvo material gutocarollo/architecture-system-eng-expert foi confirmado no remote origin, mas não consta nos cinco valores permitidos. Nenhum repositório de exemplo pode substituir esse alvo.",
+        "source": "direct-task-scope-and-current-source",
+        "evidence_families": [
+          "development",
+          "code"
+        ]
+      },
+      "technicalLayers": {
+        "state": "resolved",
+        "values": [
+          "documentation",
+          "frontend"
+        ],
+        "reason": "O conteúdo MDX é documentação e a busca padrão Nextra/Pagefind acrescentada ao escopo é comportamento renderizado no frontend do curso.",
+        "source": "direct-task-scope-and-current-source",
+        "evidence_families": [
+          "jira-self",
+          "code"
+        ]
+      },
+      "affectedAssets": {
+        "state": "unresolved",
+        "values": [],
+        "reason": "Não há objeto canônico confirmado para o curso ou sua busca. A busca FazGraph architecture-system-eng-expert retornou zero hits; isso não prova ausência em todas as classes de entidade. Os assets dos exemplos são somente fontes.",
+        "source": "direct-task-scope-and-current-source",
+        "evidence_families": [
+          "jira-self",
+          "fazgraph"
+        ]
+      },
+      "page": {
+        "state": "not_applicable",
+        "values": [],
+        "reason": "Nenhuma página MakersHub é alterada. As rotas e páginas do curso não recebem a projeção page:makershub.",
+        "source": "direct-task-scope-and-current-source",
+        "evidence_families": [
+          "jira-self",
+          "code"
+        ]
+      },
+      "labels": {
+        "state": "not_applicable",
+        "values": [],
+        "reason": "A política de labels projeta páginas MakersHub afetadas; não há uma página MakersHub materialmente alterada.",
+        "source": "direct-task-scope-and-current-source",
+        "evidence_families": [
+          "jira-self",
+          "code"
+        ]
+      }
+    },
+    "parent_prior": {
+      "key": null,
+      "used_for_discovery": false,
+      "copied": false
+    },
+    "page_slugs": [],
+    "page_projections": [],
+    "page_sources": [],
+    "page_evidence_families": [],
+    "material_catalog_gaps": [
+      "repositories",
+      "affectedAssets"
+    ],
+    "measured_at_utc": "2026-10-14 23:18 UTC",
+    "source_checkout": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+    "source_sha": "23d5d158d3a964dceba296296368ec14bcd8970b",
+    "source_origin": "https://github.com/gutocarollo/architecture-system-eng-expert.git",
+    "proposal_hash_basis": "SHA256 of stable compact JSON of base_fields before customfield_10521 insertion. Recompute for final preview."
+  },
+  "waiver": "O repositório material é gutocarollo/architecture-system-eng-expert, confirmado no remote origin. O contrato catalog-v4 instalado não registra esse repositório nem um objeto canônico do curso. A Story registra esta lacuna com Catalog Validation Status blocked e campos controlados vazios. MakersHub, Airflow, PostgreSQL e FazGraph são fontes de exemplos consultados. Este waiver explica a lacuna e não cria valor canônico, não autoriza alteração do registry e não afirma que o catálogo esteja completo.",
+  "fields_example": {
+    "project": {
+      "id": "10003"
+    },
+    "issuetype": {
+      "id": "10006"
+    },
+    "summary": "Curso de arquitetura aplicado aos sistemas da Faz Capital e busca padrão Nextra",
+    "customfield_10054": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Entregar o currículo de arquitetura no repositório gutocarollo/architecture-system-eng-expert e a busca padrão Nextra/Pagefind. Os exemplos consultam MakersHub, Airflow, PostgreSQL e FazGraph sem alterar os sistemas de negócio. Este é um exemplo estrutural de preview: a descrição final, o reporter, a prioridade e o assignee serão resolvidos pelo orquestrador contra os requisitos originais e a metadata viva."
+            }
+          ]
+        }
+      ]
+    },
+    "components": [],
+    "labels": [],
+    "customfield_10514": [
+      {
+        "value": "documentation"
+      },
+      {
+        "value": "frontend"
+      }
+    ],
+    "customfield_10515": [],
+    "customfield_10516": [],
+    "customfield_10517": [],
+    "customfield_10518": null,
+    "customfield_10519": "catalog-v4-business-contexts-2026-08-13",
+    "customfield_10520": {
+      "value": "blocked"
+    },
+    "customfield_10522": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "O repositório material é gutocarollo/architecture-system-eng-expert, confirmado no remote origin. O contrato catalog-v4 instalado não registra esse repositório nem um objeto canônico do curso. A Story registra esta lacuna com Catalog Validation Status blocked e campos controlados vazios. MakersHub, Airflow, PostgreSQL e FazGraph são fontes de exemplos consultados. Este waiver explica a lacuna e não cria valor canônico, não autoriza alteração do registry e não afirma que o catálogo esteja completo."
+            }
+          ]
+        }
+      ]
+    },
+    "customfield_10521": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "O catálogo permanece blocked porque o repositório material e o objeto do curso não foram resolvidos. Os campos de negócio e de página ficam vazios por não se aplicarem à alteração."
+            }
+          ]
+        },
+        {
+          "type": "codeBlock",
+          "content": [
+            {
+              "type": "text",
+              "text": "CATALOG_AUDIT_JSON={\"schema_version\":4,\"issue_key\":\"CREATE\",\"registry_sha256\":\"770e1b4e13bad6c9eaf0aba6496976c7a95e1043deba55c76620cd85cb4ab6fb\",\"proposal_sha256\":\"f0c0eec315d5f22498fa258227ed88bbda0c059ae86f75228008309ea7ddfcbe\",\"decisions\":{\"system\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"O curso e sua busca pertencem ao repositório de documentação. MakersHub, Airflow, PostgreSQL e FazGraph fornecem exemplos consultados; nenhum sistema operacional do catálogo é alterado.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"businessContexts\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"O trabalho ensina conceitos de arquitetura; citar produtos e jornadas em exemplos não altera esses produtos ou jornadas.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"businessCapabilities\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"O trabalho explica ações de negócio em exemplos, sem modificar nenhuma ação sobre leads, assessores, comissões ou feedback.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"repositories\":{\"state\":\"unresolved\",\"values\":[],\"reason\":\"O alvo material gutocarollo/architecture-system-eng-expert foi confirmado no remote origin, mas não consta nos cinco valores permitidos. Nenhum repositório de exemplo pode substituir esse alvo.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"development\",\"code\"]},\"technicalLayers\":{\"state\":\"resolved\",\"values\":[\"documentation\",\"frontend\"],\"reason\":\"O conteúdo MDX é documentação e a busca padrão Nextra/Pagefind acrescentada ao escopo é comportamento renderizado no frontend do curso.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"affectedAssets\":{\"state\":\"unresolved\",\"values\":[],\"reason\":\"Não há objeto canônico confirmado para o curso ou sua busca. A busca FazGraph architecture-system-eng-expert retornou zero hits; isso não prova ausência em todas as classes de entidade. Os assets dos exemplos são somente fontes.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"fazgraph\"]},\"page\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"Nenhuma página MakersHub é alterada. As rotas e páginas do curso não recebem a projeção page:makershub.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"labels\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"A política de labels projeta páginas MakersHub afetadas; não há uma página MakersHub materialmente alterada.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]}},\"parent_prior\":{\"key\":null,\"used_for_discovery\":false,\"copied\":false},\"page_slugs\":[],\"page_projections\":[],\"page_sources\":[],\"page_evidence_families\":[],\"material_catalog_gaps\":[\"repositories\",\"affectedAssets\"],\"measured_at_utc\":\"2026-10-14 23:18 UTC\",\"source_checkout\":\"/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998\",\"source_sha\":\"23d5d158d3a964dceba296296368ec14bcd8970b\",\"source_origin\":\"https://github.com/gutocarollo/architecture-system-eng-expert.git\",\"proposal_hash_basis\":\"SHA256 of stable compact JSON of base_fields before customfield_10521 insertion. Recompute for final preview.\"}"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "ready_for_recording_blocked_story": true,
+  "ready_for_claiming_catalog_verified": false,
+  "final_create_still_requires": [
+    "live field/context/option metadata",
+    "duplicate JQL",
+    "original-requirements description",
+    "reporter accountId",
+    "priority/default assignee from live metadata",
+    "topology and shared-file search",
+    "gate over exact final tool input",
+    "read-back of every field"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "observed_at": "2026-10-15T02:39:06.612Z",
+  "parser_self_test": "PASS",
+  "syntax_only": false,
+  "module_sha256": "8937e64a0bc872c0c908cf8e432511c6ec63720213b54aae32ff46cd9ee56e16",
+  "blocks_total": 1,
+  "blocks": [
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/revision-cas-postgres/index.mdx",
+      "document_sha256": "2835f761a468a3ea804d16965818a0330f09420fac5fa4d7265bfd079cf1f362",
+      "fence_index": 1,
+      "line_start": 16,
+      "source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-pg-cas/9ced80d897ad-1.png",
+        "artifact_sha256": "9a79f6f9f7613039a8d362c45ed2d78bc9f96a7a4cfe139ca771d7f4a9af65e7"
+      },
+      "semantic_review": "NOT_RUN"
+    }
+  ],
+  "errors": [],
+  "status": "PASS"
+}

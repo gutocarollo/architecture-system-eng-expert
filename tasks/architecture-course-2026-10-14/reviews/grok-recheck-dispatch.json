@@ -1,0 +1,75 @@
+{
+  "http_status": 200,
+  "started_at": "2026-10-14T19:33:55.392095+00:00",
+  "finished_at": "2026-10-14T19:37:19.786661+00:00",
+  "model_requested": "x-ai/grok-4.7",
+  "model_returned": "x-ai/grok-4.7",
+  "dispatch_id": "gen-1792006436-QbpJQoV4TCVABnjYu1y8",
+  "reasoning_effort_requested": "xhigh",
+  "usage": {
+    "prompt_tokens": 157171,
+    "completion_tokens": 16415,
+    "total_tokens": 173586,
+    "cost": 0.411104,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.411104,
+      "upstream_inference_prompt_cost": 0.312614,
+      "upstream_inference_completions_cost": 0.09849
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 14984,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "input_sha256": "464a19d91c7cb87f3d8fa6d4df1e3366c94ed99bc2e4457ccfd71bbd8587619f",
+  "output_sha256": "47cda8e321660d903d9903b613c5bec594a5185eed0fb86345295734b4a0a0a4",
+  "prefix_reuse": "Exact initial two messages, followed by actual prior response and bounded delta; provider cache hits are only established if usage reports them.",
+  "document_versions": [
+    {
+      "document_id": "explicacoes/cache/index",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "context_sha256": "85b0a98abf9025aef9c26d0d0c1280fde02cfe49b85b9b9963f052e72c34ff3b"
+    },
+    {
+      "document_id": "explicacoes/capacity/index",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "context_sha256": "080e1abf0c877fa3626e8c60910799d32963055d6f534752803732eb656edf6a"
+    },
+    {
+      "document_id": "referencia/catalogo/06-cache",
+      "document_sha256": "9fe451b92984d4ccde8a9c8c402b38ac345dea2d223c1ab48b316095ac766707",
+      "context_sha256": "bccc91508ebbea9028ae703172f87f44dc50d92136f24c33b43f471d16cc90db"
+    }
+  ],
+  "evidence_ids": [
+    "s5",
+    "bootstrap",
+    "l5a",
+    "l5b",
+    "l5c",
+    "original-request",
+    "report-api",
+    "report-service",
+    "report-repository",
+    "insurance-api",
+    "insurance-service",
+    "insurance-repository",
+    "cache-code",
+    "singleflight-code",
+    "nextbilling-code",
+    "task-worker-code",
+    "airflow-client-code",
+    "s5-high-repair",
+    "redisson-community-map",
+    "redisson-community-use"
+  ]
+}

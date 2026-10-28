@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-10-15T03:16:57.445931+00:00",
+  "workspace": {
+    "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+    "branch": "docs/FBI-4991-arquitetura-aplicada",
+    "head": "23d5d158d3a964dceba296296368ec14bcd8970b"
+  },
+  "source_inventory_receipt": {
+    "measured_at": "2026-10-15T03:09:12.053029+00:00",
+    "where": "airflow-70:/home/fazcapital/airflow/airflow-dags",
+    "commands": [
+      "git branch --show-current",
+      "git rev-parse HEAD",
+      "git for-each-ref",
+      "git rev-list --all --count"
+    ],
+    "outputs": {
+      "branch": "airflow-prod",
+      "head": "9ae34ee347cb4212515e3b26aeb87e02b167fb8d",
+      "ref_count": 155,
+      "all_ref_unique_commits": 914
+    }
+  },
+  "disk_receipt_file": "source-kernels.json#/disk_receipts",
+  "disk_measured_at": "2026-10-15T03:16:18.598445+00:00",
+  "immutable_source_capture": "python3 capture_kernels.py",
+  "remote_source_writes": false,
+  "fetched_or_cloned": false,
+  "tests_or_dag_runs": false,
+  "database_or_cluster_inspection": false,
+  "protocol_order": [
+    "Read airflow-live-source and registry",
+    "SSH read remote safe-sync skill",
+    "Read-only Git census",
+    "CodeGraph before pointed source exploration",
+    "Read immutable source and selected live disk text",
+    "Read actual PR and visible type-specific Jira description",
+    "Export selected sanitized kernels and scope limits"
+  ],
+  "privacy": "No customer HTML, contacts, author payloads, credentials or complete Jira/PR comments exported."
+}

@@ -1,0 +1,9 @@
+{
+  "observed_utc": "2026-10-15T03:07:16.804099+00:00",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-source-recommendations.json",
+  "sha256": "fcfd6fca04d1ca7596ac4a0556571583566ae7633d1ae9279a2d01f9fa133973",
+  "recommended_author_source_matches": 3,
+  "independent_reviews_pending": 3
+}

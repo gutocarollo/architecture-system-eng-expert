@@ -1,0 +1,12 @@
+{
+  "repo": "tkrotoff/WengoPhone",
+  "path": "wengophone/src/control/contactlist/CContactList.cpp",
+  "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+  "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/contactlist/CContactList.cpp",
+  "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/contactlist/CContactList.cpp",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.315041+00:00",
+  "sha256": "38813366c52f7ec073d9b8f85f6ea67dd2a7cf73c7a78ee957ac5b4ecd5b8027",
+  "line_count": 309,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--control--contactlist--CContactList.cpp"
+}

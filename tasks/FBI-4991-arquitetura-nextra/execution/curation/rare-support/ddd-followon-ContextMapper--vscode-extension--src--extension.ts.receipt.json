@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/vscode-extension",
+  "path": "src/extension.ts",
+  "revision": "cd0363ec33de4f41cc311a715ed5afd01ff8c7f3",
+  "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/src/extension.ts",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/vscode-extension/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/src/extension.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:33.381906+00:00",
+  "sha256": "a1aea68c7c55debf3e832fb522a4d54b187f7dfe67c74e6835c78877a0414d0f",
+  "line_count": 81,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--src--extension.ts"
+}

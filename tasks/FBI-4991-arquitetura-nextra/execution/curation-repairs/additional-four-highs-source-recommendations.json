@@ -1,0 +1,863 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-10-15T03:40:37.403982+00:00",
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "purpose": "Additional author repair recommendations, held until the independent full first pass ends.",
+  "rows": [
+    {
+      "concept_id": "scatter-gather",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "golang/sync",
+          "path": "errgroup/errgroup.go",
+          "revision": "36f2d70ecde9857dc4e363242a1369c7645d6770",
+          "original_url": "https://github.com/golang/sync/blob/master/errgroup/errgroup.go",
+          "url": "https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/errgroup/errgroup.go",
+          "raw_url": "https://raw.githubusercontent.com/golang/sync/36f2d70ecde9857dc4e363242a1369c7645d6770/errgroup/errgroup.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:22:34.857192Z",
+          "sha256": "fd91297cc3313c8d965137301beb80f51707d5bc863510dcd8270570cc510b87",
+          "line_count": 151,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/e9d4fec4b1b6d925512a4cb78dbc5a1031de6b8361ba3deaeefc77367d829447.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: // Copyright 2016 The Go Authors. All rights reserved.\n2: // Use of this source code is governed by a BSD-style\n3: // license that can be found in the LICENSE file.\n4: \n5: // Package errgroup provides synchronization, error propagation, and Context\n6: // cancellation for groups of goroutines working on subtasks of a common task.\n7: //\n8: // [errgroup.Group] is related to [sync.WaitGroup] but adds handling of tasks\n9: // returning errors.\n10: package errgroup\n11: \n12: import (\n13: \t\"context\"\n14: \t\"fmt\"\n15: \t\"sync\"\n16: )\n17: \n18: type token struct{}\n19: \n20: // A Group is a collection of goroutines working on subtasks that are part of\n21: // the same overall task. A Group should not be reused for different tasks.\n22: //\n23: // A zero Group is valid, has no limit on the number of active goroutines,\n24: // and does not cancel on error.\n25: type Group struct {\n26: \tcancel func(error)\n27: \n28: \twg sync.WaitGroup\n29: \n30: \tsem chan token\n31: \n32: \terrOnce sync.Once\n33: \terr     error\n34: }\n35: \n36: func (g *Group) done() {\n37: \tif g.sem != nil {\n38: \t\t<-g.sem\n39: \t}\n40: \tg.wg.Done()",
+          "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e9d4fec4b1b6d925512a4cb78dbc5a1031de6b8361ba3deaeefc77367d829447.txt",
+          "local_verified_utc": "2026-10-15T03:33:19.394520+00:00",
+          "evidence": [
+            {
+              "start_line": 55,
+              "end_line": 64,
+              "url": "https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/errgroup/errgroup.go#L55-L64",
+              "excerpt": "func (g *Group) Wait() error {\n\tg.wg.Wait()\n\tif g.cancel != nil {\n\t\tg.cancel(g.err)\n\t}\n\treturn g.err\n}\n\n// Go calls the given function in a new goroutine.\n//",
+              "excerpt_sha256": "24f58f45ce35d08765b31e9581182f2ebdf4a4acbcc0f6e8c5a7842c531e3ec4",
+              "claim": "Wait aguarda o grupo e devolve o erro registrado."
+            },
+            {
+              "start_line": 72,
+              "end_line": 100,
+              "url": "https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/errgroup/errgroup.go#L72-L100",
+              "excerpt": "func (g *Group) Go(f func() error) {\n\tif g.sem != nil {\n\t\tg.sem <- token{}\n\t}\n\n\tg.wg.Add(1)\n\tgo func() {\n\t\tdefer g.done()\n\n\t\t// It is tempting to propagate panics from f()\n\t\t// up to the goroutine that calls Wait, but\n\t\t// it creates more problems than it solves:\n\t\t// - it delays panics arbitrarily,\n\t\t//   making bugs harder to detect;\n\t\t// - it turns f's panic stack into a mere value,\n\t\t//   hiding it from crash-monitoring tools;\n\t\t// - it risks deadlocks that hide the panic entirely,\n\t\t//   if f's panic leaves the program in a state\n\t\t//   that prevents the Wait call from being reached.\n\t\t// See #53757, #74275, #74304, #74306.\n\n\t\tif err := f(); err != nil {\n\t\t\tg.errOnce.Do(func() {\n\t\t\t\tg.err = err\n\t\t\t\tif g.cancel != nil {\n\t\t\t\t\tg.cancel(g.err)\n\t\t\t\t}\n\t\t\t})\n\t\t}",
+              "excerpt_sha256": "61469d474e5ac02c0fa97c4766a157f89616ceecc1de6ab8f9a3689e171c12fe",
+              "claim": "Go registra e executa as funções concorrentes do grupo; a base é comparada ao worker pool Loki."
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "golang/sync",
+            "revision": "36f2d70ecde9857dc4e363242a1369c7645d6770",
+            "path": "LICENSE",
+            "url": "https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/LICENSE",
+            "license_spdx": "BSD-3-Clause",
+            "api_license_spdx": "NOASSERTION",
+            "observed_utc": "2026-10-15T01:28:27.425885Z",
+            "http_status": 200,
+            "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-9816865092c22f377d469581085ae333e14e2cf01da36ea4638bf3cdf4c778d4.txt",
+            "excerpt": "Copyright 2009 The Go Authors.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n\n   * Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n   * Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following disclaimer\nin the documentation and/or other materials provided with the\n",
+            "classification_basis": "The exact license text contains the BSD redistribution clauses; the original API label is preserved separately.",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-9816865092c22f377d469581085ae333e14e2cf01da36ea4638bf3cdf4c778d4.txt",
+            "kind": "LICENSE"
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "grafana/loki",
+          "revision": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+          "path": "pkg/querier/queryrange/split_by_interval.go",
+          "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/split_by_interval.go",
+          "raw_url": "https://raw.githubusercontent.com/grafana/loki/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/split_by_interval.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:25:43.870191+00:00",
+          "sha256": "63e2c26c4785cb45a6d746a9634ac03bd14a932276190ef881126fdd1d40f6fe",
+          "line_count": 320,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/fef74d192aa8f35fddb9f045b08318892539455282ae86d83a833aa206c3c679.txt",
+          "evidence": [
+            {
+              "start_line": 223,
+              "end_line": 245,
+              "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/split_by_interval.go#L223-L245",
+              "excerpt": "\ttenantIDs, err := tenant.TenantIDs(ctx)\n\tif err != nil {\n\t\treturn nil, httpgrpc.Errorf(http.StatusBadRequest, \"%s\", err.Error())\n\t}\n\n\tintervals, enabled := h.splitter.split(time.Now().UTC(), tenantIDs, r)\n\n\t// skip split by if unset\n\tif !enabled {\n\t\treturn h.next.Do(ctx, r)\n\t}\n\n\th.metrics.splits.Observe(float64(len(intervals)))\n\n\t// no interval should not be processed by the frontend.\n\tif len(intervals) == 0 {\n\t\treturn h.next.Do(ctx, r)\n\t}\n\n\ttrace.SpanFromContext(ctx).SetAttributes(attribute.Int(\"n_intervals\", len(intervals)))\n\n\tif len(intervals) == 1 {\n\t\treturn h.next.Do(ctx, intervals[0])",
+              "excerpt_sha256": "71b8ec6f042f38ee07e78df3cc0a1ca50779e7f467e01de6e5d088fb03e08fe0",
+              "claim": "Uma única requisição produz os intervalos da divisão."
+            },
+            {
+              "start_line": 269,
+              "end_line": 289,
+              "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/split_by_interval.go#L269-L289",
+              "excerpt": "\tinput := make([]*lokiResult, 0, len(intervals))\n\tfor _, interval := range intervals {\n\t\tinput = append(input, &lokiResult{\n\t\t\treq: interval,\n\t\t\tch:  make(chan *packedResp),\n\t\t})\n\t}\n\n\tmaxSeries := validation.SmallestPositiveIntPerTenant(tenantIDs, h.limits.MaxQuerySeries)\n\tmaxParallelism := MinWeightedParallelism(ctx, tenantIDs, h.configs, h.limits, model.Time(r.GetStart().UnixMilli()), model.Time(r.GetEnd().UnixMilli()))\n\tresps, err := h.Process(ctx, maxParallelism, limit, input, maxSeries)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\t// A single response is already complete. Process compact-merges log\n\t// early-exits (including a first interval that already filled the limit),\n\t// so re-merging would call MergeSplit once more and reset stats.Splits to 1.\n\tif len(resps) == 1 {\n\t\treturn resps[0], nil\n\t}\n\treturn h.merger.MergeResponse(resps...)",
+              "excerpt_sha256": "c97fe8465eba94f885cfd91b3053a543634f2c0b3fc6329cefb068584a68da62",
+              "claim": "A mesma requisição cria as subrequisições, aguarda Process e entrega suas respostas ao merger."
+            },
+            {
+              "start_line": 121,
+              "end_line": 168,
+              "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/split_by_interval.go#L121-L168",
+              "excerpt": "func (h *splitByInterval) Process(\n\tctx context.Context,\n\tparallelism int,\n\tthreshold int64,\n\tinput []*lokiResult,\n\tmaxSeries int,\n) ([]queryrangebase.Response, error) {\n\tvar responses []queryrangebase.Response\n\tctx, cancel := context.WithCancelCause(ctx)\n\tdefer cancel(errors.New(\"split by interval process canceled\"))\n\n\tch := h.Feed(ctx, input)\n\n\t// queries with 0 limits should not be exited early\n\tunlimited := threshold == 0\n\n\t// Parallelism will be at least 1\n\tp := max(parallelism, 1)\n\t// don't spawn unnecessary goroutines\n\tif len(input) < parallelism {\n\t\tp = len(input)\n\t}\n\n\t// per request wrapped handler for limiting the amount of series.\n\tnext := newSeriesLimiter(maxSeries).Wrap(h.next)\n\tfor i := 0; i < p; i++ {\n\t\tgo h.loop(ctx, ch, next)\n\t}\n\n\tfor _, x := range input {\n\t\tselect {\n\t\tcase <-ctx.Done():\n\t\t\t// Keep the usage of the intervals that completed before the\n\t\t\t// cancellation, and report the cause so a real failure wins over a\n\t\t\t// generic cancellation.\n\t\t\tjoinPartialFromResponses(ctx, responses)\n\t\t\treturn nil, context.Cause(ctx)\n\t\tcase data := <-x.ch:\n\t\t\tif data.err != nil {\n\t\t\t\t// Keep the usage of the intervals that completed before the failure.\n\t\t\t\tjoinPartialFromResponses(ctx, responses)\n\t\t\t\t// Cancel the siblings with this failure as the cause, so it is not\n\t\t\t\t// lost behind a generic cancellation.\n\t\t\t\tcancel(data.err)\n\t\t\t\treturn nil, data.err\n\t\t\t}\n\n\t\t\tresponses = append(responses, data.resp)",
+              "excerpt_sha256": "56af85df2a9fd31cc26932139a16acfcde043f6adfd6a4bb36f8da4686cf1a64",
+              "claim": "Process inicia os workers e coleta as respostas dos intervalos."
+            },
+            {
+              "start_line": 198,
+              "end_line": 217,
+              "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/split_by_interval.go#L198-L217",
+              "excerpt": "func (h *splitByInterval) loop(ctx context.Context, ch <-chan *lokiResult, next queryrangebase.Handler) {\n\tfor data := range ch {\n\n\t\tctx, sp := tracer.Start(ctx, \"interval\")\n\t\tif sp.SpanContext().IsSampled() {\n\t\t\tdata.req.LogToSpan(sp)\n\t\t}\n\n\t\tresp, err := next.Do(ctx, data.req)\n\t\tsp.End()\n\n\t\tselect {\n\t\tcase <-ctx.Done():\n\t\t\treturn\n\t\tcase data.ch <- &packedResp{resp, err}:\n\t\t\t// The parent Process method will return on the first error. So stop\n\t\t\t// processng.\n\t\t\tif err != nil {\n\t\t\t\treturn\n\t\t\t}",
+              "excerpt_sha256": "12ddc57b2b5cfb10d97bcf057518641ff4a5cd48d5449686b8f74c26ce9bc227",
+              "claim": "Cada worker executa next.Do para sua subrequisição e devolve a resposta ao coletor."
+            }
+          ],
+          "license": {
+            "repo": "grafana/loki",
+            "revision": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+            "path": "LICENSE",
+            "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/loki/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.144052+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/477bd70871d37927267fdac2c50b55d3f1127ca31eafd8f286d04b265bab4fe4.txt",
+            "status": "READ",
+            "license_spdx": "AGPL-3.0"
+          }
+        },
+        {
+          "repo": "grafana/loki",
+          "revision": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+          "path": "pkg/querier/queryrange/codec.go",
+          "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/codec.go",
+          "raw_url": "https://raw.githubusercontent.com/grafana/loki/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/codec.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:25:43.914213+00:00",
+          "sha256": "4e1702388215c7e1505f21ce0b49763e59b202ec6116f368b1bd631d158225ae",
+          "line_count": 2581,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/254ba122b63a4773a9462d29f7593496ee522b84412779f9fedff6745e5660c0.txt",
+          "evidence": [
+            {
+              "start_line": 1490,
+              "end_line": 1521,
+              "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/codec.go#L1490-L1521",
+              "excerpt": "func (Codec) MergeResponse(responses ...queryrangebase.Response) (queryrangebase.Response, error) {\n\tif len(responses) == 0 {\n\t\treturn nil, errors.New(\"merging responses requires at least one response\")\n\t}\n\tvar mergedStats stats.Result\n\tswitch res := responses[0].(type) {\n\t// LokiPromResponse type is used for both instant and range queries.\n\t// Meaning, values that are merged can be either vector or matrix types.\n\tcase *LokiPromResponse:\n\n\t\tcodec := queryrangebase.PrometheusCodecForRangeQueries\n\t\tif res.Response.Data.ResultType == model.ValVector.String() {\n\t\t\tcodec = queryrangebase.PrometheusCodecForInstantQueries\n\t\t}\n\n\t\tpromResponses := make([]queryrangebase.Response, 0, len(responses))\n\t\tfor _, res := range responses {\n\t\t\tmergedStats.MergeSplit(res.(*LokiPromResponse).Statistics)\n\t\t\tpromResponses = append(promResponses, res.(*LokiPromResponse).Response)\n\t\t}\n\t\tpromRes, err := codec.MergeResponse(promResponses...)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\treturn &LokiPromResponse{\n\t\t\tResponse:   promRes.(*queryrangebase.PrometheusResponse),\n\t\t\tStatistics: mergedStats,\n\t\t}, nil\n\tcase *LokiResponse:\n\t\treturn mergeLokiResponse(responses...), nil\n\tcase *LokiSeriesResponse:\n\t\tlokiSeriesRes := responses[0].(*LokiSeriesResponse)",
+              "excerpt_sha256": "967510915f1645a496fb6689d52086a12bb3b2ef9b70d1cd8c7487d4034d1998",
+              "claim": "O codec escolhe o merger adequado, inclusive o de respostas Loki."
+            },
+            {
+              "start_line": 2335,
+              "end_line": 2365,
+              "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/codec.go#L2335-L2365",
+              "excerpt": "func mergeLokiResponse(responses ...queryrangebase.Response) *LokiResponse {\n\tif len(responses) == 0 {\n\t\treturn nil\n\t}\n\tvar (\n\t\tlokiRes       = responses[0].(*LokiResponse)\n\t\tmergedStats   stats.Result\n\t\tlokiResponses = make([]*LokiResponse, 0, len(responses))\n\t)\n\n\tuniqueWarnings := map[string]struct{}{}\n\tfor _, res := range responses {\n\t\tlokiResult := res.(*LokiResponse)\n\t\tmergedStats.MergeSplit(lokiResult.Statistics)\n\t\tlokiResponses = append(lokiResponses, lokiResult)\n\n\t\tfor _, w := range lokiResult.Warnings {\n\t\t\tuniqueWarnings[w] = struct{}{}\n\t\t}\n\t}\n\n\twarnings := slices.Sorted(maps.Keys(uniqueWarnings))\n\n\tif len(warnings) == 0 {\n\t\t// When there are no warnings, keep it nil so it can be compared against\n\t\t// the default value\n\t\twarnings = nil\n\t}\n\n\treturn &LokiResponse{\n\t\tStatus:     loghttp.QueryStatusSuccess,",
+              "excerpt_sha256": "f0b056a0836ff6f9d0ebea0f5092e624febb8eb58837f10f01457d5ec36056fd",
+              "claim": "O merger Loki prepara a combinação das respostas e dos streams da consulta."
+            }
+          ],
+          "license": {
+            "repo": "grafana/loki",
+            "revision": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+            "path": "LICENSE",
+            "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/loki/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.144052+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/477bd70871d37927267fdac2c50b55d3f1127ca31eafd8f286d04b265bab4fe4.txt",
+            "status": "READ",
+            "license_spdx": "AGPL-3.0"
+          }
+        },
+        {
+          "repo": "grafana/loki",
+          "revision": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+          "path": "pkg/querier/queryrange/roundtrip.go",
+          "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/roundtrip.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:33:19.762897+00:00",
+          "sha256": "f870fc8fc6b7dd186cdc5e641cbcefae16d20bd77788defc8511df42365192dd",
+          "line_count": 1398,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7d38f59f0d91605728e64de0706c32d15ecc8cbdd0c86c1e958ccdac4a1228b9.txt",
+          "evidence": [
+            {
+              "start_line": 332,
+              "end_line": 342,
+              "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/roundtrip.go#L332-L342",
+              "excerpt": "\treturn base.MiddlewareFunc(func(next base.Handler) base.Handler {\n\t\tsplitter := newDefaultSplitter(limits, iqo)\n\n\t\tqueryRangeMiddleware := []base.Middleware{\n\t\t\tStatsCollectorMiddleware(),\n\t\t\tNewLimitsMiddleware(l),\n\t\t\tbase.InstrumentMiddleware(\"split_by_interval\", metrics.InstrumentMiddlewareMetrics),\n\t\t\tSplitByIntervalMiddleware(schema.Configs, limits, merger, splitter, metrics.SplitByMetrics),\n\t\t}\n\n\t\tif cfg.MaxRetries > 0 {",
+              "excerpt_sha256": "e11528475975665497294b2074a7cdf05329cfba9303f77dd3f2f37a53f2b869",
+              "claim": "A montagem do query frontend instala o middleware de divisão por intervalo."
+            }
+          ],
+          "license": {
+            "repo": "grafana/loki",
+            "revision": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+            "path": "LICENSE",
+            "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/loki/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.144052+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/477bd70871d37927267fdac2c50b55d3f1127ca31eafd8f286d04b265bab4fe4.txt",
+            "status": "READ",
+            "license_spdx": "AGPL-3.0"
+          }
+        }
+      ],
+      "mechanism": "Uma consulta de intervalo Loki é dividida em subrequisições. Process executa os intervalos com paralelismo limitado e coleta suas respostas. O caminho retorna a resposta combinada por MergeResponse. O middleware está instalado no pipeline do query frontend, portanto a divisão e a reunião pertencem à mesma requisição.",
+      "limits": "A configuração pode desabilitar a divisão. Erros cancelam os demais intervalos e um limite de linhas pode permitir encerramento antecipado. O recorte não exige coletar todas as respostas quando a própria consulta permite esse limite. Errgroup é uma base comparada de concorrência; não se afirma que esse arquivo Loki use errgroup."
+    },
+    {
+      "concept_id": "anti-corruption-layer",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-dsl",
+          "path": "org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "original_url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:20:33.348406Z",
+          "sha256": "440d9a081c28c89b5fbaac3764ad9ed946701df98c098a8de086527e70540d54",
+          "line_count": 556,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7ff20b7d9b73b81c9e3ab5f907f1187e6c29a3aa30f0cc3617c27188e9eb4683.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /*\n2:  * Copyright 2018 The Context Mapper Project Team\n3:  *\n4:  * Licensed under the Apache License, Version 2.0 (the \"License\");\n5:  * you may not use this file except in compliance with the License.\n6:  * You may obtain a copy of the License at\n7:  *\n8:  *    http://www.apache.org/licenses/LICENSE-2.0\n9:  *\n10:  * Unless required by applicable law or agreed to in writing, software\n11:  * distributed under the License is distributed on an \"AS IS\" BASIS,\n12:  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n13:  * See the License for the specific language governing permissions and\n14:  * limitations under the License.\n15:  */\n16: \n17: grammar org.contextmapper.dsl.ContextMappingDSL with org.contextmapper.tactic.dsl.TacticDDDLanguage\n18: \n19: import \"http://contextmapper.org/tactic/dsl/tacticdsl\" as tacticdsl\n20: \n21: generate contextMappingDSL \"http://www.contextmapper.org/dsl/ContextMappingDSL\"\n22: \n23: ContextMappingModel:\n24: \t(\n25: \t\t(topComment=SL_COMMENT | topComment=ML_COMMENT)? &\n26: \t\t(imports+=Import)* &\n27: \t\t(map = ContextMap)? &\n28: \t\t(boundedContexts += BoundedContext)* &\n29: \t\t(domains += Domain)* &\n30: \t\t(userRequirements += UserRequirement)* &\n31: \t\t(stakeholders += Stakeholders)* &\n32: \t\t(valueRegisters += ValueRegister)*\n33: \t)\n34: ;\n35: \n36: Import :\n37: 'import' importURI=STRING;\n38: \n39: ContextMap:\n40: \t{ContextMap} // make sure there is always a context map",
+          "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7ff20b7d9b73b81c9e3ab5f907f1187e6c29a3aa30f0cc3617c27188e9eb4683.txt",
+          "local_verified_utc": "2026-10-15T03:33:19.396314+00:00",
+          "evidence": [
+            {
+              "start_line": 136,
+              "end_line": 151,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L136-L151",
+              "excerpt": "UpstreamDownstreamRelationship:\n\tCustomerSupplierRelationship |\n\t(\n\t\t(\n\t\t\t(upstream = [BoundedContext] (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? '->' (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? downstream = [BoundedContext]) |\n\t\t\t(downstream = [BoundedContext] (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? '<-' (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? upstream = [BoundedContext]) |\n\t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Upstream-Downstream'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext]) |\n\t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Downstream-Upstream'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext])\n\t\t)\n\t\t(':' name=ID)?\n\t\t(OPEN (\n\t\t\t('implementationTechnology' ('=')? implementationTechnology=STRING)? &\n\t\t\t(('exposedAggregates' ('=')? upstreamExposedAggregates += [Aggregate]) (\",\" upstreamExposedAggregates += [Aggregate])* (exposedAggregatesComment=SL_COMMENT)?)? &\n\t\t\t('downstreamRights' ('=')? downstreamGovernanceRights=DownstreamGovernanceRights)?\n\t\t)\n\t\tCLOSE)?",
+              "excerpt_sha256": "7f080ec4464e5059c8e5b82061a2aafaefa8859a058aff0d75c638bb90a82aa0",
+              "claim": "A linguagem de modelagem permite relações upstream/downstream."
+            },
+            {
+              "start_line": 490,
+              "end_line": 492,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L490-L492",
+              "excerpt": "enum DownstreamRole:\n\tANTICORRUPTION_LAYER = 'ACL' | CONFORMIST = 'CF'\n;",
+              "excerpt_sha256": "85e784be43a89ee94a03cb388d3bcef0d224a549e693ba0506421165f7e7a124",
+              "claim": "A gramática define explicitamente o papel downstream ACL."
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "ContextMapper/context-mapper-dsl",
+            "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+            "path": "LICENSE",
+            "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T01:28:22.926569Z",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-91e0763f64124c5f208b127e87623c2a5c657995f50c5249d76862ede5f6eb0b.txt",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that is",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-91e0763f64124c5f208b127e87623c2a5c657995f50c5249d76862ede5f6eb0b.txt",
+            "kind": "LICENSE"
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "docs/domains/README.md",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md",
+          "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:25:44.144037+00:00",
+          "sha256": "6ab6077950f18352048006de04420d78fb12490b9b234e630fcefd44dce902cf",
+          "line_count": 164,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/9f7c531e3abd2141bd265280db8e6cdae2710dcb2daa7b762d5f92161e13f3fd.txt",
+          "evidence": [
+            {
+              "start_line": 132,
+              "end_line": 142,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md#L132-L142",
+              "excerpt": "\n| Piece | Role |\n| --- | --- |\n| `data-sources/thndr/http-client.ts` | `ThndrHttpClient`: adds `Authorization: Bearer`, `x-thndrx-runtime-version`, `X-Language`, `X-Correlation-ID`; retries once after 401/403 with a refreshed token; maps non-2xx to `UpstreamError` (extracting message/code from FastAPI, Next.js and other error shapes). |\n| `data-sources/thndr/krakend.ts` | `assertNoKrakendError`: the KrakenD gateway (`/krakend-thndr-x`) answers 200 with an `error_*` key when a backend fails; this turns it into an `UpstreamError`. |\n| `data-sources/thndr/dto/` | Wire types (`market-data.ts`, `portfolio.ts`, `engagement.ts`) — the only place snake_case field names live. |\n| `data-sources/thndr/wire.ts` | Decoding helpers: timestamps (epoch s/ms/ISO), numbers from formatted strings, JWT `exp`, `Set-Cookie`. |\n| `repositories/thndr/translators/` | **The anti-corruption layer proper**: pure DTO → domain functions. Malformed rows are skipped (`mapRows`), mandatory fields missing → `UpstreamError`. |\n| `repositories/thndr/market-data-repository.ts`, `portfolio-repository.ts`, `engagement-repository.ts` | `ThndrMarketDataRepository`, `ThndrPortfolioRepository`, `ThndrEngagementRepository`: implement the domain repositories (paths, params, translation). |\n| `repositories/thndr/auth-gateway.ts` | `HttpThndrAuthGateway`: implements the `ThndrAuthGateway` application port. |\n",
+              "excerpt_sha256": "1aedf5e29cd1b63bc33a4da220e5301702e5f660221d173301f506aebb934f63",
+              "claim": "O produto identifica os tradutores como sua camada anticorrupção."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "src/repositories/thndr/market-data-repository.ts",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/market-data-repository.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:30:39.607353+00:00",
+          "sha256": "05f0a2063ee587da9f108f45a37872f29fab796e7c488c5d74790aca6e222c31",
+          "line_count": 206,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/08300dc4e5802c8f89e3e26c3170f67185e0a3234284e72b31c36c11999e4f7a.txt",
+          "evidence": [
+            {
+              "start_line": 103,
+              "end_line": 119,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/market-data-repository.ts#L103-L119",
+              "excerpt": "  async getLatestPrices(ids: readonly AssetId[]): Promise<LatestPrice[]> {\n    const unique = [...new Set(ids.map((id) => id.value))].sort();\n    const out: LatestPrice[] = [];\n    for (let i = 0; i < unique.length; i += PRICE_BATCH) {\n      const path = '/securities/v2/price';\n      const data = await this.gateway.get<GatewayPriceResponseDto>(path, {\n        query: { asset_id: unique.slice(i, i + PRICE_BATCH) },\n      });\n      // The day snapshot only adds open/previous close: without it the price section is still a usable answer.\n      const usable =\n        data && typeof data === 'object' && Array.isArray(data.price?.results)\n          ? (({ error_asset_day_snapshot_v2: _ignored, ...rest }) => rest)(data as Record<string, unknown>)\n          : data;\n      assertNoKrakendError(usable, `GET ${path}`);\n      out.push(...toLatestPrices(usable as GatewayPriceResponseDto));\n    }\n    return out;",
+              "excerpt_sha256": "7f2926fe38b3a4b09d9ead70050ff8d61662914022244e500fabb6d4256ef510",
+              "claim": "O repositório consulta o contrato externo e entrega o payload à tradução do domínio."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "src/repositories/thndr/translators/prices.ts",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/prices.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:27:22.904523+00:00",
+          "sha256": "168b63423c759e884ce7de48bfbf8503177b3ef379e497c93ae0b8cd5382545f",
+          "line_count": 140,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0b6e68f55655be546f7c94177e306b47ac52905b6520a7e447879d090f4df8fe.txt",
+          "evidence": [
+            {
+              "start_line": 29,
+              "end_line": 46,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/prices.ts#L29-L46",
+              "excerpt": "export function parseGatewayTimestamp(raw: unknown): Date | null {\n  const n = typeof raw === 'string' && /^\\d+$/.test(raw) ? Number(raw) : raw;\n  if (typeof n === 'number' && Number.isFinite(n)) {\n    // Nanoseconds exceed 1e17 from 1973 on; microseconds lie between 1e14 (1973) and 1e17 (year 5138).\n    if (n > 1e17) return new Date(Math.floor(n / 1e6));\n    if (n > 1e14) return new Date(Math.floor(n / 1e3));\n  }\n  return parseTimestamp(n);\n}\n\nfunction readingValue(reading: GatewayPriceValueDto | null | undefined): number | null {\n  return reading && typeof reading === 'object' ? toNumber(reading.value) : null;\n}\n\nfunction kindOf(field: unknown): LatestPriceKind {\n  if (field === 'last_trade_price') return 'trade';\n  if (field === 'close' || field === 'close_price') return 'close';\n  return 'unknown';",
+              "excerpt_sha256": "644a9d0c1f8c651cc206b9f86e7180630071a6ce20c96c31d59073e077173d7a",
+              "claim": "A tradução converte a escala temporal e distingue semanticamente trade/close."
+            },
+            {
+              "start_line": 57,
+              "end_line": 79,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/prices.ts#L57-L79",
+              "excerpt": "/** The transactional price wins; funds have a NAV and FX rows a rate instead (ThndrApp `mapPriceToEntity`). */\nfunction priceParts(row: GatewayPriceRowDto | undefined): PriceParts {\n  const price = row?.price && typeof row.price === 'object' ? row.price : {};\n  const bid = readingValue(price.bid);\n  const ask = readingValue(price.ask);\n  const last = readingValue(price.last);\n  if (last !== null)\n    return {\n      last,\n      kind: kindOf(price.last?.price_field),\n      at: parseGatewayTimestamp(price.last?.market_effective_timestamp),\n      bid,\n      ask,\n    };\n  for (const [kind, reading] of [\n    ['nav', price.nav],\n    ['rate', price.rate],\n  ] as const) {\n    const value = readingValue(reading);\n    if (value !== null)\n      return { last: value, kind, at: parseGatewayTimestamp(reading?.market_effective_timestamp), bid, ask };\n  }\n  return { last: null, kind: 'unknown', at: null, bid, ask };",
+              "excerpt_sha256": "68873ef88099753eeda4655e259019e22be9cf62d53373980128962508e650e4",
+              "claim": "O adaptador escolhe preço transacional, NAV ou taxa e mantém a natureza do valor."
+            },
+            {
+              "start_line": 91,
+              "end_line": 125,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/prices.ts#L91-L125",
+              "excerpt": "export function toLatestPrices(dto: GatewayPriceResponseDto | null | undefined): LatestPrice[] {\n  const prices = new Map<string, GatewayPriceRowDto>();\n  for (const row of Array.isArray(dto?.price?.results) ? dto.price.results : []) {\n    if (!row || typeof row !== 'object') continue;\n    const id = parseAssetIdOrNull(row.asset_id);\n    if (id) prices.set(id.value, row);\n  }\n  const days = new Map<string, GatewayDaySideDto>();\n  for (const row of Array.isArray(dto?.day_snapshot?.results) ? dto.day_snapshot.results : []) {\n    if (!row || typeof row !== 'object') continue;\n    const id = parseAssetIdOrNull(row.asset_id);\n    if (id) days.set(id.value, daySide(row.day_snapshot?.last ?? row.day_snapshot?.rate));\n  }\n  const out: LatestPrice[] = [];\n  for (const raw of new Set([...prices.keys(), ...days.keys()])) {\n    const id = parseAssetIdOrNull(raw) as AssetId;\n    const parts = priceParts(prices.get(raw));\n    const day = days.get(raw) ?? {};\n    const dayClose = toNumber(day.close);\n    const last = parts.last ?? dayClose;\n    if (last === null) continue;\n    out.push(\n      Object.freeze({\n        instrumentId: id,\n        last,\n        kind: parts.last !== null ? parts.kind : 'close',\n        at: parts.last !== null ? parts.at : parseGatewayTimestamp(day.market_effective_timestamp),\n        open: toNumber(day.open),\n        previousClose: toNumber(day.previous_close),\n        bid: parts.bid,\n        ask: parts.ask,\n      }),\n    );\n  }\n  return out;",
+              "excerpt_sha256": "2df4cf3286ccf9693322ff6874c98cf98912328d2f9b1ca758cd0872ae9856cc",
+              "claim": "A resposta externa de duas seções produz LatestPrice com natureza, instante, abertura e fechamento anterior próprios."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "src/repositories/thndr/translators/portfolio.ts",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/portfolio.ts",
+          "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/portfolio.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:25:44.143175+00:00",
+          "sha256": "7c1af028e1842741227e6221fde750f8da0f7bef935c907939072d1bc20403fc",
+          "line_count": 358,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/1f1dbf5f648b86de6cb6cab82973396203f22c67ab3ac56b57c63f86e882da0a.txt",
+          "evidence": [
+            {
+              "start_line": 63,
+              "end_line": 82,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/portfolio.ts#L63-L82",
+              "excerpt": "export function toPosition(dto: PositionDto | null | undefined, market: Market): Position | null {\n  if (!isObject(dto)) return null;\n  const ticker = sanitizeTicker(dto.symbol);\n  const quantity = toNumber(dto.qty);\n  if (!ticker || quantity === null) return null;\n  return tolerant(() =>\n    createPosition({\n      instrumentId: parseAssetIdOrNull(dto.asset_id),\n      ticker,\n      assetClass: parseAssetClass(dto.asset_class),\n      currency: mapCurrency(dto.currency) ?? accountCurrency(market),\n      quantity,\n      averageCost: toNumber(dto.avg_cost),\n      costValue: toNumber(dto.cost_value),\n      marketPrice: toNumber(dto.market_price),\n      unrealizedPnl: toNumber(dto.gain_loss),\n      unrealizedPnlPercent: toNumber(dto.gain_loss_percentage),\n      unit: stringOrNull(dto.unit),\n    }),\n  );",
+              "excerpt_sha256": "63c144578285fffeaad5d73e4da68f8b7b30ad7206642f0a7db82017172b4f7a",
+              "claim": "A imagem de posição externa passa pelas fábricas e validações do domínio."
+            },
+            {
+              "start_line": 85,
+              "end_line": 107,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/portfolio.ts#L85-L107",
+              "excerpt": "/** Maps the wallet-and-portfolio payload (§1.1). `purchase_power` is mandatory; other cash fields default to 0. */\nexport function toAccountSnapshot(\n  dto: WalletAndPortfolioDto | null | undefined,\n  market: Market,\n): AccountSnapshot {\n  const buyingPower = isObject(dto) ? toNumber(dto.purchase_power) : null;\n  if (!isObject(dto) || buyingPower === null) {\n    throw new UpstreamError('Unexpected wallet-and-portfolio payload from Thndr: missing purchase_power');\n  }\n  const positions = mapRows(dto.portfolio?.positions, (row) => toPosition(row, market));\n  const portfolioValue =\n    toNumber(dto.portfolio?.portfolio_value) ?? positions.reduce((sum, p) => sum + (p.marketValue ?? 0), 0);\n  const summary = createAccountSummary({\n    buyingPower,\n    blockedCash: toNumber(dto.cash_in_holding) ?? 0,\n    unsettledCash: toNumber(dto.unsettled_cash) ?? 0,\n    settledCash: toNumber(dto.settled_cash),\n    portfolioValue,\n    totalReturn: toNumber(dto.portfolio?.total_return),\n    totalReturnPercent: toNumber(dto.portfolio?.total_return_prc),\n    currency: accountCurrency(market),\n  });\n  return Object.freeze({ summary, positions: Object.freeze(positions) });",
+              "excerpt_sha256": "1f7cc16cdfbbade011f3033c58bf09c131a12396a4d2fcb8409d1077cd995700",
+              "claim": "O adaptador exige purchase_power e deriva o valor da carteira dos modelos válidos quando necessário."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        }
+      ],
+      "mechanism": "O cliente financeiro thndr-mcp conserva os DTOs do fornecedor na camada de dados e os traduz para modelos próprios. A tradução de preços distingue negócio executado, fechamento, valor de cota e taxa; resolve a precedência entre as leituras e mantém a natureza escolhida no resultado. A tradução de carteira valida os dados e aplica a política de valor e moeda do domínio. Os repositórios chamam essas funções antes de devolver os modelos à aplicação.",
+      "limits": "O recorte mostra escolhas semânticas e validação além da troca de nomes de campos. A correção financeira dessas políticas não foi certificada nem foi feita uma chamada à API financeira nesta pesquisa. Context Mapper é uma base de modelagem comparada; não foi identificado como dependência do cliente."
+    },
+    {
+      "concept_id": "context-map",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-dsl",
+          "path": "org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "original_url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:20:33.348406Z",
+          "sha256": "440d9a081c28c89b5fbaac3764ad9ed946701df98c098a8de086527e70540d54",
+          "line_count": 556,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7ff20b7d9b73b81c9e3ab5f907f1187e6c29a3aa30f0cc3617c27188e9eb4683.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /*\n2:  * Copyright 2018 The Context Mapper Project Team\n3:  *\n4:  * Licensed under the Apache License, Version 2.0 (the \"License\");\n5:  * you may not use this file except in compliance with the License.\n6:  * You may obtain a copy of the License at\n7:  *\n8:  *    http://www.apache.org/licenses/LICENSE-2.0\n9:  *\n10:  * Unless required by applicable law or agreed to in writing, software\n11:  * distributed under the License is distributed on an \"AS IS\" BASIS,\n12:  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n13:  * See the License for the specific language governing permissions and\n14:  * limitations under the License.\n15:  */\n16: \n17: grammar org.contextmapper.dsl.ContextMappingDSL with org.contextmapper.tactic.dsl.TacticDDDLanguage\n18: \n19: import \"http://contextmapper.org/tactic/dsl/tacticdsl\" as tacticdsl\n20: \n21: generate contextMappingDSL \"http://www.contextmapper.org/dsl/ContextMappingDSL\"\n22: \n23: ContextMappingModel:\n24: \t(\n25: \t\t(topComment=SL_COMMENT | topComment=ML_COMMENT)? &\n26: \t\t(imports+=Import)* &\n27: \t\t(map = ContextMap)? &\n28: \t\t(boundedContexts += BoundedContext)* &\n29: \t\t(domains += Domain)* &\n30: \t\t(userRequirements += UserRequirement)* &\n31: \t\t(stakeholders += Stakeholders)* &\n32: \t\t(valueRegisters += ValueRegister)*\n33: \t)\n34: ;\n35: \n36: Import :\n37: 'import' importURI=STRING;\n38: \n39: ContextMap:\n40: \t{ContextMap} // make sure there is always a context map",
+          "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7ff20b7d9b73b81c9e3ab5f907f1187e6c29a3aa30f0cc3617c27188e9eb4683.txt",
+          "local_verified_utc": "2026-10-15T03:33:19.396314+00:00",
+          "evidence": [
+            {
+              "start_line": 39,
+              "end_line": 47,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L39-L47",
+              "excerpt": "ContextMap:\n\t{ContextMap} // make sure there is always a context map\n\t'ContextMap' (name=ID)?\n\tOPEN\n\t\t(('type' ('=')? type=ContextMapType)? &\n\t\t('state' ('=')? state=ContextMapState)?)\n\t\t('contains' boundedContexts += [BoundedContext] (\",\" boundedContexts += [BoundedContext])*)*\n\t\trelationships += Relationship*\n\tCLOSE",
+              "excerpt_sha256": "7bd5b2604ad3bb3cb4052b3f2d5e18d78dfd7c397018152a33c1cd3143640497",
+              "claim": "ContextMap contém os contextos e as relações entre eles."
+            },
+            {
+              "start_line": 136,
+              "end_line": 151,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L136-L151",
+              "excerpt": "UpstreamDownstreamRelationship:\n\tCustomerSupplierRelationship |\n\t(\n\t\t(\n\t\t\t(upstream = [BoundedContext] (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? '->' (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? downstream = [BoundedContext]) |\n\t\t\t(downstream = [BoundedContext] (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? '<-' (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? upstream = [BoundedContext]) |\n\t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Upstream-Downstream'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext]) |\n\t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Downstream-Upstream'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext])\n\t\t)\n\t\t(':' name=ID)?\n\t\t(OPEN (\n\t\t\t('implementationTechnology' ('=')? implementationTechnology=STRING)? &\n\t\t\t(('exposedAggregates' ('=')? upstreamExposedAggregates += [Aggregate]) (\",\" upstreamExposedAggregates += [Aggregate])* (exposedAggregatesComment=SL_COMMENT)?)? &\n\t\t\t('downstreamRights' ('=')? downstreamGovernanceRights=DownstreamGovernanceRights)?\n\t\t)\n\t\tCLOSE)?",
+              "excerpt_sha256": "7f080ec4464e5059c8e5b82061a2aafaefa8859a058aff0d75c638bb90a82aa0",
+              "claim": "A gramática representa direção, papéis, agregados expostos e direitos do downstream."
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "ContextMapper/context-mapper-dsl",
+            "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+            "path": "LICENSE",
+            "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T01:28:22.926569Z",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-91e0763f64124c5f208b127e87623c2a5c657995f50c5249d76862ede5f6eb0b.txt",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that is",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-91e0763f64124c5f208b127e87623c2a5c657995f50c5249d76862ede5f6eb0b.txt",
+            "kind": "LICENSE"
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:25:44.144235+00:00",
+          "sha256": "8bac1f5c296cc32363a000ae88248da14b029211f575a382d7b4539c6102308c",
+          "line_count": 70,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/2731f94207a7ffbe1fb4d17e5b8c60b335a4a3763a6ac882c4dc79385762c07d.txt",
+          "evidence": [
+            {
+              "start_line": 40,
+              "end_line": 63,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md#L40-L63",
+              "excerpt": "### Bounded contexts and context map\n\n| Context | Role | Upstream dependencies |\n| --- | --- | --- |\n| Identity & Access | Generic subdomain: login, device approval, session | none (consumed by repositories through the `AccessTokenProvider` port) |\n| Market Data | Core, upstream **supplier** (Open Host Service: `application/market-data/services/*` and its domain types as published language) | none |\n| Portfolio | Core, **customer** of Market Data | Market Data |\n| Engagement | Supporting, **customer** of Market Data | Market Data |\n\n- **Shared Kernel** (`domain/shared-kernel/`): `Money`, `Ticker`, `AssetId`, `Market`, domain errors and guards. It is\n  shared by every context and depends on nothing.\n- No context depends on Portfolio or Engagement. Portfolio and Engagement never depend on each other or on Identity.\n\n### Enforcement\n\n`src/__tests__/architecture.test.ts` turns these rules into build failures:\n\n- the layer matrix;\n- allowed packages per layer;\n- the context map, including published-interface-only access;\n- the shared kernel's independence;\n- one `Query`/`Command` per file in `queries/`/`commands/`;\n- no use case importing another;\n- no use cases in presentation.",
+              "excerpt_sha256": "740927dff888b5a5e377971c14f6ac68e87b56ea1169fbee9a5e950f423feb8b",
+              "claim": "O ADR registra relações e interfaces publicadas, núcleo compartilhado e condições de dependência."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "docs/domains/README.md",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md",
+          "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:25:44.144037+00:00",
+          "sha256": "6ab6077950f18352048006de04420d78fb12490b9b234e630fcefd44dce902cf",
+          "line_count": 164,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/9f7c531e3abd2141bd265280db8e6cdae2710dcb2daa7b762d5f92161e13f3fd.txt",
+          "evidence": [
+            {
+              "start_line": 31,
+              "end_line": 49,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md#L31-L49",
+              "excerpt": "### Context map ([ADR 0015](../adr/0015-five-layer-clean-architecture-cqs-and-context-map.md))\n\n| Context | Role | Depends on |\n| --- | --- | --- |\n| Identity & Access | Generic subdomain, **independent** | no other context |\n| Market Data | Core, upstream **supplier** — **Open Host Service**: `application/market-data/services/*` (`InstrumentResolver`, `MarketQuotesCache`) with its domain types (`src/domain/market-data/`) as the published language | no other context |\n| Portfolio | Core, **customer** of Market Data | Market Data (published interface only) |\n| Engagement | Supporting, **customer** of Market Data | Market Data (published interface only) |\n\n- **Portfolio → Market Data** and **Engagement → Market Data** (customer/supplier): both use `InstrumentResolver`\n  (and Engagement also `MarketQuotesCache`, via `InstrumentLabeler`) to translate between tickers and Thndr asset\n  ids. They may import only Market Data's domain and `application/market-data/services/*`, never its use cases.\n- **Nothing depends on Portfolio or Engagement**, and they never depend on each other or on Identity.\n- **Shared Kernel** (`src/domain/shared-kernel/`): `AssetId`, `Market` (and `AssetClass`), `Money`, `Ticker`, errors\n  and guards are shared by every context; the kernel depends on nothing.\n- **Identity & Access is consumed through a port**, not as a context dependency: the Thndr HTTP client (a data\n  source) gets its bearer token from the `AccessTokenProvider` application port; on a 401/403 it calls\n  `invalidate()` and retries once.\n- **All contexts → Thndr API** through the anti-corruption layer (below).",
+              "excerpt_sha256": "028569b414fe03f78e29651ef12165e0a9e61b3ffabd1667a1be3f09ebd2642a",
+              "claim": "O mapa relaciona Market Data, Portfolio, Engagement, Identity e o fornecedor externo."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "src/application/portfolio/queries/get-position.ts",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/portfolio/queries/get-position.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:27:22.807261+00:00",
+          "sha256": "fa44d1753764b7f499a02a745d04e7768d1a9ea22789bcca52462bf45e52e5f1",
+          "line_count": 46,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/c8c876185982281152043cd3d3581936d9d6a80c1b460da99bfec714f536df54.txt",
+          "evidence": [
+            {
+              "start_line": 35,
+              "end_line": 44,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/portfolio/queries/get-position.ts#L35-L44",
+              "excerpt": "  async execute(params: InputOf<typeof input>): Promise<PositionResult> {\n    const market = parseMarket(params.market);\n    const instrument = await this.deps.resolver.resolve(params.symbol, market);\n    const position = await this.deps.repository.getPosition(instrument.id, market);\n    const held = position !== null && position.quantity > 0;\n    const sellable =\n      held && params.includeSellable !== false\n        ? await this.deps.repository.getSellableQuantity(instrument.id, market)\n        : null;\n    return { ticker: instrument.ticker.value, held, position, sellable };",
+              "excerpt_sha256": "e9fb43965af813dd3f154d16b40c9d9e6e7d2adc1a76dc62ad42eeb40d6c2f45",
+              "claim": "Portfolio consome o serviço publicado de resolução de instrumentos antes de consultar sua posição."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "src/application/engagement/commands/create-alert.ts",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/engagement/commands/create-alert.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:33:19.650547+00:00",
+          "sha256": "820b34ded53b260b227c52c832d709ef4f8b4fa8189c2a0945827100d1194927",
+          "line_count": 56,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/e40788916064db553b71e4da44056a26883db0a026cebf21df218c6be647fe63.txt",
+          "evidence": [
+            {
+              "start_line": 45,
+              "end_line": 54,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/engagement/commands/create-alert.ts#L45-L54",
+              "excerpt": "    const frequency = parseAlertFrequency(params.frequency) ?? DEFAULT_ALERT_FREQUENCY;\n    const market = parseMarket(params.market);\n    requireMarketFeature(market, 'priceAlerts');\n    const instrument = await this.deps.resolver.resolve(params.symbol, market);\n    const direction =\n      explicitDirection ??\n      (await decideDirection(this.deps, instrument.id, instrument.ticker.value, params.price, market));\n    return toAlertReceipt(\n      await placeAlert(this.deps, instrument.id, params.price, direction, frequency, market),\n    );",
+              "excerpt_sha256": "4f033cdc41ffdbe687893a9daf532679672c01acf4adeec501c447593229d96a",
+              "claim": "Engagement consome a mesma interface publicada ao preparar o alerta."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "armaaar/thndr-mcp",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "path": "src/__tests__/architecture.test.ts",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:33:19.634008+00:00",
+          "sha256": "4cca0fe29fcb1f51a749dc9a5a6ebc3d58fa8c66903fa8a57b8cd7dfe5ff401f",
+          "line_count": 235,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/7e7b2ff6e891bdf7ac1a3608e84b8bc91926902972ab1e81a4601a0d003774d1.txt",
+          "evidence": [
+            {
+              "start_line": 76,
+              "end_line": 90,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts#L76-L90",
+              "excerpt": "/** Context map: which bounded contexts each context may depend on (besides itself and the shared kernel). */\nconst CONTEXT_MAP: Record<Context, readonly Context[]> = {\n  identity: [],\n  'market-data': [],\n  portfolio: ['market-data'],\n  engagement: ['market-data'],\n};\n\n/** What an upstream context publishes to its customers. */\nconst PUBLISHED: Record<Context, (path: string) => boolean> = {\n  identity: () => false,\n  'market-data': (p) =>\n    p.startsWith('domain/market-data/') || p.startsWith('application/market-data/services/'),\n  portfolio: () => false,\n  engagement: () => false,",
+              "excerpt_sha256": "32ef88eb8e6897f6750abf37d392c8b6eb2fa5a89e453d5eb8def8c78f3ddab7",
+              "claim": "A matriz codifica os upstreams permitidos e suas interfaces publicadas."
+            },
+            {
+              "start_line": 163,
+              "end_line": 179,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts#L163-L179",
+              "excerpt": "  it('contexts depend only on themselves, the shared kernel and their published upstreams (context map)', () => {\n    const found = violations((file, target) => {\n      const from = contextOf(file.path);\n      const to = contextOf(target);\n      if (from === null || to === null || from === to) return null;\n      return CONTEXT_MAP[from].includes(to) && PUBLISHED[to](target) ? null : `${file.path} → ${target}`;\n    });\n    expect(found).toEqual([]);\n  });\n\n  it('the domain of one context never imports another context’s domain', () => {\n    const found = violations((file, target) => {\n      const from = file.path.startsWith('domain/') ? contextOf(file.path) : null;\n      const to = target.startsWith('domain/') ? contextOf(target) : null;\n      return from && to && from !== to && !CONTEXT_MAP[from].includes(to) ? `${file.path} → ${target}` : null;\n    });\n    expect(found).toEqual([]);",
+              "excerpt_sha256": "8d2d2f669ad491bc7739ba5003089d46bd065fca883b193f67fb7400816f13a8",
+              "claim": "Os testes de arquitetura verificam as direções de importação. Eles foram lidos, não executados nesta pesquisa."
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "path": "LICENSE",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:44.147781+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/83ae1e9d8c7d95a3db616f77a0eec2352f9d0bd6a78a8f69658c4c638fba0ad7.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        }
+      ],
+      "mechanism": "O mapa de contextos thndr-mcp descreve quem publica os serviços de mercado, quem os consome e quais tipos pertencem ao núcleo compartilhado. O ADR e o README registram as relações; GetPosition e CreateAlert mostram os dois consumidores usando a interface publicada de Market Data. Uma matriz de dependências e suas verificações conservam essas direções no código.",
+      "limits": "O recorte demonstra o mapa declarado e seus caminhos de implementação. Os rótulos supplier/customer pertencem ao ADR; por si só, não provam os compromissos de planejamento de outro padrão estratégico. Os testes foram inspecionados sem execução, e não se afirma conformidade de toda alteração futura."
+    },
+    {
+      "concept_id": "domain-service",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "repo": "xmolecules/jmolecules",
+          "revision": "20d2636beba2e3cb8f0a9b62c07e3606c49da84f",
+          "path": "jmolecules-ddd/src/main/java/org/jmolecules/ddd/annotation/Service.java",
+          "url": "https://github.com/xmolecules/jmolecules/blob/20d2636beba2e3cb8f0a9b62c07e3606c49da84f/jmolecules-ddd/src/main/java/org/jmolecules/ddd/annotation/Service.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:30:39.625294+00:00",
+          "sha256": "335e62a7e2e1e3269af8ff552ce634341178e8c540893e5b239e4be8de13c07b",
+          "line_count": 45,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/d1207a040063d4246439c361f6b0a29dca8a95e0775782401b93afc15ff9cdcb.txt",
+          "evidence": [
+            {
+              "start_line": 26,
+              "end_line": 43,
+              "url": "https://github.com/xmolecules/jmolecules/blob/20d2636beba2e3cb8f0a9b62c07e3606c49da84f/jmolecules-ddd/src/main/java/org/jmolecules/ddd/annotation/Service.java#L26-L43",
+              "excerpt": "/**\n * Identifies a domain {@link Service}. A service is a significant process or transformation in the domain that is not a\n * natural responsibility of an entity or value object, add an operation to the model as a standalone interface declared\n * as a service. Define a service contract, a set of assertions about interactions with the service. (See assertions.)\n * State these assertions in the ubiquitous language of a specific bounded context. Give the service a name, which also\n * becomes part of the ubiquitous language.\n *\n * @author Christian Stettler\n * @author Henning Schwentner\n * @author Stephan Pirnbaum\n * @author Martin Schimak\n * @author Oliver Drotbohm\n */\n@Retention(RetentionPolicy.RUNTIME)\n@Target(ElementType.TYPE)\n@Documented\n@Stereotype(priority = 0)\npublic @interface Service {",
+              "excerpt_sha256": "00d8736703e888ea8538e074567fd2adda33a568fb2dd19c46590de4aedb1017",
+              "claim": "A biblioteca de modelagem identifica uma operação significativa de domínio que não pertence naturalmente a uma entidade ou objeto de valor."
+            }
+          ],
+          "license": {
+            "repo": "xmolecules/jmolecules",
+            "revision": "20d2636beba2e3cb8f0a9b62c07e3606c49da84f",
+            "path": "LICENSE",
+            "url": "https://github.com/xmolecules/jmolecules/blob/20d2636beba2e3cb8f0a9b62c07e3606c49da84f/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:30:39.612236+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/6fd0f4e8a1d6f71149934f0ca163fa18e9d62622cc91ba34f7f5d8998eed4d36.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "killbill/killbill",
+          "revision": "20e15525d1d9e56219c4f5651e06850fe793f5e0",
+          "path": "invoice/src/main/java/org/killbill/billing/invoice/generator/DefaultInvoiceGenerator.java",
+          "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/DefaultInvoiceGenerator.java",
+          "raw_url": "https://raw.githubusercontent.com/killbill/killbill/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/DefaultInvoiceGenerator.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:25:43.909713+00:00",
+          "sha256": "682af03115f64b63a1c80f5dbfc06772ba3410ac36d66effd422c620ab6c2747",
+          "line_count": 156,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/e3c9b3adc5cc35807b93413c12a52b0e1a41002480b230ed427e4aaf9f611c8a.txt",
+          "evidence": [
+            {
+              "start_line": 74,
+              "end_line": 114,
+              "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/DefaultInvoiceGenerator.java#L74-L114",
+              "excerpt": "    public InvoiceWithMetadata generateInvoice(final ImmutableAccountData account,\n                                               @Nullable final BillingEventSet events,\n                                               final AccountInvoices existingInvoices,\n                                               @Nullable final UUID targetInvoiceId,\n                                               final LocalDate targetDate,\n                                               final Currency targetCurrency,\n                                               @Nullable final DryRunInfo dryRunInfo,\n                                               final Iterable<PluginProperty> inputProperties,\n                                               final InternalCallContext context) throws InvoiceApiException {\n        if (events == null) {\n            return new InvoiceWithMetadata(null, Collections.emptySet(), Collections.emptyMap(), false, context);\n        }\n\n        validateTargetDate(targetDate, context);\n        final LocalDate adjustedTargetDate = adjustTargetDate(existingInvoices.getInvoices(), targetDate);\n\n        final LocalDate invoiceDate = context.toLocalDate(context.getCreatedDate());\n        final InvoiceStatus invoiceStatus = events.isAccountAutoInvoiceDraft() ? InvoiceStatus.DRAFT : InvoiceStatus.COMMITTED;\n        final DefaultInvoice invoice = targetInvoiceId != null ?\n                                       new DefaultInvoice(targetInvoiceId, account.getId(), null, invoiceDate, adjustedTargetDate, targetCurrency, false, invoiceStatus) :\n                                       new DefaultInvoice(account.getId(), invoiceDate, adjustedTargetDate, targetCurrency, invoiceStatus);\n\n        final Map<UUID, SubscriptionFutureNotificationDates> perSubscriptionFutureNotificationDates = new HashMap<>();\n\n        final InvoiceGeneratorResult fixedAndRecurringItems = recurringInvoiceItemGenerator.generateItems(account, invoice.getId(), events, existingInvoices, adjustedTargetDate, targetCurrency, perSubscriptionFutureNotificationDates, dryRunInfo, inputProperties, context);\n        invoice.addInvoiceItems(fixedAndRecurringItems.getItems());\n\n        final InvoiceGeneratorResult usageItemsWithTrackingIds = usageInvoiceItemGenerator.generateItems(account, invoice.getId(), events, existingInvoices, adjustedTargetDate, targetCurrency, perSubscriptionFutureNotificationDates, dryRunInfo, inputProperties, context);\n        invoice.addInvoiceItems(usageItemsWithTrackingIds.getItems());\n\n        if (targetInvoiceId != null) {\n            existingInvoices.getInvoices().stream()\n                    .filter(input -> input.getId().equals(targetInvoiceId))\n                    .findFirst().ifPresent(input -> invoice.addInvoiceItems(input.getInvoiceItems()));\n        }\n\n        return new InvoiceWithMetadata(invoice,\n                                       usageItemsWithTrackingIds.getTrackingIds(),\n                                       perSubscriptionFutureNotificationDates,\n                                       config.isUsageZeroAmountDisabled(context),\n                                       context);",
+              "excerpt_sha256": "cfc00872e7c425f76a839c60e0b124ca06a509e6184be11d6f0f0cfde3ac3d6a",
+              "claim": "O serviço combina conta, eventos de assinatura, faturas anteriores e regras para construir a fatura e seus itens."
+            }
+          ],
+          "license": {
+            "repo": "killbill/killbill",
+            "revision": "20e15525d1d9e56219c4f5651e06850fe793f5e0",
+            "path": "LICENSE",
+            "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/killbill/killbill/20e15525d1d9e56219c4f5651e06850fe793f5e0/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:43.882649+00:00",
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/28e20e0dfe61d0ac4a6da7c3f18221fe6aedeffc13ecc373b8960eff4b260310.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "killbill/killbill",
+          "revision": "20e15525d1d9e56219c4f5651e06850fe793f5e0",
+          "path": "invoice/src/main/java/org/killbill/billing/invoice/generator/FixedAndRecurringInvoiceItemGenerator.java",
+          "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/FixedAndRecurringInvoiceItemGenerator.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:30:39.616157+00:00",
+          "sha256": "a88db03833e46c728c0048c27913cd525b0e51d338726341dc4e151970ac44c7",
+          "line_count": 560,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/d27f80f01e8317d6964ea5545bdeab561c7da228348c05e40961dd61ca02ce06.txt",
+          "evidence": [
+            {
+              "start_line": 91,
+              "end_line": 124,
+              "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/FixedAndRecurringInvoiceItemGenerator.java#L91-L124",
+              "excerpt": "    public InvoiceGeneratorResult generateItems(final ImmutableAccountData account, final UUID invoiceId, final BillingEventSet eventSet,\n                                                final AccountInvoices existingInvoices, final LocalDate targetDate,\n                                                final Currency targetCurrency, final Map<UUID, SubscriptionFutureNotificationDates> perSubscriptionFutureNotificationDate,\n                                                final DryRunInfo dryRunInfo,\n                                                final Iterable<PluginProperty> pluginProperties, final InternalCallContext internalCallContext) throws InvoiceApiException {\n        final MultiValueMap<UUID, LocalDate> createdItemsPerDayPerSubscription = new MultiValueHashMap<>();\n\n\n        final InvoicePruner invoicePruner = new InvoicePruner(existingInvoices);\n        final Set<UUID> toBeIgnored = invoicePruner.getFullyRepairedItemsClosure();\n        final AccountItemTree accountItemTree = new AccountItemTree(account.getId(), invoiceId, config.getProrationFixedDays(internalCallContext));\n        for (final Invoice invoice : existingInvoices.getInvoices()) {\n            for (final InvoiceItem item : invoice.getInvoiceItems()) {\n                if (toBeIgnored.contains(item.getId())) {\n                    continue;\n                }\n\n                if (item.getSubscriptionId() == null || // Always include migration invoices, credits, external charges etc.\n                    !eventSet.getSubscriptionIdsWithAutoInvoiceOff()\n                             .contains(item.getSubscriptionId())) { //don't add items with auto_invoice_off tag\n\n                    accountItemTree.addExistingItem(item);\n                    trackInvoiceItemCreatedDay(item, createdItemsPerDayPerSubscription, internalCallContext);\n                }\n            }\n        }\n\n        // Generate list of proposed invoice items based on billing events from junction-- proposed items are ALL items since beginning of time\n        final List<InvoiceItem> proposedItems = new ArrayList<>();\n        processRecurringBillingEvents(invoiceId, account.getId(), eventSet, targetDate, targetCurrency, proposedItems, perSubscriptionFutureNotificationDate, internalCallContext);\n        processFixedBillingEvents(invoiceId, account.getId(), eventSet, targetDate, targetCurrency, proposedItems, internalCallContext);\n\n\n        existingInvoices.filterProposedItems(proposedItems, eventSet, internalCallContext);",
+              "excerpt_sha256": "45a71ed71eea6cda2c3c231a250b0869fb2fd69fdcfa1a3b8b676544c6ca203a",
+              "claim": "A geração considera eventos, itens anteriores e regras de faturamento."
+            },
+            {
+              "start_line": 225,
+              "end_line": 278,
+              "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/FixedAndRecurringInvoiceItemGenerator.java#L225-L278",
+              "excerpt": "    List<InvoiceItem> processRecurringEvent(final UUID invoiceId, final UUID accountId, final BillingEvent thisEvent, @Nullable final BillingEvent nextEvent,\n                                            final LocalDate targetDate, final Currency currency,\n                                            final InvoiceItemGeneratorLogger invoiceItemGeneratorLogger,\n                                            final Map<UUID, SubscriptionFutureNotificationDates> perSubscriptionFutureNotificationDates,\n                                            final InternalCallContext internalCallContext) throws InvoiceApiException {\n\n        final List<InvoiceItem> items = new ArrayList<InvoiceItem>();\n        final LocalDate thisEventEffectiveDate = internalCallContext.toLocalDate(thisEvent.getEffectiveDate());\n        if (thisEventEffectiveDate.compareTo(targetDate) > 0) {\n            return items;\n        }\n\n        // Handle recurring items\n        final BillingPeriod billingPeriod = thisEvent.getBillingPeriod();\n        if (billingPeriod != BillingPeriod.NO_BILLING_PERIOD) {\n\n            final Plan currentPlan = thisEvent.getPlan();\n            Preconditions.checkNotNull(currentPlan, \"Unexpected null Plan name event = %s\", thisEvent);\n\n            final BillingMode recurringBillingMode = currentPlan.getRecurringBillingMode();\n            final LocalDate startDate = thisEventEffectiveDate;\n\n            if (!startDate.isAfter(targetDate)) {\n                final LocalDate endDate = (nextEvent == null) ? null : internalCallContext.toLocalDate(nextEvent.getEffectiveDate());\n\n                final int billCycleDayLocal = thisEvent.getBillCycleDayLocal();\n\n                final RecurringInvoiceItemDataWithNextBillingCycleDate itemDataWithNextBillingCycleDate;\n                try {\n                    itemDataWithNextBillingCycleDate = generateInvoiceItemData(startDate, endDate, targetDate, billCycleDayLocal, billingPeriod, recurringBillingMode, internalCallContext);\n                } catch (final InvalidDateSequenceException e) {\n                    throw new InvoiceApiException(ErrorCode.INVOICE_INVALID_DATE_SEQUENCE, startDate, endDate, targetDate);\n                }\n                for (final RecurringInvoiceItemData itemDatum : itemDataWithNextBillingCycleDate.getItemData()) {\n\n                    final BigDecimal rate = thisEvent.getRecurringPrice();\n                    if (rate != null) {\n                        final BigDecimal quantity = new BigDecimal(thisEvent.getQuantity());\n                        final BigDecimal rateXQuantity = rate.multiply(quantity);\n\n                        final BigDecimal amount = KillBillMoney.of(itemDatum.getNumberOfCycles().multiply(rateXQuantity), currency);\n                        final DateTime catalogEffectiveDate = thisEvent.getCatalogEffectiveDate() != null ? thisEvent.getCatalogEffectiveDate() : null;\n                        final RecurringInvoiceItem recurringItem = new RecurringInvoiceItem(invoiceId,\n                                                                                            accountId,\n                                                                                            thisEvent.getBundleId(),\n                                                                                            thisEvent.getSubscriptionId(),\n                                                                                            currentPlan.getProduct().getName(),\n                                                                                            currentPlan.getName(),\n                                                                                            thisEvent.getPlanPhase().getName(),\n                                                                                            catalogEffectiveDate,\n                                                                                            itemDatum.getStartDate(),\n                                                                                            itemDatum.getEndDate(),\n                                                                                            amount, rateXQuantity, currency);\n                        items.add(recurringItem);",
+              "excerpt_sha256": "886892b826ce9c8fcfc7dc27ad70a16cfb0fcefdd595753e87aa0588ef39db7d",
+              "claim": "A regra recorrente calcula períodos, preço, quantidade e valor monetário e cria o item da assinatura."
+            }
+          ],
+          "license": {
+            "repo": "killbill/killbill",
+            "revision": "20e15525d1d9e56219c4f5651e06850fe793f5e0",
+            "path": "LICENSE",
+            "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/killbill/killbill/20e15525d1d9e56219c4f5651e06850fe793f5e0/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:43.882649+00:00",
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/28e20e0dfe61d0ac4a6da7c3f18221fe6aedeffc13ecc373b8960eff4b260310.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        },
+        {
+          "repo": "killbill/killbill",
+          "revision": "20e15525d1d9e56219c4f5651e06850fe793f5e0",
+          "path": "invoice/src/main/java/org/killbill/billing/invoice/InvoiceDispatcher.java",
+          "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/InvoiceDispatcher.java",
+          "raw_url": "https://raw.githubusercontent.com/killbill/killbill/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/InvoiceDispatcher.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:25:43.955923+00:00",
+          "sha256": "0170f658eecf50a6ac754df41047dc39b36e1c6916d51e4d01b3f88cb5abeb73",
+          "line_count": 1540,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/384b2c534ef33a85981940026332bd484189acbe1eca16dabf7ef9c15bbc1378.txt",
+          "evidence": [
+            {
+              "start_line": 952,
+              "end_line": 969,
+              "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/InvoiceDispatcher.java#L952-L969",
+              "excerpt": "    private InvoiceWithMetadata generateKillBillInvoice(final ImmutableAccountData account, final LocalDate targetDate, final BillingEventSet billingEvents, final AccountInvoices accountInvoices, @Nullable final DryRunInfo dryRunInfo, final Iterable<PluginProperty> inputProperties, final InternalCallContext context) throws InvoiceApiException {\n        final UUID targetInvoiceId;\n\n        final boolean reuseDraftIfExist = isPropertyReuseDraftSet(inputProperties);\n        final UUID reuseInvoiceDraftId = getReuseDraftInvoiceId(inputProperties);\n\n        // Filter out DRAFT invoices for computation  of existing items unless Account is in AUTO_INVOICING_REUSE_DRAFT\n        if (billingEvents.isAccountAutoInvoiceReuseDraft() || reuseDraftIfExist || reuseInvoiceDraftId != null) {\n            final Invoice existingDraft = accountInvoices.getInvoices().stream()\n                    .filter(input -> input.getStatus() == InvoiceStatus.DRAFT && (reuseInvoiceDraftId == null || reuseInvoiceDraftId.equals(input.getId())))\n                    .findFirst()\n                    .orElse(null);\n            targetInvoiceId = existingDraft != null ? existingDraft.getId() : null;\n        } else {\n            targetInvoiceId = null;\n        }\n\n        return generator.generateInvoice(account, billingEvents, accountInvoices, targetInvoiceId, targetDate, account.getCurrency(), dryRunInfo, inputProperties, context);",
+              "excerpt_sha256": "a1092003fa6ea5fae36498bfc1fe46e5da490f81dc9c757a606571da748ab475",
+              "claim": "O dispatcher da aplicação chama o gerador de faturas com seus objetos de domínio."
+            }
+          ],
+          "license": {
+            "repo": "killbill/killbill",
+            "revision": "20e15525d1d9e56219c4f5651e06850fe793f5e0",
+            "path": "LICENSE",
+            "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/killbill/killbill/20e15525d1d9e56219c4f5651e06850fe793f5e0/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T03:25:43.882649+00:00",
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/28e20e0dfe61d0ac4a6da7c3f18221fe6aedeffc13ecc373b8960eff4b260310.txt",
+            "status": "READ",
+            "license_spdx": "Apache-2.0"
+          }
+        }
+      ],
+      "mechanism": "Kill Bill executa a geração de fatura como uma operação entre conta, eventos de assinatura, catálogo e faturas anteriores. O gerador compõe a fatura e o gerador de itens recorrentes calcula o valor a partir dos ciclos, da tarifa e da quantidade. InvoiceDispatcher chama essa operação no fluxo da aplicação. A responsabilidade de cálculo atravessa esses objetos e não depende de a classe ter uma identidade própria de entidade.",
+      "limits": "O recorte é a regra de geração e composição de cobranças. Não se afirma que todos os geradores e plugins do produto sejam puros ou livres de I/O. jMolecules fornece a base de modelagem do papel; não foi identificada como dependência do Kill Bill."
+    }
+  ],
+  "independent_review": "PENDING",
+  "frozen_files_mutated": false
+}

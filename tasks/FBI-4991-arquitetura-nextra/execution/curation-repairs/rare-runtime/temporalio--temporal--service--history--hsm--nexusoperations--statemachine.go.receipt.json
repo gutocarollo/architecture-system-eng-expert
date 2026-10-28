@@ -1,0 +1,13 @@
+{
+  "repo": "temporalio/temporal",
+  "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+  "path": "service/history/hsm/nexusoperations/statemachine.go",
+  "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go",
+  "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--statemachine.go",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:04.788660+00:00",
+  "sha256": "45488e995b3fcadd2c184d8ed9fb5c053bbbdc2463dcae53d31116ad47dc0873",
+  "line_count": 685
+}

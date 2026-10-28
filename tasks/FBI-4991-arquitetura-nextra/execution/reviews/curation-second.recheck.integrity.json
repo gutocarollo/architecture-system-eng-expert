@@ -1,0 +1,1899 @@
+{
+  "observed_utc": "2026-10-15T17:25:27.422783+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "head": "32b80d5fc8eda42e2aa9b496d82c30b574120e68",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+  "baseline_review_sha256": "1b767d48cfa0d4e6b0e664480fbd596ae0c4e07045a3b6c0608b1ae3579ac074",
+  "recheck_sha256": "9e337c57486695fb4e6170e8e1f83249c55396bfa14696a3e5b4117fb1e85bba",
+  "source_captures": 188,
+  "source_hash_errors": [],
+  "license_captures": 47,
+  "license_hash_errors": [],
+  "license_scope_observations": [
+    {
+      "id": "M1",
+      "severity": "MEDIUM_BACKLOG",
+      "concept_id": "database-decomposition",
+      "scope": "license metadata only; mechanism APPROVED_BOUNDED",
+      "source_path": "doc/development/database/multiple_databases.md",
+      "observed_label": "MIT",
+      "primary_license_declaration": "All content residing under the \"doc/\" directory of this repository is licensed under \"Creative Commons: CC BY-SA 4.0 license\".",
+      "expected_label": "CC-BY-SA-4.0",
+      "evidence_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-1fb41ec1c1d1afa86d74229bdc1a6176afb49871fa3063a33a77e0ec41638f5c.txt",
+      "line": 5,
+      "fix": "Apply the path-specific doc/ license classification in the source record and MDX; keep MIT for the GitLab application code sources. No semantic source-review round is required for this deterministic metadata correction.",
+      "evidence_sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE"
+    }
+  ],
+  "positive_guard": [
+    {
+      "concept_id": "aggregate",
+      "issues": []
+    },
+    {
+      "concept_id": "aggregate-root",
+      "issues": []
+    },
+    {
+      "concept_id": "branch-by-abstraction",
+      "issues": []
+    },
+    {
+      "concept_id": "cdc-migration",
+      "issues": []
+    },
+    {
+      "concept_id": "centralized-logging",
+      "issues": []
+    },
+    {
+      "concept_id": "chain-of-responsibility",
+      "issues": []
+    },
+    {
+      "concept_id": "choreography",
+      "issues": []
+    },
+    {
+      "concept_id": "composite",
+      "issues": []
+    },
+    {
+      "concept_id": "dark-launch",
+      "issues": []
+    },
+    {
+      "concept_id": "database-decomposition",
+      "issues": []
+    },
+    {
+      "concept_id": "distributed-tracing",
+      "issues": []
+    },
+    {
+      "concept_id": "domain-policy",
+      "issues": []
+    },
+    {
+      "concept_id": "dual-write-migration",
+      "issues": []
+    },
+    {
+      "concept_id": "expand-contract",
+      "issues": []
+    },
+    {
+      "concept_id": "factory",
+      "issues": []
+    },
+    {
+      "concept_id": "feature-flags",
+      "issues": []
+    },
+    {
+      "concept_id": "finite-state-machine",
+      "issues": []
+    },
+    {
+      "concept_id": "graphql-federation",
+      "issues": []
+    },
+    {
+      "concept_id": "parallel-run",
+      "issues": []
+    },
+    {
+      "concept_id": "pipeline",
+      "issues": []
+    },
+    {
+      "concept_id": "recreate-deployment",
+      "issues": []
+    },
+    {
+      "concept_id": "rest",
+      "issues": []
+    },
+    {
+      "concept_id": "service-extraction",
+      "issues": []
+    },
+    {
+      "concept_id": "service-mesh",
+      "issues": []
+    },
+    {
+      "concept_id": "service-to-service-identity",
+      "issues": []
+    },
+    {
+      "concept_id": "state",
+      "issues": []
+    },
+    {
+      "concept_id": "state-machine",
+      "issues": []
+    },
+    {
+      "concept_id": "template-method",
+      "issues": []
+    },
+    {
+      "concept_id": "token-exchange",
+      "issues": []
+    },
+    {
+      "concept_id": "transitional-architecture",
+      "issues": []
+    },
+    {
+      "concept_id": "zero-trust",
+      "issues": []
+    }
+  ],
+  "positive_guard_negative_probes": [
+    {
+      "case": "missing-positive",
+      "rejected": true,
+      "issue_kinds": [
+        "AUTHOR_ADJUDICATION_MISSING"
+      ]
+    },
+    {
+      "case": "pending-decision",
+      "rejected": true,
+      "issue_kinds": [
+        "AUTHOR_ADJUDICATION_PENDING"
+      ]
+    },
+    {
+      "case": "unresolved-author-gate",
+      "rejected": true,
+      "issue_kinds": [
+        "AUTHOR_ADJUDICATION_OPEN_GATE"
+      ]
+    }
+  ],
+  "reference_sections": 31,
+  "reference_errors": [],
+  "own_non_high_preserved": 96,
+  "carry": [
+    {
+      "concept_id": "a-b-deployment",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "abac",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "abstract-factory",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "adapter",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "ambassador",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "api-composition",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "api-gateway",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "api-gateway-security",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "application-service",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "automatic-failover",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "backend-for-frontend-bff",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "bastion-host",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "batch-processing",
+      "state": "MEDIUM_BACKLOG",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "blue-green-deployment",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "bounded-context",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "bridge",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "builder",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "canary-release",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "cold-standby",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "command",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "dag",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "decorator",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "defense-in-depth",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "entity",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "facade",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "factory-method",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "failover",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "flyweight",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "gateway-aggregation",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "gateway-offloading",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "gateway-routing",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "gitops",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "golden-signals",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "hateoas",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "hot-standby",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "immutable-infrastructure",
+      "state": "MEDIUM_BACKLOG",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "infrastructure-as-code",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "interpreter",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "iterator",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "job-queue",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "kappa-architecture",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "lambda-architecture",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "least-privilege",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "long-polling",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "mapreduce",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "mediator",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "memento",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "metrics",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "modularization",
+      "state": "MEDIUM_BACKLOG",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "mtls",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "multi-az",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "multi-region",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "network-segmentation",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "oauth2",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "observer",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "oidc",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "open-host-service",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "opentelemetry",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "orchestrator",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "policy-based-access-control",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "polling",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "progressive-delivery",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "prototype",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "proxy",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "published-language",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "quorum",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "rbac",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "rebac",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "red-method-rate-errors-duration",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "replication",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "repository",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "request-id",
+      "state": "MEDIUM_BACKLOG",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "reverse-proxy",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "rolling-deployment",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "rpc",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "secrets-rotation",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "separate-ways",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "server-sent-events",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "shadow-deployment",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "shadow-traffic",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "short-lived-credentials",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "sidecar",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "singleton",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "specification",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "split-brain-prevention",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "stateless-services",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "strategy",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "stream-processing",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "structured-logging",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "synthetic-monitoring",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "use-method-utilization-saturation-errors",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "value-object",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "visitor",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "warm-standby",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "webhook",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    },
+    {
+      "concept_id": "workflow-engine",
+      "state": "APPROVED",
+      "semantic_fingerprint_unchanged": true
+    }
+  ],
+  "references": [
+    {
+      "concept_id": "aggregate",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "c971b61a41d9ef35771ecb9071ce43610e62ff410692e944f4ebdb0fdefe91b8",
+      "errors": []
+    },
+    {
+      "concept_id": "aggregate-root",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "c971b61a41d9ef35771ecb9071ce43610e62ff410692e944f4ebdb0fdefe91b8",
+      "errors": []
+    },
+    {
+      "concept_id": "branch-by-abstraction",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "cdc-migration",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "centralized-logging",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "b66099d181148750ce14ae3cd176300bf8b150c14ce04c9caed36354fe47a193",
+      "errors": []
+    },
+    {
+      "concept_id": "chain-of-responsibility",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "e146048a8a785cdfc6a1e8339f32bfd8edcbaa3164a7425d924c144b8e5fbc5d",
+      "errors": []
+    },
+    {
+      "concept_id": "choreography",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "538831d8a77f2378cec89718fd5ae31d978b0d3f1f924777663036d3386f7a95",
+      "errors": []
+    },
+    {
+      "concept_id": "composite",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "e146048a8a785cdfc6a1e8339f32bfd8edcbaa3164a7425d924c144b8e5fbc5d",
+      "errors": []
+    },
+    {
+      "concept_id": "dark-launch",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "database-decomposition",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "distributed-tracing",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "b66099d181148750ce14ae3cd176300bf8b150c14ce04c9caed36354fe47a193",
+      "errors": []
+    },
+    {
+      "concept_id": "domain-policy",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "c971b61a41d9ef35771ecb9071ce43610e62ff410692e944f4ebdb0fdefe91b8",
+      "errors": []
+    },
+    {
+      "concept_id": "dual-write-migration",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "expand-contract",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "factory",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "c971b61a41d9ef35771ecb9071ce43610e62ff410692e944f4ebdb0fdefe91b8",
+      "errors": []
+    },
+    {
+      "concept_id": "feature-flags",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "finite-state-machine",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "538831d8a77f2378cec89718fd5ae31d978b0d3f1f924777663036d3386f7a95",
+      "errors": []
+    },
+    {
+      "concept_id": "graphql-federation",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "9180eb34de65056692f08afe4c6d0fefb50047de4e5c3b8a2b279f28927ca5c1",
+      "errors": []
+    },
+    {
+      "concept_id": "parallel-run",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "pipeline",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "538831d8a77f2378cec89718fd5ae31d978b0d3f1f924777663036d3386f7a95",
+      "errors": []
+    },
+    {
+      "concept_id": "recreate-deployment",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "cfd3ad94b2d1e193624b2352da4885c09de64c8ddea83953a7dd3cab05d850af",
+      "errors": []
+    },
+    {
+      "concept_id": "rest",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "9180eb34de65056692f08afe4c6d0fefb50047de4e5c3b8a2b279f28927ca5c1",
+      "errors": []
+    },
+    {
+      "concept_id": "service-extraction",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "service-mesh",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "9180eb34de65056692f08afe4c6d0fefb50047de4e5c3b8a2b279f28927ca5c1",
+      "errors": []
+    },
+    {
+      "concept_id": "service-to-service-identity",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "a58fd8d9c8d07f0c567de8db88d30aa5e37a0ed7418e5ed2dfe1f28f428aa86d",
+      "errors": []
+    },
+    {
+      "concept_id": "state",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "e146048a8a785cdfc6a1e8339f32bfd8edcbaa3164a7425d924c144b8e5fbc5d",
+      "errors": []
+    },
+    {
+      "concept_id": "state-machine",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "538831d8a77f2378cec89718fd5ae31d978b0d3f1f924777663036d3386f7a95",
+      "errors": []
+    },
+    {
+      "concept_id": "template-method",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "e146048a8a785cdfc6a1e8339f32bfd8edcbaa3164a7425d924c144b8e5fbc5d",
+      "errors": []
+    },
+    {
+      "concept_id": "token-exchange",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "a58fd8d9c8d07f0c567de8db88d30aa5e37a0ed7418e5ed2dfe1f28f428aa86d",
+      "errors": []
+    },
+    {
+      "concept_id": "transitional-architecture",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "f812fa878788f5072354c879b0b92258d572beac137b412e026bc82399320bf1",
+      "errors": []
+    },
+    {
+      "concept_id": "zero-trust",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "a58fd8d9c8d07f0c567de8db88d30aa5e37a0ed7418e5ed2dfe1f28f428aa86d",
+      "errors": []
+    }
+  ],
+  "source_artifacts": {
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/e65943b48cf73c600e4362e7a717262a5f837dfcbe134895af4343d237c8647a.txt": {
+      "sha256": "f4862c63f12e04865f1279f0fe106105f44af5bd74922ac33d8af8aba04c34f6",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/ae25332d5ccaff6804287758f3936e5982dbe9fe40d4c6dd31b12c232aaee4ac.txt": {
+      "sha256": "9f4b61a7b60bbda39dc2468dd20cc802177a78807f4e8d807a67fb5c4bcbc605",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/a8a6c6b3a5f05a0be83a1c0d5d55e5df0c44405051ca71278454674de5b0addf.txt": {
+      "sha256": "12c4c0558dee77cdf50cce67f8c3812ce1403850f4bf631b55d0e75ee2acaa3e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt": {
+      "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b731dbeb13fd3fe2614e9d1c68ecab75785b0f1b4a55ef626bce8c4ff4cc0f48.txt": {
+      "sha256": "53ba2fb0b2202b8d05f54ae381920664af1f023112f91d8ae641e7c74bd78fe1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e9f81ba1da63875acbfb6c6c8b9043fd206e8a896b4ef0b52bdb33435669e4a5.txt": {
+      "sha256": "ab0066a38af5255a05ff712edcf88e4c81230c61853a3bf30980446d7c925d30",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/0f81fd8df835215f84dfaf52de67f3a5158c3c9c4450c79b19dd4bb8ec892062.txt": {
+      "sha256": "238211b202afe288a4f67f19e1b1ec542c3de05c521d73ee48869dec5182a846",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/70b805389c60ce4d67fd624b60651909444736669a189c9d79a837396782cf12.txt": {
+      "sha256": "88f5d518de25415840148d4345c134f8a544d0224ef23881e044fdb6efdd9d63",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/67a44645a81530282a1c9187127312cee15c5a4a61f0e9811ffd9f60057ed144.txt": {
+      "sha256": "7014a617383de097e5c384ae9abb661c48105e140c63d244dbc1b607c9d4f036",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cce792b7b76ec0a18100fbb892674d5ddde96543941bbc2619af7f3c02c457f1.txt": {
+      "sha256": "8be025f67fc0b8a3554093cd8c1bc70dd73c085248aebf2d7c9d29e07fda8edd",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/181ee96b52e0178680759b3e4dc47cfd4d0a5c139784402d410197cbda840ed8.txt": {
+      "sha256": "2163066fc0351586d5021aeedd47d891716c7fbc51277e8ee0aa9c1993773476",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt": {
+      "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a906410a4737032e94077356ca9d0f388f8c406357906fe786b25a55b247c524.txt": {
+      "sha256": "f14929c51892749fa83575d2307482b3884f204b553c9d976957f13ca08bbb31",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/263fdb4ead7c5a176aa0ee22ec20b782435a25506cda40b6c65b83265783d935.txt": {
+      "sha256": "7fcf87f394fbfcaf1419c1e9292d53c6edd765e2bf64c8e4b894c10af5ec0817",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4af9655e1e8483579fb87f8243513ae34f1810a9bd7f79832adc96d95e6930b6.txt": {
+      "sha256": "8603471db79ffc4e3af44812f0cbf131452cb04c9840813024eef6aad659a6f8",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/73acfa31c9d811d0af1893c183dd7dc3bce8cdcfbc437962108df72433413370.txt": {
+      "sha256": "a948777ad32eed5af65afff8246c2bc54ece526ae4f43e75803205af3aa41fe7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e762f36ac79ad5e3e593e64cac57e8b50555c1f92b8b291d3daeed098eb83dd6.txt": {
+      "sha256": "bc2853e4739242ef50db2efaacdc1ed4eac550f4810be2d6d8dedee5985df2e7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/330a3955d0af8ff88380712fa18874136595dbb38b8b35a69f2e0ef568cd392a.txt": {
+      "sha256": "2d4689685d0fda3c2a3a1f42770c990b133377bf429ce8300e649292b989f296",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/ddf6cf5c388057f273769420a677cad2ecf9f4d8d2f15822701792ebcd710a14.txt": {
+      "sha256": "9930af9a27ed8a4f737b7c2880fec71c1b4720d3962abab4b07de2824033674d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/d69bf3d579c5c0d52ae1ecacf9f3927a21b65d6df3960fddbbf620e613165d1f.txt": {
+      "sha256": "4ee53a8b138c484bb8559a9696c016eee789979bc972b2fd9047e579d12c4319",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/e369718b3476378b802621037153440af0551f8b4f709d6f2645ae0b98cb4a8e.txt": {
+      "sha256": "49cd8b09c80a3bb6cb1528349ec7ce32bc57d180d9fde4f39a649f8f728bc5c0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/df29223b3fe04c62f1a2baaa1620c4f013fcfca6d263be4755f967226eb03ad9.txt": {
+      "sha256": "ab603aac11a2bb56d45a29fea4cf69430dcd85e99bb6803dcba36c66cf9b85f8",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/d30cfa6f991701ef5112cebba5d51901eb66db7076db7d1de5b501658de776e2.txt": {
+      "sha256": "61bd4bc33e6bf897daf06eae0e844b4080653d01f251b6e8906192caa4b10ad0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/0e237358a34e960a559f196aaf53fcad4e82fdfca1129730e256113397f666a1.txt": {
+      "sha256": "e16035df3fbc35d8f2e457c8e4e8a90f058c2e620fd4cee5ee6aa96288b4bab1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/9c39c652f7b8307fe48a04d5537f4a81aeebc84e660af94244e6ed840a9e3f3e.txt": {
+      "sha256": "ca7c2359066873fbdb873677fd95dc7a8692aec9471473dda0ce76ad7af45945",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/ae65ee5b083477ab4c9e6b34733d3d01c3377796ee73b385f55b8968d99d8316.txt": {
+      "sha256": "81887e0baf7dda5811ba4b7a67e49cbbab7ae97b321ba72e475c797f989690e9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/cafa32b8e67fba7de6e4a24d350cae8d58a0fd5885f547c96acaad4850ee5023.txt": {
+      "sha256": "fce9d679b52dd9670f38216daacdcab159c6995cdb5256ee5162dc58d25a5c4f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fbfeaffd58e52fb6457a795440746ac11ee284e542e69ca4c84e4871ca7fdceb.txt": {
+      "sha256": "887871671bae1d84d69f505e82b6af6fc89e3f66c419f4ae9bc9d5a0f6474435",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e40a6908b98785cac2ac606be6bcc353bad8196086210743c47bb29891d5a328.txt": {
+      "sha256": "679130974d13ddfea0815203e064e13bfa234e94fd0bdd609b1e1f145ddc8f1b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e5ad68ee48923c82abcf67c3cc0632cfff4ff33507b3372f523876d379ac77a3.txt": {
+      "sha256": "e9aa3810923091c4eb1285d6b4bc11b2f8f46d8a859b141105af888e1c5bbebe",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ad5067d773ec1c5007ccea9b624ba330480bebe83d97bbfebc46d6692c2ed836.txt": {
+      "sha256": "13d41b57cfb30483d9b9d0248856eee26fdf0422dd11b843b8d1073ea4279cfc",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-rails--rails--activerecord--lib--active_record--transactions.rb": {
+      "sha256": "76070ab7f89e50de330b48a9a0dd6bd5cac9076842a8177f7e2595aa11110a6d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon--mastodon--Gemfile.lock": {
+      "sha256": "f39ea69a094637e25ba40bb644e75018e55623f04e508430029648ba196f7c7f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon--mastodon--app--models--concerns--account--interactions.rb": {
+      "sha256": "03c8b5168d07128c11ef7e8b9651dd0f7e21eacd21746c439409bac326aeced4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f5cfb52b5a4051ef0eea9753757121b12dfb2a4d1ff922a6bd355c1293f5dae5.txt": {
+      "sha256": "10d484bd54ca868e2a1e095f65500bd72005c8d5949e6907f056176e67209c27",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a57a2120dfd6d2aeca59c5f36fdfcdf532987aa2dfbe2fc4906732971784ee44.txt": {
+      "sha256": "199a422f0d3c4683bae0583eda94cfde805f8dfb28d771342e5f47400b9c5451",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/cb90e856a86c98e9ff30de555d68f941229b670ff156fdb2c34b665cf63cddbc.txt": {
+      "sha256": "8a7a7b2a39c40ef675bdedae54df023507bcfa9f27c99660e2c75271d86407c7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/573303b5c15efb79f4a9280120724fcf3b2e44a3c140ec16ac22bdf4eb7ab88c.txt": {
+      "sha256": "bfa21ef960640e87f187c36e1034121176411cfe0008a3341e2ed62484a16168",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5169b83ab1b73ae5889db5498f85ebef3c7cebe0d6584a26f064a05b7dd9bcdd.txt": {
+      "sha256": "85554a438e827a69edc210e99f2224665770b89de522c26fd0081326b604a4b4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e9f2753c23fa3d72b805f8b45dc24fd1812e2df683d74ecd72574c645a3add78.txt": {
+      "sha256": "f4318f6afc002107c6f180cda1872ec274e5873b2dacd163b6a1a4b409ee3fa5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/70041086cc2d5d50f63f84568dd9f8f89191bf7dc47db6dea96fb99c4d210e01.txt": {
+      "sha256": "f6592ddc9d3d5585b462b068a95261bdb3d58c9b50f29430117e6b7b491a9fa1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/29334a3a55f6bb2726efca2229b4ec076ada09936eed1ce6e141e088c57053fa.txt": {
+      "sha256": "ebc1ffa468119e78ac8fda758eb12fdce4179ccdb8eb0793b8099a6dd5289f0b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon--mastodon--app--workers--activitypub--delivery_worker.rb": {
+      "sha256": "3c8a15c70dc55ff628f3d7df33561a1e90a3709a17fb3fd1fc2d1f3cfbb4adf6",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/308dac3d01cf839fc79ce315977277dc33cbd65251ac415d097ef718f956f4a3.txt": {
+      "sha256": "cd5cb33c58c1e86aa061ccb4c67e2b87f98fb95f00c2ce24435e7e8f20735036",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/3be9a2c15ec1d7d1e9d9869caaf28ed4175e47ab4ac3e3cfed7631d4a5a13146.txt": {
+      "sha256": "720d2500c4bf5e202b8c9e0880a61900c8c228c592d81eb61755efb14289ab2a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/fe3a949ec5bec52c53e7ea7af522e0306320056765444e3371bff94b3f74b4d1.txt": {
+      "sha256": "98252d287c12c6e33701bdfcd6e5aed1fae5214906f354931187ad7b899a4c32",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/3d81c1f15eec77209492ec393014c47baa52854ec35c17080d34dd579f186801.txt": {
+      "sha256": "15690c903bbc88462bfe46226aabf6dc4124fc1997589f3844215dbcf76cf64d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/21a7a3da804585d5a00705d5ce4886ffb6ab91fdf91cd8e6c8852215abf7adc6.txt": {
+      "sha256": "7179870045960ffc150277d93d1244e2bf10edcac1f73cf5094eacef417c8379",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/c5b675177a339e14d7c5fa14c0e9621b2f843b3550acda46d555585cebacefdd.txt": {
+      "sha256": "8b7b90d1ecf937687580efeb9d3e58d8b9e2e5bf879be268b63ae1ff51ffe329",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/3d1f2ab66065f6fd3c7233dc8a4cacf54b0fb51ab893f28a997811b160590c73.txt": {
+      "sha256": "4f447ac61815da6d6ea1e7f6c2677d2e0d445dcb13c3a55297bd242ad610ed85",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/32a633917da5b0575adeaa84986ec3d12754bd9a23e15e032bf3f8345c514e94.txt": {
+      "sha256": "bbc45c034488ad948285ee9f6a74be854ce8d1b33ecd7c20a78901ad0b4c05af",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e6172b5ab0ef1a55a39f2d7396e829b874770860db8fa1d303bc13ff750e6623.txt": {
+      "sha256": "b2aef16f98a49e89695cf6755215cb03dea1372df508bcfcc6e1df1bb1a85230",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--tracing--src--main--java--io--airlift--tracing--SpanSerialization.java": {
+      "sha256": "6ef77c07b98515ce69cee0afbdce716acbad3a4d5215d017cade9ca1688ae93d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--tracing--src--main--java--io--airlift--tracing--TracingModule.java": {
+      "sha256": "74ad7c97c7418d0a6becb26b7266f75bd31003c6be42a31c7ace2ac11cddc99d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--http-client--src--main--java--io--airlift--http--client--jetty--JettyHttpClient.java": {
+      "sha256": "f66f1018c510ba8f6a1af46a8e1b55b4ffc67b7f564333af7006162d7615097c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--http-server--src--main--java--io--airlift--http--server--tracing--TracingServletFilter.java": {
+      "sha256": "4817cb689dd96ceb6e4006b555cbbd8e3c15bc32b82ddfc0149a95ef40d27a30",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--http-server--src--main--java--io--airlift--http--server--HttpServerModule.java": {
+      "sha256": "eccbaac02c92695e40f2696a1a85b6b1011be72211432ad190b25c30b7af59fa",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--opentelemetry--src--main--java--io--airlift--opentelemetry--OpenTelemetryModule.java": {
+      "sha256": "be83195f471f2602362704314d90613671f5e3ea1fcea26417bb4a6a1b74b80f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--opentelemetry--src--main--java--io--airlift--opentelemetry--OpenTelemetryExporterModule.java": {
+      "sha256": "dc7bd865b4aea8b3e544fa80cabc222214a1254b6e894dbd249879633aa79c3c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--core--trino-main--src--main--java--io--trino--server--remotetask--HttpRemoteTask.java": {
+      "sha256": "6f95126183c30caabdf0945eecd5aa02e4c82d8a5862a5e9f4fab7c1653bb64f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--core--trino-main--src--main--java--io--trino--server--TaskResource.java": {
+      "sha256": "52c5bc3b6ac58969b80785210ee7a172d4eb878f3a8b86ba30f6c3f02916cc32",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--core--trino-main--src--main--java--io--trino--execution--SqlTaskManager.java": {
+      "sha256": "a8b539ad653c40e6262346422b317ccfae1e40771ecc847e4ee17df18d2a4ec8",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--5706548d--core--trino-main--src--main--java--io--trino--execution--SqlTask.java": {
+      "sha256": "19ae41c737536abf22e7768f175dcedbcb1b2e72158591a18a09d0eca63ed87f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--5706548d--core--trino-main--src--main--java--io--trino--server--Server.java": {
+      "sha256": "dfb39227f0107b496104424be164dc6d249db1df3dbb3472ede2c1e4d63a90ee",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--pom.xml": {
+      "sha256": "5518ad1909cd9ce2c29e9aee1c6f950ae2da2446f52f230229a2c2cfe4933b69",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--5706548d--docs--src--main--sphinx--admin--opentelemetry.md": {
+      "sha256": "c91959e907c00c455a4610afc53234da4c5b705a869fc300d423e0a3e84fc395",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/9267126868c85db492ca6dc1a22340cedcfafd641b537f910cd5a2ff5b657eac.txt": {
+      "sha256": "3c585211b3383a14657660a80c47153dda4ed8ed7ddaa147f2253428604c0d58",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/e3c9b3adc5cc35807b93413c12a52b0e1a41002480b230ed427e4aaf9f611c8a.txt": {
+      "sha256": "682af03115f64b63a1c80f5dbfc06772ba3410ac36d66effd422c620ab6c2747",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/384b2c534ef33a85981940026332bd484189acbe1eca16dabf7ef9c15bbc1378.txt": {
+      "sha256": "0170f658eecf50a6ac754df41047dc39b36e1c6916d51e4d01b3f88cb5abeb73",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4f607812c499614bd14d60e4201508d6ccc0a3384990083464957007b55b8d82.txt": {
+      "sha256": "365d6694326966810a7c74b42e0cc07f27a597fe9b43a76e2c8c6518ef14d394",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/d458a3b449f6c9d78583b5d9c6d344dcf9f565aab2c046174f3afc80e183a1d9.txt": {
+      "sha256": "244b07de1299418949373e342e076d94bbeb85855fc9f58f5ff3c7614f85b066",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cc4d6f7770a1f5950bafc8dc3b6aaafd267d33d1ce78b5df64dd013ff6a32c8c.txt": {
+      "sha256": "9d8f87185c64fdda2c498a092b8b1c88dd1082d0f7086ff0c739eb6f847a2fed",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/b63a2e685aad4a44e2aaee64f88d4ab97d9d242658239a89a31cd21c5abb9118.txt": {
+      "sha256": "a8172cdaf819e4eaa85cb1b625e001a1591950c27945603f0782b5e5fd230068",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fba08c9aef10d7369d6560adec7609719547b33e939b821e022d483eeb3a94e9.txt": {
+      "sha256": "b3034e542bdd353e0aa4e03828695d74f2d26db8bdf92bc07cc84dba82cc478e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/03f6434642c125c9814f60648521d46f1c021f3ecbf75961eb7d1b4a89222b31.txt": {
+      "sha256": "c596585ca11fd287bf5dcf222cd644609379c12ce36084cf4eecee1659ac1350",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c2f8368d9151129159cdbeb0c895f27a236caf31348ca7db4682354a31cf588e.txt": {
+      "sha256": "87c9d89f1714f8c4faf94efa293cd1437329df6d4efa66ed1793f3fe511f36fa",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/561a9c8bf1ed8ed0fa3b89eef8c6280fb5bd45a16cbe9501d110cc387ca5895d.txt": {
+      "sha256": "fbb160f25a4674a67d38cca775eb6ffab4beacc33f2c3f4e4064eca9eca72fbe",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4669705fc1b6a67c5baf04c9daf1f8a1f8769a59ca7ff244a8495a879365e167.txt": {
+      "sha256": "9b9aa733da1e7049a4b0d1f4cfbb20cd2c96d68ea81a00346ef5852e121eab70",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/1995c6e7a21df7899a6010a63ffee0ef613b80090309135ad0b1abc71ddad647.txt": {
+      "sha256": "5a29a39a540ba590d45c47e0c91f5e4a5851b20c75dd442a2c4701847c0361eb",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/1184e44c8e452cbff704243dd34e55ac13df0ef7e3ed296b63020040b4cc1a14.txt": {
+      "sha256": "4146ed920382434985b5810ffc45a7fc286a1e6522c50587943872138681d3c4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/f1e8f13998543abe9323636c79bb7646a772c39abd3f9e5f7fcc56a1d6330684.txt": {
+      "sha256": "05e09c4cc46c029f84fc3848f18732066aa91cc5f971d1dd7fee71d4ca12911e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/3163722ea8f2957500001dc272a9b0192157e4e6a53461008541b6c6e13492cb.txt": {
+      "sha256": "a27a0022393cf4ac0fbd4d5e04dbe484653e80bd704550b03732a049628bcf1a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1d22d42aa7149a6490243a626f6dab46666bf5d32e5bd1e5b5b4d7f9cd412bbb.txt": {
+      "sha256": "f8cad194d2794e34b66a90b0bbbb75e3859a07eeda1b63f2ab1aa2da0cc8c375",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/c2ba67cd0562060fb364cb77d4456f55591fc77e0a9558fc95f5878b2a1b4956.txt": {
+      "sha256": "6684c612788ea012dd1f0d4686b2bf885a8b43434827d9f2f9202732dc309fb9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/4dbea3e94c56e53a7bdb72bdf70c6086c8e8a81e2131ff9e213e0301067205db.txt": {
+      "sha256": "9a308a5bb8a119e530ae6bfb55b7c328e43a73df9f2815a13ece9a1efa28f251",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e520327ed411e05dcfea4ee437aa9ed0baf91b3bacfdef37ccc60b655c1f2f60.txt": {
+      "sha256": "c1767af523bbb3e05362668d83df5a210caa56d6d4dcf6f2e0d2664744200ae7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/3f6c261841a8cf7e64821939da711abd3503fa0d6e1999cca3183129df6a8176.txt": {
+      "sha256": "bfaede2804b573cf40bf8c2b516e89cceab1833015df0c67a7826c953e2c6876",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/64a5b1adcdddd4ff4f451d06ed65532cdca738a25464c3126a9d8b2cd8d44d81.txt": {
+      "sha256": "2708bb26af5fd26c6a0652027af7702167d0d4e6eedd7256d10320d38e3df313",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--sm.go": {
+      "sha256": "4ea7b8d16c0b215fad3f1a0b02e91b3d12be07994a1c152f25dd2c44e92904e9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--10791698--proto--internal--temporal--server--api--enums--v1--nexus.proto": {
+      "sha256": "c50acc450b6bd27fb60ad98fe1f5894b087950a252b345a582186fc889362c39",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--statemachine.go": {
+      "sha256": "45488e995b3fcadd2c184d8ed9fb5c053bbbdc2463dcae53d31116ad47dc0873",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--workflow--commands.go": {
+      "sha256": "5c3ea40fce16558c5b0de051a25c80d9ce8705f980433102cb622d5e8f58bd18",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--events.go": {
+      "sha256": "b0cf4ae93144b2248c6dd79a519ea20c8d918f9556ac4322c3a2d7fcaafd11f9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--executors.go": {
+      "sha256": "347222ce9231addcd851e88a4d7b66119fe77f9e35a4ca821c0966cdbae90d4c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--10791698--service--history--hsm--nexusoperations--fx.go": {
+      "sha256": "c3ed802fe76edfb1d7c233b5f8705bd3caf50af8139d8b25321aab265ea16da1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--pkg--engine--datasource--graphql_datasource--graphql_datasource.go": {
+      "sha256": "a43fbb91811ec67e77362e2f1b4fe71fb701767a287fe0888083464da5ad3e5d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--pkg--engine--datasource--graphql_datasource--representation_variable.go": {
+      "sha256": "9a55450e82fc667fd7ef4eddfe7cddc81bb8e1b461facc6dc4222425bb1f61ab",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--pkg--engine--resolve--loader.go": {
+      "sha256": "41cb51332e46a8cf2486da6a7880db5aa7e4e8ed7a155f3cbf4139f0871028e5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--operation_planner.go": {
+      "sha256": "5750e078e0f2de23a6c942c6757fe7b826ed4449178db78d1bb2e63a71cc7fcf",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--router--go.mod": {
+      "sha256": "34a8729ff273a1e59c45fa8e761d019b104c0fc13e0e679fe4d2bf2bb4377911",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--cli--src--commands--router--commands--compose.ts": {
+      "sha256": "0a84ffe50c84c6f2a2fffe04e7cf9969619e2f12308e81f3f79dd12c89ae6ff9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--cli--src--utils.ts": {
+      "sha256": "87d8692a43425610276218cafe979801c2f71d9465adf228dd980a6a0ee51249",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--composition--src--federation--federation.ts": {
+      "sha256": "d931748ecdba9603653a2f008455fd928c4c1a0d7faa7a49b8b899d2f7137ee2",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--composition--src--v1--federation--federation-factory.ts": {
+      "sha256": "7c97dca90515348188a6c2fff1f50744147509e4a25077fdb5fb084510ce49b9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--shared--src--router-config--builder.ts": {
+      "sha256": "b95babcb74a97580473dc273a5783d434aeac69bad576849603a95c8a93e64e8",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--factoryresolver.go": {
+      "sha256": "d115c23d862672c0a29b0fc99bcebe58ca2a1e7ca56f753615fee360697d74e9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--executor.go": {
+      "sha256": "fc8d523da7b0c1a7065c3f27f3f112508ec634fafcf64dfe867c9c770b33f085",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--graphql_prehandler.go": {
+      "sha256": "ab70b89adddf1a60082010dacee576b41d6c3dc7a2255680adf55a310227eb6d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--graphql_handler.go": {
+      "sha256": "26ee207afc7363c365814828619877bcdbf4ea1f9c9d98625ea2f1c7346af109",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/c861684be0a5b348e06954d874e3a604d9f5ac7d871d1fcd57c12a0cad29fa23.txt": {
+      "sha256": "347e751eacdeab85474eb19917033815ac0b98c16a2832e16e328e36b3e63d75",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2b26e2bd43bba3e83144efd2b5247501642829c9b0b390e8c4931150a20c2cce.txt": {
+      "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/e855644a0b57bc10bb088879ca8491f17291d5ca0ab7936fdcaf0e166f74f21f.txt": {
+      "sha256": "211c191b8aee16460d97c8ea26551ed1587755b25ff9222c7fecf4e54f8ecf7a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/c64aa7a53de336d1b38bbb51fb116f7b9aad3c2800f054299b47ece5b8712cd2.txt": {
+      "sha256": "20ea7e184a8fa5b67133e25f31b53ba097a8b96712193804208cf81676876f31",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/6c7de8018ac2c1e2c9797ed0f91ba03236fd30f0a57cc6251d169d1d02b223ff.txt": {
+      "sha256": "edc2cedb16368d61ee23fa04d903d2a1bb8075d84188f40618d8611779cdec84",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/fb193903e61bb6536deb91948a0172965f6a3551c313a61f28baba87c5bdcd99.txt": {
+      "sha256": "8a41f8341fb51183a4e5475beab15c7e14bbae686ba74d4cf5abba59dce3c772",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/e6aaeaae17d306c90f6aff11432e17c0fccebb64c75baa42dd4d24b6ce4996da.txt": {
+      "sha256": "3820a60a96dbd84029aab924164cb7cdb31dec8bde182992d8a7861774149916",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/e3850dfe6c2322f1bf0d444d754e268473670a7d4b4d79316e6376906c8c45d1.txt": {
+      "sha256": "d9d2fb9dd37166ae94c4643f2542fa50741e495a0c1324799a561f13892b8f9f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/dd650957f85305d4d6719f5b7fb70dfbdd699d56af36292b8ec533380783ac79.txt": {
+      "sha256": "9bf8c1a6f81fd4efefdc1e3cab7478833a643e767e0a459e29d5640b65fb5678",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/6aef6e33017ec28883e2486128845bf55815b2eae3be9b4fc11d8ebf2febfe6b.txt": {
+      "sha256": "3e2e69b585c4a1875c01be6a295bb906465ce70aa34f34a4ec49820da945fe8c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/07e1de24ee85ce75cb6d4a37fb4d9a302ac276793d013acca38a849ddce90c0c.txt": {
+      "sha256": "b04849914e1733f41cf33496b597ff8c1f30eb769436fa321e06f9e240b0b9a3",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0cfac79419f20980ef991934d151ed8a912dd02a03a26d9621ab80a252d345cc.txt": {
+      "sha256": "58a26d56f3ac3fe86ab84bed4ee359ddb0535ab5b2a085fd87bb014b67e25bda",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0cb0fbfe8534c499ceb9c046b87c8de8d3b542956e76e77b356bbc4ddb8e5578.txt": {
+      "sha256": "ccc370d0b0bcbe0dd63118e632807b8ccd57a9e64df0c665a5ddb0f3ebd0a66d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/2a0d08804dade04c1663cb3e3942ad2d26388d834406646f05b29f4b3269a7d0.txt": {
+      "sha256": "b0d29e387a484c03a6e0333de5e0d128289a9056054a2208565a44506e369e22",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/ab8b17f5f2cdb9151b2f9a044e5dbefe052217aafd5f8026eb39483e8f78a936.txt": {
+      "sha256": "c697f9649732d18c62c67b50a09026aba9112086c8765829f995ad18306ed7ab",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/7b187b8e05eefa94c39bd84d9d0de8a84a0b70c6d5a6876c2fb0525f4eeb710f.txt": {
+      "sha256": "93a023024e575e1703a65558caffe31fdab2706b4c9984abb004f174bd40b2b9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/3fb67b8333a328a8e6b3e7524fed848c305764627952ac0e9d75d3c7796ddd7c.txt": {
+      "sha256": "41fee348adc797cd79b5ac50ce62745b1804bfefc85bfeb315e263a37741ef13",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e950b2681d62e8a9de87aa03504097df670091b748b4c780b83f35eee21b5372.txt": {
+      "sha256": "e9f61947ed06c6e84e89510a66034fdf657b8ad1f08b1870025ea0f64985d28d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/envoyproxy--envoy--960eacbb--source--common--upstream--cds_api_impl.cc": {
+      "sha256": "789b6fa98bd9e01f3ea1e02f0bdcf64fd911698256e95d18fb8591f1ef0ab965",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/envoyproxy--envoy--960eacbb--source--common--upstream--cds_api_helper.cc": {
+      "sha256": "5d11bacb3d8105879991316f2574ebddfc896142c3eb5b3d58bdf17b956ffd20",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster.go": {
+      "sha256": "428c0223d64dd690a9e3dcceb1d309efe80ba632d0d756047bb4b4398e592804",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--serviceregistry--kube--controller--controller.go": {
+      "sha256": "41dfaecbeb24936039f45342b56b2525c8dd0c67655cabd28991c35b7feb8471",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--model--push_context.go": {
+      "sha256": "9b3e060c018d719ccee219313e94fb3d15a006e5434705444cbb1958bd59887d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--xds--discovery.go": {
+      "sha256": "7dc3cb1f8476fcba21425aa769cc6066d17559a852e52ce4bc8f8bf129ab6bf3",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--bootstrap--discovery.go": {
+      "sha256": "13f4170b49866b74d813585f57622e951d994f3e7cc7383ac124c23efbdeabd2",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--xds--cds.go": {
+      "sha256": "749cf5c2712da30a281afc6a2cff11df513c86f575fc63bbf15953586c42f7e3",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster_builder.go": {
+      "sha256": "04ac7ea79d380f6c8980f824aedeb115a7853ef1af17479513390638c4821473",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster_traffic_policy.go": {
+      "sha256": "44d5630cdedd859978a082ea5def17b509d5568bc26f23d7456ebf9bee256f67",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--xds--ads.go": {
+      "sha256": "abd80261cfa6e324f5f55bf178f81d165477b6464225a2b7b17bfd54709ba0b4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--xds--xdsgen.go": {
+      "sha256": "d81f98a201aa82abf436e713bca0b7b20f1596162d9cc91ec0e7cc69f29d5e46",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--istio-agent--agent.go": {
+      "sha256": "ef9d086d4712cbfb76262bdad0c907da1d5261ee1f5d5af192cb46478adf2743",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--tools--packaging--common--envoy_bootstrap.json": {
+      "sha256": "d3a3fe34ac9f314ddd5e6db9c049d8deb405f6088ae398608f85a3d7007c7c28",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--envoy--proxy.go": {
+      "sha256": "cc90aea89b3bb98f3ecf8b2487783ad185bf618dd63529ba7183ac3acacfb213",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--istio-agent--xds_proxy.go": {
+      "sha256": "53c9812cbd6f09d2b685c24e88733d7643a0338da142b6f3ad0ac0f08e3b72d5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--kube--inject--inject.go": {
+      "sha256": "6ac851e93fcb82bb937401c710c05a5a0bb15311ceb5568d45ae2ff9d6ca6289",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spiffe--go-spiffe--77c6d2e0--spiffetls--tlsconfig--config.go": {
+      "sha256": "76923313bef22aa835b765c13a3e533ee4d9c1bdd1e25033ba96cb1e44df4d07",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spiffe--go-spiffe--77c6d2e0--spiffetls--tlsconfig--authorizer.go": {
+      "sha256": "86fa01df88db4002ad2a2c2c43abc65e4a2dee4559ea3e93d2d7d14b818fc2b0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--nodeagent--sds--sdsservice.go": {
+      "sha256": "96545f981eec308d1eda6c163dc915231599cde061ecb2f4ac79eda6b4af0bfb",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--nodeagent--cache--secretcache.go": {
+      "sha256": "5e1c7c1903efec0989fed61b99fe2600e760d146d8cd762e037bf19d45a14606",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--nodeagent--caclient--providers--citadel--client.go": {
+      "sha256": "1d3d85d257cac2a9112858262fb05c3623cfaed011db3de7ec991fc056a5266b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--server--ca--authenticate--kubeauth--kube_jwt.go": {
+      "sha256": "c8219028153a953413f5a9063a878b981926bb057aca19d64b8c5db96e15a21b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--k8s--tokenreview--k8sauthn.go": {
+      "sha256": "f8e342391be25a7304337b37b931fbc46f0fc62ebc8da012369da794bb4e9154",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pkg--spiffe--spiffe.go": {
+      "sha256": "a261b2853229d3f54d763eb0d061d01ee47e1b859c649822b744afadb6616574",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--server--ca--server.go": {
+      "sha256": "3c8c2c9e13af34f0da971f6423310a7776d1bbc556ef1e6d34cc230e849b15a8",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--pki--ca--ca.go": {
+      "sha256": "e16a1502be628ba6e0d4cc699f1fb5e2b9a1979fa7f9c88372a589d11576fbfe",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--pki--util--generate_cert.go": {
+      "sha256": "58631a26ae2943a4f5719b7b86f5574539eb5ecf437f1a0b5c917ea42fc68a8e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--pki--util--san.go": {
+      "sha256": "379ff723fa0b0ac3118c4131a5080310b8dbfec84aa654a3eb01721c3b5f67e2",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster_tls.go": {
+      "sha256": "ded0d757f71533f276b72a87a34751606ee5bc578917e406f6eed11108a49e6c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--model--model.go": {
+      "sha256": "37ca74e3961f8b7c8e0a18c5798bdce33133ed386e0f51cf556675768f57cdb2",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--model--generator.go": {
+      "sha256": "492f4739938451f8f57df892a29e2c84154b6e4138ea85ad589be3e693cbc430",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--model--principal.go": {
+      "sha256": "8dae457acbe3544cf9a0c82e7107cfe665e64fcdf512765179f31c2c85085d66",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--builder--builder.go": {
+      "sha256": "cf6f60f502505e73c30ad48d5587ca7c88e2e2acb1b69f959da8a0b3aa03dbf7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--ha--HAState.java": {
+      "sha256": "fa8bf2ee8cc339d481abf81cef19e294b0316ce005bff8e62cbcffb4eeba7db6",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--NameNode.java": {
+      "sha256": "ccffe91f1857f290d3cc6a239df138cf83b76c405448376ad0f769842d7ef464",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--ha--ActiveState.java": {
+      "sha256": "c237ae79d6b6a40f100712943c9668bafc06a12e029b02c6665ce2f01577fdf3",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--ha--StandbyState.java": {
+      "sha256": "638d63c7821167afaa04ce490c0a5f3bd43d60c0bb99bb6fb658de46870657a4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--6f3d71bc--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--FSNamesystem.java": {
+      "sha256": "c0a96febf352882c4aad60f791944edbabfac59b18fde573e7cac49224d2dca4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/a4b0324630fad6d7e97ef2bcb406168e15e9f440ec1c725c6aa62de8acc6c120.txt": {
+      "sha256": "23ddb70e1278c6cf23f920e64d8e2593ce82aa51f47e4fe401b14d34ee19bfd7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e33dc28664e5705ce19a4324171fc7db8a57bb3e9e9eee8156eae1b05a667966.txt": {
+      "sha256": "678864cef93bb5e36beab390509e93689da3b2a85746761cd724b879cb6c650b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/599165c3ed3742b84a19f0c1960fad30919eab5470ccb5e73178b6350c714802.txt": {
+      "sha256": "8bd1fea680efe74b1533c7135f51fcbd13e7bf68b37ed4468ce0a25ca819f11f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--TokenExchangeGrantRequest.java": {
+      "sha256": "c7cf109f089fd20f47763f66da74eae33519825f7cad181d1b8e63ea9a61706b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--TokenExchangeOAuth2AuthorizedClientProvider.java": {
+      "sha256": "1f33f6970215826778f9147663d14cbf3fa729806d2b393524c1e7ac77ed2189",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--RestClientTokenExchangeTokenResponseClient.java": {
+      "sha256": "bf89df645f3665889cead4e61ab13e02daf16e145a07b226aa088a674af6094f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--DefaultOAuth2TokenRequestParametersConverter.java": {
+      "sha256": "fa66a92a0888dd8229dc699ce265c8db2a6451a1e737842e4706b78d9174efc8",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--AbstractRestClientOAuth2AccessTokenResponseClient.java": {
+      "sha256": "f7aa08fb026f8d7373940958eb91252a93db311418d8e7684a764d59c26976f5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--endpoints--TokenEndpoint.java": {
+      "sha256": "23c8c74cbaeee855b77ae71c855a0e577b61c14e2c0c0a3ba97f66d0b8103ef7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--grants--TokenExchangeGrantType.java": {
+      "sha256": "bac109de4f9f4626efc29918292a147642214543200bcce8fc9ba81b6b6526a0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--tokenexchange--StandardTokenExchangeProviderFactory.java": {
+      "sha256": "a1c71e09aebadf51413413b8c5f7a054f818b751e321c066b36a1e5e04751d5c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--tokenexchange--StandardTokenExchangeProvider.java": {
+      "sha256": "dfac7cfb3a3df09118670583e4200de9c0735bf09edfd83f2667620f27bd1145",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--services--managers--AuthenticationManager.java": {
+      "sha256": "ee8fb1b97a33eb85ecf17e2c4d9eb8370a475185e760d60e7b28b8f67305be58",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--tokenexchange--AbstractTokenExchangeProvider.java": {
+      "sha256": "e9bb19049343a2e336bb5618ac31ac475eb831f66b8842a1ee21ce6014b8474b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--TokenManager.java": {
+      "sha256": "4f55098516cad8a56d189baa3173b382ef8410936a6aedd0f114dceecfb61aab",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--services--role.go": {
+      "sha256": "af0247b7c5f315a29402c8d65c26ff8cca60cd2a5e2b377e5fbc7606821c6f12",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/golang--crypto--cf169cd0--ssh--certs.go": {
+      "sha256": "093b1448a7e8a17a5056e31e007bd10cda2e0a67a74b8548cede45068b4b1f2c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/golang--crypto--cf169cd0--ssh--server.go": {
+      "sha256": "a9ff150f87775be31f40685d38f1c6934101a461f9bce82936a35331f6949c82",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--services--access_checker.go": {
+      "sha256": "ffa6dc5c6ca607f0879acfb30308c71c1c16a3d86715d0dd7eaf20010caa2770",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--srv--authhandlers.go": {
+      "sha256": "a9eccdc03e5293cbcfbad05b00902b7669b9a596b11589a0518ae93437a06c13",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--srv--regular--sshserver.go": {
+      "sha256": "04d37924615f6a533e4cc8bc1e29f64534cc60a63284bdacd5a5ede511ed9de0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--sshutils--server.go": {
+      "sha256": "19e0c0eb13eb6f294d841ff82145c1f9c7723b868998d411d414f988de0796ef",
+      "valid": true
+    }
+  },
+  "license_artifacts": {
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt": {
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-50a823eb77b8754951ff4a89a39d483b7af44df9f31620d41619602d241a5796.txt": {
+      "sha256": "c86b4df35bc41bae3635d652e53432bb37ae8b8906349c40e2228bec9c95f165",
+      "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a7c438b5d70a3c98c62ca092fe0d15d2f326cacc11207d47491d53da7a88c9d7.txt": {
+      "sha256": "f964c4c458fcc3741ac1639dc28bef1e42c016b37cab9fe84400fc3b597dc5ab",
+      "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-85ea9e9d5c264713355312169b87ae06517b1f6e8ddaafa4c43049c84a083a58.txt": {
+      "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-1fb41ec1c1d1afa86d74229bdc1a6176afb49871fa3063a33a77e0ec41638f5c.txt": {
+      "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-c3b2a2e0eb988829902928d0aaa50ae199e7646e2b30fdec2240d05ba1c2983c.txt": {
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-59e6fede393cdff5f6a0d2a7c06871b6a1a6faac7ad5dd58bd6e8e315e75ca15.txt": {
+      "sha256": "f79ec4f5ee00cc27d8dc8e2f924c3a76df86ac1ee8ce0e84548c70f14af5132d",
+      "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/LICENSE.txt",
+      "spdx": "BSD-2-Clause",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/77bf83f2e948bae9412ead0ce49ac998a5b34b2f60d3892999029001fddd307e.txt": {
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "url": "https://github.com/fluent/fluent-bit/blob/54b97f8ff1e69948ee794ca3e01c41d148f4fe36/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-dfe6806c845f77ccdc40a501316d3607973ff0aaf82fd7509e8f668bb2e96412.txt": {
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE",
+      "spdx": "AGPL-3.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-8338a9b8368d81ee807354c3286150c6d7534aff9665a7e4579e3afe7b883656.txt": {
+      "sha256": "4ec89ffc81485b97fec584b2d4a961032eeffe834453894fd9c1274906cc744e",
+      "url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/b6be64053c84c82cb1f5dcdd0a7870e104db6d4c62bab02ed8274bfd3247dea0.txt": {
+      "sha256": "dcb95677a02240243187e964f941847d19b17821cf99e5afae684fab328c19bf",
+      "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md",
+      "spdx": "BSD-3-Clause",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e407ecd8e696471c452b9f8a65e0e430dcb1c77634383ae778ad501de0d16fee.txt": {
+      "sha256": "cb0d37346e7916e782a2904dc5b8c8cdb8424eac5effb91ac409329c883619d4",
+      "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-c7458db016e9351b4bf4ced7616653635ea484223c8e717ed44b0828b1dc2f65.txt": {
+      "sha256": "05ae8e8ae6c2ae313d504cd54cd60902fada54670932b3dbff2ef522ed340c6d",
+      "url": "https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/LICENSE.md",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7fd184dfc19e61eb4bf996f2088b6d95ab1cc2b03fb6ee7a052aa53dd047ad41.txt": {
+      "sha256": "717ba1949502290f8e47688ae2e323acd06c8ca47aec9f7596b15f678c1af4a2",
+      "url": "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/MIT-LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt": {
+      "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+      "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+      "spdx": "AGPL-3.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-58ca4fb8121799a991c6f62d76a562a4205dc3a74a122348835529503bcced41.txt": {
+      "sha256": "b8655bf6423a32f12013ac91b5cbfdf17304c527016a1cdec2ff0b21ebdc4723",
+      "url": "https://github.com/javaparser/javaparser/blob/c4fb5365836e8c5a579687c9a78251059d489d47/LICENSE",
+      "spdx": "NOASSERTION",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-cdf91bc53dab45d12bc49fd7046104487e358aaac921bf8ca2edd7e7ad3f2ca2.txt": {
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/41d254ee8d08d6ec9b9fa9a2ac778c4e0c3e0de28e391654eb747f599041e73e.txt": {
+      "sha256": "4db6ecff4859ffd352fe66d20c66808f3d2b6536cbca144bf3b6a737d9b0551b",
+      "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e41a4442b57f0a4520ff7829e611d91c14f3e621dfaff769509f62bcbd60b4e8.txt": {
+      "sha256": "717ba1949502290f8e47688ae2e323acd06c8ca47aec9f7596b15f678c1af4a2",
+      "url": "https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/MIT-LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-8faa62f52134aaf40f991243cf41a6ed2d40453c8951fc415b4d9b8319396129.txt": {
+      "sha256": "d0dec51ee8a7ba8181a9913a694943f38cb0dc21b2971f25c9fcdeaed826b58d",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--LICENSE": {
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/005c85faf737d1ede5f028004d49c2d6669e4c55cea7518ce53d45f361cbaefc.txt": {
+      "sha256": "bf651d73094216f0a0d250afa54ff6e47e6ae7f4385d8bab09d1497b9218b821",
+      "url": "https://github.com/j-easy/easy-rules/blob/d4450831533e47a5c0cb361edb80dad43db228a4/LICENSE.md",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/28e20e0dfe61d0ac4a6da7c3f18221fe6aedeffc13ecc373b8960eff4b260310.txt": {
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "url": "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt": {
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-3edd14ef7f1f9812d38cda51b11c22d7c904e27b01076e562f94063f0565de16.txt": {
+      "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/5039ee4ec28005c45aee852b5cf678315ad9d343ed2f565a5312e3d21d6a150e.txt": {
+      "sha256": "557a991ac1ba95dee0b8b654ff1d4194e410c8ffad5ffd0986e04a379f4fe882",
+      "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-9948a3cbd3ae8bfe69c997d64cba629d823b7ef87dd02dbe1f9917417b33b15c.txt": {
+      "sha256": "6aab9afd99ceb1dcaf6a0d91386b46baef9bce17ae4006044e0f231e31430b69",
+      "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--LICENSE": {
+      "sha256": "a37034638bff6772710b179744c2d3605c8d493dbc41dcfb31d6e6d217ce9a02",
+      "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--LICENSE": {
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-21e6fa2861957d9b4e6eaef64d52e91af150cadd054ff9a8cda8e284ff07d776.txt": {
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://github.com/apache/camel/blob/cd2ce899764e3c482bdebfc1695e971afd2a962c/LICENSE.txt",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7db99ed5d01698c594bd7c68960f6fdede09870a6e02a9e0689cd3d2c4605a4e.txt": {
+      "sha256": "eea36becddb2b006bba9ceb0be5373a41ce369674609f9295e7d2a4b10da3d8e",
+      "url": "https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-5ea30561a78bb93cccf5135d4ecdfdc3d686c81a39a7b73a20c794528389314e.txt": {
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/1d4832ba8523d086eca8f1c80a0a2fdec0fa56efa93f0f5ff367b496e4ad3401.txt": {
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "url": "https://github.com/prometheus-community/helm-charts/blob/e03ae02f8664ffa7ab88720c1c5542d6f678d293/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/157800362c37c8625eb37f3d8d723869954b8496e6b57cadc2f313e8c6b9ffb3.txt": {
+      "sha256": "cc12b0b85368972177ebf422089419b9fe3eea5729fecb11105c640f6eeaccd4",
+      "url": "https://github.com/encode/django-rest-framework/blob/14998d0a735f8ed6abd86751fd6984a9277a1d40/LICENSE.md",
+      "spdx": "BSD-3-Clause",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-b8433215948e821464bb952d50a9448bccee577b84dc71a69a8e78f172dfcf02.txt": {
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e3d196480056078c44c0d01491461815b03715588379488cc2d85f0668f14c8b.txt": {
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/c9a4324b1676bbd05742015efb3b5fca6bfd6004a82f2a703d560cd4b9f358bb.txt": {
+      "sha256": "a60a07cfafa66191227557322bd764aee897a53fff11a1ade3630b58295042c3",
+      "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/LICENSE",
+      "spdx": "MIT",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-d1cd720df698d1056b04f1bbff3bf6cf5375d4936101c2c6207b8db2aa27c576.txt": {
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-4d9034e524b507e809b27da7868d111a42881ba4c90ba7109622e4cea90a49d2.txt": {
+      "sha256": "9fa6e54dafda853bb3cdc01486b677a55102f0d488282a85ba6e426d9125f8c5",
+      "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-9fef45fec945239077ccd0ab3b84657f9585926b0f2b4b60612e03f5ac969217.txt": {
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/LICENSE",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-074befbe80ba890a76b4232564e08529c6ca3e106e85c2d611a7ba31a7285327.txt": {
+      "sha256": "1cd7319cd139fe0e28c4393ae431b6c8b583472cef1189bd1139a4b13c4be997",
+      "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-a23cd67f167d16b495666f9dd1d47ee2d65a00b6668442e7d980fe292c221e46.txt": {
+      "sha256": "56dfc19e0dc836e30177332f73e8e6fbc297941acf3d906eec6eaaa46c2c452a",
+      "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/LICENSE.txt",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-c993a99f492c4210c430d5dccc09f70e962ad0540e72abd4cee839c0a53e2ec0.txt": {
+      "sha256": "f371b80469fb235bc500ec29e0e85b682d4a6157a158567d828ff0be544d4f1d",
+      "url": "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/LICENSE",
+      "spdx": "GPL-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--LICENSE.txt": {
+      "sha256": "7200000367e0e8b47822d563a5ddd2dd3a97cc05b32bd7dbcc7b4eeb92b76628",
+      "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/LICENSE.txt",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-6c04d3558ce4bd2cef636eeeb97e05c96629b1c9ece481736b7b5f83a9bad784.txt": {
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/LICENSE.txt",
+      "spdx": "Apache-2.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-ad327ccebbc136f441687cec9b0dc24ff2cec8bbbdcaf770559e4c75abedc574.txt": {
+      "sha256": "88a722879257e3ddf202789119d13f77da8718d03a4ee936ce5c12f0ce6f6ecf",
+      "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/LICENSE",
+      "spdx": "AGPL-3.0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e600c99b74f7eb8d4056187b99b810271344f58000dde573f10510110514bbc0.txt": {
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/LICENSE",
+      "spdx": "BSD-3-Clause",
+      "valid": true
+    }
+  },
+  "control_files": {
+    "freeze-receipt.json": "47cb3a6995651c4d489d6abb0f3abe3648934334ee26d495a43ca38bc87361a8",
+    "repair-selections.json": "6ff5e1960d46a32b309b8a7fb1aef16cfdaff1da217919458c2039343116e832",
+    "author-adjudications.json": "0cacb4009b59e711aa7db7a5a84e0f41fb0317c8ee370eb10dc84e87b69db16f",
+    "review-baseline.json": "5f678cd0b31d0f07650e05f97a14fb723958fd90e9f8328a97603b030d5494c6",
+    "adjudication_gate.py": "15e7f7e29558c0d4b4102e0d1dc4c8c450228e6a6578999dc981f67253de7600",
+    "semantic_fingerprints.py": "ce7acc4c0105b8f214554beffc1c913896789697d3864ab6f8ea389f539edebf",
+    "consolidated-recommendations.json": "3de457f9f69860dcacd7a66a01307aae6a55675db6c5457c417714597a37ba19"
+  }
+}

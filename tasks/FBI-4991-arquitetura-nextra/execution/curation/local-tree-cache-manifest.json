@@ -1,0 +1,590 @@
+[
+  {
+    "original": "apache--flink-tree.json",
+    "archive": "apache--flink-tree.json.gz",
+    "original_sha256": "a36918a69d587b1d6fd0a5b63c057c2d97a693b24c54c5dbc71a8f27e54e0516",
+    "archive_sha256": "2078ef6b3796ed3999e349cec268363e0ad7bd93f49530ea67eeaf67b568b645",
+    "original_bytes": 10977103,
+    "archive_bytes": 1336247
+  },
+  {
+    "original": "obsproject--obs-studio-tree.json",
+    "archive": "obsproject--obs-studio-tree.json.gz",
+    "original_sha256": "c7b19b1045a54f128a183e5f4856acade4b0b33e448ecbbca35fdcb2024385e4",
+    "archive_sha256": "eae8b68494cecc68a9cf01cdb62f69c4c8bab7a1f37fffec7c6a598d54fb9f44",
+    "original_bytes": 1472751,
+    "archive_bytes": 222126
+  },
+  {
+    "original": "apache--pulsar-tree.json",
+    "archive": "apache--pulsar-tree.json.gz",
+    "original_sha256": "91583da7a3c2d532ee6ef22549bb13db00fb298d515a738971e27f8de900038b",
+    "archive_sha256": "e2cbf7f68eb643eb25eca29af31e4303b45c595ba77188a83f406f78d3c41313",
+    "original_bytes": 2349938,
+    "archive_bytes": 340721
+  },
+  {
+    "original": "apache--skywalking-tree.json",
+    "archive": "apache--skywalking-tree.json.gz",
+    "original_sha256": "b4fa1e464a3204de857df9219cf38c767a5fe089f60fb4a049ccac6d026674e3",
+    "archive_sha256": "8d01388a2e9e10f0dc9ff63d97e547ab1c01e5b230af1394df8925c155559189",
+    "original_bytes": 2716435,
+    "archive_bytes": 354962
+  },
+  {
+    "original": "immich-app--immich-tree.json",
+    "archive": "immich-app--immich-tree.json.gz",
+    "original_sha256": "407a09f01019f4b707bd4fb24e585329c804d04edb131e7f6c9331bd600de8f3",
+    "archive_sha256": "1dd4a13f0a9db37002a53db5b9d033bca3ab33466b72c573fa9202ec2c594a9a",
+    "original_bytes": 1096920,
+    "archive_bytes": 173996
+  },
+  {
+    "original": "apache--spark-tree.json",
+    "archive": "apache--spark-tree.json.gz",
+    "original_sha256": "f9b9209f375333be8979bc3ec3978bcc95f07e55bb4c558a8dc263352a631a5b",
+    "archive_sha256": "2b0f60600ac10a031bc83dc649f2d58613bc6c0d0bbaaeca75278a1d3fc1b57f",
+    "original_bytes": 9195895,
+    "archive_bytes": 1138523
+  },
+  {
+    "original": "camunda--zeebe-tree.json",
+    "archive": "camunda--zeebe-tree.json.gz",
+    "original_sha256": "09e3f0643bd230095de9e512e311abb8d854ffaa3d4add66c924e08b2e4f0298",
+    "archive_sha256": "3ddb8de187f0cdfe6e0473a9c2cf280eb4ddd30bae6c1dd34a7801bd1fe39b22",
+    "original_bytes": 10189970,
+    "archive_bytes": 1390434
+  },
+  {
+    "original": "qos-ch--slf4j-tree.json",
+    "archive": "qos-ch--slf4j-tree.json.gz",
+    "original_sha256": "dcfc484459e94f7af730f6f1bb08b96e088a60e1f910adf75e6d3e62e73ee45a",
+    "archive_sha256": "89eba84e57d1f6e61e9b9cb999546f072459f54e9e74cab383d8f3def2e7220e",
+    "original_bytes": 166659,
+    "archive_bytes": 26086
+  },
+  {
+    "original": "Tuskyapp--Tusky-tree.json",
+    "archive": "Tuskyapp--Tusky-tree.json.gz",
+    "original_sha256": "4c9d7d558812ace20597c92f62924ab125028a115ade9b7e142e55d189e7f0a9",
+    "archive_sha256": "ba64f099e27e7effa2e676e3b7b2652477f19f664afeac816345a19cb4a0edef",
+    "original_bytes": 527549,
+    "archive_bytes": 76806
+  },
+  {
+    "original": "jellyfin--jellyfin-androidtv-tree.json",
+    "archive": "jellyfin--jellyfin-androidtv-tree.json.gz",
+    "original_sha256": "ea18edd47becce660258ab214458e696315574579d661a164270bdde940730e8",
+    "archive_sha256": "aee2a9271f3fcf17311d9568302208dacf55a780d03137fb614aeb844c56d3c3",
+    "original_bytes": 429779,
+    "archive_bytes": 61956
+  },
+  {
+    "original": "debezium--debezium-tree.json",
+    "archive": "debezium--debezium-tree.json.gz",
+    "original_sha256": "0efa09144b9a8b218b9d67fc5b84a8175e0d59d62e8a6986b16f5aa5c41edb4e",
+    "archive_sha256": "64268ec8d7f29853f0802334e51fe8b6a4bbff20a6a1becb63f805a8204ff57d",
+    "original_bytes": 1872852,
+    "archive_bytes": 261037
+  },
+  {
+    "original": "NethermindEth--nethermind-tree.json",
+    "archive": "NethermindEth--nethermind-tree.json.gz",
+    "original_sha256": "b2e6dad3a41f1f308008dedae91584fe78eb75c9ade022c14bbe7b2df2cf5546",
+    "archive_sha256": "ecc8c942daa830642b164c36823c6a8851ba2ac7bc27f94ee867f4c8d6fcc39d",
+    "original_bytes": 2501766,
+    "archive_bytes": 374203
+  },
+  {
+    "original": "kubernetes-sigs--cluster-api-tree.json",
+    "archive": "kubernetes-sigs--cluster-api-tree.json.gz",
+    "original_sha256": "335c46a17b73547173332673c88f3f17df0d83b4af7c194d87d2d34b6000ec72",
+    "archive_sha256": "c3b3fbfc1b73b8f9becf21a595935387a9881dce2966b35c5fcc5e02c46f4b06",
+    "original_bytes": 794566,
+    "archive_bytes": 118265
+  },
+  {
+    "original": "hashicorp--memberlist-tree.json",
+    "archive": "hashicorp--memberlist-tree.json.gz",
+    "original_sha256": "95fe9585e50b83312516507671bd2db499078b97a787cc35a3c59d768e988e1d",
+    "archive_sha256": "bf0111435540272eafb3741d21325ab6a984a4fed8b39be3b8ce4d89c1e65658",
+    "original_bytes": 15328,
+    "archive_bytes": 2896
+  },
+  {
+    "original": "openstack--cinder-tree.json",
+    "archive": "openstack--cinder-tree.json.gz",
+    "original_sha256": "e01db681f262919806126cb10b2148f6ec27c4f2fdc6099916ceaa5224132101",
+    "archive_sha256": "bed26c8c381ded8fab9a602a5375e2bb8928e8db5f7824d1ca9e261962de7e32",
+    "original_bytes": 1138648,
+    "archive_bytes": 187787
+  },
+  {
+    "original": "envoyproxy--ratelimit-tree.json",
+    "archive": "envoyproxy--ratelimit-tree.json.gz",
+    "original_sha256": "7d76f1556d340b10419676956e9c65512fe7829d2ebd3a9102665f4d6922b972",
+    "archive_sha256": "2a5a6b28d3d8b783bca478d840133a996ddf92bee4e4f74d822944b37d15bba3",
+    "original_bytes": 61974,
+    "archive_bytes": 10605
+  },
+  {
+    "original": "apache--fineract-tree.json",
+    "archive": "apache--fineract-tree.json.gz",
+    "original_sha256": "02578f80535726f953c75acffa289b9b1c1e4f217e0ab05420f60ae0c9087eef",
+    "archive_sha256": "dff058c467e1340827593276aeaeb074d7cad8cee28fcb563d35aea51e98e247",
+    "original_bytes": 3528478,
+    "archive_bytes": 476702
+  },
+  {
+    "original": "prometheus--node_exporter-tree.json",
+    "archive": "prometheus--node_exporter-tree.json.gz",
+    "original_sha256": "9782c33be78a2bdb52719cad17b78bde3a5d9af94259678615476e9223237f6f",
+    "archive_sha256": "8bb13e1c7c52f3dc1cc9179d9b04e0e38c8d5bef4498cb4e656ed36332b6bed9",
+    "original_bytes": 124175,
+    "archive_bytes": 19900
+  },
+  {
+    "original": "apache--druid-tree.json",
+    "archive": "apache--druid-tree.json.gz",
+    "original_sha256": "b33d836f08e6a74323f16e739103b53180d1903a54eed918da131692dbc23a42",
+    "archive_sha256": "ba54abbb8dc303783fb5c9dd5d0badc7bf31d53ecc0e713a15c4326419a63a94",
+    "original_bytes": 5858907,
+    "archive_bytes": 803425
+  },
+  {
+    "original": "gitlabhq--gitlabhq-tree.json",
+    "archive": "gitlabhq--gitlabhq-tree.json.gz",
+    "original_sha256": "c2452a5d0752f071f43660bac8e25d8dc9c268ab927056af342fb25229e15578",
+    "archive_sha256": "e8901bbc4a255f4d309395c73004d075fb08ab981a51e58d44dfb22f8cbca0b9",
+    "original_bytes": 17292793,
+    "archive_bytes": 2665562
+  },
+  {
+    "original": "kovidgoyal--calibre-tree.json",
+    "archive": "kovidgoyal--calibre-tree.json.gz",
+    "original_sha256": "71bafa2aff15655cd12e1cc40c3b917589ea86754b83e83121ad14d499029034",
+    "archive_sha256": "971bda29aa8a313c4d37486c2b524b0145b33c975ab9e9f655fc821c734efb31",
+    "original_bytes": 1316972,
+    "archive_bytes": 211954
+  },
+  {
+    "original": "obra--superpowers-tree.json",
+    "archive": "obra--superpowers-tree.json.gz",
+    "original_sha256": "c908998d8898b4df8f011752ba146201a8ab65d192abb3781caea681bae29ce3",
+    "archive_sha256": "856229a2a6e5cfc24b7f7ee4d05b202d25bf883f95d2af80b4002b4c59e6257b",
+    "original_bytes": 78370,
+    "archive_bytes": 13853
+  },
+  {
+    "original": "redpanda-data--skills-tree.json",
+    "archive": "redpanda-data--skills-tree.json.gz",
+    "original_sha256": "4c636c005ae8acd71d13e52e3fb9361cf4cdd0f8b989b6862d9bb57311bd3b88",
+    "archive_sha256": "bba1efb305bef184fb4529d4d106ece9bc36dbcb574be4d1308126969db7a1d9",
+    "original_bytes": 77946,
+    "archive_bytes": 12598
+  },
+  {
+    "original": "qt--qtbase-tree.json",
+    "archive": "qt--qtbase-tree.json.gz",
+    "original_sha256": "7caec77b11bdbcb68d3495a1a0629df3a1e4e847e106baee1f7b7d7c5a65d692",
+    "archive_sha256": "da397eae22f8f4e1238405b0671c17c1c650b0c2828d436ff1a853f4321afc6e",
+    "original_bytes": 7438788,
+    "archive_bytes": 1047808
+  },
+  {
+    "original": "apache--airflow-tree.json",
+    "archive": "apache--airflow-tree.json.gz",
+    "original_sha256": "9a390c96419d4cd5b6612773a68220c3e4e81d895742e140e608272e80bb42ec",
+    "archive_sha256": "0cfc643b94aa221b70f4955916dd84cc9b4a71b013034ef201b9e4e4783b62db",
+    "original_bytes": 5034504,
+    "archive_bytes": 680447
+  },
+  {
+    "original": "coredns--coredns-tree.json",
+    "archive": "coredns--coredns-tree.json.gz",
+    "original_sha256": "e7a75e919563ef0d3b1fcf027c9ec8e38687775f3981120d6a8e4f1e70a11082",
+    "archive_sha256": "dd0be6d0ed47460c6731efbc032078259a9ca76eb5bc53fb894edab3a342daae",
+    "original_bytes": 280203,
+    "archive_bytes": 46324
+  },
+  {
+    "original": "cgeo--cgeo-tree.json",
+    "archive": "cgeo--cgeo-tree.json.gz",
+    "original_sha256": "56edb7e91af2d9d04a313d235514ad04836d332001b3fcfcf207faafe634c315",
+    "archive_sha256": "8ae5a617324c48d30ad954ac0171034f089c864a6a78ed0ff0be89bd970e5dbc",
+    "original_bytes": 893971,
+    "archive_bytes": 138314
+  },
+  {
+    "original": "n8n-io--n8n-tree.json",
+    "archive": "n8n-io--n8n-tree.json.gz",
+    "original_sha256": "d60179e0165401f2befdae5727a31c3d94ed369b2ec693466de3157252efd44f",
+    "archive_sha256": "25fff75fc23c7dd69967d31297eb8f8bdf46629c9ca625d5b33601e56584ba03",
+    "original_bytes": 10851554,
+    "archive_bytes": 1583716
+  },
+  {
+    "original": "thunderbird--thunderbird-android-tree.json",
+    "archive": "thunderbird--thunderbird-android-tree.json.gz",
+    "original_sha256": "01332fb6cdea14e80b38f405689dc916716fe9e438542db00d9684e8675f373c",
+    "archive_sha256": "f2e1caa542ea6c1eca8a5289a63637bb90792c619adb5c32957077e3eefc7ceb",
+    "original_bytes": 4425799,
+    "archive_bytes": 535097
+  },
+  {
+    "original": "papercups-io--papercups-tree.json",
+    "archive": "papercups-io--papercups-tree.json.gz",
+    "original_sha256": "ae5debf6e38a49e597fd1e9ac958b0543a6f91c1953b2ba54e951b2f715111df",
+    "archive_sha256": "97a1ae3a2bfa96a38dc859c284875dbad323d65bf65e412804302522a96fd0a7",
+    "original_bytes": 209501,
+    "archive_bytes": 34376
+  },
+  {
+    "original": "postgres--postgres-tree.json",
+    "archive": "postgres--postgres-tree.json.gz",
+    "original_sha256": "f0176e60ee11dac0a5e5bd5983ca74f093fb5a434a700c9fa9c9cb454833ada5",
+    "archive_sha256": "69763db06167a4265c477f1fc8054bcdcebb9398b4a645f793532d04f586b627",
+    "original_bytes": 2155337,
+    "archive_bytes": 339235
+  },
+  {
+    "original": "istio--istio-tree.json",
+    "archive": "istio--istio-tree.json.gz",
+    "original_sha256": "fd15ef904f5bf6241ba3af969f2c13bd8c36cae3bd132f3107cb2f7260171153",
+    "archive_sha256": "061c6dd1ac378a5cf037bba19e85fd4c03fa1b1ab998f82f785c0f2c107f0bd3",
+    "original_bytes": 2095083,
+    "archive_bytes": 317754
+  },
+  {
+    "original": "trinodb--trino-tree.json",
+    "archive": "trinodb--trino-tree.json.gz",
+    "original_sha256": "67c0c8878d1a58772bfc7f80b463f569f548a36f3929274cd30d04ad75c9d26a",
+    "archive_sha256": "981691e70554de39c587ab6aec531558d6a395e4092ca669f1b6a0837657e2fc",
+    "original_bytes": 5687719,
+    "archive_bytes": 795476
+  },
+  {
+    "original": "temporalio--temporal-tree.json",
+    "archive": "temporalio--temporal-tree.json.gz",
+    "original_sha256": "0dcc0f972ef855421dc7fbc75c3bb8987265f2e2da071517bcf68f547e5c3fca",
+    "archive_sha256": "d03f959e75b12b57d71c9adbdf8a52792fc42685aa80e07353f10487ef89dcee",
+    "original_bytes": 1274265,
+    "archive_bytes": 199419
+  },
+  {
+    "original": "open-telemetry--opentelemetry-collector-tree.json",
+    "archive": "open-telemetry--opentelemetry-collector-tree.json.gz",
+    "original_sha256": "b4c8307ebcefeb7f3aa22335e351df9af4a633ba46ea1cd245c135330a1a8fe5",
+    "archive_sha256": "9bb68f1997c7f93aef5cfb8fad3dd24d9d76290e613422c619d750c46a2d3fd0",
+    "original_bytes": 915593,
+    "archive_bytes": 126607
+  },
+  {
+    "original": "apache--superset-tree.json",
+    "archive": "apache--superset-tree.json.gz",
+    "original_sha256": "174c948d3849768c1d4f3a9696f663a50c4c2762b94f2135f067bfb324a2d166",
+    "archive_sha256": "bab862393b510ac1d525b28d0216c90ad48f75450e926258f933777265c48e6e",
+    "original_bytes": 3698624,
+    "archive_bytes": 526632
+  },
+  {
+    "original": "wshobson--agents-tree.json",
+    "archive": "wshobson--agents-tree.json.gz",
+    "original_sha256": "8d4fe77dbe70c986ed3f17861b7cf2529d7969e586311ff066d19fbfbf409cb7",
+    "archive_sha256": "c5983b6eda4f9c773dc1834dd47fafd8a9cf34ffc321a4f234de6cc37bfb100c",
+    "original_bytes": 518897,
+    "archive_bytes": 79631
+  },
+  {
+    "original": "estatio--estatio-tree.json",
+    "archive": "estatio--estatio-tree.json.gz",
+    "original_sha256": "63d055472f48d7abd1344f44760d117dfd72fda60f47629ce90f33169dca1252",
+    "archive_sha256": "b46b289695da6d3db697017248b24826b7e6d331bd6057656f9c4185bc0e74eb",
+    "original_bytes": 1405313,
+    "archive_bytes": 191046
+  },
+  {
+    "original": "zulip--zulip-tree.json",
+    "archive": "zulip--zulip-tree.json.gz",
+    "original_sha256": "532973a663728471413558a6165c03687da6a1b15f61c94aa48443af405b1081",
+    "archive_sha256": "674556e664a444b35ab6a400f4da47eb4092e92ede2a7606f3b95bcb214aeaa2",
+    "original_bytes": 2635040,
+    "archive_bytes": 393746
+  },
+  {
+    "original": "dotnet--runtime-tree.json",
+    "archive": "dotnet--runtime-tree.json.gz",
+    "original_sha256": "455834cf27d678cd205eabfb6161fb69f35445e00d55826e2375d037cf532ab4",
+    "archive_sha256": "b13496cc3278947e8558ec9ba3e9a54045eeda520a97e3502277349d042c087d",
+    "original_bytes": 15826432,
+    "archive_bytes": 2237296
+  },
+  {
+    "original": "openshift--console-tree.json",
+    "archive": "openshift--console-tree.json.gz",
+    "original_sha256": "37da8a69f0c3b06461e4f8721f0412b1742d3027f5dfdd92d54740750a5d8858",
+    "archive_sha256": "4486f89c0765a842c92ccf36d92eec532cdbcdd710e1cce75eaeae1707ef848d",
+    "original_bytes": 4758240,
+    "archive_bytes": 689500
+  },
+  {
+    "original": "apache--nifi-tree.json",
+    "archive": "apache--nifi-tree.json.gz",
+    "original_sha256": "9fe1d03ee841e5097cab5ab8902dbcda3171e26363d646d42bfff5f2f3bf9b43",
+    "archive_sha256": "4a068289781982d77dcd94944b3727345da67fd3657be05976c6a3f95c79d6a9",
+    "original_bytes": 7726528,
+    "archive_bytes": 972724
+  },
+  {
+    "original": "jlowin--fastmcp-tree.json",
+    "archive": "jlowin--fastmcp-tree.json.gz",
+    "original_sha256": "a341ffd10fadc21589495f68dcd474e47e52cdb2b7664ace8e99a428e2dc76c1",
+    "archive_sha256": "3b6d5749b7966a89ad3ad4c6734397f086482e56b19f1af8767d186e8804becc",
+    "original_bytes": 538520,
+    "archive_bytes": 87297
+  },
+  {
+    "original": "apache--hadoop-tree.json",
+    "archive": "apache--hadoop-tree.json.gz",
+    "original_sha256": "5b494271f6e95c28e0e53a9bcc9d6de759c39dae03b9392ed4276f7efbb73af2",
+    "archive_sha256": "f7e6c975d6d96b21dfa923d9c6834abd6d082d111997de5e9ecd77377b3867f7",
+    "original_bytes": 5854681,
+    "archive_bytes": 751149
+  },
+  {
+    "original": "j4flmao--agent-skills-tree.json",
+    "archive": "j4flmao--agent-skills-tree.json.gz",
+    "original_sha256": "4f0c6aac9c09cd0158f7617a4788ac50f60149a716f8579fb21dfb7c77ba46df",
+    "archive_sha256": "aca9b160803d35d6043ec4644a56e239e0624cf4da2ff9cfeeb886f36fee557b",
+    "original_bytes": 1697450,
+    "archive_bytes": 252575
+  },
+  {
+    "original": "camunda--camunda-tree.json",
+    "archive": "camunda--camunda-tree.json.gz",
+    "original_sha256": "09e3f0643bd230095de9e512e311abb8d854ffaa3d4add66c924e08b2e4f0298",
+    "archive_sha256": "3ddb8de187f0cdfe6e0473a9c2cf280eb4ddd30bae6c1dd34a7801bd1fe39b22",
+    "original_bytes": 10189970,
+    "archive_bytes": 1390434
+  },
+  {
+    "original": "argoproj--argo-cd-tree.json",
+    "archive": "argoproj--argo-cd-tree.json.gz",
+    "original_sha256": "044f6d50db4e977b15ebbbb88be3c6504df3c0c0e0b615bd1a9cfe0ebe7f8537",
+    "archive_sha256": "f3d7fce2e3cc1b1935fa38b8b5e02c6f344981be7b3e4e2c11f1af621d5f8ac8",
+    "original_bytes": 2192598,
+    "archive_bytes": 311967
+  },
+  {
+    "original": "addyosmani--agent-skills-tree.json",
+    "archive": "addyosmani--agent-skills-tree.json.gz",
+    "original_sha256": "be56e496034ab95c6191de16eaea234b35b1d2a925c890ad559580f589c7f6be",
+    "archive_sha256": "96a4db7ab8cd4a4711afe07833a325ee1e1417cae1fcf3c224d0eae988d995da",
+    "original_bytes": 81053,
+    "archive_bytes": 13384
+  },
+  {
+    "original": "androidx--androidx-tree.json",
+    "archive": "androidx--androidx-tree.json.gz",
+    "original_sha256": "5494cb81ef4f7a6e24690d908fae4ccca1a4063b13447176cd6994b429c79755",
+    "archive_sha256": "f8254b8e193bc721b6c1f7289745690e87aa0e34d05660ba10d79ae0d62b68c9",
+    "original_bytes": 15552420,
+    "archive_bytes": 1924158
+  },
+  {
+    "original": "diagrid-labs--dapr-skills-tree.json",
+    "archive": "diagrid-labs--dapr-skills-tree.json.gz",
+    "original_sha256": "68622cf847b1ec6ca621d48a41131f12b68d53a9b0ad18ce507fa8c50eb0dfd7",
+    "archive_sha256": "60614489347a3bbb7439f58ddbbce7798dac6f0e81495ba46239a6644cec22ed",
+    "original_bytes": 251567,
+    "archive_bytes": 33987
+  },
+  {
+    "original": "mattpocock--skills-tree.json",
+    "archive": "mattpocock--skills-tree.json.gz",
+    "original_sha256": "e715ded6b3dbf986f7a97e181e328ce0d421cb95dc59b5830195c09a38d8dd2b",
+    "archive_sha256": "a8b22ec305bb301658f85bfd380a73d4cc270f5d84489cfdda44683af96d80fb",
+    "original_bytes": 72556,
+    "archive_bytes": 12160
+  },
+  {
+    "original": "prometheus--prometheus-tree.json",
+    "archive": "prometheus--prometheus-tree.json.gz",
+    "original_sha256": "37633c4d6b0dc0eb70a0a5edc269778bc77b9deba034e33751cfac6b20bc80c2",
+    "archive_sha256": "3cc01aeab04522e19e224af6dc56d061b458a3cf94ade39783abdfa2de1f9eb7",
+    "original_bytes": 506771,
+    "archive_bytes": 81088
+  },
+  {
+    "original": "grafana--loki-tree.json",
+    "archive": "grafana--loki-tree.json.gz",
+    "original_sha256": "53c8cb1f719618863361a3f195b0a51cb089d040829f4d50caa889b4d7b7ce3b",
+    "archive_sha256": "03898d23785d67ba20a24f92f758ee44f0a8521fe2a5c5ba7d8f38d0d1f7b5ff",
+    "original_bytes": 5530622,
+    "archive_bytes": 821442
+  },
+  {
+    "original": "microsoft--vscode-tree.json",
+    "archive": "microsoft--vscode-tree.json.gz",
+    "original_sha256": "5ce7470158e5ca3ef4121294e0ebad375537fb49c4dd917749d63b4dc123a93a",
+    "archive_sha256": "b167d818d35e442315adfd2afda752d4acdfe3562c94a85b9d89d3a43e04a031",
+    "original_bytes": 7104302,
+    "archive_bytes": 1053236
+  },
+  {
+    "original": "kubernetes--client-go-tree.json",
+    "archive": "kubernetes--client-go-tree.json.gz",
+    "original_sha256": "d01988b9c837f2945d0153e38cb6c313dba415189902c4df991e70e317e89b90",
+    "archive_sha256": "b1406800180237177574f8d926b88451a9a24e7dcdbb1d97a69998d0b5c24efd",
+    "original_bytes": 808486,
+    "archive_bytes": 116440
+  },
+  {
+    "original": "apache--seata-tree.json",
+    "archive": "apache--seata-tree.json.gz",
+    "original_sha256": "6ca9e72ba82fd39bcdce7b7339f28da00d1b3050e89e22cf04181928510e6391",
+    "archive_sha256": "a5139837851a114253871b1073d6f983d06d1ccd63f1a44932fcf6ff5e136e1a",
+    "original_bytes": 2001213,
+    "archive_bytes": 271728
+  },
+  {
+    "original": "medusajs--medusa-tree.json",
+    "archive": "medusajs--medusa-tree.json.gz",
+    "original_sha256": "7a4ac195f5cbb4f3be99ef0f70d795653c4e97a0792f868723abce5e27f8c12a",
+    "archive_sha256": "fafe9c9f2006b1c2b3e505581362c0dd203267402feb1432418def791b49542e",
+    "original_bytes": 11470291,
+    "archive_bytes": 1513017
+  },
+  {
+    "original": "spiffe--go-spiffe-tree.json",
+    "archive": "spiffe--go-spiffe-tree.json.gz",
+    "original_sha256": "f40ac31e0478ed67057b1969a82637846cb9292adfc345106cb8d34ec5799b88",
+    "archive_sha256": "9b94801da2c53f273a21fa9fb8077973182b420cdb7132a006b11d23d8ec390d",
+    "original_bytes": 61897,
+    "archive_bytes": 10219
+  },
+  {
+    "original": "jellyfin--jellyfin-tree.json",
+    "archive": "jellyfin--jellyfin-tree.json.gz",
+    "original_sha256": "27fdf2b9458be7cc4256b2917f627e5529c8807e445530b4a4943114c7764b8f",
+    "archive_sha256": "694d18f81361539301382219eda824daea1105dd5ddac14a65e14e16925688fb",
+    "original_bytes": 870769,
+    "archive_bytes": 135920
+  },
+  {
+    "original": "kubernetes-monitoring--kubernetes-mixin-tree.json",
+    "archive": "kubernetes-monitoring--kubernetes-mixin-tree.json.gz",
+    "original_sha256": "4cd98f22bc046a4079b4fa1b77558686793faea9eb04082e4b5998e7ad65fd86",
+    "archive_sha256": "a40abcde1be84e479d08246833dda92b5fd0a379e4a941d4e59ccb8470c1b805",
+    "original_bytes": 41815,
+    "archive_bytes": 6919
+  },
+  {
+    "source": "apache--pinot-curation-tree.json",
+    "archive": "apache--pinot-curation-tree.json.gz",
+    "source_bytes": 3069609,
+    "archive_bytes": 433570,
+    "source_sha256": "b092527b454c5f5701238c8c8deaa4578a2c07a53e2b79901fea9ebac5806c76",
+    "archive_sha256": "a023b51e016018278f2ced63cc43c2a9f4279e8b53b02d75d75d094801b8244a",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "appwrite--appwrite-new-tree.json",
+    "archive": "appwrite--appwrite-new-tree.json.gz",
+    "source_bytes": 5127888,
+    "archive_bytes": 765387,
+    "source_sha256": "e7a94050df376ddefa638eb86ac6b6e8cca2c5c22348dd272d251b937549c121",
+    "archive_sha256": "83b335e6b40d8b41163d6f6c6c62b050bc2c3d79a9ddefcfe5d3554644d694ab",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "confluentinc--ksql-master-tree.json",
+    "archive": "confluentinc--ksql-master-tree.json.gz",
+    "source_bytes": 13308124,
+    "archive_bytes": 1241767,
+    "source_sha256": "a7d8a14e7004f564c96f9d8f4ead5724b869a255ce96e875bb788a37cce2900a",
+    "archive_sha256": "6d0ba7a9362a5474f961f356e4b9f83836f80af9b544a893356e0baeb164e56d",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "debezium--debezium-new-tree.json",
+    "archive": "debezium--debezium-new-tree.json.gz",
+    "source_bytes": 1872852,
+    "archive_bytes": 261037,
+    "source_sha256": "0efa09144b9a8b218b9d67fc5b84a8175e0d59d62e8a6986b16f5aa5c41edb4e",
+    "archive_sha256": "64268ec8d7f29853f0802334e51fe8b6a4bbff20a6a1becb63f805a8204ff57d",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "debezium--debezium-server-new-tree.json",
+    "archive": "debezium--debezium-server-new-tree.json.gz",
+    "source_bytes": 306090,
+    "archive_bytes": 41215,
+    "source_sha256": "eb221fdc1ceeb653dc20081a3249cc2ad7c96020e670598774414c6d9ed47964",
+    "archive_sha256": "ddef176fe8dd8ef50565167e4373e85edf56a4a7522abaf2ff2e141d77afd3ce",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "debezium--debezium-server-v2.7.3.Final-tree.json",
+    "archive": "debezium--debezium-server-v2.7.3.Final-tree.json.gz",
+    "source_bytes": 156326,
+    "archive_bytes": 20553,
+    "source_sha256": "7aefc1e7a9b595bd09e8183893fc62ec67440ed1831e2c427db49ccd542cdbfa",
+    "archive_sha256": "9d574bca4bea361ba60086db4f054a26b4f6eff90e3eb2b49fd60712c8e11a68",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "debezium--debezium-v2.7.3.Final-tree.json",
+    "archive": "debezium--debezium-v2.7.3.Final-tree.json.gz",
+    "source_bytes": 1220769,
+    "archive_bytes": 172520,
+    "source_sha256": "53cad2aeb4ab989bcf19b70d89662de86832f5da793b6f01ef67ba450e4c9f9e",
+    "archive_sha256": "5fada72b990d516a465e66479190a672a7942f0f82080433909598ff1a028ce9",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "elk-zone--elk-new-tree.json",
+    "archive": "elk-zone--elk-new-tree.json.gz",
+    "source_bytes": 167147,
+    "archive_bytes": 28763,
+    "source_sha256": "4b5494dc3b148439dc15bd11e98a834416a45711a2321339929d965d799026e1",
+    "archive_sha256": "8799bc00e6331bd62033d79faac219769cf8f52a0b9f7776e78aeee99d0e7b5a",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "grafana--grafana-v10.4.0-tree.json",
+    "archive": "grafana--grafana-v10.4.0-tree.json.gz",
+    "source_bytes": 4631654,
+    "archive_bytes": 704073,
+    "source_sha256": "d22e170a750cbe858fbc5d9a51687acd83c6ef7c17178ebfc4ef449f1cb7f80c",
+    "archive_sha256": "108da112073a191adffb7be0f17038469aeca133ffd53498e52b924829276181",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "neet--masto.js-new-tree.json",
+    "archive": "neet--masto.js-new-tree.json.gz",
+    "source_bytes": 95530,
+    "archive_bytes": 15988,
+    "source_sha256": "e1d581e3b6a83dc3e5744fa009ce2d59a5ce4d9ad8e2b8a482699fdef42de2ff",
+    "archive_sha256": "528a58be170774f51a9612503c792b4cc4b09cee67f7021a1bafe4d18e3dfcde",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "open-runtimes--open-runtimes-new-tree.json",
+    "archive": "open-runtimes--open-runtimes-new-tree.json.gz",
+    "source_bytes": 333221,
+    "archive_bytes": 40819,
+    "source_sha256": "758936764f226a6ac686fc6a58d631c49215d36e140dbcbd785088835dfddba6",
+    "archive_sha256": "720c6a7e397cdb459a9af334e09d9e7da729d4ab4998adec6b727ce5bee15530",
+    "scope": "Local discovery cache only; exclude from publication."
+  },
+  {
+    "source": "risingwavelabs--risingwave-curation-tree.json",
+    "archive": "risingwavelabs--risingwave-curation-tree.json.gz",
+    "source_bytes": 2152736,
+    "archive_bytes": 329590,
+    "source_sha256": "7af2e4b423ab1353216321a50c4e0603b704612d9c7dac3754fccfadc04f3ae5",
+    "archive_sha256": "421eb25b45f1889052c11a19c5ebf3643fc9a1e9f1a83d27932a74bf2d107a8c",
+    "scope": "Local discovery cache only; exclude from publication."
+  }
+]

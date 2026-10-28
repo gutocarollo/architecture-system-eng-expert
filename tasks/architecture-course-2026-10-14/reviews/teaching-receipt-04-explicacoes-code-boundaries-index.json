@@ -1,0 +1,23 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "explicacoes/code-boundaries/index",
+  "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+  "context_sha256": "8532040ca358c04fe4b4a393adf0b720f4d603704379a6d1762723a52c80818a",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [
+    "insurance-api-service",
+    "insurance-service-repository"
+  ],
+  "evidence_ids": [
+    "original-request",
+    "original-catalog",
+    "s2",
+    "l2a",
+    "insurance-api",
+    "insurance-service",
+    "insurance-repository"
+  ]
+}

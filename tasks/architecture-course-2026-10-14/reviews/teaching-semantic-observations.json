@@ -1,0 +1,170 @@
+[
+  {
+    "diagram_id": "explicacoes/business-rules/index#mermaid-1",
+    "document_id": "explicacoes/business-rules/index",
+    "source_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/business-rules/index#mermaid-2",
+    "document_id": "explicacoes/business-rules/index",
+    "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/business-rules/index#mermaid-3",
+    "document_id": "explicacoes/business-rules/index",
+    "source_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/business-rules/index#mermaid-4",
+    "document_id": "explicacoes/business-rules/index",
+    "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-boundaries/index#mermaid-1",
+    "document_id": "explicacoes/code-boundaries/index",
+    "source_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-boundaries/index#mermaid-2",
+    "document_id": "explicacoes/code-boundaries/index",
+    "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-boundaries/index#mermaid-3",
+    "document_id": "explicacoes/code-boundaries/index",
+    "source_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-boundaries/index#mermaid-4",
+    "document_id": "explicacoes/code-boundaries/index",
+    "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-boundaries/index#mermaid-5",
+    "document_id": "explicacoes/code-boundaries/index",
+    "source_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-boundaries/index#mermaid-6",
+    "document_id": "explicacoes/code-boundaries/index",
+    "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-boundaries/index#mermaid-7",
+    "document_id": "explicacoes/code-boundaries/index",
+    "source_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-patterns/index#mermaid-1",
+    "document_id": "explicacoes/code-patterns/index",
+    "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-patterns/index#mermaid-2",
+    "document_id": "explicacoes/code-patterns/index",
+    "source_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "explicacoes/code-patterns/index#mermaid-3",
+    "document_id": "explicacoes/code-patterns/index",
+    "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "guias/investigar-impacto#mermaid-1",
+    "document_id": "guias/investigar-impacto",
+    "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "tutoriais/idempotency#mermaid-1",
+    "document_id": "tutoriais/idempotency",
+    "source_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "tutoriais/optimistic-concurrency#mermaid-1",
+    "document_id": "tutoriais/optimistic-concurrency",
+    "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "tutoriais/outbox#mermaid-1",
+    "document_id": "tutoriais/outbox",
+    "source_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "tutoriais/read-projection#mermaid-1",
+    "document_id": "tutoriais/read-projection",
+    "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "tutoriais/single-flight#mermaid-1",
+    "document_id": "tutoriais/single-flight",
+    "source_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  },
+  {
+    "diagram_id": "tutoriais/state-machine#mermaid-1",
+    "document_id": "tutoriais/state-machine",
+    "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+    "matches_prepared_source": true,
+    "semantic_verdict": "APPROVED",
+    "reviewer_id": "/root/council_teaching_sol"
+  }
+]

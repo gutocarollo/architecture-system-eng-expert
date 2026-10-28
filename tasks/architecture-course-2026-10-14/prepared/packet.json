@@ -1,0 +1,65 @@
+{
+  "packet_version": 2,
+  "project_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "created_at": "2026-10-14T16:12:31.638538Z",
+  "status": "DRAFT",
+  "scope": "Criar uma trilha Nextra MDX Diátaxis de todos os conceitos dos 18 grupos e dos 40 padrões prioritários do texto do usuário, com casos MakersHub e Airflow, agregados PostgreSQL, blast radius FazGraph, Mermaid e referências OSS verificadas; distinguir código, runtime, histórico e proposta.",
+  "inventory": [],
+  "sources": [
+    {
+      "id": "project",
+      "revision": "UNPINNED",
+      "observed_at": "2026-10-14T16:12:31.638538Z",
+      "state": "AVAILABLE",
+      "reason": "Preparation verified local path availability only."
+    },
+    {
+      "id": "makershub",
+      "revision": "UNPINNED",
+      "observed_at": "2026-10-14T16:12:31.638538Z",
+      "state": "AVAILABLE",
+      "reason": "Preparation verified local path availability only."
+    },
+    {
+      "id": "workflow-evidence",
+      "revision": "UNPINNED",
+      "observed_at": "2026-10-14T16:12:31.638538Z",
+      "state": "AVAILABLE",
+      "reason": "Preparation verified local path availability only."
+    }
+  ],
+  "evidence": [],
+  "coverage": {
+    "L0": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    },
+    "L1": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    },
+    "L2": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    },
+    "L3": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    },
+    "L4": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    }
+  },
+  "relations": [],
+  "documents": [],
+  "adrs": [],
+  "diagrams": [],
+  "reviews": [],
+  "gaps": []
+}

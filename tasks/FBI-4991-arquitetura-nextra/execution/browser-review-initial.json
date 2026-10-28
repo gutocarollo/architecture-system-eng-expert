@@ -1,0 +1,1568 @@
+{
+  "observedAt": "2026-10-15T01:43:01.349Z",
+  "base": "http://127.0.0.1:59142",
+  "routeResults": [
+    {
+      "route": "/explicacoes/api-integration",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/availability",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/business-rules",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/cache",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/capacity",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/cache-policy",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/consensus",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/date-only",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/diagnostics",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/early-refresh",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/ledger-projection",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/opportunity-entry",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/order-boundaries",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/order-delivery",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/queue-workflow",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/reservation",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/safe-release",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/single-flight-cancel",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/storage-partitions",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/code-boundaries",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/code-patterns",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/concurrency",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/data-distribution",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/data-durability",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/distributed-work",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/messages",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/observability",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/read-models",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/reliable-integration",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/safe-change",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/security",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/workflow",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/cache-policy",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/consensus",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/date-only",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/diagnostics",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/early-refresh",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/ledger-projection",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/opportunity-entry",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/order-boundaries",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/order-delivery",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/queue-workflow",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/reservation",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/safe-release",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/single-flight-cancel",
+      "status": 200
+    },
+    {
+      "route": "/guias/casos/storage-partitions",
+      "status": 200
+    },
+    {
+      "route": "/guias",
+      "status": 200
+    },
+    {
+      "route": "/guias/investigar-impacto",
+      "status": 200
+    },
+    {
+      "route": "/guias/recuperar-pipeline",
+      "status": 200
+    },
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/access-policy/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/cache-policy/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/cache-policy",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/consensus/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/consensus",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/date-only/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/date-only",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/diagnostics/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/diagnostics",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/early-refresh/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/early-refresh",
+      "status": 200
+    },
+    {
+      "route": "/jornadas",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/ledger-projection/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/ledger-projection",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/matriz",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/opportunity-entry/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/opportunity-entry",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/order-boundaries/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/order-boundaries",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/order-delivery/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/order-delivery",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/queue-workflow/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/queue-workflow",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/reservation/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/reservation",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/safe-release/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/safe-release",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/single-flight-cancel/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/single-flight-cancel",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/storage-partitions/conceitos",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/storage-partitions",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/cache-policy",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/consensus",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/date-only",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/diagnostics",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/early-refresh",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/ledger-projection",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/opportunity-entry",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/order-boundaries",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/order-delivery",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/queue-workflow",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/reservation",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/safe-release",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/single-flight-cancel",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/storage-partitions",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/01-arquiteturas-de-aplicacao",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/03-event-driven-messaging",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/05-banco-de-dados-e-armazenamento",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/06-cache",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/07-resiliencia",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/08-concorrencia",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/09-apis-e-integracao",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/10-ddd-domain-driven-design",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/11-padroes-para-decompor-sistemas",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/12-deploy-e-releases",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/13-alta-disponibilidade",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/14-seguranca",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/15-observabilidade",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/16-workflow-e-processamento",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo/17-padroes-classicos-gof",
+      "status": 200
+    },
+    {
+      "route": "/referencia/catalogo",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/01-arquiteturas-de-aplicacao",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/03-event-driven-messaging",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/05-banco-de-dados-e-armazenamento",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/06-cache",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/07-resiliencia",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/08-concorrencia",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/09-apis-e-integracao",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/10-ddd-domain-driven-design",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/11-padroes-para-decompor-sistemas",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/12-deploy-e-releases",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/13-alta-disponibilidade",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/14-seguranca",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/15-observabilidade",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/16-workflow-e-processamento",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria/17-padroes-classicos-gof",
+      "status": 200
+    },
+    {
+      "route": "/referencia/curadoria",
+      "status": 200
+    },
+    {
+      "route": "/referencia/evidencias",
+      "status": 200
+    },
+    {
+      "route": "/referencia",
+      "status": 200
+    },
+    {
+      "route": "/referencia/prioritarios",
+      "status": 200
+    },
+    {
+      "route": "/referencia/skills-e-projetos",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/cache-policy",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/consensus",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/date-only",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/diagnostics",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/early-refresh",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/ledger-projection",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/opportunity-entry",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/order-boundaries",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/order-delivery",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/queue-workflow",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/reservation",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/safe-release",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/single-flight-cancel",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/storage-partitions",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/idempotency",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/optimistic-concurrency",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/outbox",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/read-projection",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/single-flight",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/state-machine",
+      "status": 200
+    }
+  ],
+  "journeys": [
+    {
+      "caseId": "single-flight-cancel",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/single-flight-cancel/",
+          "heading": "Cancelamento de uma busca compartilhada",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/single-flight-cancel/",
+          "heading": "Por que um leitor cancela a busca",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/single-flight-cancel/",
+          "heading": "Experimente: um leitor cancela a busca",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/single-flight-cancel/",
+          "heading": "Verifique a proteção: um leitor cancela a busca",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/single-flight-cancel/",
+          "heading": "Contratos: um leitor cancela a busca",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "early-refresh",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/early-refresh/",
+          "heading": "A lista continua disponível durante a renovação",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/early-refresh/",
+          "heading": "Por que a lista precisa continuar disponível",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/early-refresh/",
+          "heading": "Experimente: a lista precisa continuar disponível",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/early-refresh/",
+          "heading": "Verifique a proteção: a lista precisa continuar disponível",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/early-refresh/",
+          "heading": "Contratos: a lista precisa continuar disponível",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "date-only",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/date-only/",
+          "heading": "A emissão continua no mesmo dia em São Paulo",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/date-only/",
+          "heading": "Por que o dia da emissão muda no caminho",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/date-only/",
+          "heading": "Experimente: o dia da emissão muda no caminho",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/date-only/",
+          "heading": "Verifique a proteção: o dia da emissão muda no caminho",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/date-only/",
+          "heading": "Contratos: o dia da emissão muda no caminho",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "opportunity-entry",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/opportunity-entry/",
+          "heading": "A oportunidade existente conserva sua identidade",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/opportunity-entry/",
+          "heading": "Por que a oportunidade existente conserva sua identidade",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/opportunity-entry/",
+          "heading": "Experimente: a oportunidade existente conserva sua identidade",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/opportunity-entry/",
+          "heading": "Verifique a proteção: a oportunidade existente conserva sua identidade",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/opportunity-entry/",
+          "heading": "Contratos: a oportunidade existente conserva sua identidade",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "order-boundaries",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/order-boundaries/",
+          "heading": "Uma ordem atravessa fronteiras sem espalhar regras",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/order-boundaries/",
+          "heading": "Por que a regra se espalha pelo produto",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/order-boundaries/",
+          "heading": "Experimente: a regra se espalha pelo produto",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/order-boundaries/",
+          "heading": "Verifique a proteção: a regra se espalha pelo produto",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/order-boundaries/",
+          "heading": "Contratos: a regra se espalha pelo produto",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "order-delivery",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/order-delivery/",
+          "heading": "A repetição de uma ordem produz um único efeito",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/order-delivery/",
+          "heading": "Por que uma ordem repetida cobra de novo",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/order-delivery/",
+          "heading": "Experimente: uma ordem repetida cobra de novo",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/order-delivery/",
+          "heading": "Verifique a proteção: uma ordem repetida cobra de novo",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/order-delivery/",
+          "heading": "Contratos: uma ordem repetida cobra de novo",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "reservation",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/reservation/",
+          "heading": "Dois operadores disputam a mesma reserva",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/reservation/",
+          "heading": "Por que dois operadores disputam o mesmo recurso",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/reservation/",
+          "heading": "Experimente: dois operadores disputam o mesmo recurso",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/reservation/",
+          "heading": "Verifique a proteção: dois operadores disputam o mesmo recurso",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/reservation/",
+          "heading": "Contratos: dois operadores disputam o mesmo recurso",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "consensus",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/consensus/",
+          "heading": "Uma partição separa os escritórios da corretora",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/consensus/",
+          "heading": "Por que os escritórios deixam de conversar",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/consensus/",
+          "heading": "Experimente: os escritórios deixam de conversar",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/consensus/",
+          "heading": "Verifique a proteção: os escritórios deixam de conversar",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/consensus/",
+          "heading": "Contratos: os escritórios deixam de conversar",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "queue-workflow",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/queue-workflow/",
+          "heading": "Uma fila absorve trabalho e recupera falhas",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/queue-workflow/",
+          "heading": "Por que a fila cresce durante uma dependência lenta",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/queue-workflow/",
+          "heading": "Experimente: a fila cresce durante uma dependência lenta",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/queue-workflow/",
+          "heading": "Verifique a proteção: a fila cresce durante uma dependência lenta",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/queue-workflow/",
+          "heading": "Contratos: a fila cresce durante uma dependência lenta",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "cache-policy",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/cache-policy/",
+          "heading": "A consulta de posição envelhece de forma controlada",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/cache-policy/",
+          "heading": "Por que a posição rápida pertence ao outro recorte",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/cache-policy/",
+          "heading": "Experimente: a posição rápida pertence ao outro recorte",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/cache-policy/",
+          "heading": "Verifique a proteção: a posição rápida pertence ao outro recorte",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/cache-policy/",
+          "heading": "Contratos: a posição rápida pertence ao outro recorte",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "ledger-projection",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/ledger-projection/",
+          "heading": "O histórico reconstrói a posição do cliente",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/ledger-projection/",
+          "heading": "Por que o saldo precisa explicar sua história",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/ledger-projection/",
+          "heading": "Experimente: o saldo precisa explicar sua história",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/ledger-projection/",
+          "heading": "Verifique a proteção: o saldo precisa explicar sua história",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/ledger-projection/",
+          "heading": "Contratos: o saldo precisa explicar sua história",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "storage-partitions",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/storage-partitions/",
+          "heading": "A posição cresce e a consulta precisa encontrar seus dados",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/storage-partitions/",
+          "heading": "Por que a consulta cresce e a soma muda de significado",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/storage-partitions/",
+          "heading": "Experimente: a consulta cresce e a soma muda de significado",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/storage-partitions/",
+          "heading": "Verifique a proteção: a consulta cresce e a soma muda de significado",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/storage-partitions/",
+          "heading": "Contratos: a consulta cresce e a soma muda de significado",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "safe-release",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/safe-release/",
+          "heading": "A corretora troca uma versão sem perder o contrato",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/safe-release/",
+          "heading": "Por que a versão nova chega a quem ainda usa a antiga",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/safe-release/",
+          "heading": "Experimente: a versão nova chega a quem ainda usa a antiga",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/safe-release/",
+          "heading": "Verifique a proteção: a versão nova chega a quem ainda usa a antiga",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/safe-release/",
+          "heading": "Contratos: a versão nova chega a quem ainda usa a antiga",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "access-policy",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/access-policy/",
+          "heading": "A permissão acompanha a ordem e a identidade",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/access-policy/",
+          "heading": "Por que a permissão precisa alcançar o objeto certo",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/access-policy/",
+          "heading": "Experimente: a permissão precisa alcançar o objeto certo",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/access-policy/",
+          "heading": "Verifique a proteção: a permissão precisa alcançar o objeto certo",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/access-policy/",
+          "heading": "Contratos: a permissão precisa alcançar o objeto certo",
+          "missingSiblingLinks": []
+        }
+      ]
+    },
+    {
+      "caseId": "diagnostics",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/diagnostics/",
+          "heading": "A equipe descobre onde a ordem parou",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/diagnostics/",
+          "heading": "Por que o processo responde, mas a ordem não terminou",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/diagnostics/",
+          "heading": "Experimente: o processo responde, mas a ordem não terminou",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/diagnostics/",
+          "heading": "Verifique a proteção: o processo responde, mas a ordem não terminou",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/diagnostics/",
+          "heading": "Contratos: o processo responde, mas a ordem não terminou",
+          "missingSiblingLinks": []
+        }
+      ]
+    }
+  ],
+  "pageErrors": [],
+  "failures": [
+    "Error: Error: failed to find element matching selector \"main a[href=\"/explicacoes/casos/single-flight-cancel/\"]\"\n    at CdpElementHandle.$eval (file:///Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/node_modules/puppeteer-core/lib/esm/puppeteer/api/ElementHandle.js:492:27)\n    at async CdpFrame.$eval (file:///Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/node_modules/puppeteer-core/lib/esm/puppeteer/api/Frame.js:450:20)\n    at async CdpPage.$eval (file:///Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/node_modules/puppeteer-core/lib/esm/puppeteer/api/Page.js:450:20)\n    at async file:///Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/verify-browser.mjs:68:5"
+  ],
+  "homeHeading": "Aprenda a enxergar o problema antes de escolher o padrão",
+  "searchShortcutFocus": true,
+  "searchResults": [
+    {
+      "href": "/explicacoes/casos/single-flight-cancel",
+      "text": "Por que um leitor cancela a buscaum leitor cancela a busca. Continue o mesmo caso: volte ao caso; execute a experiência; resolva a tarefa; consulte contratos e fontes. Um assessor deixa de aguardar a lista de"
+    },
+    {
+      "href": "/explicacoes/casos/single-flight-cancel#a-condi%C3%A7%C3%A3o-anterior",
+      "text": "A condição anteriorA condição anterior. O cancelamento de um leitor é propagado para o produtor, e os cinco recebem CancelledError."
+    },
+    {
+      "href": "/explicacoes/casos/single-flight-cancel#o-benef%C3%ADcio-o-custo-e-o-limite",
+      "text": "O benefício, o custo e o limiteO benefício, o custo e o limite. O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma. A proteção"
+    },
+    {
+      "href": "/tutoriais/casos/single-flight-cancel",
+      "text": "Experimente: um leitor cancela a buscaExperimente: um leitor cancela a busca. Continue o mesmo caso: volte ao caso; entenda o mecanismo; resolva a tarefa; consulte contratos e fontes. Você concluirá uma experiência local e previsível."
+    },
+    {
+      "href": "/tutoriais/casos/single-flight-cancel#4-compare-a-sa%C3%ADda",
+      "text": "4. Compare a saídacomando acima; uma execução futura recebe seu próprio horário. O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma."
+    },
+    {
+      "href": "/tutoriais/casos/single-flight-cancel#5-examine-a-mudan%C3%A7a",
+      "text": "5. Examine a mudança5. Examine a mudança. Abra labs/architecture/single-flight-cancel/source.diff e os snapshots before/after. O runner lê os módulos ou os corpos das funções desses snapshots; a correção estudada já está preservada em after."
+    },
+    {
+      "href": "/tutoriais/casos/single-flight-cancel#6-corrija-uma-c%C3%B3pia-sua-e-repita-a-condi%C3%A7%C3%A3o",
+      "text": "6. Corrija uma cópia sua e repita a condiçãocondição anterior e a verificação recusa o resultado: O cancelamento de um leitor é propagado para o produtor, e os cinco recebem CancelledError. Esse fracasso esperado confirma que a sua"
+    },
+    {
+      "href": "/jornadas/single-flight-cancel/conceitos",
+      "text": "Conceitos: um leitor cancela a buscaum leitor cancela a busca. Este mapa conecta os conceitos ao mesmo problema. Um assessor deixa de aguardar a lista de chamadas enquanto outros quatro continuam esperando. O commit de"
+    },
+    {
+      "href": "/jornadas/single-flight-cancel/conceitos#asyncawait",
+      "text": "Async/AwaitNo caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados. O vínculo é"
+    },
+    {
+      "href": "/jornadas/single-flight-cancel/conceitos#cache-stampede-protection",
+      "text": "Cache Stampede ProtectionNo caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados. O vínculo é"
+    },
+    {
+      "href": "/jornadas/single-flight-cancel/conceitos#futurespromises",
+      "text": "Futures/PromisesNo caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados. O vínculo é"
+    },
+    {
+      "href": "/jornadas/single-flight-cancel/conceitos#mutex",
+      "text": "MutexNo caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados. O vínculo é"
+    },
+    {
+      "href": "/jornadas/single-flight-cancel/conceitos#single-flight",
+      "text": "Single FlightNo caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados. O vínculo é"
+    },
+    {
+      "href": "/tutoriais/single-flight",
+      "text": "Compartilhe uma busca sem cancelar os outros leitoresCompartilhe uma busca sem cancelar os outros leitores. Neste tutorial, vamos iniciar cinco leitores fictícios do mesmo dado. Você cancelará um leitor, observará os outros quatro receberem a mesma resposta"
+    },
+    {
+      "href": "/tutoriais/single-flight#4-observe-o-resultado-que-voc%C3%AA-produziu",
+      "text": "4. Observe o resultado que você produziuGuarde o sinal: producer-calls=2 inclui uma busca inicial e uma renovação. Cancelar um leitor não cria outra busca nem cancela o trabalho que os demais aguardam."
+    },
+    {
+      "href": "/tutoriais/single-flight#benef%C3%ADcio-e-limite-da-experi%C3%AAncia",
+      "text": "Benefício e limite da experiênciaBenefício e limite da experiência. A tarefa compartilhada exige tratamento de cancelamento e expiração. Durante a renovação, um leitor recebe o valor anterior enquanto ele ainda é válido. O relógio"
+    },
+    {
+      "href": "/jornadas/single-flight-cancel",
+      "text": "Cancelamento de uma busca compartilhadaCancelamento de uma busca compartilhada. Um assessor deixa de aguardar a lista de chamadas enquanto outros quatro continuam esperando. O commit de FBI-2331 relata que cancelar um participante cancelava a"
+    },
+    {
+      "href": "/jornadas/single-flight-cancel#o-resultado-que-conecta-a-jornada",
+      "text": "O resultado que conecta a jornadaO resultado que conecta a jornada. O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma. A garantia vale"
+    },
+    {
+      "href": "/guias/casos/single-flight-cancel",
+      "text": "Verifique a proteção: um leitor cancela a buscaVerifique a proteção: um leitor cancela a busca. Continue o mesmo caso: volte ao caso; entenda o mecanismo; execute a experiência; consulte contratos e fontes. Este guia serve a quem"
+    },
+    {
+      "href": "/guias/casos/single-flight-cancel#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridaque desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma. Confira uma falha relevante além do caminho feliz: cancelamento de leitor,"
+    },
+    {
+      "href": "/guias/casos/single-flight-cancel#localizadores-de-consulta",
+      "text": "Localizadores de consultaLocalizadores de consulta. backend/app/utils/single_flight.py foi preservado em labs/architecture/single-flight-cancel/before.py, na versão 342de122cdbfccbe7659adec0e1fcb842b38fc83, com SHA-256 e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a. backend/app/utils/single_flight.py foi preservado em labs/architecture/single-flight-cancel/after.py, na versão a304a4e56480648bdc60be96c00532c38d18df9f, com SHA-256 2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c. Continue o mesmo caso: volte"
+    },
+    {
+      "href": "/referencia/casos/single-flight-cancel",
+      "text": "Contratos: um leitor cancela a buscaContratos: um leitor cancela a busca. Esta página reúne os contratos que a prática compara. Você aprenderá a identificar quem é dono de uma tarefa compartilhada e quem é apenas"
+    },
+    {
+      "href": "/referencia/casos/single-flight-cancel#entradas-e-ambiente",
+      "text": "Entradas e ambientea liberação do produtor. ContratoValor do caso Identidade do caso. single-flight-cancel. Símbolos a consultar. SingleFlightCache.get / _on_inflight_settled. Comando completo. python3 labs/architecture/single-flight-cancel/run.py. Dados e efeito externo. As entradas são sintéticas. A"
+    },
+    {
+      "href": "/referencia/casos/single-flight-cancel#vers%C3%B5es-e-fronteiras-da-reprodu%C3%A7%C3%A3o",
+      "text": "Versões e fronteiras da reproduçãofoi medido por ela. FaseFonte históricaSHACópia do laboratório Anterior. backend/app/utils/single_flight.py 342de122cdbfccbe7659adec0e1fcb842b38fc83. labs/architecture/single-flight-cancel/before.py. Posterior. backend/app/utils/single_flight.py a304a4e56480648bdc60be96c00532c38d18df9f. labs/architecture/single-flight-cancel/after.py. O diff preservado é labs/architecture/single-flight-cancel/source.diff; seu SHA-256 é a98325fe7dbe7cc7d0013d688f247a00386b36541f4e5562b3e852dc02582cd7. As cópias possuem hashes no"
+    },
+    {
+      "href": "/referencia/casos/single-flight-cancel#resultados-que-o-contrato-compara",
+      "text": "Resultados que o contrato comparaResultados que o contrato compara. O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma. A reprodução histórica emite"
+    },
+    {
+      "href": "/referencia/casos/single-flight-cancel#recibo-e-rastreabilidade",
+      "text": "Recibo e rastreabilidadeRecibo e rastreabilidade. A captura fica em tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json, na entrada single-flight-cancel. O hash SHA-256 da saída capturada é 05cfb344616401c3b01996ee0f5177335546d7ad8a65fffd82886c551b0d9b87. O recibo registra exit_code=0. Uma execução futura precisa produzir seu próprio"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#cache-aside",
+      "text": "Cache Asideeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#cache-invalidation",
+      "text": "Cache Invalidationeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#cache-warming",
+      "text": "Cache Warmingeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#distributed-cache",
+      "text": "Distributed Cacheeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#local-cache",
+      "text": "Local Cacheeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#negative-caching",
+      "text": "Negative Cachingeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#read-through",
+      "text": "Read Througheviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#space-based-architecture",
+      "text": "Space-Based Architectureeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#ttl-cache",
+      "text": "TTL Cacheeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#two-level-cache",
+      "text": "Two-Level Cacheeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#write-behind--write-back",
+      "text": "Write Behind / Write Backeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas/cache-policy/conceitos#write-through",
+      "text": "Write Througheviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. A explicação do capítulo amplia a decisão, e a entrada de"
+    },
+    {
+      "href": "/jornadas#cancelamento-de-uma-busca-compartilhada",
+      "text": "Cancelamento de uma busca compartilhadaCancelamento de uma busca compartilhada. Um assessor deixa de aguardar a lista de chamadas enquanto outros quatro continuam esperando. O commit de FBI-2331 relata que cancelar um participante cancelava a"
+    },
+    {
+      "href": "/guias/casos/cache-policy#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridano modelo que confirmou a escrita durável. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/cache-policy#5-feche-a-decis%C3%A3o-com-seu-limite",
+      "text": "5. Feche a decisão com seu limiteeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. Quando sua mudança exigir uma garantia que o modelo não mede,"
+    },
+    {
+      "href": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia#choreography-saga",
+      "text": "Choreography Sagapor coreografia é distinta do sample orquestrado. Em OrderEventConsumer, pedido criado aciona reserveCredit e pedido cancelado aciona releaseCredit. CustomerEventConsumer aprova ou rejeita o pedido conforme o resultado do crédito. O"
+    },
+    {
+      "href": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia#tcc--tryconfirmcancel",
+      "text": "TCC — Try/Confirm/Cancel— Try/Confirm/Cancel. Try valida e reserva; Confirm finaliza; Cancel libera a reserva. Uma reserva hipotética de R$ 1.000 sobre R$ 1.500 deixa R$ 500 disponíveis enquanto a operação está pendente."
+    },
+    {
+      "href": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia#reservation-pattern",
+      "text": "Reservation Patternnecessária está pendente. O custo é gerir validade, liberação e recuperação. Uma expiração local não cancela automaticamente um efeito externo aceito. A referência é TCC do Seata , REF para"
+    },
+    {
+      "href": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia#lease",
+      "text": "LeaseA expiração da lease altera o contrato do serviço; não mata automaticamente um executor nem cancela um pagamento externo. No MakersHub lido, a lease de idempotência é outro mecanismo, limitado"
+    },
+    {
+      "href": "/#comece-por-uma-dor-e-acompanhe-a-mudan%C3%A7a",
+      "text": "Comece por uma dor e acompanhe a mudançaqual garantia você adquiriu. Uma pessoa cancela a busca e os colegas perdem o resultado. Compare a espera compartilhada antes e depois da proteção contra cancelamento. A lista demora porque"
+    },
+    {
+      "href": "/tutoriais",
+      "text": "Aprenda fazendouma política de atualização. Compartilhe uma recomputação e preserve sua tarefa. Você verá como o cancelamento de um cliente afeta os demais. Recuse uma transição inválida. Você verá estados, eventos"
+    },
+    {
+      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#choreography-saga",
+      "text": "Choreography Sagaas compensações da Saga correspondente. Seata executa confirmação e cancelamento TCC. Eventuate é a base de Saga; compensação de Saga e cancelamento de reserva TCC precisam conservar a diferença. A"
+    },
+    {
+      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#compensating-transaction",
+      "text": "Compensating Transactionas compensações da Saga correspondente. Seata executa confirmação e cancelamento TCC. Eventuate é a base de Saga; compensação de Saga e cancelamento de reserva TCC precisam conservar a diferença. A"
+    },
+    {
+      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#orchestration-saga",
+      "text": "Orchestration Sagaas compensações da Saga correspondente. Seata executa confirmação e cancelamento TCC. Eventuate é a base de Saga; compensação de Saga e cancelamento de reserva TCC precisam conservar a diferença. A"
+    },
+    {
+      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#reservation-pattern",
+      "text": "Reservation PatternReservation Pattern. O identificador canônico é reservation-pattern. A curadoria deste item permanece pendente. O carrinho Medusa comprova idempotência; falta rastrear a reserva e os caminhos de confirmar e cancelar do"
+    },
+    {
+      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#saga",
+      "text": "Sagaas compensações da Saga correspondente. Seata executa confirmação e cancelamento TCC. Eventuate é a base de Saga; compensação de Saga e cancelamento de reserva TCC precisam conservar a diferença. A"
+    },
+    {
+      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#tcc--tryconfirmcancel",
+      "text": "TCC — Try/Confirm/Cancel— Try/Confirm/Cancel. O identificador canônico é tcc-try-confirm-cancel. A curadoria deste item permanece pendente. Seata implementa o coordenador e o recurso TCC. Falta uma aplicação consumidora OSS real com reserva, confirmação"
+    },
+    {
+      "href": "/explicacoes/distributed-work#reservar-antes-de-confirmar",
+      "text": "Reservar antes de confirmaro autor do pipeline deve adivinhar. O padrão TCC — Try/Confirm/Cancel organiza participantes que oferecem três ações: tentar e reservar; confirmar; cancelar a reserva. Cada ação precisa tolerar a repetição"
+    },
+    {
+      "href": "/explicacoes/distributed-work#saga-e-a-compensa%C3%A7%C3%A3o-que-o-neg%C3%B3cio-realmente-precisa",
+      "text": "Saga e a compensação que o negócio realmente precisaaceitou o pedido, mas um aviso acessório falhou. Liberar a reserva por causa do aviso cancelaria uma operação válida. A decisão adequada ao contrato do exercício é preservar o pedido"
+    },
+    {
+      "href": "/tutoriais/casos",
+      "text": "Casos conectados: aprenda fazendoCasos conectados: aprenda fazendo. Cada link abaixo conserva o problema, a entrada e o limite do caso. A jornada ajuda a escolher o destino quando sua necessidade mudar. Cancelamento de"
+    },
+    {
+      "href": "/guias/casos",
+      "text": "Casos conectados: resolva a tarefaCasos conectados: resolva a tarefa. Cada link abaixo conserva o problema, a entrada e o limite do caso. A jornada ajuda a escolher o destino quando sua necessidade mudar. Cancelamento"
+    },
+    {
+      "href": "/explicacoes/casos",
+      "text": "Casos conectados: entenda as decisõesCasos conectados: entenda as decisões. Cada link abaixo conserva o problema, a entrada e o limite do caso. A jornada ajuda a escolher o destino quando sua necessidade mudar. Cancelamento"
+    },
+    {
+      "href": "/jornadas/order-delivery/conceitos#tcc--tryconfirmcancel",
+      "text": "TCC — Try/Confirm/Cancel— Try/Confirm/Cancel. Try valida e reserva; Confirm finaliza; Cancel libera a reserva. No caso desta família, faça a seguinte observação: Observe a alocação falhar depois do débito de R$ 100"
+    },
+    {
+      "href": "/explicacoes/reliable-integration#9-saga-completar-passos-locais-e-compensar-o-que-for-revers%C3%ADvel",
+      "text": "9. Saga: completar passos locais e compensar o que for reversívelrejeita antes de liquidar, liberar a reserva recupera a disponibilidade. Se o banco já liquidou, cancelar um registro local não recupera o dinheiro. Uma devolução exige outra operação e outra"
+    },
+    {
+      "href": "/explicacoes/reliable-integration#reservar-preparar-ou-compensar-s%C3%A3o-escolhas-distintas",
+      "text": "Reservar, preparar ou compensar são escolhas distintasReservar, preparar ou compensar são escolhas distintas. No protocolo Try/Confirm/Cancel (TCC), Try valida e reserva; Confirm finaliza; Cancel libera a reserva. Cada chamada precisa tolerar repetição. Uma reserva de R$"
+    },
+    {
+      "href": "/referencia/catalogo/07-resiliencia#deadline-propagation",
+      "text": "Deadline Propagationde dez segundos deixa sete para o restante. O limite inclui trabalho que continua após cancelamento e relógios; timeouts por fase não comprovam esse contrato. A skill de apoio é"
+    },
+    {
+      "href": "/referencia/catalogo/07-resiliencia#chaos-engineering",
+      "text": "Chaos EngineeringChaos Engineering. Aplica uma falha controlada para investigar uma hipótese sobre o sistema e observar recuperação. Um laboratório proposto cancela um leitor de uma task compartilhada. O limite é ter"
+    },
+    {
+      "href": "/jornadas/cache-policy#o-resultado-que-conecta-a-jornada",
+      "text": "O resultado que conecta a jornadaeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. Quando terminar a prática e consultar seus contratos, continue em A"
+    },
+    {
+      "href": "/explicacoes/casos/cache-policy#o-benef%C3%ADcio-o-custo-e-o-limite",
+      "text": "O benefício, o custo e o limiteeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. Uma alternativa só atende esta dor se proteger o mesmo recurso"
+    },
+    {
+      "href": "/guias/casos/early-refresh#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridaversões realizam duas buscas no cenário concluído. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/diagnostics#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridaenquanto a prova da ordem detecta provider_failed. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/order-boundaries#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridae a ordem negativa não gera escrita. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/safe-release#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridae 1.000 antes de trocar a saída. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/access-policy#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridae ledger não pertence às ligações permitidas. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/reservation#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridauma reserva do mesmo horário é aceita. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/explicacoes/cache#reunir-leitores-em-uma-chamada",
+      "text": "Reunir leitores em uma chamadaa limpeza para a conclusão da task e acrescentou asyncio.shield. Se um de cinco leitores cancela sua espera, a tarefa compartilhada pode continuar para os outros quatro. O diff é"
+    },
+    {
+      "href": "/guias/casos/queue-workflow#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridaassinatura de auditoria recebe seus próprios fatos. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/order-delivery#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridafictício de R$ 900 para R$ 1.000. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/date-only#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquirida04/10/26, pois o instante não foi alterado. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/storage-partitions#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridade SCAN para SEARCH com COVERING INDEX. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/ledger-projection#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridajournal_mode=wal e conserva 100.000 centavos após rollback. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/consensus#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquirida2 − 3 = 1 participante comum. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/tutoriais/casos/cache-policy#7-reinicie-e-conclua",
+      "text": "7. Reinicie e concluaeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. Você já observou a diferença. Continue o mesmo caso: volte ao"
+    },
+    {
+      "href": "/guias/casos/opportunity-entry#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridahistóricas também recusam oportunidades ganhas ou perdidas. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/jornadas/matriz",
+      "text": "Todos os conceitos e seus casosexemplo, ajuda a discutir Raft, mas não executa Raft. CasoConceitosDestinos que conservam o mesmo problema Cancelamento de uma busca compartilhada. 5. Explicação, tutorial, guia e referência. A lista continua disponível"
+    },
+    {
+      "href": "/referencia/casos/cache-policy#garantia-par%C3%A2metros-e-limites",
+      "text": "Garantia, parâmetros e limiteseviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, --probe"
+    },
+    {
+      "href": "/explicacoes/concurrency#executar-mais-trabalho-n%C3%A3o-significa-compartilhar-mais-mem%C3%B3ria",
+      "text": "Executar mais trabalho não significa compartilhar mais memóriareferência dos 22 conceitos de concorrência distingue cada garantia, aplicação e limite. O caso de single-flight e cancelamento está em cache, e as tasks entre executores estão em trabalho distribuído."
+    },
+    {
+      "href": "/referencia/catalogo/06-cache#single-flight",
+      "text": "Single Flightcom shield. O limite é que essa coordenação pertence ao processo e precisa tratar erro, cancelamento e limpeza. A skill é backend-caching. A base é task compartilhada e asyncio.shield ."
+    },
+    {
+      "href": "/referencia/catalogo/08-concorrencia#futurespromises",
+      "text": "Futures/PromisesFutures/Promises. Representam uma conclusão futura com resultado ou erro. Os leitores do single-flight aguardam a mesma task; o ciclo de vida dessa conclusão é separado do leitor que cancelou. O"
+    },
+    {
+      "href": "/explicacoes/messages#o-alcance-da-confirma%C3%A7%C3%A3o",
+      "text": "O alcance da confirmaçãodo consumidor informa que ele concluiu a etapa definida. Um timeout em Request/Reply não prova cancelamento do comando. Por isso a recuperação precisa conhecer identidade e estado, além de repetir"
+    },
+    {
+      "href": "/explicacoes/capacity#timeout-e-prazo-total",
+      "text": "Timeout e prazo totalpropagado. A documentação HTTPX detalha as fases, e gRPC deadlines fornece a base de propagação. Cancelar a espera do chamador não desfaz automaticamente um efeito externo já realizado."
+    },
+    {
+      "href": "/referencia/curadoria/07-resiliencia#deadline-propagation",
+      "text": "Deadline Propagationcontexto com timeout para a consulta; chamadas que recebem o contexto compartilham o prazo de cancelamento. A base de estudo é grpc/grpc-go / clientconn.go @ 4d4d4284 ; licença Apache-2.0 ."
+    },
+    {
+      "href": "/referencia/curadoria/07-resiliencia#timeout",
+      "text": "Timeoutcontexto com timeout para a consulta; chamadas que recebem o contexto compartilham o prazo de cancelamento. A base de estudo é grpc/grpc-go / clientconn.go @ 4d4d4284 ; licença Apache-2.0 ."
+    },
+    {
+      "href": "/referencia/catalogo/03-event-driven-messaging#requestreply",
+      "text": "Request/Replyresposta, espera e recuperação. A correlação não deduplica o comando; timeout do chamador não prova cancelamento ou ausência do efeito. Watermill requestreply é outra base de comparação, não uma dependência"
+    }
+  ],
+  "searchNavigation": {
+    "selected": "/explicacoes/casos/single-flight-cancel",
+    "actual": "http://127.0.0.1:59142/explicacoes/casos/single-flight-cancel"
+  },
+  "clickedJourney": [],
+  "completedAt": "2026-10-15T01:44:21.501Z",
+  "verdict": "FAIL"
+}

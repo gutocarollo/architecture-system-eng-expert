@@ -1,0 +1,5 @@
+flowchart LR
+    A[Origem: evt-01 e evt-02] -->|refresh processa até evt-01| P[Projeção: total 10]
+    P -->|consulta enquanto evt-02 aguarda| U[Painel mostra 10]
+    A -->|próximo refresh processa evt-02| P2[Projeção: total 15, cursor evt-02]
+    P2 --> U2[Painel mostra 15]

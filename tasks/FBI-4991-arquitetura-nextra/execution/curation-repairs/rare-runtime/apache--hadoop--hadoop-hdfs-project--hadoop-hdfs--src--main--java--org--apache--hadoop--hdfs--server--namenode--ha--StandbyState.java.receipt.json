@@ -1,0 +1,13 @@
+{
+  "repo": "apache/hadoop",
+  "revision": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+  "path": "hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java",
+  "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java",
+  "raw_url": "https://raw.githubusercontent.com/apache/hadoop/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--ha--StandbyState.java",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:04.788060+00:00",
+  "sha256": "638d63c7821167afaa04ce490c0a5f3bd43d60c0bb99bb6fb658de46870657a4",
+  "line_count": 121
+}

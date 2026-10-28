@@ -1,0 +1,43 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		gradlePluginPortal()
+	}
+	dependencies {
+		classpath 'org.xtext:xtext-gradle-plugin:3.0.2'
+	}
+}
+
+def pomXml = new XmlSlurper().parse('pom.xml')
+
+subprojects {
+	ext.xtextVersion = '2.32.0'
+	repositories {
+		mavenCentral()
+	}
+	
+	apply plugin: 'java-library'
+	dependencies {
+		api platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
+	}
+	apply plugin: 'maven-publish'
+	apply plugin: 'org.xtext.xtend'
+	apply from: "${rootDir}/gradle/source-layout.gradle"
+	apply from: "${rootDir}/gradle/maven-deployment.gradle"
+	apply plugin: 'eclipse'
+	apply plugin: 'jacoco'
+	
+	group = 'org.contextmapper'
+	version = pomXml.version
+			
+	sourceCompatibility = '11'
+	targetCompatibility = '11'
+	
+	configurations.all {
+		exclude group: 'asm'
+	}
+
+    if (!project.hasProperty('signing.secretKeyRingFile')) {
+        project.ext.'signing.secretKeyRingFile' = "${rootDir}/secret-key.gpg"
+    }
+}

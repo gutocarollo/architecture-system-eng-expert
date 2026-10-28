@@ -1,0 +1,104 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: um leitor cancela a busca
+
+Este mapa conecta os conceitos ao mesmo problema. Um assessor deixa de aguardar a lista de chamadas enquanto outros quatro continuam esperando. O commit de FBI-2331 relata que cancelar um participante cancelava a tarefa compartilhada e derrubava os cinco leitores. A reprodução usa cinco participantes fictícios e a mesma classe das duas versões.
+
+Comece pela [jornada](/jornadas/single-flight-cancel/), execute o [tutorial](/tutoriais/casos/single-flight-cancel/) e use a [referência](/referencia/casos/single-flight-cancel/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/single-flight-cancel/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="async-await" />
+
+## Async/Await
+
+Organiza a suspensão e retomada de trabalho assíncrono.
+
+No caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados.
+
+```sh
+python3 labs/architecture/single-flight-cancel/run.py
+```
+
+O código desta observação está em `labs/architecture/single-flight-cancel/run.py`. O identificador do probe é `historical-cancellation`.
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Async/Await; não implementa o padrão completo. A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/single-flight-cancel/) permite continuar com o mesmo problema.
+
+<span id="cache-stampede-protection" />
+
+## Cache Stampede Protection
+
+Coordena ou distribui recomputações para evitar que muitos leitores iniciem a mesma carga na expiração.
+
+No caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados.
+
+```sh
+python3 labs/architecture/single-flight-cancel/run.py
+```
+
+O código desta observação está em `labs/architecture/single-flight-cancel/run.py`. O identificador do probe é `historical-cancellation`.
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Cache Stampede Protection; não implementa o padrão completo. A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/single-flight-cancel/) permite continuar com o mesmo problema.
+
+<span id="futures-promises" />
+
+## Futures/Promises
+
+Representam uma conclusão futura com resultado ou erro.
+
+No caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados.
+
+```sh
+python3 labs/architecture/single-flight-cancel/run.py
+```
+
+O código desta observação está em `labs/architecture/single-flight-cancel/run.py`. O identificador do probe é `historical-cancellation`.
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Futures/Promises; não implementa o padrão completo. A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/single-flight-cancel/) permite continuar com o mesmo problema.
+
+<span id="mutex" />
+
+## Mutex
+
+Permite um executante por vez na seção protegida.
+
+No caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados.
+
+```sh
+python3 labs/architecture/single-flight-cancel/run.py
+```
+
+O código desta observação está em `labs/architecture/single-flight-cancel/run.py`. O identificador do probe é `historical-cancellation`.
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Mutex; não implementa o padrão completo. A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/single-flight-cancel/) permite continuar com o mesmo problema.
+
+<span id="single-flight" />
+
+## Single Flight
+
+Leitores da mesma identidade aguardam um produtor em andamento.
+
+No caso desta família, faça a seguinte observação: Cancele um dos cinco leitores nas duas classes históricas e compare cinco cancelamentos com um cancelamento e quatro resultados.
+
+```sh
+python3 labs/architecture/single-flight-cancel/run.py
+```
+
+O código desta observação está em `labs/architecture/single-flight-cancel/run.py`. O identificador do probe é `historical-cancellation`.
+
+O vínculo é um mecanismo local executado. A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/single-flight-cancel/) permite continuar com o mesmo problema.
+

@@ -1,0 +1,71 @@
+{
+  "observed_at": "2026-10-15T18:57:38.014245+00:00",
+  "verdict": "FUNCTIONAL_PASS_WITH_RECORDED_CONSOLE_ERRORS",
+  "raw_verdict_preserved": "FAIL",
+  "release_id": "9610402f817c2a20860be620f45c164b3b77478feed1cbf769f57b021fb8d6bf",
+  "site_version": 3,
+  "site_source_commit": "fafe26360c7140239a74ce31305fb07637de7c54",
+  "native_editor_credential_used_by_learner": false,
+  "interval_utc": [
+    "2026-10-15T18:54:45.236Z",
+    "2026-10-15T18:56:49.660Z"
+  ],
+  "anonymous_denied": 1397,
+  "authenticated_sha256_matches": 1397,
+  "anonymous_after_warm_denied": 1397,
+  "wrong_password_rejected": true,
+  "login_search_download_logout": "PASS",
+  "functional_failures": [],
+  "page_errors": [],
+  "diagnostic_http_errors": [
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/login",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 404
+    }
+  ],
+  "backlog": "Authenticated favicon.ico404; expected denied requests produce401. These do not establish all-green QA or full Story acceptance.",
+  "sources": [
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/public-final-verification.json",
+      "sha256": "8683cc1f34d0cbc62563ee65b0d2756909e501faf133eb23006f9bd358b6a747"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/public-final-network-diagnostic-verification.json",
+      "sha256": "1adb647604fba4e6b7504579eea2b693729995af79b98b99120b19e234f7c64c"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/public-final-publication.json",
+      "sha256": "96d1d8cb9821e5107d4ae7470639c82c30174c88ce590e4aacaa41f658ae18ac"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/asset-manifest.json",
+      "sha256": "dad4ca5436421239dcf40dd32528866f5ced3b37176a0bc55a10a3ce8917f4ad"
+    }
+  ]
+}

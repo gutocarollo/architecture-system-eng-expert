@@ -1,0 +1,52 @@
+diff --git a/backend/app/utils/single_flight.py b/backend/app/utils/single_flight.py
+index 54507e1ef..ec701edd4 100644
+--- a/backend/app/utils/single_flight.py
++++ b/backend/app/utils/single_flight.py
+@@ -64,22 +64,37 @@ class SingleFlightCache(Generic[T]):
+             if self._value is not None and time.monotonic() < self._expires_at:
+                 return self._value
+             if self._inflight is None:
+-                self._inflight = asyncio.create_task(producer())
++                task = asyncio.create_task(producer())
++                # Slot-clearing and result-caching are driven by the task
++                # settling, not by an awaiter reaching its finally — so a
++                # cancelled awaiter can neither orphan the slot (forcing a 2nd
++                # upstream call mid-flight) nor lose a successful result.
++                task.add_done_callback(self._on_inflight_settled)
++                self._inflight = task
+             task = self._inflight
+ 
+-        try:
+-            result = await task
+-        finally:
+-            # Clear the slot so the next expiry starts a new flight. Only the
+-            # task we launched clears it (a newer flight must survive).
+-            async with self._lock:
+-                if self._inflight is task:
+-                    self._inflight = None
++        # ``shield`` so a cancelled awaiter (request timeout / client disconnect,
++        # which FastAPI propagates to the request task) does not cancel the
++        # SHARED task and take every other coalesced caller down with it. Only
++        # the cancelled caller raises; the rest still get the upstream result.
++        return await asyncio.shield(task)
+ 
++    def _on_inflight_settled(self, task: "asyncio.Task[T]") -> None:
++        """Done-callback for the shared in-flight task.
++
++        Runs exactly once, when the task settles, regardless of how many
++        awaiters cancelled. Frees the slot and caches a successful result. A
++        cancelled or failed task caches nothing (errors must retry), and
++        retrieving the outcome here also marks any exception as consumed.
++        """
++        if self._inflight is task:
++            self._inflight = None
++        if task.cancelled() or task.exception() is not None:
++            return
++        result = task.result()
+         if self._is_error is None or not self._is_error(result):
+             self._value = result
+             self._expires_at = time.monotonic() + self._ttl
+-        return result
+ 
+     def invalidate(self) -> None:
+         """Drop the cached value (next call refetches). Does not cancel an

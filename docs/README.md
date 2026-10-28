@@ -44,3 +44,7 @@
 - [Skills de arquitetura (agent skills)](referencias/skills.md)
 - [Catálogo 40 padrões × skills × frameworks × OSS](referencias/catalogo-40-patterns-skills-frameworks.md)
 - [Stack MakersHub/Airflow/PostgreSQL/Salesforce — referências](referencias/stack-makershub-airflow-postgres-salesforce.md)
+
+## Curso navegável
+
+A versão em [Nextra e MDX](../content/index.mdx) reorganiza estes textos com Diátaxis e casos datados do MakersHub e do Airflow. Para abrir o curso localmente, siga os comandos no [README do projeto](../README.md). O conteúdo deste diretório permanece como fonte do material fornecido.

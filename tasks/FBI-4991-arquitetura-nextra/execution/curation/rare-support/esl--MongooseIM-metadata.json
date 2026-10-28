@@ -1,0 +1,13 @@
+{
+  "repository": "esl/MongooseIM",
+  "default_branch": "master",
+  "sha": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+  "license": {
+    "key": "other",
+    "name": "Other",
+    "spdx_id": "NOASSERTION",
+    "url": null,
+    "node_id": "MDc6TGljZW5zZTA="
+  },
+  "observed_utc": "2026-10-15T01:46:36.756104+00:00"
+}

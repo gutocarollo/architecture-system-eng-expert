@@ -1,0 +1,12 @@
+{
+  "repo": "esl/MongooseIM",
+  "path": "COPYING",
+  "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+  "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/COPYING",
+  "raw_url": "https://raw.githubusercontent.com/esl/MongooseIM/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/COPYING",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:46:55.779009+00:00",
+  "sha256": "9d4531bf6c03f6e630c016960fb00ad37435025d5f45391228b7ef8db16274cb",
+  "line_count": 343,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/esl--MongooseIM--COPYING"
+}

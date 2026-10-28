@@ -1,0 +1,322 @@
+{
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:2026-10-14:bounded-recheck-at19:49",
+  "measured_at_utc": "2026-10-14T20:01:32.983803+00:00",
+  "scope": "semantic review only; not document approval or council receipt",
+  "unchanged_fences": 38,
+  "delta_fences": 1,
+  "checks": [
+    {
+      "document_path": "content/explicacoes/distributed-work/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3",
+      "body_sha256_without_final_newline": "5ab42bfde93e33cf09acc89d5bf46d681b6538aeefdaa0f8f7ce9a5cc136cb0f",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/distributed-work/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+      "body_sha256_without_final_newline": "f4ea7a83cd40a0e8d1ebad643e6b7713b1a78847ad37487b0091d46f9ac90036",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/reliable-integration/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+      "body_sha256_without_final_newline": "be2d68aaf0b9c7bed8dc2913b5042f4c9dbfb0636c95a1957780ac53863fc261",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/reliable-integration/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e",
+      "body_sha256_without_final_newline": "72473298c233048b3e5b98e70869e4df908ee32b1a36ec4b8e8aee8a17052470",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/reliable-integration/index.mdx",
+      "fence_index": 3,
+      "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+      "body_sha256_without_final_newline": "4e23c5b3ba530f4adc8accff2e3e4abe4f599bff93d1f184dec7d3b1816a94bc",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/reliable-integration/index.mdx",
+      "fence_index": 4,
+      "source_sha256": "0ff8488de2b1999055352402198880539bf611ee3a56617d71b371788afde22b",
+      "body_sha256_without_final_newline": "e2517a05ad3592d1131521db3802788c843cf3e2c1675e75a0fd773666ab8484",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/messages/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b",
+      "body_sha256_without_final_newline": "9bd59e90f23c13da60269ea8ec84fe943a6b67f5c896228dbdf4ee43338dd323",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/messages/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+      "body_sha256_without_final_newline": "ff777f2b65a648f1b5152bd2525fdd522c3e4fe6ffadbac1f2f5273ee68302e0",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/messages/index.mdx",
+      "fence_index": 3,
+      "source_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92",
+      "body_sha256_without_final_newline": "ae32d7f9896a45ab651b0acd92f56b96175c33c7a2ce6a1428297fb00924147e",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/messages/index.mdx",
+      "fence_index": 4,
+      "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+      "body_sha256_without_final_newline": "3f981ae92aa2e5b9cee768e2004a3b3ce7e50131b003bd13b7be777db6c19a01",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/messages/index.mdx",
+      "fence_index": 5,
+      "source_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760",
+      "body_sha256_without_final_newline": "d19fc74e3e6159336d70cc37d4faefdcdb7aa606a3adef0fb9affb791de2e709",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/read-models/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+      "body_sha256_without_final_newline": "bf88c5a8e5ff74298afc100ef45241abbc442df8fc79b4145d75ade8ea7b0993",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/read-models/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "f4fe20faf96323d569c4e3ce0bee8fdd06b0b73475c08675eb9d414825f821b8",
+      "body_sha256_without_final_newline": "c6eeafd62e73e91bee0d6ac067d95e4791e24a67555d70bb3d1d7f44d291745a",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/read-models/index.mdx",
+      "fence_index": 3,
+      "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+      "body_sha256_without_final_newline": "75b40b1d880f9f656baaeab7b480dddf7b0e0ae7057e763f79d1a3c7a56b04e7",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/read-models/index.mdx",
+      "fence_index": 4,
+      "source_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
+      "body_sha256_without_final_newline": "9e0bab2f182bc91920d5ed85f87ba8f1c65de333b3ea68a999d97693a16fc2ce",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/data-durability/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5",
+      "body_sha256_without_final_newline": "b5cec17c6055c411d1a34bd1cd96c52292bb5d3c33a42aa45085ebc1e40d5080",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/data-durability/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+      "body_sha256_without_final_newline": "b0e79fd1965af9dcd0a724db4bdcf664d6d58d97bfbacb325b69dc887d7d4c54",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/data-durability/index.mdx",
+      "fence_index": 3,
+      "source_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d",
+      "body_sha256_without_final_newline": "cb8a8354d77217cc4aa35d32f1f8be2a19e3353c3dfb926219161d141f7eae8a",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/data-durability/index.mdx",
+      "fence_index": 4,
+      "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+      "body_sha256_without_final_newline": "2ba274e1a7ec6df7687a3ae5d39b21f50de03951982be477a7fe3b5e7f98e9f3",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/data-distribution/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7",
+      "body_sha256_without_final_newline": "1684ec5855135f160da785599a82ba9b02ef26151cea9d0e8940d1eebd6dd101",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/data-distribution/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+      "body_sha256_without_final_newline": "a26ae72df75facbf12895c1c5286ae81a20b70e82566a63f642b061f203f2a28",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/data-distribution/index.mdx",
+      "fence_index": 3,
+      "source_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075",
+      "body_sha256_without_final_newline": "f512f6f782ca878dba83369efa126869d459e743ae0b07e15b28dd34bd9687b0",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/data-distribution/index.mdx",
+      "fence_index": 4,
+      "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+      "body_sha256_without_final_newline": "eb661acdb4e8e415bf4ddef7d974c51e8a0ba48276066d2d53f69cdb7ff42002",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/workflow/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba",
+      "body_sha256_without_final_newline": "47473d92537c78d485e7d333b8cb807982e97d56dd1a25160494226b67f3f223",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/workflow/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+      "body_sha256_without_final_newline": "fca90ee536852a4f3cd26c4f2d59631b357d175bdd11cc8f3ec923b4db1a12db",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/workflow/index.mdx",
+      "fence_index": 3,
+      "source_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd",
+      "body_sha256_without_final_newline": "6c31f4051c15d55433e5c0f67b3f0c0cb0c7a4a51e5c7102ef826cb772e8414e",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/availability/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "b8ed0e4a799e477e9e774181eadd67f0ea7bebbd26aa96c0b03689135789ae09",
+      "body_sha256_without_final_newline": "1b6774f09c208d5c0389efecac50e1e1e381cb73e36f7990d0fc6cbb7725b56a",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/availability/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e",
+      "body_sha256_without_final_newline": "1ac09a802059b7fdb4be20849a1f5eb5c7e36ad27f97e9e01df6dae32cd3ff03",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/availability/index.mdx",
+      "fence_index": 3,
+      "source_sha256": "eecbec62887bf56eca7d94f837f121a2ed93f5596cccedda41d793053f274685",
+      "body_sha256_without_final_newline": "50b24d6ade2e6ede979ec1bd9faa9cfae6ca6f9cb15ad894c5095f8791ec6cf8",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/availability/index.mdx",
+      "fence_index": 4,
+      "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db",
+      "body_sha256_without_final_newline": "fca019f83e237f951fc26d8cdd3600577d8288905e9a7b1aba406fb4f82b8a0c",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/availability/index.mdx",
+      "fence_index": 5,
+      "source_sha256": "ffe58dadfe859bbaafea505c6bda5bb370b75794d1504a7ee42e8e5e3d8fa0e3",
+      "body_sha256_without_final_newline": "1529b1eb68c17e8a1648093b81f3db72dbf19b83618785e7332a568267ad3930",
+      "semantic_review": "PASS",
+      "review_basis": "bounded recheck: dated git-sync container writes shared emptyDir consumed by scheduler in same pod; no recent execution asserted"
+    },
+    {
+      "document_path": "content/explicacoes/availability/index.mdx",
+      "fence_index": 6,
+      "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3",
+      "body_sha256_without_final_newline": "d8398fd33eb1ae8a88316c54a2c1bdf71fc7d10c9a13a904356e2c844dd4fed5",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/safe-change/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54",
+      "body_sha256_without_final_newline": "8fbd5cdf41017b789e33c575e524011cc40ec0f68793cf03258dc5597493db0b",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/safe-change/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "1dcd4775735b86f0671ffa1c2db397c029d9e3c16de41ac026bb4e695c7f5866",
+      "body_sha256_without_final_newline": "58cf4d1e00f6b344bedc19e8b10cbb8a461c107ec09e1feb4c0ea4ea697f206e",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/safe-change/index.mdx",
+      "fence_index": 3,
+      "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33",
+      "body_sha256_without_final_newline": "06173c02a2bc2f1f5cb97cf16ef74e9dfca04e3104410b5d88da5213ee889b40",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/safe-change/index.mdx",
+      "fence_index": 4,
+      "source_sha256": "8908c7b14ac9dc63eda70aa6014c1f6db4ee63bcb55812dea7a20e034b5c80c0",
+      "body_sha256_without_final_newline": "8ab6760bcc0599d90483c0ea37bab12e6ad340e18257ab398f6188f81b2a3f0e",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/safe-change/index.mdx",
+      "fence_index": 5,
+      "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d",
+      "body_sha256_without_final_newline": "9ca2b9bad595093fe472858cc4c1f6c440946be30b429540a39949f3cdf0cf8a",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/security/index.mdx",
+      "fence_index": 1,
+      "source_sha256": "b7dfc92e4153777fa7c644a8eb5f9ddd0a690acb00e3d83de7da0158e2993e5b",
+      "body_sha256_without_final_newline": "fbee0374c559dd0dd60df72e25455861a29a0c7f0857c073e31afd3c3afc42b4",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    },
+    {
+      "document_path": "content/explicacoes/security/index.mdx",
+      "fence_index": 2,
+      "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365",
+      "body_sha256_without_final_newline": "bcfa82c5f230f005f8666c351c116d8ae249605ceb2ffe6fb0b165b672803585",
+      "semantic_review": "PASS",
+      "review_basis": "first-pass body unchanged"
+    }
+  ]
+}

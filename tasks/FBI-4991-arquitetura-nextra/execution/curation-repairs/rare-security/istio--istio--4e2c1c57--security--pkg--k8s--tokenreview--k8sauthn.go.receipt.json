@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "security/pkg/k8s/tokenreview/k8sauthn.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/k8s/tokenreview/k8sauthn.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/k8s/tokenreview/k8sauthn.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--k8s--tokenreview--k8sauthn.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.314426+00:00",
+  "sha256": "f8e342391be25a7304337b37b931fbc46f0fc62ebc8da012369da794bb4e9154",
+  "line_count": 121,
+  "source": "raw_primary"
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/nova",
+  "path": "nova/scheduler/client/report.py",
+  "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+  "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py",
+  "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:55:26.930204+00:00",
+  "sha256": "029c57e513c56e087c4b12b05764b8d764580a0a9324ca496fa8de2cf9bb59ea",
+  "line_count": 2688,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-openstack--nova--nova--scheduler--client--report.py"
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "apache/geode",
+  "path": "geode-core/src/main/java/org/apache/geode/cache/RegionShortcut.java",
+  "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+  "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/RegionShortcut.java",
+  "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/RegionShortcut.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:55:01.782919+00:00",
+  "sha256": "da02664e6cb1f6665f6ee23cb5e7e94eb5fca6f2d57370f248988947b3d97aa9",
+  "line_count": 246,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--cache--RegionShortcut.java"
+}

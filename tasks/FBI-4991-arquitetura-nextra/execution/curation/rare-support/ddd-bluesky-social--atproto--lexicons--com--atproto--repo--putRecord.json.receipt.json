@@ -1,0 +1,12 @@
+{
+  "repo": "bluesky-social/atproto",
+  "path": "lexicons/com/atproto/repo/putRecord.json",
+  "revision": "388dac9f7fdfa5ba8e4af08217b4afdc30d993ee",
+  "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/lexicons/com/atproto/repo/putRecord.json",
+  "raw_url": "https://raw.githubusercontent.com/bluesky-social/atproto/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/lexicons/com/atproto/repo/putRecord.json",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:09:57.582907+00:00",
+  "sha256": "3132c3b46ba530c367dc066ce263e6e1d405c4f2e91ed995bfc2d2fb654e50d7",
+  "line_count": 74,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-bluesky-social--atproto--lexicons--com--atproto--repo--putRecord.json"
+}

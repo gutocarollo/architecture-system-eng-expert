@@ -1,0 +1,10 @@
+flowchart TD
+    U["Assessor fecha uma consulta"] --> C["FastAPI cancela um awaiter"]
+    C --> B["Antes: single_flight.py::get usa await task"]
+    B --> X["Task do produtor cancelada: cinco leitores falham"]
+    C --> A["Depois: single_flight.py::get usa asyncio.shield"]
+    A --> O["Somente o leitor cancelado recebe CancelledError"]
+    A --> P["Produtor local controlado continua"]
+    P --> D["_on_inflight_settled guarda resultado e libera slot"]
+    D --> R["Quatro leitores recebem a mesma resposta"]
+    X --> N["Próxima requisição precisa de outro voo"]

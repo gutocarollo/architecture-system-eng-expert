@@ -1,0 +1,10 @@
+flowchart TD
+    S["backend envia issue_date: 2026-10-05"] --> C["insurance/InsuranceProposalsAnalysisCard.tsx::formatDate"]
+    C --> B["Antes: new Date interpreta UTC"]
+    B --> Z["America/Sao_Paulo: 04/10/26"]
+    C --> A["Depois: frontend/app/_utils/isoDate.ts::formatBrDate"]
+    A --> D{"String inteira é YYYY-MM-DD?"}
+    D -->|sim| L["parseIsoLocal monta componentes locais"]
+    L --> R["Emissão preservada: 05/10/26"]
+    D -->|não: tem hora ou offset| I["new Date preserva o instante"]
+    I --> T["00:00Z continua 04/10/26 em São Paulo"]

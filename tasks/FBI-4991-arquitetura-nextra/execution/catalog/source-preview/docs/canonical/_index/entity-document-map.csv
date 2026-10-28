@@ -1,0 +1,2 @@
+entity_id,kind,title,document_path,authoring_state,evidence_state,runtime_state,lifecycle,route,fqn,backlog_ids
+doc:architecture/architecture-system-eng-expert,document,Curso de arquitetura aplicada da Faz Capital,docs/canonical/operations/architecture-system-eng-expert.md,assistant_curated,partially_verified,not_applicable,active_candidate,,,

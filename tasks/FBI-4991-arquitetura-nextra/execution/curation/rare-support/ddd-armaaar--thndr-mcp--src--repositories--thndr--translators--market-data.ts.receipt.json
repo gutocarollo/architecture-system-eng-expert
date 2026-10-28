@@ -1,0 +1,12 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/repositories/thndr/translators/market-data.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/market-data.ts",
+  "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/market-data.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:08:59.762161+00:00",
+  "sha256": "85f3349f67bd0d4150fe9dff082a1917b064542f56c427c7f95f5b2f54f32dee",
+  "line_count": 328,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--repositories--thndr--translators--market-data.ts"
+}

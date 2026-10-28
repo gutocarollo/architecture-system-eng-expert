@@ -1,0 +1,11 @@
+sequenceDiagram
+    participant Person as Pessoa no exemplo
+    participant P as Primário proposto
+    participant R as Réplica proposta
+    Person->>P: Registra aporte de R$ 500
+    P-->>Person: Commit aceito
+    P->>R: Propaga mudança
+    Note over P,R: A propagação pode estar atrasada
+    Person->>R: Consulta antes de aplicar a mudança
+    R-->>Person: Estado anterior
+    Note over Person,R: Roteamento ou garantia de sessão precisa tratar o atraso

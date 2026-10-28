@@ -1,0 +1,516 @@
+**Exploration: SalesforceDagFactory create_dag download_and_upload_task load_metadata_task**
+
+Found 8 symbols across 1 file.
+
+**Blast radius — what depends on these (update/verify before editing)**
+
+- `create_dag` (toolkit/factories/dag.py:27) — 1 caller in `toolkit/factories/dag.py`; ⚠️ no covering tests found
+- `load_metadata_task` (dags/recordings__nextbilling__api_to_stg__audio.py:715) — 1 caller in `dags/recordings__nextbilling__api_to_stg__audio.py`; ⚠️ no covering tests found
+- `download_and_upload_task` (dags/recordings__nextbilling__api_to_stg__audio.py:529) — 1 caller in `dags/recordings__nextbilling__api_to_stg__audio.py`; ⚠️ no covering tests found
+
+**Relationships**
+
+**calls:**
+- create_dag → get_dag_defaults
+- create_dag → _parse_date
+- create_dag → _resolver_callbacks_de_default_args
+- create_dag → _get_callback
+- create_dag → DAG
+- create_dag → _create_tasks
+- create_dag → normalize_schedule
+- create_dag_from_pipeline → create_dag
+- _resolver_callbacks_de_default_args → _get_callback
+- test_string_no_default_args_vira_callable → _resolver_callbacks_de_default_args
+- ... and 96 more
+
+**references:**
+- load_metadata_task → POSTGRES_CONN_ID
+- create_dag → advanced_teams_notification
+- normalize_schedule → _CRON_PRESETS
+- build_incremental_dag → POSTGRES_CONN_ID
+- build_incremental_dag → advanced_teams_notification
+- build_bootstrap_dag → advanced_teams_notification
+- download_and_upload_task → TEAM_NAME
+- enrich_with_salesforce_data_task → POSTGRES_CONN_ID
+- quality_check → POSTGRES_CONN_ID
+
+**instantiates:**
+- create_dag → SalesforcePipeline
+- create_dag → CustomQueryPipeline
+- load → LoadResult
+- create_cdr_file_pipeline → CSVLoader
+- load → LoadResult
+- load → LoadResult
+- _load → LoadResult
+- create_cdr_file_pipeline → CDRExtractor
+- create_cdr_file_pipeline → CDRTransformer
+- create_cdr_file_pipeline → JSONLoader
+- ... and 1 more
+
+**extends:**
+- CustomQueryPipeline → SalesforcePipeline
+- CSVLoader → BaseLoader
+- JSONLoader → BaseLoader
+- PostgreSQLLoader → BaseLoader
+- CDRFilePipeline → BasePipeline
+
+**Source Code**
+
+> The code below is the **verbatim, current on-disk source** of these files — re-read from disk on this call and line-numbered, byte-for-byte identical to what the Read tool returns. It is NOT a summary, outline, or stale cache. Treat each block as a Read you have already performed: do not Read a file shown here.
+
+**`dags/recordings__nextbilling__api_to_stg__audio.py`** — xcom_pull(calls), load(calls), extract_recording_id(calls), get_conn(calls), cursor(calls), execute(calls), close(calls), enrich_with_salesforce_data_task(function), calls(calls), download_and_upload_task(function), +4 more
+
+```python
+373	        raise
+374	
+375	
+376	def enrich_with_salesforce_data_task(**context):
+377	    """
+378	    Task de Enriquecimento
+379	    Faz join com dados do Salesforce para obter IDs necessários
+380	    """
+381	    try:
+382	        ti = context['ti']
+383	        extraction_result = ti.xcom_pull(task_ids='extract_recordings')
+384	        
+385	        if not extraction_result or extraction_result['extracted_records'] == 0:
+386	            logging.info("No data to enrich")
+387	            raise AirflowSkipException("No data to enrich")
+388	        
+389	        # Carregar dados extraídos
+390	        temp_file_path = extraction_result['temp_file']
+391	        with open(temp_file_path, 'r', encoding='utf-8') as f:
+392	            raw_recordings = json.load(f)
+393	        
+394	        # DEBUG: Log primeiro registro para ver estrutura
+395	        if raw_recordings:
+396	            logging.info(f"🔍 Sample recording structure: {json.dumps(raw_recordings[0], indent=2, default=str)[:500]}")
+397	        
+398	        # Extrair IDs das gravações - usar função helper
+399	        recording_ids = []
+400	        for rec in raw_recordings:
+401	            rec_id = extract_recording_id(rec)
+402	            if rec_id:
+403	                recording_ids.append(rec_id)  # Agora é int, não str
+404	        
+405	        logging.info(f"📊 Found {len(recording_ids)} recording IDs from {len(raw_recordings)} records")
+406	        
+407	        if not recording_ids:
+408	            logging.warning("No valid recording IDs found")
+409	            logging.warning(f"🔍 Available keys in first record: {list(raw_recordings[0].keys()) if raw_recordings else 'No records'}")
+410	            os.unlink(temp_file_path)
+411	            raise AirflowSkipException("No valid recording IDs")
+412	        
+413	        logging.info(f"🔗 Enriching {len(recording_ids)} recordings with Salesforce data")
+414	        
+415	        # Buscar dados do Salesforce usando conexão direta (sem logging verboso)
+416	        postgres_hook = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
+417	        
+418	        # Query para fazer join com Salesforce
+419	        # migração DW: a fonte é a PRATA public.fct_salesforce__calls (plural), cujo
+420	        # de-para foi call_start_date->call_started_at, account_id->salesforce_account_id,
+421	        # costumer_id->client_id, lead_id->salesforce_lead_id e call_duration MANTIDA —
+422	        # não confundir com a OURO makershub.fct_salesforce__call (nomes diferentes).
+423	        sql = """
+424	        SELECT
+425	            fc.call_id,
+426	            fc.nextbilling_call_id,
+427	            fc.call_started_at,
+428	            fc.call_duration,
+429	            fc.salesforce_account_id,
+430	            fc.employee_id,
+431	            fc.owner_id,
+432	            fc.client_id as customer_id,
+433	            fc.salesforce_lead_id
+434	        FROM fct_salesforce__calls fc
+435	        WHERE fc.nextbilling_call_id = ANY(%s)
+436	            AND fc.is_deleted = FALSE
+437	            AND fc.call_duration >= 45
+438	        """
+439	        
+440	        # Executar query diretamente no cursor sem log verboso
+441	        conn = postgres_hook.get_conn()
+442	        cursor = conn.cursor()
+443	        cursor.execute(sql, (recording_ids,))
+444	        salesforce_records = cursor.fetchall()
+445	        cursor.close()
+446	        
+447	        logging.info(f"📊 Found {len(salesforce_records)} matching Salesforce records")
+448	        
+449	        # Criar mapping nextbilling_id -> salesforce_data
+450	        salesforce_map = {}
+451	        for record in salesforce_records:
+452	            nextbilling_id = record[1]  # Já é int do banco
+453	            salesforce_map[nextbilling_id] = {
+454	                'call_id': record[0],
+455	                'nextbilling_call_id': record[1],
+456	                'call_start_date': record[2].isoformat() if record[2] else None,
+457	                'call_duration_seconds': record[3],
+458	                'account_id': record[4],
+459	                'employee_id': record[5],
+460	                'owner_id': record[6],
+461	                'customer_id': record[7],
+462	                'lead_id': record[8]
+463	            }
+464	        
+465	        # Enriquecer recordings com dados do Salesforce
+466	        enriched_recordings = []
+467	        skipped_no_match = 0
+468	        skipped_missing_fields = 0
+469	        
+470	        for recording in raw_recordings:
+471	            recording_id = extract_recording_id(recording)  # int
+472	            
+473	            if not recording_id or recording_id not in salesforce_map:
+474	                skipped_no_match += 1
+475	                continue
+476	            
+477	            sf_data = salesforce_map[recording_id]
+478	            
+479	            # Validar campos obrigatórios baseado no tipo de call
+480	            if sf_data['lead_id']:
+481	                # Lead call - precisa de employee_id, owner_id, lead_id
+482	                if not all([sf_data['employee_id'], sf_data['owner_id'], sf_data['lead_id']]):
+483	                    skipped_missing_fields += 1
+484	                    continue
+485	            else:
+486	                # Customer call - precisa de account_id, employee_id, owner_id
+487	                if not all([sf_data['account_id'], sf_data['employee_id'], sf_data['owner_id']]):
+488	                    skipped_missing_fields += 1
+489	                    continue
+490	            
+491	            # Merge recording data com Salesforce data
+492	            enriched_record = {
+493	                **recording,  # Dados da API (record_id, download_url, duration, etc)
+494	                **sf_data,    # Dados do Salesforce
+495	                '_recording_id': recording_id  # Garantir que o ID está disponível como int
+496	            }
+497	            
+498	            enriched_recordings.append(enriched_record)
+499	        
+500	        logging.info(f"✅ Enriched {len(enriched_recordings)} recordings")
+501	        logging.info(f"⚠️  Skipped {skipped_no_match} (no Salesforce match)")
+502	        logging.info(f"⚠️  Skipped {skipped_missing_fields} (missing required fields)")
+503	        
+504	        if not enriched_recordings:
+505	            logging.info("No valid enriched recordings to process")
+506	            os.unlink(temp_file_path)
+507	            raise AirflowSkipException("No valid enriched recordings")
+508	        
+509	        # Salvar dados enriquecidos
+510	        enriched_temp_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='_enriched.json')
+511	        json.dump(enriched_recordings, enriched_temp_file, default=str, ensure_ascii=False)
+512	        enriched_temp_file.close()
+513	        
+514	        # Limpar arquivo original
+515	        os.unlink(temp_file_path)
+516	        
+517	        return {
+518	            'enriched_records': len(enriched_recordings),
+519	            'temp_file': enriched_temp_file.name,
+520	            'skipped_no_match': skipped_no_match,
+521	            'skipped_missing_fields': skipped_missing_fields
+522	        }
+523	        
+524	    except Exception as e:
+525	        logging.error(f"❌ Enrichment failed: {e}")
+526	        raise
+527	
+528	
+529	def download_and_upload_task(**context):
+530	    """
+531	    Task de Download e Upload
+532	    Baixa áudios da API e faz upload para MinIO
+533	    """
+534	    try:
+535	        ti = context['ti']
+536	        enrichment_result = ti.xcom_pull(task_ids='enrich_with_salesforce_data')
+537	        
+538	        if not enrichment_result or enrichment_result['enriched_records'] == 0:
+539	            logging.info("No data to download")
+540	            raise AirflowSkipException("No data to download")
+541	        
+542	        # Carregar dados enriquecidos
+543	        temp_file_path = enrichment_result['temp_file']
+544	        with open(temp_file_path, 'r', encoding='utf-8') as f:
+545	            enriched_recordings = json.load(f)
+546	        
+547	        # Setup MinIO
+548	        minio_client = create_minio_client()
+549	        bucket_name = Variable.get("minio_bucket")
+550	        
+551	        # Ensure bucket exists
+552	        if not minio_client.bucket_exists(bucket_name):
+553	            minio_client.make_bucket(bucket_name)
+554	            logging.info(f"Created bucket: {bucket_name}")
+555	        
+556	        # Setup API credentials para construir URLs
+557	        base_url = Variable.get('NEXTBILLING_BASE_URL', 'https://sip.qualivox.net.br')
+558	        api_token = Variable.get('qualivox_api_token')
+559	        api_key = Variable.get('qualivox_api_key')
+560	        
+561	        # Setup requests session
+562	        verify_ssl = Variable.get("qualivox_verify_ssl", default="false").lower() == "true"
+563	        if not verify_ssl:
+564	            logging.warning("⚠️  SSL verification disabled")
+565	            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+566	        
+567	        # Tracking
+568	        successful = 0
+569	        failed = 0
+570	        skipped_existing = 0
+571	        uploaded_metadata = []
+572	        
+573	        for record in enriched_recordings:
+574	            try:
+575	                # Tentar extrair recording_id (pode estar em _recording_id ou em algum campo da API)
+576	                recording_id = record.get('_recording_id') or extract_recording_id(record)
+577	                
+578	                if not recording_id:
+579	                    logging.warning(f"No ID found in record with keys: {list(record.keys())}")
+580	                    failed += 1
+581	                    continue
+582	                
+583	                call_id = record['call_id']
+584	                call_start_date_str = record['call_start_date']
+585	                call_duration_seconds = record['call_duration_seconds']
+586	                account_id = record['account_id']
+587	                employee_id = record['employee_id']
+588	                owner_id = record['owner_id']
+589	                customer_id = record['customer_id']
+590	                lead_id = record['lead_id']
+591	                
+592	                # Construir URL de download manualmente com credenciais reais
+593	                # A API retorna download_url com placeholders, não podemos usar
+594	                recording_url = f"{base_url}/api/recording/{api_token}/{api_key}/?id_record={recording_id}&is_download=1"
+595	                
+596	                if not recording_url:
+597	                    logging.warning(f"No URL for recording_id {recording_id}")
+598	                    failed += 1
+599	                    continue
+600	                
+601	                # Parse call_start_date para criar estrutura de pastas
+602	                if call_start_date_str:
+603	                    call_start_date = datetime.fromisoformat(call_start_date_str.replace('Z', '+00:00'))
+604	                    year = call_start_date.year
+605	                    month = str(call_start_date.month).zfill(2)
+606	                    day = str(call_start_date.day).zfill(2)
+607	                else:
+608	                    now = datetime.now()
+609	                    year = now.year
+610	                    month = str(now.month).zfill(2)
+611	                    day = str(now.day).zfill(2)
+612	                
+613	                # Build object key baseado no tipo de call
+614	                if lead_id:
+615	                    object_key = f"calls/qualivox-audio/year={year}/month={month}/day={day}/team={TEAM_NAME}/employee_id={employee_id}/owner_id={owner_id}/lead_id={lead_id}/record_id={recording_id}/audio.mp3"
+616	                else:
+617	                    base_path = f"calls/qualivox-audio/year={year}/month={month}/day={day}/team={TEAM_NAME}/employee_id={employee_id}/account_id={account_id}/owner_id={owner_id}"
+618	                    if customer_id:
+619	                        object_key = f"{base_path}/customer_id={customer_id}/record_id={recording_id}/audio.mp3"
+620	                    else:
+621	                        object_key = f"{base_path}/record_id={recording_id}/audio.mp3"
+622	                
+623	                # Check if file already exists
+624	                try:
+625	                    stat_info = minio_client.stat_object(bucket_name, object_key)
+626	                    
+627	                    # Adicionar metadata mesmo se arquivo já existe
+628	                    uploaded_metadata.append({
+629	                        'call_id': call_id,
+630	                        'nextbilling_call_id': recording_id,
+631	                        'call_start_date': call_start_date_str,
+632	                        'call_duration_seconds': call_duration_seconds,
+633	                        'account_id': account_id,
+634	                        'employee_id': employee_id,
+635	                        'owner_id': owner_id,
+636	                        'lead_id': lead_id,
+637	                        'customer_id': customer_id,
+638	                        'audio_file_path': object_key,
+639	                        'audio_file_size_bytes': stat_info.size
+640	                    })
+641	                    
+642	                    skipped_existing += 1
+643	                    continue
+644	                except S3Error as e:
+645	                    if e.code != 'NoSuchKey':
+646	                        raise e
+647	                
+648	                # Download áudio
+649	                logging.info(f"📥 Downloading recording_id: {recording_id}")
+650	                response = requests.get(recording_url, timeout=300, verify=verify_ssl)
+651	                response.raise_for_status()
+652	                
+653	                if len(response.content) == 0:
+654	                    logging.warning(f"Empty response for recording_id: {recording_id}")
+655	                    failed += 1
+656	                    continue
+657	                
+658	                # Upload para MinIO
+659	                file_data = BytesIO(response.content)
+660	                file_size = len(response.content)
+661	                
+662	                minio_client.put_object(
+663	                    bucket_name=bucket_name,
+664	                    object_name=object_key,
+665	                    data=file_data,
+666	                    length=file_size,
+667	                    content_type='audio/mpeg'
+668	                )
+669	                
+670	                logging.info(f"✅ Uploaded: {object_key}")
+671	                
+672	                # Guardar metadata para inserção no banco
+673	                uploaded_metadata.append({
+674	                    'call_id': call_id,
+675	                    'nextbilling_call_id': recording_id,
+676	                    'call_start_date': call_start_date_str,
+677	                    'call_duration_seconds': call_duration_seconds,
+678	                    'account_id': account_id,
+679	                    'employee_id': employee_id,
+680	                    'owner_id': owner_id,
+681	                    'lead_id': lead_id,
+682	                    'customer_id': customer_id,
+683	                    'audio_file_path': object_key,
+684	                    'audio_file_size_bytes': file_size
+685	                })
+686	                
+687	                successful += 1
+688	                
+689	            except Exception as e:
+690	                logging.error(f"❌ Error processing recording_id {recording_id}: {e}")
+691	                raise AirflowException(f"Failed to process recording_id {recording_id}: {e}")
+692	        
+693	        logging.info(f"📊 Download complete: {successful} new, {skipped_existing} existing")
+694	        
+695	        # Salvar metadata para próxima task
+696	        metadata_temp_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='_metadata.json')
+697	        json.dump(uploaded_metadata, metadata_temp_file, default=str, ensure_ascii=False)
+698	        metadata_temp_file.close()
+699	        
+700	        # Limpar arquivo de dados enriquecidos
+701	        os.unlink(temp_file_path)
+702	        
+703	        return {
+704	            'successful_downloads': successful,
+705	            'skipped_existing': skipped_existing,
+706	            'failed_downloads': failed,
+707	            'metadata_file': metadata_temp_file.name
+708	        }
+709	        
+710	    except Exception as e:
+711	        logging.error(f"❌ Download failed: {e}")
+712	        raise
+713	
+714	
+715	def load_metadata_task(**context):
+716	    """
+717	    Task de Load
+718	    Insere/atualiza metadata no banco de dados
+719	    """
+720	    try:
+721	        ti = context['ti']
+722	        download_result = ti.xcom_pull(task_ids='download_and_upload')
+723	        
+724	        if not download_result:
+725	            logging.info("No metadata to load")
+726	            return {'loaded_records': 0}
+727	        
+728	        # Carregar metadata
+729	        metadata_file_path = download_result['metadata_file']
+730	        with open(metadata_file_path, 'r', encoding='utf-8') as f:
+731	            metadata_records = json.load(f)
+732	        
+733	        if not metadata_records:
+734	            logging.info("No metadata records to load")
+735	            os.unlink(metadata_file_path)
+736	            return {'loaded_records': 0}
+737	        
+738	        # Setup database
+739	        postgres_hook = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
+740	        
+741	        insert_sql = """
+742	        INSERT INTO public.fct_minio__call (
+743	            call_id,
+744	            nextbilling_call_id,
+745	            call_started_at,
+746	            call_duration_seconds,
+747	            account_id,
+748	            employee_id,
+749	            owner_id,
+750	            salesforce_lead_id,
+751	            client_id,
+752	            audio_file_path,
+753	            audio_file_size_bytes,
+754	            is_deleted,
+755	            created_at,
+756	            updated_at
+757	        ) VALUES (
+758	            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+759	        )
+760	        ON CONFLICT (nextbilling_call_id) 
+761	        DO UPDATE SET
+762	            call_id = EXCLUDED.call_id,
+763	            call_started_at = EXCLUDED.call_started_at,
+764	            call_duration_seconds = EXCLUDED.call_duration_seconds,
+765	            account_id = EXCLUDED.account_id,
+766	            employee_id = EXCLUDED.employee_id,
+767	            owner_id = EXCLUDED.owner_id,
+768	            salesforce_lead_id = EXCLUDED.salesforce_lead_id,
+769	            client_id = EXCLUDED.client_id,
+770	            audio_file_path = EXCLUDED.audio_file_path,
+771	            audio_file_size_bytes = EXCLUDED.audio_file_size_bytes,
+772	            is_deleted = EXCLUDED.is_deleted,
+773	            updated_at = CURRENT_TIMESTAMP
+774	        """
+775	        
+776	        # Inserir em batch
+777	        conn = postgres_hook.get_conn()
+778	        cursor = conn.cursor()
+779	        
+780	        loaded_count = 0
+781	        for record in metadata_records:
+782	            try:
+783	                call_start_dt = datetime.fromisoformat(record['call_start_date'].replace('Z', '+00:00'))
+784	                
+785	                params = (
+786	                    record['call_id'],
+787	                    record['nextbilling_call_id'],
+788	                    call_start_dt,
+789	                    record['call_duration_seconds'],
+790	                    record['account_id'],
+791	                    record['employee_id'],
+792	                    record['owner_id'],
+793	                    record['lead_id'],
+794	                    record['customer_id'],
+795	                    record['audio_file_path'],
+796	                    record['audio_file_size_bytes'],
+797	                    False  # is_deleted
+798	                )
+799	                
+800	                cursor.execute(insert_sql, params)
+801	                loaded_count += 1
+802	                
+803	            except Exception as e:
+804	                logging.error(f"Failed to insert metadata for nextbilling_call_id={record['nextbilling_call_id']}: {e}")
+805	        
+806	        conn.commit()
+807	        cursor.close()
+808	        
+809	        logging.info(f"✅ Loaded {loaded_count} metadata records to database")
+810	        
+811	        # Limpar arquivo temporário
+812	        os.unlink(metadata_file_path)
+813	        
+814	        return {'loaded_records': loaded_count}
+815	        
+816	    except Exception as e:
+817	        logging.error(f"❌ Load failed: {e}")
+818	        raise
+819	
+820	
+821	# ============================================================================
+```
+
+
+... (output truncated to budget; the source above is complete and verbatim — treat it as already Read. For any area not covered, run another codegraph_explore with the specific names — do NOT Read these files.)

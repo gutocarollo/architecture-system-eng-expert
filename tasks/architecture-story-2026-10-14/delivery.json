@@ -1,0 +1,23 @@
+{
+  "created_issue": "FBI-4991",
+  "url": "https://fazcapital.atlassian.net/browse/FBI-4991",
+  "read_at": "2026-10-14 23:29:25 UTC",
+  "verification": "getJiraIssue response raw JSON; exact ADF comparison and controlled-field value comparison",
+  "fields_compared": 17,
+  "all_fields_match": true,
+  "status": "To Do",
+  "catalog_validation": "blocked",
+  "description_field": "customfield_10054",
+  "system_description": null,
+  "body_adf_sha256": "bb854d56406ffab12f926bdbd6e3d89d6947bf9992428a03beada0955dd474a3",
+  "review": "Independent Sol6.1xhigh review found2materialfidelityissues; both corrected and warmrecheck PASS at23:28UTC.",
+  "gate": "Exact final MCP input returned allow; initial negated-removal prose triggered textualgate and was clarified without changing scope.",
+  "raw_adf_artifact": "jira-readback-adf.json",
+  "initial_projection_artifact": "jira-readback.json stores initial Markdown projection comparison; superseded by rawADFreceipt.",
+  "search": "search/live-header-recheck.json and search/receipt.json",
+  "limits": [
+    "Catalog repository/asset unresolved",
+    "All-commit causal investigation not demonstrated",
+    "No external documentation publication performed"
+  ]
+}

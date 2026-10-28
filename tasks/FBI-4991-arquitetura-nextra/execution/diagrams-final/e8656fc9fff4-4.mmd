@@ -1,0 +1,11 @@
+sequenceDiagram
+    participant Reader as Leitor
+    participant MV as Materialized view proposta
+    participant Refresh as Atualizador
+    Reader->>MV: Consulta versão já disponível
+    Refresh->>MV: REFRESH CONCURRENTLY com pré-condições válidas
+    alt Atualização concluída
+        MV-->>Reader: Consultas posteriores usam resultado renovado
+    else Falha no refresh
+        Note over Reader,MV: A leitura pode continuar antiga, e o frescor precisa ser observado
+    end

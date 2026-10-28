@@ -1,0 +1,22 @@
+{
+  "sql": "SELECT clock_timestamp() AT TIME ZONE 'UTC' AS measured_at_utc, count(*) AS row_count, count(DISTINCT movement_adjusted_sk) AS distinct_movement_keys, min(movement_date) AS first_movement_date, max(movement_date) AS latest_movement_date, count(*) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01') AS october_row_count, round(sum(brl_amount) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01'), 2) AS october_signed_brl_sum FROM public.rpt_inflow__movement_adjusted;",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"rows\": [\n    {\n      \"measured_at_utc\": \"2026-10-14 15:56:30.702110\",\n      \"row_count\": 557731,\n      \"distinct_movement_keys\": 557731,\n      \"first_movement_date\": \"2022-01-03\",\n      \"latest_movement_date\": \"2026-10-08\",\n      \"october_row_count\": 3380,\n      \"october_signed_brl_sum\": \"18742122.16\"\n    }\n  ],\n  \"row_count\": 1,\n  \"returned_row_count\": 1,\n  \"truncated\": false,\n  \"max_rows\": 1\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": [
+        {
+          "type": "text",
+          "text": "{\n  \"rows\": [\n    {\n      \"measured_at_utc\": \"2026-10-14 15:56:30.702110\",\n      \"row_count\": 557731,\n      \"distinct_movement_keys\": 557731,\n      \"first_movement_date\": \"2022-01-03\",\n      \"latest_movement_date\": \"2026-10-08\",\n      \"october_row_count\": 3380,\n      \"october_signed_brl_sum\": \"18742122.16\"\n    }\n  ],\n  \"row_count\": 1,\n  \"returned_row_count\": 1,\n  \"truncated\": false,\n  \"max_rows\": 1\n}",
+          "annotations": null,
+          "_meta": null
+        }
+      ]
+    },
+    "isError": false
+  }
+}

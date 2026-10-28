@@ -1,0 +1,10 @@
+{
+  "repo": "ContextMapper/context-mapper-cli",
+  "path": "LICENSE",
+  "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+  "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:22:39.503215+00:00",
+  "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--LICENSE"
+}

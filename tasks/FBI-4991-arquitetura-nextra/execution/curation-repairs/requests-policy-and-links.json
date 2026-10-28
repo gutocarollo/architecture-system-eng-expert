@@ -1,0 +1,27 @@
+[
+  {
+    "repo": "grafana/dskit",
+    "ref": "b6a53f6bee29",
+    "path": "ring/util.go"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/util/ring/ring.go"
+  },
+  {
+    "repo": "apache/superset",
+    "path": "superset/utils/cache.py"
+  },
+  {
+    "repo": "pallets-eco/flask-caching",
+    "path": "src/flask_caching/backends/rediscache.py"
+  },
+  {
+    "repo": "j-easy/easy-rules",
+    "path": "easy-rules-core/src/main/java/org/jeasy/rules/core/DefaultRulesEngine.java"
+  },
+  {
+    "repo": "j-easy/easy-rules",
+    "path": "easy-rules-core/src/main/java/org/jeasy/rules/core/BasicRule.java"
+  }
+]

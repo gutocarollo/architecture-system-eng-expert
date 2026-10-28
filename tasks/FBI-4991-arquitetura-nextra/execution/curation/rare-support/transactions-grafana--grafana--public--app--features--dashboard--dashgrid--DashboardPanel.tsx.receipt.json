@@ -1,0 +1,12 @@
+{
+  "repo": "grafana/grafana",
+  "path": "public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+  "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+  "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+  "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:54:10.860789+00:00",
+  "sha256": "e4a6596694f9ae9a0140b3609da2005bb6b2724006ed98a096ed56c75bc972d7",
+  "line_count": 126,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--features--dashboard--dashgrid--DashboardPanel.tsx"
+}

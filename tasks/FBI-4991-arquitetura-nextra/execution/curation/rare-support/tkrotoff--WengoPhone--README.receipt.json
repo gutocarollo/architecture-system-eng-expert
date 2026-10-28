@@ -1,0 +1,12 @@
+{
+  "repo": "tkrotoff/WengoPhone",
+  "path": "README",
+  "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+  "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/README",
+  "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/README",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.306692+00:00",
+  "sha256": "aaea9a86602321de27461dae35435a17b15a1f7a040ef4a0b7ed6ababa4281b6",
+  "line_count": 16,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--README"
+}

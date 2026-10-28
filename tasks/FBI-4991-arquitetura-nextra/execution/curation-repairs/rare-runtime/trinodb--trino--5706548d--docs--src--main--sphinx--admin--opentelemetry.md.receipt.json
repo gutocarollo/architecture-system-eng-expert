@@ -1,0 +1,12 @@
+{
+  "repo": "trinodb/trino",
+  "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+  "path": "docs/src/main/sphinx/admin/opentelemetry.md",
+  "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/docs/src/main/sphinx/admin/opentelemetry.md",
+  "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/docs/src/main/sphinx/admin/opentelemetry.md",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--5706548d--docs--src--main--sphinx--admin--opentelemetry.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:51:58.618038+00:00",
+  "sha256": "c91959e907c00c455a4610afc53234da4c5b705a869fc300d423e0a3e84fc395",
+  "line_count": 157
+}

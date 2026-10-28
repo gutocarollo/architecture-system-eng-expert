@@ -1,0 +1,34 @@
+[
+  {
+    "gate": "catalog",
+    "script": "/Users/augustocarollo/.agents/skills/jira-fbi/scripts/jira-fbi-gate.mjs",
+    "sha256": "243100a2c1627ea8488b8d67d4f631f86f40ebb05d024cccf2f77e998218be53",
+    "validated_at_utc": "2026-10-15T18:46:09.843703+00:00",
+    "input": "jira-update-preview.json",
+    "input_sha256": "8a10ace48be0e19503767073ea7f1dedfc6b20f1f2b6c20db34a854b2c0b3317",
+    "execution": "actual JSON preview supplied through stdin",
+    "exit_code": 0,
+    "output": {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "allow",
+        "permissionDecisionReason": "jira-fbi catalog-v4 gate passed"
+      }
+    },
+    "stderr": "",
+    "allowed": true
+  },
+  {
+    "gate": "adf",
+    "script": "/Users/augustocarollo/.agents/skills/jira-fbi/scripts/claude-hook-wrapper.cjs",
+    "sha256": "9124b9ac1b9ef58ec7d1fa4d76b86338764e97371d2a273b72bab2a9058bc9b9",
+    "validated_at_utc": "2026-10-15T18:46:09.897565+00:00",
+    "input": "jira-update-preview.json",
+    "input_sha256": "8a10ace48be0e19503767073ea7f1dedfc6b20f1f2b6c20db34a854b2c0b3317",
+    "execution": "actual JSON preview supplied through stdin",
+    "exit_code": 0,
+    "output": null,
+    "stderr": "",
+    "allowed": true
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "repo": "trinodb/trino",
+  "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+  "path": "core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java",
+  "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java",
+  "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--core--trino-main--src--main--java--io--trino--execution--SqlTaskManager.java",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:05.140652+00:00",
+  "sha256": "a8b539ad653c40e6262346422b317ccfae1e40771ecc847e4ee17df18d2a4ec8",
+  "line_count": 883
+}

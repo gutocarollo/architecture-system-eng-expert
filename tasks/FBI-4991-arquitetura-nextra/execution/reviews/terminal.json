@@ -1,0 +1,228 @@
+{
+  "observed_at_utc": "2026-10-15T18:13:29.021291+00:00",
+  "verdict": "PASS_FOR_PROTECTED_SITE_AND_DRAFT",
+  "adversarial_verification": "SATISFEITO",
+  "scope": "Frozen source623 and Sites1677; independently checked local password gate, downloadable source package and integration; hosted receipts reconciled. This is a draft/site gate, not full Story acceptance.",
+  "reviewer": {
+    "agent": "/root/terminal_delivery",
+    "native_type": "default",
+    "contract": "adversarial-review",
+    "model": "gpt-6.1-sol",
+    "effort": "xhigh",
+    "fork_turns": "none"
+  },
+  "checkouts": [
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+      "branch": "docs/FBI-4991-arquitetura-aplicada",
+      "head": "623ae1d3d34143df53c571327a508de47ab58951",
+      "tracked_changes": []
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/sites/architecture-course",
+      "branch": "main",
+      "head": "1677c81236d3588736e88597e9589d942b655a25",
+      "tracked_changes": []
+    }
+  ],
+  "source_worker_sha256": "3afee5efd34af4dbc9e8b6b50f031b6f6b09b325e4a1b9ee0b8e2010414cf825",
+  "high_findings": [],
+  "checks": {
+    "local_worker_groups": 13,
+    "active_mutations_killed": 2,
+    "real_headless_chrome": "PASS_LOCAL_FIXTURE",
+    "download_source_files": 98,
+    "download_runners": 16,
+    "download_without_git": "PASS",
+    "docs": 181,
+    "diagram_source_render_bindings": 94,
+    "diagrams_semantically_inspected": 3,
+    "journeys": 18,
+    "journey_destinations": 90,
+    "links_checked": 7894,
+    "invalid_local_links": 0,
+    "curation_concepts_bound_to_actual_judgments": 310,
+    "positive_guard_checks": 375,
+    "positive_guard_failures": 0
+  },
+  "private_hosted_evidence": {
+    "scope": "Read-back of root-captured hosted receipts; not an independent terminal network session. Native audience was private in these captures.",
+    "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+    "release_id": "d3ca4575af6e36ac80fa3974d6720a0195b89f701e59a04ab4e1465500c7a06c",
+    "anonymous_denied": 1397,
+    "authenticated_sha_matches_current_export": 1397,
+    "anonymous_after_warm_denied": 1397,
+    "raw_harness_verdict_preserved": "FAIL",
+    "diagnostic_http_errors": [
+      {
+        "path": "/favicon.ico",
+        "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/login",
+        "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/favicon.ico",
+        "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/favicon.ico",
+        "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/favicon.ico",
+        "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+        "method": "GET",
+        "status": 404
+      }
+    ],
+    "terminal_functional_assessment": "PASS; invalid-password401 and unauthenticatedfavicon401 are expected denials. The only authenticated404 is favicon.ico.",
+    "future_public_audience_qa_required": true
+  },
+  "backlog": [
+    {
+      "id": "B1",
+      "severity": "MEDIUM",
+      "verdict": "REAL",
+      "class": "UI",
+      "statement": "O export não contém favicon.ico e o navegador recebe404 após autenticar.",
+      "evidence": "hosting/private-network-diagnostic-verification.json:httpErrors; GET/favicon.ico404.",
+      "impact": "Falta o ícone da aba; leitura, busca e logout passaram.",
+      "fix": "Acrescentar um favicon no próximo ajuste visual autorizado."
+    },
+    {
+      "id": "B2",
+      "severity": "MEDIUM",
+      "verdict": "REAL",
+      "class": "MAINTENANCE",
+      "statement": "O empacotador não exclui node_modules depois do npm ci indicado nos tutoriais.",
+      "evidence": "hosting/build_lab_bundle.py:12-17 excludes .venv and __pycache__, not node_modules; terminal-download-runs.json source_sha256 contains installed TypeScript package files from the fresh extraction.",
+      "impact": "Uma futura regeneração após instalar o lock dos labs pode incluir dependências no pacote. O ZIP congelado atual foi verificado e contém98 arquivos de fonte.",
+      "fix": "Excluir node_modules e exigir o conjunto de arquivos de fonte na próxima manutenção do empacotador."
+    }
+  ],
+  "delivery_boundaries": {
+    "packet_status": "PARTIAL",
+    "story_required_status": "In Progress",
+    "history_classifications": {
+      "CAUSE_REPORTED_AND_CODE_SUPPORTED": 7,
+      "MISSING_CAUSE_EVIDENCE": 35,
+      "REPORTED_ONLY": 290,
+      "NOT_APPLICABLE_CHANGE": 263
+    },
+    "history_commits": 12697,
+    "fbi_issues": 595,
+    "catalog_gap_preserved": true,
+    "full_packet_critical_gaps": [
+      {
+        "id": "catalog-registration",
+        "kind": "authorization",
+        "critical": true,
+        "source_id": "project",
+        "description": "The exact repository and asset remain outside the approved catalog contract; the concrete proposal is preserved without bypassing validation."
+      },
+      {
+        "id": "history-causal-proof",
+        "kind": "source",
+        "critical": true,
+        "source_id": "project",
+        "description": "Individual classification is complete for 595 FBI issues, with 35 explicitly missing causal evidence and 290 reported-only classifications. Full causal confirmation is not established by patch indexing or source triage."
+      },
+      {
+        "id": "independent-final-review",
+        "kind": "review",
+        "critical": true,
+        "source_id": "project",
+        "description": "The current packet and diagrams require actual independent receipts; earlier-cycle receipts were not transplanted."
+      },
+      {
+        "id": "production-boundary",
+        "kind": "scope",
+        "critical": false,
+        "source_id": "project",
+        "description": "Local experiments and read-only source inspection do not establish deployment or end-to-end production execution."
+      }
+    ],
+    "per_document_reviews_in_packet": 0,
+    "all94_semantic_review_claimed": false,
+    "merge_or_production_deployment_claimed": false,
+    "public_availability_proven_by_terminal": false
+  },
+  "official_contracts": {
+    "context7": "Attempted; monthly quota reached.",
+    "fallbacks": [
+      "https://hono.dev/docs/helpers/cookie",
+      "https://developers.cloudflare.com/workers/runtime-apis/streams/transformstream/",
+      "https://developers.cloudflare.com/r2/api/workers/workers-api-reference/"
+    ],
+    "installed_versions": {
+      "hono": "4.13.13",
+      "esbuild": "0.28.2"
+    },
+    "comparison": "Signed host cookie API matches installed Hono implementation; fixed-length stream and R2 sha256 behavior match primary Cloudflare contract. Local stream double is explicitly not live R2."
+  },
+  "evidence": [
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-worker.json",
+      "sha256": "82ee65b6dd3c1570cb350259d651907acbd493613071e59e40ae1c81658fad5c"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-download.json",
+      "sha256": "b4de4886c0d45caa7651079ff5b36396f1691f944e4c2e28cc095ab3193512a3"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-integrity.json",
+      "sha256": "398a0107860903d856768b35558526b097163b18ff80c5f28af87f58526f1feb"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-curation-guard.json",
+      "sha256": "5d2d6e88a9ca3a9991258017fae299f804cf07ac99ad87c24931b1b439035aad"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-curation-validation.json",
+      "sha256": "82c98a37a5c956c7c07ac35ffac5a375b184474b35acf364b15e93666ac810c2"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-history.json",
+      "sha256": "d06c1ea01a2c00c73876b5571bb8aad6443cc279f80240e83dfe349d5862dce3"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-course.json",
+      "sha256": "43567c853ece7054c5d3a21a095bee0506a5b91fdcbcf09cd61ddbb80cb2ee32"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-diagrams.json",
+      "sha256": "bcaa5185ee3a482b5caa96a7280427f35245bdb2c783c96d80ac27a957111e5e"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/private-fixed-verification.json",
+      "sha256": "57d37c58ab395ec44cb747eefa48120cd565955f2f6beb05ceaee208ad8d70bf"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/private-network-diagnostic-verification.json",
+      "sha256": "caa192fb8b321e067a44f46703e68cd21155696757ea06c960fa3045c21325da"
+    }
+  ],
+  "scope_limitations": [
+    "No standalone original request anchor or harness topology scanner exists in this checkout; inline mandate and execution/profile bounded_anchor govern this cold pass.",
+    "Prior teaching and root-owned-case judgments were reconciled by exact source hashes; only the optional Git metadata and fifteen prerequisite sentences changed.",
+    "Original automated course checker ran from a terminal copy with only repository-root and report-output path adaptation; verification logic unchanged. It returns REVIEW_REQUIRED and zero structural errors.",
+    "Per-document council receipts were not fabricated from hashes. Three diagram correspondences are explicitly bounded and do not close the entire packet."
+  ],
+  "next_action": "Root may proceed with approved protected-site publication and public anonymous/browser QA, preserving raw FAIL receipts, the declared backlog, PARTIAL packet and In Progress Story.",
+  "final_readback_at_utc": "2026-10-15T18:14:41.422491+00:00",
+  "final_source_heads": {
+    "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991": "623ae1d3d34143df53c571327a508de47ab58951",
+    "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/sites/architecture-course": "1677c81236d3588736e88597e9589d942b655a25"
+  },
+  "markdown_sha256": "971e69669affd44e07387bde4e4351066278f4a86674a3e2486b1043c547b102"
+}

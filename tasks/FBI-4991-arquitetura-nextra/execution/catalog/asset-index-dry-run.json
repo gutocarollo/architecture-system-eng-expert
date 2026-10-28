@@ -1,0 +1,10 @@
+{
+  "mode": "existing-index-renderer-candidate-only",
+  "candidate_entity_count": 1,
+  "output_paths": [
+    "source-preview/docs/canonical/INDEX.md",
+    "source-preview/docs/canonical/_index/entity-document-map.csv",
+    "source-preview/docs/canonical/_index/section-map.csv"
+  ],
+  "global_index_writes": false
+}

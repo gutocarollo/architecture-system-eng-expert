@@ -1,0 +1,12 @@
+{
+  "repo": "rails/rails",
+  "path": "activerecord/lib/active_record/transactions.rb",
+  "revision": "c3466ea00d7121798e3aa3144ffdf7174b81d8cb",
+  "url": "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/activerecord/lib/active_record/transactions.rb",
+  "raw_url": "https://raw.githubusercontent.com/rails/rails/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/activerecord/lib/active_record/transactions.rb",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:58:29.429348+00:00",
+  "sha256": "76070ab7f89e50de330b48a9a0dd6bd5cac9076842a8177f7e2595aa11110a6d",
+  "line_count": 549,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-rails--rails--activerecord--lib--active_record--transactions.rb"
+}

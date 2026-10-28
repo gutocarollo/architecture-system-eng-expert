@@ -1,0 +1,1144 @@
+{
+  "observed_utc": "2026-10-15T03:40:07.996509+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "expected_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "assigned": 127,
+  "finished_judgments": 127,
+  "unreviewed": 0,
+  "covered_by_lane1": 0,
+  "source_captures_checked": 223,
+  "source_hash_errors": [],
+  "missing_implementation_captures": [
+    {
+      "concept_id": "database-decomposition",
+      "role": "base",
+      "url": "https://github.com/rails/rails/tree/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord"
+    },
+    {
+      "concept_id": "expand-contract",
+      "role": "base",
+      "url": "https://github.com/rails/rails/tree/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord"
+    }
+  ],
+  "captures": {
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/afd7ff33e6396168a6d54dc413f61ddf5a4fb0a183074b815ea21fd5675bc077.txt": {
+      "sha256": "35fa524ca87ad7156946ba46c26dd2627c35523bfb096fee6dbb6345737f3501",
+      "expected_sha256": "35fa524ca87ad7156946ba46c26dd2627c35523bfb096fee6dbb6345737f3501",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ed76e62545794d9f1cae850fa30fe3834e5421dd8cb45ca025bde3318d5c7834.txt": {
+      "sha256": "3478c93b9140e23a7cbffc996092ed4b67b83213c2583953841d70bec67202fd",
+      "expected_sha256": "3478c93b9140e23a7cbffc996092ed4b67b83213c2583953841d70bec67202fd",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/45e4140f5e619fec5f1024e8dd60d85c84393d0916df6c6b91d4eb11a78ce8db.txt": {
+      "sha256": "a1787b39090b4e02f614028e43558290f515495078a471e620e72a4713bfd99b",
+      "expected_sha256": "a1787b39090b4e02f614028e43558290f515495078a471e620e72a4713bfd99b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b914181d46b70fb077c1153ca6679158f83a451fabc7ed4ebd94970150430a78.txt": {
+      "sha256": "b0dad5a62a2f21b6ec83d58092e272b00ba296c29b937b8f8cd7d205b009fb37",
+      "expected_sha256": "b0dad5a62a2f21b6ec83d58092e272b00ba296c29b937b8f8cd7d205b009fb37",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/340a68e33eefa74b1743df3b2a52e10873ea6918a306cc5159ee5c5a123c30e1.txt": {
+      "sha256": "a6ed8ed56456b01ff8314c44eefc69897d9905ae4e06bb2b7036286efb79b5f0",
+      "expected_sha256": "a6ed8ed56456b01ff8314c44eefc69897d9905ae4e06bb2b7036286efb79b5f0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/941c151f4468ccc236aab41b52ec0b058c212d366ece63b0c9d4e852f53d030e.txt": {
+      "sha256": "f204e5a42cc61a32c8da2b782a1e39f95b972e1adc63e3375ef0dfa1a5eaf6f7",
+      "expected_sha256": "f204e5a42cc61a32c8da2b782a1e39f95b972e1adc63e3375ef0dfa1a5eaf6f7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2d667ddbe134adcf3b3cde3fb5ed4e46550a9186673747b21c12c0d41fa77302.txt": {
+      "sha256": "5baebbc842996ce3b08553051f684966d8f179d3b6996a0d8d3fea723bb54d08",
+      "expected_sha256": "5baebbc842996ce3b08553051f684966d8f179d3b6996a0d8d3fea723bb54d08",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/902383e26242f569dba1bca46620a00bbb1ba74e75ee1dcb0006ae45a2ce408e.txt": {
+      "sha256": "071f8a500ff8064f6152ef1412ddad748caeaaf510356d5601769671f90b9ace",
+      "expected_sha256": "071f8a500ff8064f6152ef1412ddad748caeaaf510356d5601769671f90b9ace",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e6260845d6ac3c11355e585a4479a9753fd399dfb2e173a9c27828bf594f699c.txt": {
+      "sha256": "2e3fc60eed5aba97fe416f3f3c9317fdb014a682925ec70a733c3ff99e4b9858",
+      "expected_sha256": "2e3fc60eed5aba97fe416f3f3c9317fdb014a682925ec70a733c3ff99e4b9858",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b0b4dc51f3eacf2f55ca715a603973e472193862d5920b487581013b65553d37.txt": {
+      "sha256": "543796c186a8f9b2d92701975ac81b4c37ba84c2a1005cf32d33a84187a7aa4b",
+      "expected_sha256": "543796c186a8f9b2d92701975ac81b4c37ba84c2a1005cf32d33a84187a7aa4b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/3abd57e46c35f096280ce81d02a270ba408a4a08ea273de2e12c6e26e123c8d9.txt": {
+      "sha256": "3cd011eacf24df63c99995b8ac74b1b7f5c5a44a5d969d11f3b06e24c35a1405",
+      "expected_sha256": "3cd011eacf24df63c99995b8ac74b1b7f5c5a44a5d969d11f3b06e24c35a1405",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/3fb86f58f6fed40cc71e1ca9c4185c1cc9d65e5e166a3ca45a2ce95865ec355b.txt": {
+      "sha256": "c8565476a1034a829d8763a0bedf5e5cb7d23308f6741e21f450b6db772a1de7",
+      "expected_sha256": "c8565476a1034a829d8763a0bedf5e5cb7d23308f6741e21f450b6db772a1de7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/923330878a8c251b9fe6dfd7730e4cba8dd9b7c3e56ed815f619afe89ffc413b.txt": {
+      "sha256": "42c99b3bc55a56a65cd3f16aa24ea50672ce0fa4893eb0f34bba0cdb8a0e3319",
+      "expected_sha256": "42c99b3bc55a56a65cd3f16aa24ea50672ce0fa4893eb0f34bba0cdb8a0e3319",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b5e2b47e2907f242d26c41dd2d2910b9d751931433e5a54b90d623a3ae1e5999.txt": {
+      "sha256": "20a6006986be880e383b76ecc6c9a1c8d5b021fdc54e85fb5b1f0df88f710f41",
+      "expected_sha256": "20a6006986be880e383b76ecc6c9a1c8d5b021fdc54e85fb5b1f0df88f710f41",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c900a97bf70eb484482733d6eaab4ad6367974dab3095c2313c6bf28ef03efa8.txt": {
+      "sha256": "0f7b4ace5fc0ec1488f6a9e3db996d1f886ebf9249a8163fbcb22447da7bff97",
+      "expected_sha256": "0f7b4ace5fc0ec1488f6a9e3db996d1f886ebf9249a8163fbcb22447da7bff97",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b703d1eb11cd1e43dd0649259318976a3a48919dbb5c09f7ed7665de407b04e9.txt": {
+      "sha256": "e83d34f52ff12dd8a7c5134cd7e8140ea4541ec65e204f8a1e4cd366e30c4192",
+      "expected_sha256": "e83d34f52ff12dd8a7c5134cd7e8140ea4541ec65e204f8a1e4cd366e30c4192",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/72370b931582bce0ac56216acc04e0f5ebf63063cf9112ab8fc7ed9c717606ec.txt": {
+      "sha256": "03426c88bdf0968fd2bdbd3b1d4296bc3a71adc2a7cca7ce2f78ff6ddb57265f",
+      "expected_sha256": "03426c88bdf0968fd2bdbd3b1d4296bc3a71adc2a7cca7ce2f78ff6ddb57265f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt": {
+      "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+      "expected_sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/607ea36cc9e148edd06d6abbeb5de1525b5b86c9bff32cee826a30546453d093.txt": {
+      "sha256": "350caf22b856b7d2908a10a69a8cc13e743c757ba9838716051b4e29fc1d7595",
+      "expected_sha256": "350caf22b856b7d2908a10a69a8cc13e743c757ba9838716051b4e29fc1d7595",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e0b55ed129a8b7741d30aeed6cdd18906a66e0b3e65eed6e91ca6edbe40824a9.txt": {
+      "sha256": "3e23f957dcce2c5c3d87303a97be5dd0d0dd4d7b42c08e7961bb58116a856d2b",
+      "expected_sha256": "3e23f957dcce2c5c3d87303a97be5dd0d0dd4d7b42c08e7961bb58116a856d2b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/6d9d38f65ef29e10584d9485b2dce24d002f9fb07a7bbf17ebf0a4b82514a8dc.txt": {
+      "sha256": "6ac851e93fcb82bb937401c710c05a5a0bb15311ceb5568d45ae2ff9d6ca6289",
+      "expected_sha256": "6ac851e93fcb82bb937401c710c05a5a0bb15311ceb5568d45ae2ff9d6ca6289",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/32a28f16bbde6f2227a544a7cb2249e2e91ef2e297d1bf9c4afb5ebb897a9071.txt": {
+      "sha256": "97ee8b6a86a3f17f89220da897ab746b96665d908163f45653d24b5c090466cf",
+      "expected_sha256": "97ee8b6a86a3f17f89220da897ab746b96665d908163f45653d24b5c090466cf",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/41d79bacd861bb0ff54db963bfbf662f90d26af4fb685086daf07068108c156a.txt": {
+      "sha256": "1e5cf5bb0cdf68b8bed58f61248193555817efb06af320cdf7d2b1b35a0b8a20",
+      "expected_sha256": "1e5cf5bb0cdf68b8bed58f61248193555817efb06af320cdf7d2b1b35a0b8a20",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5a78a514a0335760bbd0c9423468cb60f8342eb188069b8a099d44d700ee24b8.txt": {
+      "sha256": "5e533203f37ac15156d075c8565898c083111ae7a79947f5263d4e56307b138e",
+      "expected_sha256": "5e533203f37ac15156d075c8565898c083111ae7a79947f5263d4e56307b138e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d5938e68942333ed446f0b0aebbe304ddf91da29b904f8db3571e3880e3b2140.txt": {
+      "sha256": "d05c7843c95deff50bcc76ab0e3acad501009f4e01062e06eacedc4e53beaa6e",
+      "expected_sha256": "d05c7843c95deff50bcc76ab0e3acad501009f4e01062e06eacedc4e53beaa6e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/056a660fec5416500cc25307235437203dfcc3aeeb4a413a455e429ef7a59c02.txt": {
+      "sha256": "4f1ace913968533d5e0d088e2424b450a5f1cbc7c188eb388ccd76b9e3879c75",
+      "expected_sha256": "4f1ace913968533d5e0d088e2424b450a5f1cbc7c188eb388ccd76b9e3879c75",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4b674e6c63c81502b6252e9d620a43fd7c464c86246d14fa7596865d0fab3f91.txt": {
+      "sha256": "f97ad54990f8aca18671e4b5bfcb5010b365a26de03b42e38fde449b642dab0c",
+      "expected_sha256": "f97ad54990f8aca18671e4b5bfcb5010b365a26de03b42e38fde449b642dab0c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7d682c10c8156e7373b7c3da1c1b7af460268dcf7e5ccf29eb4f453bd0fc0fb9.txt": {
+      "sha256": "c932d0fb85d4ed23b82635a702f7513a1957fa8da0d72e47ef208850498372d6",
+      "expected_sha256": "c932d0fb85d4ed23b82635a702f7513a1957fa8da0d72e47ef208850498372d6",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5d40eaf6f56d54c28632344898b2b12da3ef41af80064310b0ebdd4287706546.txt": {
+      "sha256": "9ef886842b35c68099d38ada11e01f030b4dc45ec610f6cb39dbfd28434e7951",
+      "expected_sha256": "9ef886842b35c68099d38ada11e01f030b4dc45ec610f6cb39dbfd28434e7951",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/0a8bf15440d8c7f86644b475522ba93aa6617a89c8f5100154bc5a68915a436a.txt": {
+      "sha256": "3cbea3eb74cada6632eeeb42e23c6a63be00dfde644dc670c673f38f735d14ca",
+      "expected_sha256": "3cbea3eb74cada6632eeeb42e23c6a63be00dfde644dc670c673f38f735d14ca",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/1a8f04fc05a00602504887fa4cf0cdd7619d8aa06a6d683a64e0c6881f07f2a6.txt": {
+      "sha256": "bf0e584bd287d503936796c16527dddad332515c5e7b00da57c9a5b31ce7bbb7",
+      "expected_sha256": "bf0e584bd287d503936796c16527dddad332515c5e7b00da57c9a5b31ce7bbb7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/88e2f9ec78c4f7869319b7a8139718a8b5da43415c768f744e8ad471f72f2a6a.txt": {
+      "sha256": "659446f7f86dd0fbd3b6df74eec06d554e6112dc3be652cb330dc8f6a753aa44",
+      "expected_sha256": "659446f7f86dd0fbd3b6df74eec06d554e6112dc3be652cb330dc8f6a753aa44",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b232ad5e8cb1e0d10655794727a8bbb0c6ab721c62449a0698d229db7b8a30bb.txt": {
+      "sha256": "08cb578cbac5024c9337d5f89511e4cf5bbace622facec20c67a827604dce293",
+      "expected_sha256": "08cb578cbac5024c9337d5f89511e4cf5bbace622facec20c67a827604dce293",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/df09abde4fd3326de67dbeba1b3ec84588630a8e42d6e9b30b662c035ca51419.txt": {
+      "sha256": "ab71d45c1d4ad29388b089b78357486b494d5c39f0493fc01dc64c69b6e112ee",
+      "expected_sha256": "ab71d45c1d4ad29388b089b78357486b494d5c39f0493fc01dc64c69b6e112ee",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/6a4aad9b7c3b6d1827ad1ecac4079973da758a29f67d29449dcb635b0b735941.txt": {
+      "sha256": "135f860b0de9805429d8ce6e776f049b632aae20e41d7e9fca444926024fc951",
+      "expected_sha256": "135f860b0de9805429d8ce6e776f049b632aae20e41d7e9fca444926024fc951",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2da020d79592a00e4cacba9874d62af2c7041fdd7f14f66da472485f647ceae3.txt": {
+      "sha256": "82b7663b198584852cdb8ec0c573cbacba6fa955fc1ffe68072b84b8d5d98f4d",
+      "expected_sha256": "82b7663b198584852cdb8ec0c573cbacba6fa955fc1ffe68072b84b8d5d98f4d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9bf5c4f49499666c4b9a899b2e280aac78671bdc9121ef96c77a7d1a6100ea32.txt": {
+      "sha256": "4c0cb00d3ba2987a77dd980baf177b2f5df382c19942eb1a05efb0a429f56cee",
+      "expected_sha256": "4c0cb00d3ba2987a77dd980baf177b2f5df382c19942eb1a05efb0a429f56cee",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a31aaa8f9ba13fa8f33845f30bd692b6240d44d97a658dd9b3a8e75ced355fd8.txt": {
+      "sha256": "2834b90a0ae558b9b909b584f653a6780678a6922a584992c2bc6759fc5103dc",
+      "expected_sha256": "2834b90a0ae558b9b909b584f653a6780678a6922a584992c2bc6759fc5103dc",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c56c17537baafe3b508eb63ed7b919b1ae3bacaf318cb8225baacc9f1a0b636a.txt": {
+      "sha256": "a932b3a7b09e1a17bc04bc3d3ca8995f28ba9db163aeee994b18b84500fa71c1",
+      "expected_sha256": "a932b3a7b09e1a17bc04bc3d3ca8995f28ba9db163aeee994b18b84500fa71c1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/05abfe8b08b317589ae11cbacc30fdd23e2cff733603ab6e47ecd440edddd214.txt": {
+      "sha256": "051d28a51c0de35a9198297b5de8c8e05a83064a14097b0c73d6b9339b1c3e7c",
+      "expected_sha256": "051d28a51c0de35a9198297b5de8c8e05a83064a14097b0c73d6b9339b1c3e7c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/084421eeac212496d4ea4891c036a5342bb1173c7bf9eec59841790fc451cfdc.txt": {
+      "sha256": "a9ff150f87775be31f40685d38f1c6934101a461f9bce82936a35331f6949c82",
+      "expected_sha256": "a9ff150f87775be31f40685d38f1c6934101a461f9bce82936a35331f6949c82",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/3ef4066919bb77021849fa0ad0b93a5a80666e3e79e2d5967784e246028c94a2.txt": {
+      "sha256": "04d37924615f6a533e4cc8bc1e29f64534cc60a63284bdacd5a5ede511ed9de0",
+      "expected_sha256": "04d37924615f6a533e4cc8bc1e29f64534cc60a63284bdacd5a5ede511ed9de0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ced4da2d1539a7051b69b7a056b1b6112f4a827b084d583409a1697c3ee20276.txt": {
+      "sha256": "67ea97aaa6e869c90805c7bbe61a63c543b909d3d0a1ab6c31ed78d53722741a",
+      "expected_sha256": "67ea97aaa6e869c90805c7bbe61a63c543b909d3d0a1ab6c31ed78d53722741a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/0219e5f384e835af8eed609169c3c888443c36b8b54343a82925c5c0856eae53.txt": {
+      "sha256": "a3ea4d54ea5e4daefe50fcdedc2aef99450296dc1e93e6f4c8e2e70f7455d2d4",
+      "expected_sha256": "a3ea4d54ea5e4daefe50fcdedc2aef99450296dc1e93e6f4c8e2e70f7455d2d4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/83d7ed41b816debcbb54d5ba9f9b18ba1f68d923cd7a13b9ba2ad431b44fc305.txt": {
+      "sha256": "f4418f98189bd89d7b801ec65df48b53caa1c555a23f1d9684799415818f1024",
+      "expected_sha256": "f4418f98189bd89d7b801ec65df48b53caa1c555a23f1d9684799415818f1024",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4d8a5bbed690388059d68c104869434c615226fb5b7c2a9eb2dcc267aea63274.txt": {
+      "sha256": "25a294ab09f85016f8a85d4a76d6a14793d791e51147082757a6e7aa00350d01",
+      "expected_sha256": "25a294ab09f85016f8a85d4a76d6a14793d791e51147082757a6e7aa00350d01",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/52233e4f03a0d374effa4ea5d79f78d1785082d1b0b7e1d0e909ccbe7e6b5bc4.txt": {
+      "sha256": "cbfe0841e8b8275c19d3930f32f99abe4f27ac859779ba59e67064b4eed594a1",
+      "expected_sha256": "cbfe0841e8b8275c19d3930f32f99abe4f27ac859779ba59e67064b4eed594a1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ca0934a130bc050051178d3253e5103b8b6d03ceac1fb2a7cb71a6045835e9c2.txt": {
+      "sha256": "a69075aee4578d0b78383de854f27b26dbce4ba375ee6fdf95f5dca149b95573",
+      "expected_sha256": "a69075aee4578d0b78383de854f27b26dbce4ba375ee6fdf95f5dca149b95573",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/90f9f3ef248a44ff76227121f73750dc1a2177b65f81fa2746f94e9c34eee97c.txt": {
+      "sha256": "a5181c47e2b04028baebc33e7734c20a37b300f710b033546c3410a68fb92c3a",
+      "expected_sha256": "a5181c47e2b04028baebc33e7734c20a37b300f710b033546c3410a68fb92c3a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/bc1acebdf22ddadf4e0e807f31f22108e77e8d839c771db4aa6921b78be97b33.txt": {
+      "sha256": "d00689c3eaad433d9c3dfc7f333ba0d141e9434d42d4e1c8fa29758208579475",
+      "expected_sha256": "d00689c3eaad433d9c3dfc7f333ba0d141e9434d42d4e1c8fa29758208579475",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/584bb74134ca8033785fa13b971bd8a53b83c5a0fee5fb3816e7a816eec0b07e.txt": {
+      "sha256": "6217440c8939715a115fcd916dd1c8e7744fa907dabba6e650182266233a48f0",
+      "expected_sha256": "6217440c8939715a115fcd916dd1c8e7744fa907dabba6e650182266233a48f0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/69e8acb197672f5cfc91bf652947fbf8fab22f7b8390b41147bca568ba0a8b09.txt": {
+      "sha256": "fc0a533f29aebec4f2ea2f48e36f65b6757108fab13cbe2a19d5873f6f52c305",
+      "expected_sha256": "fc0a533f29aebec4f2ea2f48e36f65b6757108fab13cbe2a19d5873f6f52c305",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2b26e2bd43bba3e83144efd2b5247501642829c9b0b390e8c4931150a20c2cce.txt": {
+      "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+      "expected_sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a906410a4737032e94077356ca9d0f388f8c406357906fe786b25a55b247c524.txt": {
+      "sha256": "f14929c51892749fa83575d2307482b3884f204b553c9d976957f13ca08bbb31",
+      "expected_sha256": "f14929c51892749fa83575d2307482b3884f204b553c9d976957f13ca08bbb31",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/79c2ad39fa34c8d99f5da9cab9007706316bf76c6f132ca657ff2c1c1fdc377a.txt": {
+      "sha256": "d388db68c9f86beba823247f910b6a91c2fe8e12ef9b30b6e49f4b1bf19f1ab1",
+      "expected_sha256": "d388db68c9f86beba823247f910b6a91c2fe8e12ef9b30b6e49f4b1bf19f1ab1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/82148edb808455057c0a583f680697eff0490b2fbc74ba095aa58772b836f8e1.txt": {
+      "sha256": "e79b2d51e49e498b795b40eb310f2d19228544a6645c07644e2aaf098acda280",
+      "expected_sha256": "e79b2d51e49e498b795b40eb310f2d19228544a6645c07644e2aaf098acda280",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/bb8a700f0389ba5866a1d1340d2e85cb75ef9bce0ba72f34d30a0252437b9671.txt": {
+      "sha256": "85cca87b44cf86bd8ed662afd1668dcd7f81ef0872d462c625c975da8128189c",
+      "expected_sha256": "85cca87b44cf86bd8ed662afd1668dcd7f81ef0872d462c625c975da8128189c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5fe39a77a0b3585fbaef5507cb82306c7e79b73ddb26d481e0b5d732ec720839.txt": {
+      "sha256": "c5672ff85e004d209ef4dbc6270a287c05f264cb8c1bed66f501dcc3ed835830",
+      "expected_sha256": "c5672ff85e004d209ef4dbc6270a287c05f264cb8c1bed66f501dcc3ed835830",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/73acfa31c9d811d0af1893c183dd7dc3bce8cdcfbc437962108df72433413370.txt": {
+      "sha256": "a948777ad32eed5af65afff8246c2bc54ece526ae4f43e75803205af3aa41fe7",
+      "expected_sha256": "a948777ad32eed5af65afff8246c2bc54ece526ae4f43e75803205af3aa41fe7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e762f36ac79ad5e3e593e64cac57e8b50555c1f92b8b291d3daeed098eb83dd6.txt": {
+      "sha256": "bc2853e4739242ef50db2efaacdc1ed4eac550f4810be2d6d8dedee5985df2e7",
+      "expected_sha256": "bc2853e4739242ef50db2efaacdc1ed4eac550f4810be2d6d8dedee5985df2e7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/6ac4e17780d0af8924444432b317fe8db17fead364aae38cf217f58e71b8cbdf.txt": {
+      "sha256": "7b47ad986318b0c0b25b5eaaaacfc91475f1fdbd954e0414a5c41809affd4956",
+      "expected_sha256": "7b47ad986318b0c0b25b5eaaaacfc91475f1fdbd954e0414a5c41809affd4956",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4cff6b27bfa8f379a39e0e8ff5f4dfdf1df8e98d6e2a4c698a49e91beccc7aa8.txt": {
+      "sha256": "bd06a0f4ad535adfe58766ff10251aac2589c1073d9a7779012dd3f00217c30e",
+      "expected_sha256": "bd06a0f4ad535adfe58766ff10251aac2589c1073d9a7779012dd3f00217c30e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/1504cd1651ee086670f7595857e1ca8145f15287b4372bb5b0134b950364122f.txt": {
+      "sha256": "2c98d6c49feb3ee2c47f78ca4cb0f03a1461caf6fdc535395f2080f317201bab",
+      "expected_sha256": "2c98d6c49feb3ee2c47f78ca4cb0f03a1461caf6fdc535395f2080f317201bab",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ec56142f0dd165289d115461db08ebe43cdf322adb289955000659310ed7d3b9.txt": {
+      "sha256": "e7fcb0820306d46268de9594d676ad98e35040858926c412b7000faa52a61f87",
+      "expected_sha256": "e7fcb0820306d46268de9594d676ad98e35040858926c412b7000faa52a61f87",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2d715ea17726258276bdcb3e67b69f2d20aa7843796afe572d9f3d0562c747e0.txt": {
+      "sha256": "7283655dbb9a4fd3b51d1ec4bd9a2e33fba64cae072cf082e352dd0eb9832819",
+      "expected_sha256": "7283655dbb9a4fd3b51d1ec4bd9a2e33fba64cae072cf082e352dd0eb9832819",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fbfeaffd58e52fb6457a795440746ac11ee284e542e69ca4c84e4871ca7fdceb.txt": {
+      "sha256": "887871671bae1d84d69f505e82b6af6fc89e3f66c419f4ae9bc9d5a0f6474435",
+      "expected_sha256": "887871671bae1d84d69f505e82b6af6fc89e3f66c419f4ae9bc9d5a0f6474435",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/198ddd0a6150dc254a1edaeb6d54c2dfbcb9bb6b9ec7b10ac6f45c85f75b1a6d.txt": {
+      "sha256": "90d950112a96d846a83237fe08a800f28d99b7069ef7e63d929ca9df56d2d663",
+      "expected_sha256": "90d950112a96d846a83237fe08a800f28d99b7069ef7e63d929ca9df56d2d663",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ca1f534cd1c4b186a0c14bf78f3ac974a62966bcede96e5812b235e4a2386b51.txt": {
+      "sha256": "c528f989bf91fc0aabe63c5fc364549843daeebfe779f599714f69b53fed11fe",
+      "expected_sha256": "c528f989bf91fc0aabe63c5fc364549843daeebfe779f599714f69b53fed11fe",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/84b17d9bad83e606e79a9f1fb97334d0c13dfb891c1897cd2e8e48220fc0f92b.txt": {
+      "sha256": "46d15ffe351b4a46d2cb81d5862f62a3654091d38d3084425019107ae81eaebb",
+      "expected_sha256": "46d15ffe351b4a46d2cb81d5862f62a3654091d38d3084425019107ae81eaebb",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/41f6ad385bc441c017fcc22cd873f89e3a9bc72d0bea16adf7f37cc420de19cc.txt": {
+      "sha256": "15a4ad841ddc05b18c4cfdb6894cdd5df7faf8cd6332fec07778130bf51c090b",
+      "expected_sha256": "15a4ad841ddc05b18c4cfdb6894cdd5df7faf8cd6332fec07778130bf51c090b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f1c5194952a66b3a08b59e028d929d58d133edf141edc989e216b866485cbc4d.txt": {
+      "sha256": "e4b3afd00cff5b8955dad2433c68aeba9b873fd907b71e71f871beb49b2f686f",
+      "expected_sha256": "e4b3afd00cff5b8955dad2433c68aeba9b873fd907b71e71f871beb49b2f686f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8d59686d23c0dffcc2ed4ef47b74f19a99fc81a1db277d710f7a44b31c6a35cf.txt": {
+      "sha256": "25792d05ee4699ff137af2cdd61aed943303b04741912e4341de4f11d464b11c",
+      "expected_sha256": "25792d05ee4699ff137af2cdd61aed943303b04741912e4341de4f11d464b11c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4455c4b06bd62198a2d1530aa2483e4973359d7f2a9dbf25bdc762c8c55bb69f.txt": {
+      "sha256": "f4bc324a0395d24ed12db705b0a81536b642509aa148025bf114d9b7c9340e2b",
+      "expected_sha256": "f4bc324a0395d24ed12db705b0a81536b642509aa148025bf114d9b7c9340e2b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9e0ee96dbd575ffd7b72eee6f17402afe89a85f2757014fda1151fc11f72ac34.txt": {
+      "sha256": "964dd0a37af96f27dd75c786e4d42ce42d451423f60b760a70283b3bcedbb60a",
+      "expected_sha256": "964dd0a37af96f27dd75c786e4d42ce42d451423f60b760a70283b3bcedbb60a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/47707a8d2e840c8d63d376a939c61d55c79bf4efef8d22ef5c64d538d258496c.txt": {
+      "sha256": "c4793643985f8b64fbd538cd65cc9602086ceeff932052bc66474875620c90df",
+      "expected_sha256": "c4793643985f8b64fbd538cd65cc9602086ceeff932052bc66474875620c90df",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/32a633917da5b0575adeaa84986ec3d12754bd9a23e15e032bf3f8345c514e94.txt": {
+      "sha256": "bbc45c034488ad948285ee9f6a74be854ce8d1b33ecd7c20a78901ad0b4c05af",
+      "expected_sha256": "bbc45c034488ad948285ee9f6a74be854ce8d1b33ecd7c20a78901ad0b4c05af",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e6172b5ab0ef1a55a39f2d7396e829b874770860db8fa1d303bc13ff750e6623.txt": {
+      "sha256": "b2aef16f98a49e89695cf6755215cb03dea1372df508bcfcc6e1df1bb1a85230",
+      "expected_sha256": "b2aef16f98a49e89695cf6755215cb03dea1372df508bcfcc6e1df1bb1a85230",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/60ab38b1e10ac65b11ed3d422c730f1ce080f1c01be22e3076eb316421fe8148.txt": {
+      "sha256": "c7828cdbb87b506cbeb054e3667e4fc6a83916b1e3426e743b684b9b82f45dba",
+      "expected_sha256": "c7828cdbb87b506cbeb054e3667e4fc6a83916b1e3426e743b684b9b82f45dba",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ff62d5c21b0b2db3d83d50275b6987f4999f40433737aab6ce14a6e6e4f026b2.txt": {
+      "sha256": "b5054f321ca6fce2c8ac35080b00d81b3970b315a7fffeb7884062b423b0c88c",
+      "expected_sha256": "b5054f321ca6fce2c8ac35080b00d81b3970b315a7fffeb7884062b423b0c88c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d98d9cf4a3c692febbc512b665bd453c9dafcc4efc97084a66d1db9e73348b5c.txt": {
+      "sha256": "c63244467c9f31f1d9ab7324925f28c2fcedbc724e83b8f6626fd8fa16fbbfd2",
+      "expected_sha256": "c63244467c9f31f1d9ab7324925f28c2fcedbc724e83b8f6626fd8fa16fbbfd2",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/36e3685a4d844b02706583473760f1ced58076fa385cf40f6e2a40cc14c17ac4.txt": {
+      "sha256": "397aa1444d575a05ec4bca8a02779e88a8e857c118d278f6f293f09e99a2263d",
+      "expected_sha256": "397aa1444d575a05ec4bca8a02779e88a8e857c118d278f6f293f09e99a2263d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a6420e64717a09bd77f15dbd512188184885f1cb71466dee18f8875fed8bded5.txt": {
+      "sha256": "26bdf1c2cdd1ff768b3e9383566e263e8f7a871138d1fb357aa7dd26ae949b1c",
+      "expected_sha256": "26bdf1c2cdd1ff768b3e9383566e263e8f7a871138d1fb357aa7dd26ae949b1c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c522625005f0adf79c97ed69aaad89be866fc8a78971b01f6ee287c9f8ffb344.txt": {
+      "sha256": "a1cc2e8396d2f83582dc105f2c0ed299aede3ea8561023cd298572b26ff7e99d",
+      "expected_sha256": "a1cc2e8396d2f83582dc105f2c0ed299aede3ea8561023cd298572b26ff7e99d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/46943b17e00a6ca8fcfe3f01214c2aabd77f08c764fa757fc6f10546e7a8979d.txt": {
+      "sha256": "552ae25f830ceadcff1c3df282e40bedf917eaeb8521f92fdea325e61004c307",
+      "expected_sha256": "552ae25f830ceadcff1c3df282e40bedf917eaeb8521f92fdea325e61004c307",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d30cfa6f991701ef5112cebba5d51901eb66db7076db7d1de5b501658de776e2.txt": {
+      "sha256": "61bd4bc33e6bf897daf06eae0e844b4080653d01f251b6e8906192caa4b10ad0",
+      "expected_sha256": "61bd4bc33e6bf897daf06eae0e844b4080653d01f251b6e8906192caa4b10ad0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fba08c9aef10d7369d6560adec7609719547b33e939b821e022d483eeb3a94e9.txt": {
+      "sha256": "b3034e542bdd353e0aa4e03828695d74f2d26db8bdf92bc07cc84dba82cc478e",
+      "expected_sha256": "b3034e542bdd353e0aa4e03828695d74f2d26db8bdf92bc07cc84dba82cc478e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/03f6434642c125c9814f60648521d46f1c021f3ecbf75961eb7d1b4a89222b31.txt": {
+      "sha256": "c596585ca11fd287bf5dcf222cd644609379c12ce36084cf4eecee1659ac1350",
+      "expected_sha256": "c596585ca11fd287bf5dcf222cd644609379c12ce36084cf4eecee1659ac1350",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c2f8368d9151129159cdbeb0c895f27a236caf31348ca7db4682354a31cf588e.txt": {
+      "sha256": "87c9d89f1714f8c4faf94efa293cd1437329df6d4efa66ed1793f3fe511f36fa",
+      "expected_sha256": "87c9d89f1714f8c4faf94efa293cd1437329df6d4efa66ed1793f3fe511f36fa",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/561a9c8bf1ed8ed0fa3b89eef8c6280fb5bd45a16cbe9501d110cc387ca5895d.txt": {
+      "sha256": "fbb160f25a4674a67d38cca775eb6ffab4beacc33f2c3f4e4064eca9eca72fbe",
+      "expected_sha256": "fbb160f25a4674a67d38cca775eb6ffab4beacc33f2c3f4e4064eca9eca72fbe",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4669705fc1b6a67c5baf04c9daf1f8a1f8769a59ca7ff244a8495a879365e167.txt": {
+      "sha256": "9b9aa733da1e7049a4b0d1f4cfbb20cd2c96d68ea81a00346ef5852e121eab70",
+      "expected_sha256": "9b9aa733da1e7049a4b0d1f4cfbb20cd2c96d68ea81a00346ef5852e121eab70",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/96f0b2ef789c4af56112172f9266380612bc972e7b201d73f24c5759559711af.txt": {
+      "sha256": "bd6b5992125ed596366cf35b0d36c5a3242debeec5b12189f1a5263be5bbeb9f",
+      "expected_sha256": "bd6b5992125ed596366cf35b0d36c5a3242debeec5b12189f1a5263be5bbeb9f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/606fa32acbaa70d08f8466fd1acf88a4e88dcdfbd6d2f9b02cd3b9843fd7815c.txt": {
+      "sha256": "4209c66deea7045c6ff35cc9a56f261d7456804675c7c6a464819a9cfa208d43",
+      "expected_sha256": "4209c66deea7045c6ff35cc9a56f261d7456804675c7c6a464819a9cfa208d43",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5dfd4f20f9a5a5843d744244b63789396226a7547cc36e57e39d4bde92a1d7ac.txt": {
+      "sha256": "baf560991da4451c2a148d5f8e9d747446650509a9e85459ac58eff7de350bd5",
+      "expected_sha256": "baf560991da4451c2a148d5f8e9d747446650509a9e85459ac58eff7de350bd5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d9b9ac3ae76671ba52b0703cdf3e570f29c6a393d0c775eddbf57464e748e77f.txt": {
+      "sha256": "623a695e90db8148f157ecb2f094c6753bca6d29fec0e0b6879a24806bfa06c1",
+      "expected_sha256": "623a695e90db8148f157ecb2f094c6753bca6d29fec0e0b6879a24806bfa06c1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2a14196c1260100bf3fda17725a7f056dc6a19f6f8d18b85799915cb2b091cad.txt": {
+      "sha256": "8d16a06e8cf21e5360c36191ba14ba3eae4eacf270fb0496a742df32533428b7",
+      "expected_sha256": "8d16a06e8cf21e5360c36191ba14ba3eae4eacf270fb0496a742df32533428b7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/64a5b1adcdddd4ff4f451d06ed65532cdca738a25464c3126a9d8b2cd8d44d81.txt": {
+      "sha256": "2708bb26af5fd26c6a0652027af7702167d0d4e6eedd7256d10320d38e3df313",
+      "expected_sha256": "2708bb26af5fd26c6a0652027af7702167d0d4e6eedd7256d10320d38e3df313",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/0fe6471c3125790588e3e11a75609d0e76aabee82e9e6e205efadd396f905a6c.txt": {
+      "sha256": "9189ef149093dabb94c001be9f84da7234c88cb98557b9f3294da1cca1a50b35",
+      "expected_sha256": "9189ef149093dabb94c001be9f84da7234c88cb98557b9f3294da1cca1a50b35",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/17dfa32d41487800676bfc8305e8ff682295eb1031b9e80c0e18da041bf06d4d.txt": {
+      "sha256": "ef972d2439619542431cb5c45e1f2349484f46f75276cd9be4d2f8d003619d17",
+      "expected_sha256": "ef972d2439619542431cb5c45e1f2349484f46f75276cd9be4d2f8d003619d17",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ce8a4b82fbdf791bee5b3965065e9b79de9b0ad800ecfc741c54769b65935ec6.txt": {
+      "sha256": "508279e69994e6253bd56fc4ba31c703cf40c927fc1fcb87b5f7d7473f9c125f",
+      "expected_sha256": "508279e69994e6253bd56fc4ba31c703cf40c927fc1fcb87b5f7d7473f9c125f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/73b4f253fb1984b8fb6e4f5d48ed77b635d8a4d9df54e778c5f7605a38652d58.txt": {
+      "sha256": "e25b309b01ae107509f58ee21c3a9f21360e980131178afdcb60da62bf128d21",
+      "expected_sha256": "e25b309b01ae107509f58ee21c3a9f21360e980131178afdcb60da62bf128d21",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7c1bc52fc3ff8081c4f8a8917858483581ca68c07fd165eb730b146861167caf.txt": {
+      "sha256": "b5056a16dd2888032b1f3d729ba30a6f1c8d8b8756d20c413389663910f39475",
+      "expected_sha256": "b5056a16dd2888032b1f3d729ba30a6f1c8d8b8756d20c413389663910f39475",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a30a776a5f02979b8ff56a0d8456016b90de3194684e2f53147cd4c3bd3fad07.txt": {
+      "sha256": "f219371401b38a4f8ee1420de3973a043974b56085a2c259e23e94dc41ed08cb",
+      "expected_sha256": "f219371401b38a4f8ee1420de3973a043974b56085a2c259e23e94dc41ed08cb",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2d9cbbde03c8106f7847f121c4fa9ea9abb88c09dc02c5abfa100373e6936d67.txt": {
+      "sha256": "cfce28bcb05db91e0d2023caa5d1b7ff6311072053d9e74af7515e6f8630b266",
+      "expected_sha256": "cfce28bcb05db91e0d2023caa5d1b7ff6311072053d9e74af7515e6f8630b266",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b19fda5673cfcd7c5da9201c60c94cc403ddf9e1e6ab070bbc8971d25ca3df7b.txt": {
+      "sha256": "d7aa97d73f52607d569bc2fdb8c75996c9fadf6bbeba468cd29adf8aca9667d9",
+      "expected_sha256": "d7aa97d73f52607d569bc2fdb8c75996c9fadf6bbeba468cd29adf8aca9667d9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e41310ffd5327ec53d6ab72fe7c203aa3e62e1fe8d214ca4bc7773018687a1c7.txt": {
+      "sha256": "d9f1bc223e6fdafa9c8b5cd1591aaf449a23a5398baed4cd5ae88adb2e5c954f",
+      "expected_sha256": "d9f1bc223e6fdafa9c8b5cd1591aaf449a23a5398baed4cd5ae88adb2e5c954f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/902df7ba99eb6eabe80036c83467ce182da89d32b0995ee86b256e102c3de7f7.txt": {
+      "sha256": "2f9ae66c7ebbc79cea06bc3edfc1f7a5053a53e962616a0e62a0444fc8492b47",
+      "expected_sha256": "2f9ae66c7ebbc79cea06bc3edfc1f7a5053a53e962616a0e62a0444fc8492b47",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d3c71c97d84955efa27813410cc3254188731faafca0d7653c65dc1a52a5efc2.txt": {
+      "sha256": "9233958859dfd9cb35b63c6cd28075fb752b64997b5354b372fbadeba5ef5207",
+      "expected_sha256": "9233958859dfd9cb35b63c6cd28075fb752b64997b5354b372fbadeba5ef5207",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2dc5bc9bd1121acf7ea4b19b7bc876733ba0858b464fe072b75af2fa0685a9d7.txt": {
+      "sha256": "073dc34ec340a09df533d3003c1cc2be32dc5a2e1bcdb8bf319a70537f7c9115",
+      "expected_sha256": "073dc34ec340a09df533d3003c1cc2be32dc5a2e1bcdb8bf319a70537f7c9115",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fad9a87ec5e23eb64c5b27023a5ff337cf68d19a6999297a8e676bb29b2e7c22.txt": {
+      "sha256": "e83a859a7325f9026665e2b504f97840b4e18b3899b4ea9ddb41bdcca48023e1",
+      "expected_sha256": "e83a859a7325f9026665e2b504f97840b4e18b3899b4ea9ddb41bdcca48023e1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ce8e922eea74d6481e1ee3ed0fee307e246215760085968f32738aa7708a298f.txt": {
+      "sha256": "cd02fa81e2b2e6bc0de1aec452bedd30d4c2def6d2fff1423cfcb59a4cc8fcec",
+      "expected_sha256": "cd02fa81e2b2e6bc0de1aec452bedd30d4c2def6d2fff1423cfcb59a4cc8fcec",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a724e01f351d1927d99604f0024c561ed0c82631f2a5014991019fffc99bc38a.txt": {
+      "sha256": "a1ba5f251f08a4833a594850499ccee9051c0cdc3a5542adb5bce1c9c2c09966",
+      "expected_sha256": "a1ba5f251f08a4833a594850499ccee9051c0cdc3a5542adb5bce1c9c2c09966",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5ea11606fd9aa4845b1f8481b167dc8988805b050d6f356eeb8ae2a3103de545.txt": {
+      "sha256": "dfb4fbf31d07e8a47a52a4e078b70de37d3dc32448c87ec88b3d2080d2d2d497",
+      "expected_sha256": "dfb4fbf31d07e8a47a52a4e078b70de37d3dc32448c87ec88b3d2080d2d2d497",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c9ef9692cd0bf8ed45c724e8a6afc3fa2c1bf1229f09d5e078b22e9889dae6a6.txt": {
+      "sha256": "d422fb04675293eb1e9bb8ac795271b8bf9fe7104c19918a4b585f7a41e1d724",
+      "expected_sha256": "d422fb04675293eb1e9bb8ac795271b8bf9fe7104c19918a4b585f7a41e1d724",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/034ce1f759064a467b1b6f6255e4b15fbb8866615418f59f023dee8410801092.txt": {
+      "sha256": "afdab25e5f9fb1cdcb6679faf6730bce94e44df67c3a4b93d0b6ad1058db5777",
+      "expected_sha256": "afdab25e5f9fb1cdcb6679faf6730bce94e44df67c3a4b93d0b6ad1058db5777",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/00718abfc391eafae9f09c91dfb139d7f2a70b6d796bd4f146b858490bbfb3aa.txt": {
+      "sha256": "5a088b686193ca7904055d0a455ed59704ade20661b92149a381a8779520270c",
+      "expected_sha256": "5a088b686193ca7904055d0a455ed59704ade20661b92149a381a8779520270c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/78d8c2419875606ef200c6653adcf071ae10244d744e2d47faa2c88a4892e084.txt": {
+      "sha256": "3660930cea3585781f4326d1a84f418b186bc3ec8c95b3e3c276b97fe689d61e",
+      "expected_sha256": "3660930cea3585781f4326d1a84f418b186bc3ec8c95b3e3c276b97fe689d61e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c1c27712c7f2c3ddd52f017e0cd21b7df922cb92755f6db4f1cd1d9dd7c8946c.txt": {
+      "sha256": "66667576c472aaeacf6f02df2c6fc820fb25fe51c83f86bf4ed46631f1e9b0f5",
+      "expected_sha256": "66667576c472aaeacf6f02df2c6fc820fb25fe51c83f86bf4ed46631f1e9b0f5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/dc020f010549e977307848bf312b8d886d10f6532368657b423c8779f499c667.txt": {
+      "sha256": "af8e32d4e91c5cbbd253f337a75b86b63c8f0800c75463d20cc92118c962788f",
+      "expected_sha256": "af8e32d4e91c5cbbd253f337a75b86b63c8f0800c75463d20cc92118c962788f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e78091536028057d0a400b7849f1ee5333304af1bf7f0fd03d1b6327fa123838.txt": {
+      "sha256": "cccbb2ac7844a01a58fb9a99096ecc72e0d97b440ed90c5be916a3b867ad8592",
+      "expected_sha256": "cccbb2ac7844a01a58fb9a99096ecc72e0d97b440ed90c5be916a3b867ad8592",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/6af225addc7afdc104beb34a808b5414305e6a6319aacc20e361571da4318e47.txt": {
+      "sha256": "e868b6ef54b1c4f437444e10bc455479dfc6e936540e738016a3447bd244f249",
+      "expected_sha256": "e868b6ef54b1c4f437444e10bc455479dfc6e936540e738016a3447bd244f249",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2380de6943df22674d53b70bb07c0c3ae4905b6a58588404a3686af9fa3da2ab.txt": {
+      "sha256": "773909a5932728bfa3f00640c171a0624c4f1006372a20eb6a58e8e9fc6e3a81",
+      "expected_sha256": "773909a5932728bfa3f00640c171a0624c4f1006372a20eb6a58e8e9fc6e3a81",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7cf48a74a08f3bb9d377332f2138cc7bf4bf400e0d5d49800f759929caa9565b.txt": {
+      "sha256": "436ba99b9efb149d130674b61031371888791d3199790a17e674044d0293f2a0",
+      "expected_sha256": "436ba99b9efb149d130674b61031371888791d3199790a17e674044d0293f2a0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8f4d4e96baaf44969fd40a77e058a27e3df8509dae489fe5f05e3a5526262ccf.txt": {
+      "sha256": "a4209d229f9c72066446b6f16e13ffc3368a9bd7daaec9b3882e2eaa2835a32f",
+      "expected_sha256": "a4209d229f9c72066446b6f16e13ffc3368a9bd7daaec9b3882e2eaa2835a32f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9e2d572ad35d52faa9408292cb807ac0d276c89b0125b3ffa0504712f340f333.txt": {
+      "sha256": "3f0ae634569bf89dd66cf35e5620b44782fb838daf59e3c956f900d71eb611a4",
+      "expected_sha256": "3f0ae634569bf89dd66cf35e5620b44782fb838daf59e3c956f900d71eb611a4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8b9a4588e93f51877c8e0e1e99093d8876b1f6e6da710793a90c14f920472b4c.txt": {
+      "sha256": "aabd2f0f7fdcf5560f9b89c5d32bfe58103fc02cc25bb965536bbb4e5a70203d",
+      "expected_sha256": "aabd2f0f7fdcf5560f9b89c5d32bfe58103fc02cc25bb965536bbb4e5a70203d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f7e8215ce2b5bd7ce441b377ec2b389e34d4f5ae357300c193ba20851c91a494.txt": {
+      "sha256": "40d462b343c4f8cf03e3dbd2b6f2f66c83acd5387f3d28e82000e79b1edae60f",
+      "expected_sha256": "40d462b343c4f8cf03e3dbd2b6f2f66c83acd5387f3d28e82000e79b1edae60f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8f9526843b6b249311db37836280b8d12708ae7adca660ec4ce1fe277d04291a.txt": {
+      "sha256": "b690f21bd958a53a833402f2c014ac42e09d1900cd64759fe57c43308c0e8db1",
+      "expected_sha256": "b690f21bd958a53a833402f2c014ac42e09d1900cd64759fe57c43308c0e8db1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4ac6a19d986f7a99535294ea3b965cb097f76e76d6977da2e220ec4e1c70b8fa.txt": {
+      "sha256": "6a5c04d7dd23d46a1fe28803f0d19cbf247917cc0d46e21dcf1606bc262575b8",
+      "expected_sha256": "6a5c04d7dd23d46a1fe28803f0d19cbf247917cc0d46e21dcf1606bc262575b8",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/6894b285bf81b0157ecdda2969e26945e0b23205fce264b4eb81f7a199008a44.txt": {
+      "sha256": "029689d1e2da106b165579adbfc17adb2e4e866df6fc17a4ce2e27c6ce9e0ff9",
+      "expected_sha256": "029689d1e2da106b165579adbfc17adb2e4e866df6fc17a4ce2e27c6ce9e0ff9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/80a3cfcdfc5ac8d4423e575f73c5ec284b51b6bc56c5540bee1bf4ba7ae80623.txt": {
+      "sha256": "e916ac49a86fc0e61badc1672c472424f8d47c457bf83a78a098062c227c284b",
+      "expected_sha256": "e916ac49a86fc0e61badc1672c472424f8d47c457bf83a78a098062c227c284b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/469c5b2671f2a14e04003d13be3b77a713162072635f873f4512d171b50fb09d.txt": {
+      "sha256": "7b442dba7e8f1e8c26a3db50bb3051c4edd6c5c3af0d0979a0dff46aaa2ee2d5",
+      "expected_sha256": "7b442dba7e8f1e8c26a3db50bb3051c4edd6c5c3af0d0979a0dff46aaa2ee2d5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/acd5730e4ff71d99b975e9e38ba41cce32e57f9bf7ed2b17bfb8718731adb1fa.txt": {
+      "sha256": "9ddc301bab8bc3b29940cf61277b5634883e8ee1009ec670d3d66ebb7db88685",
+      "expected_sha256": "9ddc301bab8bc3b29940cf61277b5634883e8ee1009ec670d3d66ebb7db88685",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a8037b0e4ecf198a5971c6373335887d5feab00ae910346e7984d89a77e4a68c.txt": {
+      "sha256": "bfc5497bc7815139a803fac096ff0bb1d409ca3e98968945ebbe819668c32933",
+      "expected_sha256": "bfc5497bc7815139a803fac096ff0bb1d409ca3e98968945ebbe819668c32933",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/66ccd942916efe53f0e7653b0549902a4f4899f1d90ce8682aaa88677bdc3df6.txt": {
+      "sha256": "9e8019396e7f901ec20df5ca0b0b2ac30b490a7e145e03c27b4da51d724ac437",
+      "expected_sha256": "9e8019396e7f901ec20df5ca0b0b2ac30b490a7e145e03c27b4da51d724ac437",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/16e0d0d35a2fa1db1e6c0b97228fa79911f3cdcb1e46ed3b978409712e4d07ab.txt": {
+      "sha256": "a6936bc5ec93f8474a545a6044ecfada7814e7321d41f9a257944f888e3e2cda",
+      "expected_sha256": "a6936bc5ec93f8474a545a6044ecfada7814e7321d41f9a257944f888e3e2cda",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/1eadc6932838eb93a13fda60a49ed643dacd69e031a63b196234a0902aff2ac9.txt": {
+      "sha256": "38e32f11ed27e2a12bcadf4fc545b36f279390f0434d366407df69c5dc5b5e3b",
+      "expected_sha256": "38e32f11ed27e2a12bcadf4fc545b36f279390f0434d366407df69c5dc5b5e3b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8b65bbef38679e11541e9d4a851df61886cb70b406fed4ce8b9465ef11868601.txt": {
+      "sha256": "51591af07584601e84ed031cb5c79f945298b6ea52a0e9bb000f53e821c495b5",
+      "expected_sha256": "51591af07584601e84ed031cb5c79f945298b6ea52a0e9bb000f53e821c495b5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d9f0537e06d374fdbe6ca7d55d0b960d9971ff77767352d902f1d0808d278038.txt": {
+      "sha256": "6bbfd9ed9d6d6566a5dfe1cd8205a3cfcf82b7f569c511f7dc40836b15212f9b",
+      "expected_sha256": "6bbfd9ed9d6d6566a5dfe1cd8205a3cfcf82b7f569c511f7dc40836b15212f9b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/10f82854b5db12fb3ec23c624051c67248cd7f3109cf60856ed1ba7002af1ebe.txt": {
+      "sha256": "509a41e803730d468f04c16e274fb6ce69037325cacf81d0abd7db8760bea66f",
+      "expected_sha256": "509a41e803730d468f04c16e274fb6ce69037325cacf81d0abd7db8760bea66f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b90b96d068c57a82fe6e3eb6b9e6f2e6927e01387b0952fb5c275d5d38810416.txt": {
+      "sha256": "854d1761355e6add70deefaceda3a2f6162dd094026e60d02faec5a36741834e",
+      "expected_sha256": "854d1761355e6add70deefaceda3a2f6162dd094026e60d02faec5a36741834e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7378935c08508219e77dec6b3413e4b8690a3f2e60c8ab44e85a8a5b3497e293.txt": {
+      "sha256": "c42a73e03939905d5d2c655eb114f6db22bc2d2169276c36e3c9f76822c8bbe1",
+      "expected_sha256": "c42a73e03939905d5d2c655eb114f6db22bc2d2169276c36e3c9f76822c8bbe1",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/30435aa05f31947b5e78fdbbdf944dcf993ce9de39ca4cb5c33ee6b3f3464d78.txt": {
+      "sha256": "f22a291ce6c523a803833738feb1a5ded33104495f9fd677c568e92d3751ea62",
+      "expected_sha256": "f22a291ce6c523a803833738feb1a5ded33104495f9fd677c568e92d3751ea62",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/769c66d8e4ea9bef43339190bd925adb6ec00c3195e3408b09610db8f8490de0.txt": {
+      "sha256": "19a9e265a64c1c051f2437a4ce9c1f8c0509d006c947b4f146b2be29bbcb26c4",
+      "expected_sha256": "19a9e265a64c1c051f2437a4ce9c1f8c0509d006c947b4f146b2be29bbcb26c4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/24da24059fa0144589c8cbf91f9809c9a12c6e8eda232562e698ca3fbb60e194.txt": {
+      "sha256": "fce253bf80b2adb2af879d5d1d452d7e5483b3ed59001730c9b02736271360bb",
+      "expected_sha256": "fce253bf80b2adb2af879d5d1d452d7e5483b3ed59001730c9b02736271360bb",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9f8a7fd7c2868c4ccf4c2e37d6ba3ab04eccd35ce7199d74d7f42c9233aaa165.txt": {
+      "sha256": "76923313bef22aa835b765c13a3e533ee4d9c1bdd1e25033ba96cb1e44df4d07",
+      "expected_sha256": "76923313bef22aa835b765c13a3e533ee4d9c1bdd1e25033ba96cb1e44df4d07",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/747e419c7877a8facf8d747ae148dd0d35c64119a2fa85c7ab47e19f5c0a3602.txt": {
+      "sha256": "1d3d85d257cac2a9112858262fb05c3623cfaed011db3de7ec991fc056a5266b",
+      "expected_sha256": "1d3d85d257cac2a9112858262fb05c3623cfaed011db3de7ec991fc056a5266b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a720ad0ccdaf0a62ed9c97b8d27321c7fbe54cc200413b6adeaaf36a14f1303f.txt": {
+      "sha256": "e8b02a7ae0095c6073bb6c5aae8bda93da0aa713c5f5c5216617f72108b0690f",
+      "expected_sha256": "e8b02a7ae0095c6073bb6c5aae8bda93da0aa713c5f5c5216617f72108b0690f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a591880a45e343ad25e6e53d709aeeb8949b6a764f1cc871047c1bfdb46e0517.txt": {
+      "sha256": "5a20bdd6b5eaf02fde0a78211fb13c21d3467280624deef61c2d15889f52eefd",
+      "expected_sha256": "5a20bdd6b5eaf02fde0a78211fb13c21d3467280624deef61c2d15889f52eefd",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4e97e842f436b3af17bd3f07d667fd28a1395f237217ac1a605774aa0dd93d3b.txt": {
+      "sha256": "fc0fc4d51e598b009a2a4808bbd667674b1462ebb13331edfb12d6b2690f4209",
+      "expected_sha256": "fc0fc4d51e598b009a2a4808bbd667674b1462ebb13331edfb12d6b2690f4209",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/66add5cb5340128a6dd97d80100539c58eceecbf8db234765ca33ee0c4d5a05b.txt": {
+      "sha256": "80bf17767414697382b751105eee2ca7f2be40fc11cb01e9a8095472db100550",
+      "expected_sha256": "80bf17767414697382b751105eee2ca7f2be40fc11cb01e9a8095472db100550",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/94cfd2bc8229cf38251ecfd71eaf5b6dedf2e4ae633ce8488ce705120e25f6ff.txt": {
+      "sha256": "a0840f2eecd70565fcbeee058f1ec2fceba6e9a0cfff4a0979c26d6a0c6f2fb3",
+      "expected_sha256": "a0840f2eecd70565fcbeee058f1ec2fceba6e9a0cfff4a0979c26d6a0c6f2fb3",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/528977cc5db2bed48b8c567935582a13093e97b4d7bf571873239ffaf2903230.txt": {
+      "sha256": "79a07e3f8674e32bb370e4ae1e90b3892a6f33ff6d7f5a251dd3290b7532053f",
+      "expected_sha256": "79a07e3f8674e32bb370e4ae1e90b3892a6f33ff6d7f5a251dd3290b7532053f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/afdaac4c797bc96e4c3e7b3b5a7ae8de6c8d7b291a4d4609791817d872d6aa30.txt": {
+      "sha256": "eb551763727a25720128107ba7ed744d3b612e6f68689d919a05803b8fbe771b",
+      "expected_sha256": "eb551763727a25720128107ba7ed744d3b612e6f68689d919a05803b8fbe771b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ade3adaa0184e4d0c7329a2679f7e2f3e7191ca1747e9ebe253a07f02c5dd5b5.txt": {
+      "sha256": "80baff223a0cd7b025d946ffa90f318c05c7cb75bc0100eac7fa415ba616446f",
+      "expected_sha256": "80baff223a0cd7b025d946ffa90f318c05c7cb75bc0100eac7fa415ba616446f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/663dc59ce47da23807b3277775888dba2e15ae8fd5cf6d1570734b3fceaa2a83.txt": {
+      "sha256": "8724a0a1e826491300a9011afec0ef158ed4f1a1f6510e737225f4dd2ab36972",
+      "expected_sha256": "8724a0a1e826491300a9011afec0ef158ed4f1a1f6510e737225f4dd2ab36972",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c12360d608b9b0e7399428687dbf7d08fbebf7139650f5b4e1301206555803ba.txt": {
+      "sha256": "b004f5e5d3a5dcc38b8f1408c6349acfeaf9b0cc7c9c11caa72b7ef154d29eb5",
+      "expected_sha256": "b004f5e5d3a5dcc38b8f1408c6349acfeaf9b0cc7c9c11caa72b7ef154d29eb5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c38f3e1206ad5d8e663904313a26812a6bd61a2a9c160568880cd3163415e7e8.txt": {
+      "sha256": "af096df9608d7b77a9245351071ef4c6b978bf6a0606927efde88d69ab18b879",
+      "expected_sha256": "af096df9608d7b77a9245351071ef4c6b978bf6a0606927efde88d69ab18b879",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c4e97661856942121133f26b992b876d6f40045a003555457d09287bf7a20dfd.txt": {
+      "sha256": "712fe0e4194879293885329e8c05225517d3bd9622ce7b7a920195b6e110164f",
+      "expected_sha256": "712fe0e4194879293885329e8c05225517d3bd9622ce7b7a920195b6e110164f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/15675baa27cc7c7a688b47531837131dda30a8d85338e71a735cb04839c133a5.txt": {
+      "sha256": "c70d9f66f72d5132c1d56f75480da48929964de484144ce5d0824109db86d0de",
+      "expected_sha256": "c70d9f66f72d5132c1d56f75480da48929964de484144ce5d0824109db86d0de",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/12bc7bacb77e1050aedd59ae8dc57a0f7d40023defec0ae65bf2c01e789bf1a1.txt": {
+      "sha256": "149879d5e19bcf9c3533e484e4e80c6c4169649910d84941042b00971c67947f",
+      "expected_sha256": "149879d5e19bcf9c3533e484e4e80c6c4169649910d84941042b00971c67947f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7927f9744612731b79056bad5d38a90078afc0378b0ad50c05e31e68535636a0.txt": {
+      "sha256": "c18b114d30bedb524430733e2c3d1bae01140a1c0552304b4c4cd13b03a77edb",
+      "expected_sha256": "c18b114d30bedb524430733e2c3d1bae01140a1c0552304b4c4cd13b03a77edb",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e855644a0b57bc10bb088879ca8491f17291d5ca0ab7936fdcaf0e166f74f21f.txt": {
+      "sha256": "211c191b8aee16460d97c8ea26551ed1587755b25ff9222c7fecf4e54f8ecf7a",
+      "expected_sha256": "211c191b8aee16460d97c8ea26551ed1587755b25ff9222c7fecf4e54f8ecf7a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2ec0e681a196328c008559534969b27c09694e73b6489a96a707e964a86f9971.txt": {
+      "sha256": "c5fbffc1ded6bfdabd40e8da904fb01114bc8660d0ec3598f02ff4e65ca57844",
+      "expected_sha256": "c5fbffc1ded6bfdabd40e8da904fb01114bc8660d0ec3598f02ff4e65ca57844",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fb6eb2509cce4f10490e1349c9a7cb150c361ac2ec050a6fd220593d0ada435d.txt": {
+      "sha256": "bc9ec24627389d324ab68e5b87f831047871e4eccc1c4f5275ea0823474622be",
+      "expected_sha256": "bc9ec24627389d324ab68e5b87f831047871e4eccc1c4f5275ea0823474622be",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/80cb93eed75612e9b521b767376ee0880bed66d8dea8e33624e53394ff460ad8.txt": {
+      "sha256": "8a561345d791f2e6fe96fdbdd8b8965ddb450addade15fb17c9ec792d37a12eb",
+      "expected_sha256": "8a561345d791f2e6fe96fdbdd8b8965ddb450addade15fb17c9ec792d37a12eb",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f38947217211f869ecea465bc6356843af97e2a599f58b45604a1afabf620a91.txt": {
+      "sha256": "120238f795fdb0364d7a29450ce5494b3e32dc7f6367e0076138f77663ecf086",
+      "expected_sha256": "120238f795fdb0364d7a29450ce5494b3e32dc7f6367e0076138f77663ecf086",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/3858ae20d541cf003bfd04a084a696d7a8093b09d8342b19a0c11f267bdfad14.txt": {
+      "sha256": "70882d9769655bb7f9edabd955830f151b502fa338d38b93b144777edd5556f0",
+      "expected_sha256": "70882d9769655bb7f9edabd955830f151b502fa338d38b93b144777edd5556f0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5839a57e42567e2bf31b4cf00d7e652b43268c342920c55d3a93ee55d5ae22cd.txt": {
+      "sha256": "7339b43bfbfecb8e3284a5d5fcb5042808680c660f6430e5a513a48e27e7acf4",
+      "expected_sha256": "7339b43bfbfecb8e3284a5d5fcb5042808680c660f6430e5a513a48e27e7acf4",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a888e6bacb7279ae8feff7f46c2903facddde7fe628802dee44e346eb5965168.txt": {
+      "sha256": "c4c1717b952fccca234daa463b9953ba23bb98138b484054ce857b746888d94b",
+      "expected_sha256": "c4c1717b952fccca234daa463b9953ba23bb98138b484054ce857b746888d94b",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f008aaac744545a9312a1147f3f4df5876cc77acce2094a09f241333e9011093.txt": {
+      "sha256": "5768e01d4d45a70e0d9e44cfd42753e1312a0bf0deec599b657914f9d1bf6a1f",
+      "expected_sha256": "5768e01d4d45a70e0d9e44cfd42753e1312a0bf0deec599b657914f9d1bf6a1f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7152dc18fae7e3b9879976888c2782e66aefed3d63527e672b76ef41acaba48d.txt": {
+      "sha256": "d3d8fa573e1488e3aa35b9b997ba943454f3f357740a550d4bcc44d81975f07f",
+      "expected_sha256": "d3d8fa573e1488e3aa35b9b997ba943454f3f357740a550d4bcc44d81975f07f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/741897a95da58371622eb4ac6cce810b168cb1a5037aaed6be1d513c74089449.txt": {
+      "sha256": "37853a3bdf903810058a335df96e96874673a5974d9e5e5adfea96d9a52bca42",
+      "expected_sha256": "37853a3bdf903810058a335df96e96874673a5974d9e5e5adfea96d9a52bca42",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/212c9d7fe3e2737c546db1cdb9c2fa31f95653d781e9ceb7e8d91aad1583234a.txt": {
+      "sha256": "e64597c12b1102b64239da9a77cdb49fd86bf30cb37659e4c4e9dddc4dc09e9d",
+      "expected_sha256": "e64597c12b1102b64239da9a77cdb49fd86bf30cb37659e4c4e9dddc4dc09e9d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/73b3d5bb95783951f48d1f905e4f055b939ef9015466b6bb6a1f957f9acbb632.txt": {
+      "sha256": "13c693f24c8b8a6a23b4441e6f7528b18e735b8da4b9b5a642fef5b6969445a7",
+      "expected_sha256": "13c693f24c8b8a6a23b4441e6f7528b18e735b8da4b9b5a642fef5b6969445a7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/804a0c035ff4ff711dedb6bd888bf8ac894dd768742cb1f75983679683bfd4cd.txt": {
+      "sha256": "4180934a5afc92b82af1eeb0fe821501fc1914de33821aa516c96af6724cf740",
+      "expected_sha256": "4180934a5afc92b82af1eeb0fe821501fc1914de33821aa516c96af6724cf740",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/41aa9231a61f888c722aac5f7ee69d55523c7d006e9a7b330a112d7fb0d5ee11.txt": {
+      "sha256": "4b61771e3d30c2aa0502deebdcbeaef97910708155574f4dfe82d17e7a3250ed",
+      "expected_sha256": "4b61771e3d30c2aa0502deebdcbeaef97910708155574f4dfe82d17e7a3250ed",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b359b0105a9b8dbf5601889cbf8de87e2ba9442f3557df7184b4f280ff710b31.txt": {
+      "sha256": "bbba5647bb9ef790423952d6c5c58876c42d254c8ae2958ba8e022c443f2aad9",
+      "expected_sha256": "bbba5647bb9ef790423952d6c5c58876c42d254c8ae2958ba8e022c443f2aad9",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8152dccc3e4235dcef84e7434909aed745ca5cb1e8e48ab050e98e50dc9fb2bb.txt": {
+      "sha256": "e31a0f40414373d3a2c0cfed4fffa55108f0855d0139406e705611daad378c69",
+      "expected_sha256": "e31a0f40414373d3a2c0cfed4fffa55108f0855d0139406e705611daad378c69",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8575588835be6f24044bfdb6a2a2200fe9cbf4e4322a5743a630b29f288c7445.txt": {
+      "sha256": "43d18333d4adafb33e9a5d5d9d34ef3de03227d4ceb5221c9882592000f834b8",
+      "expected_sha256": "43d18333d4adafb33e9a5d5d9d34ef3de03227d4ceb5221c9882592000f834b8",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/3ccd326a43c5f07e3a7e794fbf664feb6bc274dfbe64c32fedca50eeb0e1dbf0.txt": {
+      "sha256": "c12ab897a88c585046da1dcf062849825c69530b85d104eab49f035096db9eaf",
+      "expected_sha256": "c12ab897a88c585046da1dcf062849825c69530b85d104eab49f035096db9eaf",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f3cea58f2ce73952354021bd956934e0ea4f1c4c4491d5400573a0648430d364.txt": {
+      "sha256": "257044c0a1d69240bd78e2e516865d0e45a1a7f3afb824b58f1815fc91ae8946",
+      "expected_sha256": "257044c0a1d69240bd78e2e516865d0e45a1a7f3afb824b58f1815fc91ae8946",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2a0d08804dade04c1663cb3e3942ad2d26388d834406646f05b29f4b3269a7d0.txt": {
+      "sha256": "b0d29e387a484c03a6e0333de5e0d128289a9056054a2208565a44506e369e22",
+      "expected_sha256": "b0d29e387a484c03a6e0333de5e0d128289a9056054a2208565a44506e369e22",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9df2c9a65f95b88049e80c26535c99e253f8e950936837cc8d3c5d47c78df514.txt": {
+      "sha256": "e9f61947ed06c6e84e89510a66034fdf657b8ad1f08b1870025ea0f64985d28d",
+      "expected_sha256": "e9f61947ed06c6e84e89510a66034fdf657b8ad1f08b1870025ea0f64985d28d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8dbd2c5f78eb6c89a1600eb4010a4bd184836b2dd01ac709c0a8c5f69027bbd8.txt": {
+      "sha256": "cbec2c3186cae8fe162736830a059bfe66c062091c008f6d2286ccd4a94be77a",
+      "expected_sha256": "cbec2c3186cae8fe162736830a059bfe66c062091c008f6d2286ccd4a94be77a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f17c484115f7de09debf159e0dfed06732ca81fca45070654fd1a754739fbb4d.txt": {
+      "sha256": "b3607fc23483a400bae5c09b8d8314f589c5a7d9b1343357293c583499c5032c",
+      "expected_sha256": "b3607fc23483a400bae5c09b8d8314f589c5a7d9b1343357293c583499c5032c",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/275a480ece792ba7f9d1d041c28dea4a1fb61b465d10fb96e758efc73ca2b093.txt": {
+      "sha256": "861041e7d67952d7fd388e63948bacc04599d6587c1898995669bbb85807429d",
+      "expected_sha256": "861041e7d67952d7fd388e63948bacc04599d6587c1898995669bbb85807429d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5df9e79f9dbd58e5fc0c4574819b36354a53f05b75925a68026eeb4cfc527fe7.txt": {
+      "sha256": "32838d787638c7691daaf85184ed2c9b713e6b9aa0d8a7083573a52c21572c77",
+      "expected_sha256": "32838d787638c7691daaf85184ed2c9b713e6b9aa0d8a7083573a52c21572c77",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7ff20b7d9b73b81c9e3ab5f907f1187e6c29a3aa30f0cc3617c27188e9eb4683.txt": {
+      "sha256": "440d9a081c28c89b5fbaac3764ad9ed946701df98c098a8de086527e70540d54",
+      "expected_sha256": "440d9a081c28c89b5fbaac3764ad9ed946701df98c098a8de086527e70540d54",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e47c9d31ed418ec42ef145cf0ac1efd882a1684a60d23b9cc5b4217cd4abaa49.txt": {
+      "sha256": "fbfd58999ea6478de156d409ce1bbfed598831b1981564f971dfec6eaafe56e2",
+      "expected_sha256": "fbfd58999ea6478de156d409ce1bbfed598831b1981564f971dfec6eaafe56e2",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/60e723622f76f029680c6363434400f6e0c2c4996ab91f4ba493cfb1d44aa0db.txt": {
+      "sha256": "ce4f38dcbb0691584f9e97dd907ddb21173461d140cf85d19143e5657e4834fa",
+      "expected_sha256": "ce4f38dcbb0691584f9e97dd907ddb21173461d140cf85d19143e5657e4834fa",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/86cddd85b64c6f2a73705f47bd4dcfbdaf4840087ced7f7f8a0f07bb87c6e012.txt": {
+      "sha256": "4f36787a794cebc6d719b0aa9177327c711a26f0a1e5382fac43494d1c9eedbb",
+      "expected_sha256": "4f36787a794cebc6d719b0aa9177327c711a26f0a1e5382fac43494d1c9eedbb",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d4c3f259903874aa4d937b2804093e532dc2338fc12d9fc86f3440f5b15f3959.txt": {
+      "sha256": "e859f35398cb736f2b5e1de178c19abac6447175b76e76bc504b0ad908876222",
+      "expected_sha256": "e859f35398cb736f2b5e1de178c19abac6447175b76e76bc504b0ad908876222",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/0771a63d47c70050025a608217c9b114b17f279b440a474e45befd3da9f372a2.txt": {
+      "sha256": "b9c959e38beca12354b7be4df1051ffcaae34b044e3f4117facb2755e0a6f5b7",
+      "expected_sha256": "b9c959e38beca12354b7be4df1051ffcaae34b044e3f4117facb2755e0a6f5b7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-atproto-separate-protocol-decision.html": {
+      "sha256": "b9cf873aed187f3ef07dc2e8b5bc26384a6d94e895d0c8715f931c1f702f9643",
+      "expected_sha256": "b9cf873aed187f3ef07dc2e8b5bc26384a6d94e895d0c8715f931c1f702f9643",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/bb10b72dca29f7cb7755e91f2ce4ade34b991143190260119c9e5c25c6dd63c3.txt": {
+      "sha256": "fc8790be99f98c2bd9545ca2c319a55a1285b862a05fa6a2e1ff4db715c6ece5",
+      "expected_sha256": "fc8790be99f98c2bd9545ca2c319a55a1285b862a05fa6a2e1ff4db715c6ece5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/480e055277e96399dc4f5965b13daef0c5ee6daad313a794ed1b1deec75ad183.txt": {
+      "sha256": "ed3e5b3ac91a3bcf2e87d27b7e26579a420477747123b846c5cd019649045673",
+      "expected_sha256": "ed3e5b3ac91a3bcf2e87d27b7e26579a420477747123b846c5cd019649045673",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e950b2681d62e8a9de87aa03504097df670091b748b4c780b83f35eee21b5372.txt": {
+      "sha256": "e9f61947ed06c6e84e89510a66034fdf657b8ad1f08b1870025ea0f64985d28d",
+      "expected_sha256": "e9f61947ed06c6e84e89510a66034fdf657b8ad1f08b1870025ea0f64985d28d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9e028ee07e332f591dcb85d922e0f76fa83c2ecea1eff7685a150189abfd588c.txt": {
+      "sha256": "13b84ef07cdd02005264c5ee2b5dfb94c2724abcfdf7becfe3278f85465ba8c7",
+      "expected_sha256": "13b84ef07cdd02005264c5ee2b5dfb94c2724abcfdf7becfe3278f85465ba8c7",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/111745518013de94e203a4dd158aa97509dcbffeebd95a83c2f7a7a3c5007c37.txt": {
+      "sha256": "ffbf8ebebd66a0079808befcc4ee6015afdff0eeeb76fcd984dca3bf50355b6e",
+      "expected_sha256": "ffbf8ebebd66a0079808befcc4ee6015afdff0eeeb76fcd984dca3bf50355b6e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4a7acd1f362bfb43c685e340ea9ba21ccdc3adc1c238ca53a2beab6cbb29d74e.txt": {
+      "sha256": "abf9695a83f353bcf9432938bada1a69a4c8c9e0e7a0a5cb6fb51308ae117fe2",
+      "expected_sha256": "abf9695a83f353bcf9432938bada1a69a4c8c9e0e7a0a5cb6fb51308ae117fe2",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9d22d3975c07cc712018ccc0bf2d01a37c9171404d105ffc89e040443a2c8e6b.txt": {
+      "sha256": "d5d08a274567a3fcdcc337252a8fcce05b8e6d6f679e6e6a6bfa43eef2d4e2dd",
+      "expected_sha256": "d5d08a274567a3fcdcc337252a8fcce05b8e6d6f679e6e6a6bfa43eef2d4e2dd",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/6e09c081a33ae7f39d60e66808442fc885a650c3094499f2d77e805cc8e1cd4d.txt": {
+      "sha256": "feb65aac1808a37ac804420e1f2a2f18270880e8b25fc65231601e0d0478468d",
+      "expected_sha256": "feb65aac1808a37ac804420e1f2a2f18270880e8b25fc65231601e0d0478468d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/76aa34c2980eb4e04cff8c240129e7902a68e03e7abd4cda2f435892d9b7814d.txt": {
+      "sha256": "899fb5819903381884d12ae3df73eb2da057600267dfbd746d7be83a8d157568",
+      "expected_sha256": "899fb5819903381884d12ae3df73eb2da057600267dfbd746d7be83a8d157568",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4a6f16c281f1cba8c6d2993c277822c3bb9df71c3fafa26d160286ff793d1475.txt": {
+      "sha256": "aec539e2f251a1fb03b828759915abef4827c9b60dcef6c5feefa52e475e531a",
+      "expected_sha256": "aec539e2f251a1fb03b828759915abef4827c9b60dcef6c5feefa52e475e531a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/75c511940e90a74920a934a2380d9ec24e00402313f592837fd71697ed727dee.txt": {
+      "sha256": "edcbc46fa07f35d590d6e71048f53000f714dfe88315f06312711f4a5520f8e0",
+      "expected_sha256": "edcbc46fa07f35d590d6e71048f53000f714dfe88315f06312711f4a5520f8e0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/bc406a9c298383ac0e3aa4481beac047ea6f18f498bf1d5b15aa08add66166bd.txt": {
+      "sha256": "5acc78b2d8c0c5a37f3d068589b8bb1432f1ab6198aaa2770f07d7392f325ab5",
+      "expected_sha256": "5acc78b2d8c0c5a37f3d068589b8bb1432f1ab6198aaa2770f07d7392f325ab5",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e5b3d7ad716ca031176620f174cf595bd31279ea8fb49c0f014cd2ef7ebb853c.txt": {
+      "sha256": "0a30b4c6c55a28319e1bf6a5c8e65d416fa5ec6dcc65bd11a7666651b2724e48",
+      "expected_sha256": "0a30b4c6c55a28319e1bf6a5c8e65d416fa5ec6dcc65bd11a7666651b2724e48",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e531662c01d2b4e6282e33cba264f276a8b12fa5191347344a2c713fe321405b.txt": {
+      "sha256": "afb61a23ed34aeb4a2eaa7f229b1d5cca1f34a95f2e159597e0b949d8ee6c042",
+      "expected_sha256": "afb61a23ed34aeb4a2eaa7f229b1d5cca1f34a95f2e159597e0b949d8ee6c042",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/703efcc6de7cf1c86e7b8ad8aee7fde894defaf186675e027c7b4f134b0f1f4d.txt": {
+      "sha256": "8519e45e9e31da58fc3cf7da111bc0ffca6450712045a7e4ff3f939a9d23a847",
+      "expected_sha256": "8519e45e9e31da58fc3cf7da111bc0ffca6450712045a7e4ff3f939a9d23a847",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/bdd2372ed9a330f8cdda29f42f961a1333dd68fc8c97dbbafc3ccdbd36c39baf.txt": {
+      "sha256": "d3b5cd7561fb13ad2f5660c4dea8a592a4b45edf450a8cce7507a2fb807bb3e0",
+      "expected_sha256": "d3b5cd7561fb13ad2f5660c4dea8a592a4b45edf450a8cce7507a2fb807bb3e0",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/37bd385241515cb5b5106ced13aea2c31ae5c8980ee202ec9412e06cf5b53f52.txt": {
+      "sha256": "a6ad4b86d1b4c94bc0697f648b45f75304db2864f5a6dcac48312106649a7a80",
+      "expected_sha256": "a6ad4b86d1b4c94bc0697f648b45f75304db2864f5a6dcac48312106649a7a80",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/61126bd2ad069a50c2b7e065f04f7978203d8bcad2ef91f091b6d4abbdcf9864.txt": {
+      "sha256": "4d9e7ba321c5001f824e05638cee92d42b32ddee290bf1488afed09336a9c023",
+      "expected_sha256": "4d9e7ba321c5001f824e05638cee92d42b32ddee290bf1488afed09336a9c023",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f591cae07ed5d45343e844d9f43083aa4693e9909a612817cdd298050fec2fc7.txt": {
+      "sha256": "12dae119a406f5719aa61fdddf774aacf826fe365c9c43886e5a089778b3115d",
+      "expected_sha256": "12dae119a406f5719aa61fdddf774aacf826fe365c9c43886e5a089778b3115d",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/599165c3ed3742b84a19f0c1960fad30919eab5470ccb5e73178b6350c714802.txt": {
+      "sha256": "8bd1fea680efe74b1533c7135f51fcbd13e7bf68b37ed4468ce0a25ca819f11f",
+      "expected_sha256": "8bd1fea680efe74b1533c7135f51fcbd13e7bf68b37ed4468ce0a25ca819f11f",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f67b7d907759d328e3b20f8661741c7c79e5c2ec1100599aa11199fd74f01e78.txt": {
+      "sha256": "e77ac54c8501a4e93f054e3eb8c6bb0003b127004359c17bd4a22424c8d3e24e",
+      "expected_sha256": "e77ac54c8501a4e93f054e3eb8c6bb0003b127004359c17bd4a22424c8d3e24e",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/095aa1e694b638f7183b36157df1bbf119eb8c22659e54668ede9f0f36a33315.txt": {
+      "sha256": "dfac7cfb3a3df09118670583e4200de9c0735bf09edfd83f2667620f27bd1145",
+      "expected_sha256": "dfac7cfb3a3df09118670583e4200de9c0735bf09edfd83f2667620f27bd1145",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b68b0684bf82cf9a5ec83c35e15573487bd3219dec7b29d820e072d40cf2f438.txt": {
+      "sha256": "5581506b08c12c6bf3ed612365f9f3c4dbc3fb989701a97711bb13da0f1db211",
+      "expected_sha256": "5581506b08c12c6bf3ed612365f9f3c4dbc3fb989701a97711bb13da0f1db211",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d54a91c799785216e0a455b505c74ee36bc2150e21465e4e98b7f0b8e98d22c3.txt": {
+      "sha256": "06b6d7cc39f291b20ad661984595df68cc759b9f2bbe3a31790b1894f9f78e64",
+      "expected_sha256": "06b6d7cc39f291b20ad661984595df68cc759b9f2bbe3a31790b1894f9f78e64",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d9329781786f1dc5a3264008f6f1715b3e3baf3560985782b7de58629098c7de.txt": {
+      "sha256": "60ab92756a05f0f6e15bace7e708b542a781d3f93264f880883c4fde64423cca",
+      "expected_sha256": "60ab92756a05f0f6e15bace7e708b542a781d3f93264f880883c4fde64423cca",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/7230c9ef6341f277ced683ca82ab67db4eb89ec6128d824e1aa5ba6f80de3dca.txt": {
+      "sha256": "9e808027342dd2a25eaef136f2e6d9d17e7f35d8b27fc05d54d9dc41e063744a",
+      "expected_sha256": "9e808027342dd2a25eaef136f2e6d9d17e7f35d8b27fc05d54d9dc41e063744a",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/556b2b03abda23785f6377d7bbf79347d6abc8bc33e8960c5a6c5cbed2eaaa84.txt": {
+      "sha256": "f72808ef81c60ca1de31d0eceaa65f72fd5293b258495f8d6d82be768baeb3de",
+      "expected_sha256": "f72808ef81c60ca1de31d0eceaa65f72fd5293b258495f8d6d82be768baeb3de",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/19e320f1b069b039a12f00c6fe283a4bb7b6dbf6775142dccda84f57a09006d3.txt": {
+      "sha256": "bfa3b7b419099b0eeee7b0b65b0993edfe2f9ec340db3873ba59d2acf7db1e17",
+      "expected_sha256": "bfa3b7b419099b0eeee7b0b65b0993edfe2f9ec340db3873ba59d2acf7db1e17",
+      "valid": true
+    },
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/20661ded76cb121ec46146cd6d9a247c88539dfc802ed19410125761e6ac5db1.txt": {
+      "sha256": "c5575215aae6eb7a78dfd296b74429783aef06eb75eded61852f5eb5cefa683e",
+      "expected_sha256": "c5575215aae6eb7a78dfd296b74429783aef06eb75eded61852f5eb5cefa683e",
+      "valid": true
+    }
+  },
+  "global_integrity_reused": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.integrity.json",
+  "global_reference_reconciliation_reused": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.reference-reconciliation.json",
+  "scope": "Own assigned source captures only. Metadata, licenses and global locator/gzip gates reused. No production/runtime approval."
+}

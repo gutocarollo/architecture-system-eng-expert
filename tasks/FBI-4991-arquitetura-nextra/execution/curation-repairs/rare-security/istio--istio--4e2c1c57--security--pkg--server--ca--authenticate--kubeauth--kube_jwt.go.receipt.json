@@ -1,0 +1,15 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--server--ca--authenticate--kubeauth--kube_jwt.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.143061+00:00",
+  "sha256": "c8219028153a953413f5a9063a878b981926bb057aca19d64b8c5db96e15a21b",
+  "line_count": 184,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0f2029ef0b239c09cd65dea1d22c659aa1a0c07036642416c9c79a147201049f.txt",
+  "upstream_observed_utc": "2026-10-15T03:49:30.458543+00:00"
+}

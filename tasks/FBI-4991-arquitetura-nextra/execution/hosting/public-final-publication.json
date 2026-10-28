@@ -1,0 +1,23 @@
+{
+  "observed_at": "2026-10-15T18:54:46.137Z",
+  "project_id": "appgprj_6ad10a8b63b081919c3eabac313e64ab",
+  "version_number": 3,
+  "version_id": "appgprj_6ad10a8b63b081919c3eabac313e64ab~appgver_5995d681e1b881918b637f58444674f5",
+  "source_commit_sha": "fafe26360c7140239a74ce31305fb07637de7c54",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_000000003a6081f497f612d44347425a",
+    "content_hash": "sha256:b5cc97ac26c8fad1613ba2d1b1e9bcf4eb300c5a454662e67bd366276da03f66",
+    "size_bytes": 81920,
+    "file_count": 2
+  },
+  "release_id": "9610402f817c2a20860be620f45c164b3b77478feed1cbf769f57b021fb8d6bf",
+  "access_mode": "public",
+  "access_policy_revision": 2,
+  "environment_revision": 4,
+  "deployment_id": "appgdep_6ad12157e6208191952a28970a7763e3",
+  "status": "succeeded",
+  "deployment_updated_at": "2026-10-15T18:54:35.732875+00:00",
+  "url": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+  "password_values_recorded": false
+}

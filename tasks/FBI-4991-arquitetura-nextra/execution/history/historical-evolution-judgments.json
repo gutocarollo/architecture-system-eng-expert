@@ -1,0 +1,65 @@
+{
+  "scope": "Sequências de aprendizado com referências explícitas. Uma sequência de cards não prova repetição da mesma causa nem implantação.",
+  "families": [
+    {
+      "id": "shared-flight-lifetime",
+      "issues": ["FBI-2331"],
+      "code": ["a304a4e56480648bdc60be96c00532c38d18df9f", "a8bb7023f1ad080cb899cccfb73225231b28e235"],
+      "sequence": "O polling multiplicava consultas idênticas. O coalescimento uniu os solicitantes, mas passou a compartilhar também o efeito do cancelamento. O primeiro reparo protegeu o produtor e entregou a limpeza à tarefa; a atualização antecipada veio depois, preservando essa proteção.",
+      "lesson": "Reutilizar trabalho exige definir quem o possui e quando ele termina. Melhorar latência depois disso não autoriza mudar a garantia de cancelamento.",
+      "evidence": "cases-source.json e history-causal-batch-001.json contêm os pais, módulos e kernels lidos.",
+      "level": "SELECTED_HISTORICAL_CODE_KERNELS"
+    },
+    {
+      "id": "authentication-recovery",
+      "issues": ["FBI-2442", "FBI-2502", "FBI-2520", "FBI-4699"],
+      "sequence": "Os relatos passam pela recuperação do seletor, pelo momento em que a autenticação fica pronta e pela comparação de um 401 atrasado com o token que já mudou. São caminhos diferentes que podem produzir a mesma tela vazia ou volta ao login.",
+      "lesson": "O sintoma compartilhado não basta para declarar a mesma causa. A investigação precisa preservar o token da requisição e o estado que cada consumidor observou.",
+      "evidence": "Os trechos mínimos e as referências de PR/diff estão nas partes causal de public-causal/.",
+      "level": "SOURCE_REPORTED_SEQUENCE_NOT_INDEPENDENT_RUNTIME_CONFIRMATION"
+    },
+    {
+      "id": "rename-consumer-fanout",
+      "issues": ["FBI-2722", "FBI-3254", "FBI-3332", "FBI-4358", "FBI-3257"],
+      "sequence": "A mudança de nomes físicos é seguida por relatos de contrato misto, leitura de chaves antigas e troca indevida de um argumento que não era coluna do DW. A própria varredura distingue ocorrências legítimas das que precisam migrar.",
+      "lesson": "Igualdade de grafia não garante igualdade de significado. Um rename precisa acompanhar produtor, payload e consumidor; a quantidade de ocorrências não autoriza substituição global.",
+      "level": "SOURCE_REPORTED_SEQUENCE_WITH_ACTUAL_PATCH_ROUTES"
+    },
+    {
+      "id": "insurance-inactive-history-policy",
+      "issues": ["FBI-3498", "FBI-4307", "FBI-4362"],
+      "sequence": "O primeiro relato trata da produção histórica que desaparece ao desligar o especialista. Depois surge o controle de entrada dos inativos e um refinamento de qual mês participa da meta.",
+      "lesson": "Preservar fato histórico e definir uma nova política de meta são decisões distintas. O refinamento posterior não prova regressão da regra anterior.",
+      "level": "SOURCE_REPORTED_POLICY_EVOLUTION"
+    },
+    {
+      "id": "credential-cache-runtime-contract",
+      "issues": ["FBI-2343", "FBI-2344", "FBI-2731", "FBI-3191", "FBI-2337", "FBI-2457"],
+      "sequence": "Os relatos distinguem consulta externa redundante, cache por processo, cache compartilhado que depende de configuração e uma investigação que concluiu que o cache funcionava. A melhoria de TTL foi mantida separada desse último diagnóstico corrigido.",
+      "lesson": "Presença do código, ativação de runtime e benefício observado são provas diferentes. Falta de ganho aparente não demonstra ausência de cache.",
+      "level": "SOURCE_REPORTED_SEQUENCE_WITH_EXPLICIT_DIAGNOSTIC_CORRECTIONS"
+    },
+    {
+      "id": "employee-effects-and-concurrency",
+      "issues": ["FBI-4394", "FBI-4395", "FBI-4396", "FBI-4397", "FBI-4398", "FBI-4924"],
+      "sequence": "A frente separa persistência de coordenação, registra intenção junto com o commit, propõe retomada e reconciliação dos efeitos externos e torna o resultado visível. Outro caso demonstra que preservar a quantidade de versões SCD2 não impede perder o conteúdo de um writer concorrente.",
+      "lesson": "Durabilidade da intenção e proteção contra atualização perdida resolvem problemas diferentes. Uma não substitui a outra, e resultado externo desconhecido não autoriza recriação cega.",
+      "evidence": "O kernel de revisão transitória está na primeira onda; os outros cards permanecem classificados pelo relato ou intenção da mudança.",
+      "level": "MIXED_SELECTED_KERNEL_AND_REPORTED_DESIGN_SEQUENCE"
+    },
+    {
+      "id": "temporal-eligibility-policy",
+      "issues": ["FBI-2944", "FBI-3447", "FBI-2969"],
+      "sequence": "A elegibilidade passou a considerar a reunião futura, mas a revisão expôs que ausência hoje e ausência na reunião atendem intenções diferentes. O escopo de bloqueio tornou essa escolha explícita; dispensas posteriores formam outra política, não um sinônimo de ausência.",
+      "lesson": "Uma data de referência precisa carregar a pergunta de negócio. Unificar consultas sem unificar a pergunta pode preservar o erro.",
+      "level": "SELECTED_POLICY_KERNEL_PLUS_REPORTED_FOLLOWUPS"
+    },
+    {
+      "id": "roa-different-questions",
+      "issues": ["FBI-3083", "FBI-4604"],
+      "sequence": "Um relato distingue executado de projetado. Outro trata da ponderação do ratio e da cardinalidade do join por assessor. Ambos se chamam ROA, mas as perguntas e os mecanismos são diferentes.",
+      "lesson": "O nome de um indicador não identifica uma causa. A análise deve explicitar fórmula, grão, população e janela antes de comparar os números.",
+      "level": "SOURCE_REPORTED_CONTRAST_WITH_SELECTED_FBI4604_KERNEL"
+    }
+  ]
+}

@@ -1,0 +1,417 @@
+{
+  "canonical_concepts": 310,
+  "priority_entries": [
+    {
+      "priority_id": 1,
+      "concept_ids": [
+        "modular-monolith"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/01-arquiteturas-de-aplicacao/#modular-monolith"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 2,
+      "concept_ids": [
+        "hexagonal-ports-adapters"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/01-arquiteturas-de-aplicacao/#hexagonal-ports-adapters"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 3,
+      "concept_ids": [
+        "vertical-slice-architecture"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/01-arquiteturas-de-aplicacao/#vertical-slice-architecture"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 4,
+      "concept_ids": [
+        "ddd",
+        "bounded-context"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/10-ddd-domain-driven-design/#ddd",
+        "/referencia/curadoria/10-ddd-domain-driven-design/#bounded-context"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 5,
+      "concept_ids": [
+        "event-driven-architecture"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/01-arquiteturas-de-aplicacao/#event-driven-architecture"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 6,
+      "concept_ids": [
+        "publish-subscribe"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/03-event-driven-messaging/#publish-subscribe"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 7,
+      "concept_ids": [
+        "transactional-outbox"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#transactional-outbox"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 8,
+      "concept_ids": [
+        "change-data-capture-cdc"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#change-data-capture-cdc"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 9,
+      "concept_ids": [
+        "saga"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#saga"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 10,
+      "concept_ids": [
+        "idempotency"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#idempotency"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 11,
+      "concept_ids": [
+        "cqrs"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#cqrs"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 12,
+      "concept_ids": [
+        "event-sourcing"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#event-sourcing"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 13,
+      "concept_ids": [
+        "materialized-view",
+        "projection"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#materialized-view",
+        "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#projection"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 14,
+      "concept_ids": [
+        "cache-aside"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/06-cache/#cache-aside"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 15,
+      "concept_ids": [
+        "refresh-ahead"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/06-cache/#refresh-ahead"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 16,
+      "concept_ids": [
+        "circuit-breaker"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/07-resiliencia/#circuit-breaker"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 17,
+      "concept_ids": [
+        "retry",
+        "exponential-backoff",
+        "jitter"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/07-resiliencia/#retry",
+        "/referencia/curadoria/07-resiliencia/#exponential-backoff",
+        "/referencia/curadoria/07-resiliencia/#jitter"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 18,
+      "concept_ids": [
+        "bulkhead"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/07-resiliencia/#bulkhead"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 19,
+      "concept_ids": [
+        "backpressure"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/07-resiliencia/#backpressure"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 20,
+      "concept_ids": [
+        "rate-limiting"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/07-resiliencia/#rate-limiting"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 21,
+      "concept_ids": [
+        "api-gateway"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/09-apis-e-integracao/#api-gateway"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 22,
+      "concept_ids": [
+        "backend-for-frontend-bff"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/09-apis-e-integracao/#backend-for-frontend-bff"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 23,
+      "concept_ids": [
+        "strangler-fig"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/11-padroes-para-decompor-sistemas/#strangler-fig"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 24,
+      "concept_ids": [
+        "expand-contract"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/11-padroes-para-decompor-sistemas/#expand-contract"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 25,
+      "concept_ids": [
+        "blue-green-deployment"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/12-deploy-e-releases/#blue-green-deployment"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 26,
+      "concept_ids": [
+        "canary-release"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/12-deploy-e-releases/#canary-release"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 27,
+      "concept_ids": [
+        "feature-flags"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/11-padroes-para-decompor-sistemas/#feature-flags"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 28,
+      "concept_ids": [
+        "leader-election"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#leader-election"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 29,
+      "concept_ids": [
+        "distributed-lock",
+        "lease",
+        "fencing-token"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#distributed-lock",
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#lease",
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#fencing-token"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 30,
+      "concept_ids": [
+        "replication"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/13-alta-disponibilidade/#replication"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 31,
+      "concept_ids": [
+        "sharding"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#sharding"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 32,
+      "concept_ids": [
+        "consistent-hashing"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#consistent-hashing"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 33,
+      "concept_ids": [
+        "optimistic-concurrency-control"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#optimistic-concurrency-control"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 34,
+      "concept_ids": [
+        "write-ahead-log-wal"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#write-ahead-log-wal"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 35,
+      "concept_ids": [
+        "sidecar"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/09-apis-e-integracao/#sidecar"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 36,
+      "concept_ids": [
+        "service-mesh"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/09-apis-e-integracao/#service-mesh"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 37,
+      "concept_ids": [
+        "anti-corruption-layer"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/09-apis-e-integracao/#anti-corruption-layer"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 38,
+      "concept_ids": [
+        "competing-consumers"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/03-event-driven-messaging/#competing-consumers"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 39,
+      "concept_ids": [
+        "dead-letter-queue"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/03-event-driven-messaging/#dead-letter-queue"
+      ],
+      "pending": []
+    },
+    {
+      "priority_id": 40,
+      "concept_ids": [
+        "state-machine"
+      ],
+      "concept_reference_urls": [
+        "/referencia/curadoria/16-workflow-e-processamento/#state-machine"
+      ],
+      "pending": []
+    }
+  ]
+}

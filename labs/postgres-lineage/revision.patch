@@ -1,0 +1,10 @@
+--- candidate.sql
++++ candidate.sql
+@@ -4,5 +4,7 @@
+                 {FIELD_VALID_TO} = :current_timestamp
+             WHERE {FIELD_EMPLOYEE_ID} = :{FIELD_EMPLOYEE_ID}
+             AND {FIELD_IS_CURRENT} = TRUE
++            AND _employee_id::text || ':' || xmin::text = :source_revision
+             {concurrency_predicate}
++            RETURNING _employee_id
+         

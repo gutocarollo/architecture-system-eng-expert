@@ -1,0 +1,130 @@
+---
+title: "15. Observabilidade"
+description: "Sinais, identidade e limites dos doze conceitos de observabilidade do catálogo."
+diataxis: reference
+---
+
+# 15. Observabilidade
+
+Esta referência conserva os labels do catálogo. O código MakersHub corresponde ao snapshot `main@e233fb046ec333982cd1547171b0f0bd8d8d92ee`, lido em 14/10/2026 às 16:16 UTC; nenhum exporter, dashboard ou alerta em produção foi medido nesta frente. A skill `observability-and-instrumentation` e o apoio `distributed-tracing` estão na [curadoria](/referencia/skills-e-projetos/). A [explicação](/explicacoes/observability/) apresenta as histórias e as contas.
+
+<span id="g15-e001" />
+
+## Structured Logging
+
+Registra eventos com campos estáveis e consultáveis. Uma falha proposta inclui evento, resultado, tentativa e identidade da operação, sem payload completo de cliente. O limite é qualidade e segurança dos campos; texto que parece chave-valor não demonstra schema ou exporter uniforme. A skill é `observability-and-instrumentation`; a base [logs OpenTelemetry](https://opentelemetry.io/docs/concepts/signals/logs/) tem aplicação **REF** no [OTel Demo](https://opentelemetry.io/docs/demo/architecture/). Não foi certificada uma política uniforme de logs MakersHub.
+
+{/* current-curation:structured-logging */}
+
+A [curadoria de Structured Logging](/referencia/curadoria/15-observabilidade/#structured-logging) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e002" />
+
+## Centralized Logging
+
+Reúne logs de diferentes componentes para consulta com retenção e acesso definidos. Num incidente proposto, permite localizar API e worker no mesmo recorte temporal. O limite é que centralizar não reconstrói um evento que o produtor não emitiu. A skill é `observability-and-instrumentation`; a base e produto OSS [Loki](https://github.com/grafana/loki/blob/main/cmd/loki/main.go) fornecem implementação de comparação. Sua implantação local não foi comprovada.
+
+{/* current-curation:centralized-logging */}
+
+A [curadoria de Centralized Logging](/referencia/curadoria/15-observabilidade/#centralized-logging) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e003" />
+
+## Distributed Tracing
+
+Relaciona etapas causais por spans e contexto propagado. Um agendamento proposto liga API, consulta e integração no mesmo trace. O limite é que um UUID em linhas separadas não comprova relações de pai/filho ou exportação. A skill é `distributed-tracing`; a base [propagação OpenTelemetry](https://opentelemetry.io/docs/concepts/context-propagation/) tem aplicação **REF didática** no [OTel Demo](https://opentelemetry.io/docs/demo/architecture/), sem spans MakersHub comprovados.
+
+{/* current-curation:distributed-tracing */}
+
+A [curadoria de Distributed Tracing](/referencia/curadoria/15-observabilidade/#distributed-tracing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e004" />
+
+## Correlation ID
+
+Reúne acontecimentos da mesma operação, inclusive tentativas ou pedidos diferentes. Na recuperação proposta de uma integração, conserva a identidade da intenção entre etapas. O limite é transportar o contexto correto e definir seu escopo; gerar um novo ID a cada etapa pode quebrar essa ligação. A skill é `observability-and-instrumentation`; [contexto OpenTelemetry](https://opentelemetry.io/docs/concepts/context-propagation/) fornece a base e o Demo é **REF**. O ContextVar Airflow local não teve vínculo comprovado com o ID de entrada.
+
+{/* current-curation:correlation-id */}
+
+A [curadoria de Correlation ID](/referencia/curadoria/03-event-driven-messaging/#correlation-id) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e005" />
+
+## Request ID
+
+Identifica uma requisição. `SecurityHeadersMiddleware` gera UUID e devolve `X-Request-ID` no checkout. O limite é que uma operação pode usar várias requisições e que o header sozinho não é trace distribuído. A skill é `observability-and-instrumentation`; a base é identidade de request, aplicada localmente. O plugin OSS [APISIX request-id](https://apisix.apache.org/docs/apisix/plugins/request-id/) oferece **REF** de geração/transporte na entrada, sem gateway local inferido.
+
+{/* current-curation:request-id */}
+
+A [curadoria de Request ID](/referencia/curadoria/15-observabilidade/#request-id) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e006" />
+
+## Metrics
+
+Medem quantidades ou distribuições de um comportamento. O middleware MakersHub alimenta contadores, status e duração; o diff histórico separa acumulado e delta. O limite é unidade, período, cardinalidade e agregação: uma média não é um percentil. A skill é `observability-and-instrumentation`; a base [métricas OpenTelemetry](https://opentelemetry.io/docs/concepts/signals/metrics/) e a aplicação **REF** [OTel Demo](https://opentelemetry.io/docs/demo/architecture/) fornecem comparação, sem garantir exporter local.
+
+{/* current-curation:metrics */}
+
+A [curadoria de Metrics](/referencia/curadoria/15-observabilidade/#metrics) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e007" />
+
+## RED Method (Rate, Errors, Duration)
+
+Observa taxa, erros e duração de operações. Num cenário fictício, 600 pedidos em 60 segundos representam dez por segundo; doze falhas representam 2%. O limite é definir o erro e observar distribuição de duração, sem concluir causa apenas desses sinais. A skill é `observability-and-instrumentation`; o [método RED](https://grafana.com/blog/the-red-method-how-to-instrument-your-services/) orienta contadores e histogramas. O [OTel Demo e cobertura de métricas](https://opentelemetry.io/docs/demo/telemetry-features/metric-coverage/) é aplicação **REF**, sem certificar todos os endpoints MakersHub.
+
+{/* current-curation:red-method-rate-errors-duration */}
+
+A [curadoria de RED Method (Rate, Errors, Duration)](/referencia/curadoria/15-observabilidade/#red-method-rate-errors-duration) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e008" />
+
+## USE Method (Utilization, Saturation, Errors)
+
+Observa utilização, saturação e erros por recurso. Um pool hipotético com sete de dez vagas ocupadas tem 70% de utilização, enquanto a espera por vaga informa saturação. O limite é a medição representar o recurso correto e não confundir ocupação com causa. A skill é `observability-and-instrumentation`; a base é a [metodologia USE de Brendan Gregg](https://www.brendangregg.com/usemethod.html). O produto OSS [node_exporter](https://github.com/prometheus/node_exporter) oferece coletores de CPU, pressão e disco para aplicá-la. Coletar esses sinais não certifica um dashboard USE completo.
+
+{/* current-curation:use-method-utilization-saturation-errors */}
+
+A [curadoria de USE Method (Utilization, Saturation, Errors)](/referencia/curadoria/15-observabilidade/#use-method-utilization-saturation-errors) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e009" />
+
+## Golden Signals
+
+Reúnem latência, tráfego, erros e saturação para avaliar um serviço. Numa consulta proposta, mostram mudança de procura, espera e falhas. O limite é que esses sinais orientam investigação e não provam uma causa única. A skill é `observability-and-instrumentation`; a base é [Google SRE](https://sre.google/sre-book/monitoring-distributed-systems/). O [OTel Demo](https://opentelemetry.io/docs/demo/architecture/) é **REF** de sinais de comparação, sem dashboard completo dos quatro comprovado nesta frente.
+
+{/* current-curation:golden-signals */}
+
+A [curadoria de Golden Signals](/referencia/curadoria/15-observabilidade/#golden-signals) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e010" />
+
+## OpenTelemetry
+
+Oferece APIs, SDKs e protocolos para instrumentar e transportar sinais. O blueprint do capítulo propõe contexto e spans entre etapas. O limite é que dependência instalada não comprova produtor, exporter, destino e leitura funcionando. A skill é `distributed-tracing`; a base [conceitos OpenTelemetry](https://opentelemetry.io/docs/concepts/) e a aplicação OSS **REF** [Demo](https://opentelemetry.io/docs/demo/architecture/) fornecem peças de estudo. Nenhum deploy OTel MakersHub foi afirmado.
+
+{/* current-curation:opentelemetry */}
+
+A [curadoria de OpenTelemetry](/referencia/curadoria/15-observabilidade/#opentelemetry) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e011" />
+
+## Health Checks
+
+Verificam uma condição de saúde definida. Uma probe proposta pode observar se a instância recebe pedidos. O limite é o alcance: sucesso de probe não confirma a operação de negócio inteira. A skill é `observability-and-instrumentation`; a base e produto OSS [Kubernetes probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) têm exemplos **REF**. Os recibos do runtime pertencem a [disponibilidade](/explicacoes/availability/).
+
+{/* current-curation:health-check */}
+
+A [curadoria de Health Check](/referencia/curadoria/07-resiliencia/#health-check) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g15-e012" />
+
+## Synthetic Monitoring
+
+Executa uma operação controlada para observar um comportamento. Num ensaio proposto, consulta uma rota com identidade fictícia e confirma resultado sem efeito de cliente. O limite é escolher saída segura e reconhecer o que o ensaio cobre. A skill adjacente é `agentic-end-to-end-testing`; o produto OSS e base [blackbox_exporter](https://github.com/prometheus/blackbox_exporter) fornecem probes de comparação. Probe HTTP não comprova um fluxo Salesforce completo; nenhum ensaio em produção foi feito nesta autoria.
+
+{/* current-curation:synthetic-monitoring */}
+
+A [curadoria de Synthetic Monitoring](/referencia/curadoria/15-observabilidade/#synthetic-monitoring) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

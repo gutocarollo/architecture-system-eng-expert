@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "LICENSE",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+  "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "line_count": 202,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE"
+}

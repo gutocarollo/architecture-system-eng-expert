@@ -1,0 +1,156 @@
+﻿
+Creating a Processing Unit
+Skip To Main Content
+Account
+Settings
+Logout
+placeholder
+Account
+Settings
+Logout
+Filter:
+All Files
+Submit Search
+docs.gigaspaces.com
+Release Notes
+Products
+Architectural Overview
+Guides
+Devops Tools
+Reference Implementations
+Glossary
+Search
+Archive
+Documentation
+Products
+Architectural Overview
+Guides
+Devops Tools
+Reference Implementations
+Glossary
+Blog
+My Tickets
+Watch a Demo
+Contact Us
+Break free from traditional database limitations with
+I
+n-
+M
+emory
+D
+ata
+G
+rid - achieve unparalleled
+speed, persistence, and accuracy
+.
+Book a demo today!
+Share
+18 March 2024
+XAP
+XAP Skyline
+Creating a Processing Unit
+The
+PU
+This is the unit of packaging and deployment in the GigaSpaces Data Grid, and is essentially the main GigaSpaces service. The Processing Unit (PU) itself is typically deployed onto the Service Grid. When a Processing Unit is deployed, a Processing Unit instance is the actual runtime entity.
+is the fundamental unit of deployment in
+data grid
+. The PU itself runs within a
+Processing Unit
+This is the unit of packaging and deployment in the GigaSpaces Data Grid, and is essentially the main GigaSpaces service. The Processing Unit (PU) itself is typically deployed onto the Service Grid. When a Processing Unit is deployed, a Processing Unit instance is the actual runtime entity.
+Container and is deployed onto the
+Service Grid
+A built-in orchestration tool which contains a set of Grid Service Containers (GSCs) managed by a Grid Service Manager. The containers host various deployments of Processing Units and data grids. Each container can be run on a separate physical machine. This orchestration is available for XAP only.
+. Once a PU is deployed, a PU instance is the actual runtime entity.
+There are two types of Processing Unit Containers:
+Integrated Processing Unit Container A container that runs the PU inside an
+IDE
+Integrated Development Environment. A software application that helps programmers develop software code efficiently. It increases developer productivity by combining capabilities such as software editing, building, testing, and packaging in an easy-to-use application. Example: DBeaver.
+(e.g. IntelliJ IDEA, Eclipse). The integrated processing unit container enables to run the PU inside your IDE for testing and debugging purposes.
+Service Grid Processing Unit Container A Processing Unit Container which runs within a Grid Service Container. It enables running the PU within a service grid, which provides self-healing and SLA capabilities to components deployed on it.
+Processing Unit (PU)
+The PU is a deployable, independent, scalable unit, which is the building block for the
+Space
+Where GigaSpaces data is stored. It is the logical cache that holds data objects in memory and might also hold them in layered in tiering. Data is hosted from multiple SoRs, consolidated as a unified data model.
+Based Architecture (
+SBA
+Space-Based Architecture. This architecture implementation is a set of Processing Units, with the following properties: Each processing unit instances holds a partitioned space instance and one or more services that are registered on events on that specific partition. Together they form an application cluster. Utlized by Utilized GigaSpaces cloud-native IMDG.
+). The PU is a combination of service beans and/or an embedded space instance. The artifacts that belong to a PU are packaged as a JAR or WAR file.
+There are several types of PUs; data only, business-logic only, mixed PUs (which contain both data and business logic) and special purpose PUs.
+Data Only PU
+This type of PU does not include any business logic, only a Space. The PU simply defines the runtime characteristics of the space, i.e. its runtime topology, the number of space replicas/partitions, etc.
+Business Logic Only PU
+The Business-logic Only PU implements your application code, and does not include any data. Typically, your code interacts with a remote Space which is defined by another PU. By defining the PU as business logic only, you create an application server which is hosted and monitored by the Service Grid. The application can be a typical
+Spring
+application deployed to a
+data grid
+PU.
+Mixed PU
+This type of PU's includes both business logic and a space. Typically, the business logic interacts with a local space instance (i.e. a data grid instance running within the same PU instance) to achieve lowest possible latency and best performance.
+Web PU
+Data grid
+allows you to deploy web applications (packaged as a WAR file) onto the Service Grid. The integration is built on top of the Service Grid Processing Unit Container. The web application itself is a pure, JEE based, web application. The application can be the most generic web application, and automatically make use of the Service Grid features. The web application can define a Space (either embedded or remote) very easily (either using Spring or not).The web container used behind the scenes is Jetty.
+For more information, see the
+Web Application Support
+section in the developer guide.
+The PU JAR File
+Much like a JEE web application or an OSGi bundle, The PU is packaged as a .jar file and follows a certain directory structure which enables the
+data grid
+runtime environment to easily locate the deployment descriptor and load its classes and the libraries it depends on. A typical PU looks as follows:
+|----META-INF |--------spring |------------pu.xml |------------pu.properties |------------sla.xml |--------MANIFEST.MF |----xap |--------tutorial |------------model |----------------Payment.class |----------------User.class |----lib |--------hibernate
+6.4.8
+.jar |--------.... |--------commons-math.jar
+The PU JAR file is composed of several key elements:
+META-INF/spring/pu.xml (mandatory): This is the PU's deployment descriptor, which is in fact a Spring context XML configuration with a number of
+data grid
+-specific namespace bindings. These bindings include
+data grid
+specific components (such as the space for example). The pu.xml file typically contains definitions of
+data grid
+components (space, event containers, remote service exporters) and user defined beans.
+META-INF/spring/sla.xml (not mandatory): This file contains SLA definitions for the PU (i.e. number of instances, number of backup and deployment requirements). Note that this is optional, and can be replaced with an
+<os:sla>
+definition in the pu.xml file. If neither is present, the default SLA will be applied. SLA definitions can also be specified at the deploy time via command line arguments.
+META-INF/spring/pu.properties (not mandatory): Enables you to externalize properties included in the pu.xml file (e.g. database connection username and password), and also set system-level deployment properties and overrides, such as JEE related deployment properties.
+User class files: Your processing unit's classes (here under the xap.tutorial package)
+lib: Other JARson which your PU depends.
+META-INF/MANIFEST.MF (not mandatory): This file could be used for adding additional jars to the PU classpath, using the standard MANIFEST.MF Class-Path property.
+The pu.xml File
+This file is a Spring framework XML configuration file. It leverages the Spring framework IoC container and extends it by using the Spring custom namespace mechanism.
+The definitions in the pu.xml file are divided into 2 major categories:
+GigaSpaces specific components, such as space, event containers or remote service exporters.
+User-defined beans, which define instances of user classes to be used by the PU. For example, user defined event handlers to which the event containers delegate events as those are received.
+Here is an example of a pu.xml file:
+<?xml version="1.0" encoding="UTF-8"?> <!-- top level element of the Spring configuration. Note the multiple namespace definition for both GigaSpaces and Spring. --> <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:os-core="http://www.openspaces.org/schema/core" xmlns:os-events="http://www.openspaces.org/schema/events" xmlns:os-remoting="http://www.openspaces.org/schema/remoting" xmlns:os-sla="http://www.openspaces.org/schema/sla" xsi:schemaLocation=" http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.openspaces.org/schema/core http://www.openspaces.org/schema/17.1.0/core/openspaces-core.xsd http://www.openspaces.org/schema/events http://www.openspaces.org/schema/17.1.0/events/openspaces-events.xsd http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/17.1.0/remoting/openspaces-remoting.xsd http://www.openspaces.org/schema/sla http://www.openspaces.org/schema/17.1.0/sla/openspaces-sla.xsd"> <!-- Enables to configure Spring beans through annotations --> <context:annotation-config /> <!-- Enable OpenSpaces core annotation support. --> <os-core:annotation-support /> <!-- Enables using @Polling and @Notify annotations to creating polling and notify containers --> <os-events:annotation-support /> <!-- Enables using @RemotingService and other remoting related annotations --> <os-remoting:annotation-support /> <!-- A bean representing a space. Here we configure an embedded space (note the url element which does not contain any remote protocol prefix. Also note that we do not specify here the cluster topology of the space. It is declared by the os-sla:sla element of this pu.xml file. --> <os-core:embedded-space id="space" space-name="eventSpace" /> <!-- Define the GigaSpace instance that the application will use to access the space --> <os-core:giga-space id="eventSpace" space="space"/> </beans>
+For more information, see the
+Configuration
+page in the Processing Unit section of the developer guide.
+Creating a Processing Unit
+Processing Unit (PU)
+Data Only PU
+Business Logic Only PU
+Mixed PU
+Web PU
+The PU JAR File
+The pu.xml File
+Company
+About
+Contact Us
+Book a Demo
+What's New
+What's new in the latest release
+Resources
+Glossary
+Webinars
+Blogs
+Videos
+Solution Briefs & Whitepapers
+Copyright © GigaSpaces
+2026
+All rights reserved |
+Privacy Policy
+|
+Terms of Use
+|
+Visit us at gigaspaces.com
+Archive.html
+17.1.0

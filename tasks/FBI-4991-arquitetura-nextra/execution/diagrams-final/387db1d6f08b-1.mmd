@@ -1,0 +1,11 @@
+sequenceDiagram
+    participant Service as _apply no MakersHub
+    participant DB as PostgreSQL
+    Service->>DB: UPDATE owner para B e pending para TRUE, se owner ainda é A
+    alt A ainda é o owner esperado
+        DB-->>Service: Uma linha alterada
+        Note over Service,DB: Estado e intenção mudam na mesma instrução
+    else Outro executor já mudou o owner
+        DB-->>Service: Nenhuma linha alterada
+        Service->>Service: Retorna False e evita atribuir efeitos da troca perdida
+    end

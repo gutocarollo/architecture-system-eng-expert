@@ -1,0 +1,8 @@
+stateDiagram-v2
+    [*] --> Manual
+    Manual --> Manual: selectMode(manual)
+    Manual --> Automatic: selectMode(automatic)
+    Automatic --> Automatic: selectMode(automatic)
+    Automatic --> Manual: selectMode(manual)
+    Manual --> Manual: entrada inválida recusada
+    Automatic --> Automatic: entrada inválida recusada

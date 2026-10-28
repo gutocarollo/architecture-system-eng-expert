@@ -1,0 +1,12 @@
+{
+  "repo": "signalapp/Signal-Server",
+  "path": "service/src/main/java/org/whispersystems/textsecuregcm/controllers/MessageController.java",
+  "revision": "d1073e00bdf3d411eaa9ebdd288d7a99202b06f9",
+  "url": "https://github.com/signalapp/Signal-Server/blob/d1073e00bdf3d411eaa9ebdd288d7a99202b06f9/service/src/main/java/org/whispersystems/textsecuregcm/controllers/MessageController.java",
+  "raw_url": "https://raw.githubusercontent.com/signalapp/Signal-Server/d1073e00bdf3d411eaa9ebdd288d7a99202b06f9/service/src/main/java/org/whispersystems/textsecuregcm/controllers/MessageController.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:06:44.871002+00:00",
+  "sha256": "442f510ddb1f17833a2c03bba87187a71c5b0fb98b19505964afa469a2056b3c",
+  "line_count": 757,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-signalapp--Signal-Server--service--src--main--java--org--whispersystems--textsecuregcm--controllers--MessageController.java"
+}

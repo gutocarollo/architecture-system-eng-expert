@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-mapper-cli",
+  "path": "build.gradle",
+  "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+  "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/build.gradle",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-cli/b819362eed75e7dfb0332fa1acdda56f9029b91d/build.gradle",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:33.388839+00:00",
+  "sha256": "fb579f7ecaa7d622a0277db6dde24c9e1345aef2e926a40d6c7a12c4c9a22536",
+  "line_count": 175,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--build.gradle"
+}

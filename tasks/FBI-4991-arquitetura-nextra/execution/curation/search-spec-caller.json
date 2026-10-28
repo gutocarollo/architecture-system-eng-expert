@@ -1,0 +1,27 @@
+{
+  "query": "repo:apache/fineract \"CriteriaQueryFactory\" -path:CriteriaQueryFactory.java",
+  "observed_utc": "2026-10-15T01:53:22.603795Z",
+  "total_count": 4,
+  "items": [
+    {
+      "repo": "apache/fineract",
+      "path": "fineract-core/src/main/java/org/apache/fineract/infrastructure/core/jpa/CriteriaQueryFactory.java",
+      "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/jpa/CriteriaQueryFactory.java"
+    },
+    {
+      "repo": "apache/fineract",
+      "path": "fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/LoanSummaryBalancesRepository.java",
+      "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/LoanSummaryBalancesRepository.java"
+    },
+    {
+      "repo": "apache/fineract",
+      "path": "fineract-core/src/main/java/org/apache/fineract/portfolio/client/domain/search/SearchingClientRepositoryImpl.java",
+      "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/portfolio/client/domain/search/SearchingClientRepositoryImpl.java"
+    },
+    {
+      "repo": "apache/fineract",
+      "path": "fineract-investor/src/main/java/org/apache/fineract/investor/domain/search/SearchingExternalAssetOwnerRepositoryImpl.java",
+      "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-investor/src/main/java/org/apache/fineract/investor/domain/search/SearchingExternalAssetOwnerRepositoryImpl.java"
+    }
+  ]
+}

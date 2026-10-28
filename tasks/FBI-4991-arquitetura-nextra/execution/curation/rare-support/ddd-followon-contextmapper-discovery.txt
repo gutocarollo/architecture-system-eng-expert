@@ -1,0 +1,363 @@
+Context Map Discovery | Context Mapper
+Toggle navigation
+Documentation
+Project Background
+Getting Involved
+News
+Introduction
+Welcome
+Getting started
+Create CML Project
+Examples
+Usage as Library
+Frequently Asked Questions
+Language Reference (Core)
+CML Reference - Introduction
+Language Semantics
+Context Map
+Bounded Context
+Domain and Subdomain
+Domain Vision Statement
+Partnership
+Shared Kernel
+Customer/Supplier
+Conformist
+Open Host Service
+Anticorruption Layer
+Published Language
+Responsibility Layers
+Knowledge Level
+Aggregate
+Tactic DDD Syntax
+Application and Process Layer
+User Requirements
+Stakeholders
+Value Registers
+Imports
+Analysis and Design Transformations
+Rapid Object-oriented Analysis and Design
+Story Splitting (PoC)
+Stakeholder and Value Modelling Transformations
+Architectural Refactorings (ARs)
+Architectural Refactorings
+AR-1: Split Aggregate by Entities
+AR-2: Split Bounded Context by Features
+AR-3: Split Bounded Context by Owner
+AR-4: Extract Aggregates by Volatility
+AR-5: Extract Aggregates by Cohesion
+AR-6: Merge Aggregates
+AR-7: Merge Bounded Contexts
+AR-8: Extract Shared Kernel
+AR-9: Suspend Partnership
+AR-10: Change Shared Kernel to Partnership
+AR-11: Change Partnership to Shared Kernel
+Value-Driven Analysis and Design
+Value-Driven Analysis and Design (VDAD) Support
+Service Cutter
+Context Map Suggestions with Service Cutter
+Service Cutter Configuration File (.servicecutter.yml)
+Reverse Engineering
+Context Map Discovery
+Generators
+Generators Overview
+Context Map Generator
+PlantUML Generator
+BPMN Sketch Miner Generator
+MDSL (Micro-)Service Contracts Generator
+Service Cutter Generators
+Generic Generator (Templating)
+Tutorials
+Model Event Storming Results in Context Mapper
+Event Sourcing and CQRS Modeling in Context Mapper
+Generate Microservices From Context Map Using JHipster
+Systematic Service Decomposition with Context Mapper and Service Cutter
+Validating the Implementation against the Model (with ArchUnit)
+IDE Plugins and Extensions
+Visual Studio Code Extension
+Online IDE (no longer supported)
+Eclipse Plugin
+Feature Support
+Context Map Discovery
+Our “context map discovery” or “reverse engineering” library allows you to derive a CML context map from existing source code. If you work in a project involving an existing monolith, you may want to generate a Bounded Context that represents and contains your domain model. Afterwards, you can analyze and decompose the architecture with our tools. This helps you to get started with our tool and avoids huge efforts to re-model the existing system. If your system already has a (micro-)service-oriented architecture, you may want to reverse engineer the CML context map illustrating all bounded contexts and their relationships.
+The discovery library supports the reverse engineering of bounded contexts and context maps (including relationships between bounded contexts). It is extensible and designed to plug-in new discovery
+strategies
+. The current prototype supports bounded context discovery for
+Spring Boot
+applications and relationship discovery on the basis of Docker compose.
+Contributions to the discovery library are very welcome! If you implement a new discovery strategy for another programming language or framework, please contribute it to our project and create a Pull Request (PR) in our
+GitHub repository
+.
+Usage
+The latest version of the discovery library is available through Maven Central:
+You can find all information about the library, how to use it, and how to extend it with new discovery strategies in our Github repository:
+https://github.com/ContextMapper/context-map-discovery
+Note that this is a prototype and limited in the discovery strategies already implemented. Additional strategies will have to be implemented in the future.
+Lakeside Mutual Case Study
+The following example illustrates how the discovery library works. We applied it to the
+Lakeside Mutual
+project, a fictitious insurance company. It is a sample application to demonstrate microservices. With our
+context map discovery library
+we derived a CML context map from the
+Lakeside Mutual source code
+.
+The following diagram, courtesy of the Lakeside Mutual project itself, illustrates the architecture:
+With the
+strategies already available
+we are able to discover the bounded contexts:
+Customer Management
+Customer Self-Service
+Policy Management
+Customer Core
+The
+risk management context
+is currently not detected, since a strategy on the basis of Node.js is not available yet.
+The following piece of code is all that is needed to generate the context map with our discovery library:
+public
+class
+LakesideMutualContextMapDiscoverer
+{
+public
+static
+void
+main
+(
+String
+[]
+args
+)
+throws
+IOException
+{
+// configure the discoverer
+ContextMapDiscoverer
+discoverer
+=
+new
+ContextMapDiscoverer
+()
+.
+usingBoundedContextDiscoveryStrategies
+(
+new
+SpringBootBoundedContextDiscoveryStrategy
+(
+"com.lakesidemutual"
+))
+.
+usingRelationshipDiscoveryStrategies
+(
+new
+DockerComposeRelationshipDiscoveryStrategy
+(
+new
+File
+(
+System
+.
+getProperty
+(
+"user.home"
+)
++
+"/source/LakesideMutual/"
+)))
+.
+usingBoundedContextNameMappingStrategies
+(
+new
+SeparatorToCamelCaseBoundedContextNameMappingStrategy
+(
+"-"
+)
+{
+@Override
+public
+String
+mapBoundedContextName
+(
+String
+s
+)
+{
+// remove the "Backend" part of the Docker service names to map correctly...
+String
+name
+=
+super
+.
+mapBoundedContextName
+(
+s
+);
+return
+name
+.
+endsWith
+(
+"Backend"
+)
+?
+name
+.
+substring
+(
+0
+,
+name
+.
+length
+()
+-
+7
+)
+:
+name
+;
+}
+});
+// run the discovery process to get the Context Map
+ContextMap
+contextmap
+=
+discoverer
+.
+discoverContextMap
+();
+// serialize the Context Map to CML
+new
+ContextMapSerializer
+().
+serializeContextMap
+(
+contextmap
+,
+new
+File
+(
+"./src-gen/lakesidemutual.cml"
+));
+}
+}
+The library is based on strategies implementing the three interfaces
+BoundedContextDiscoveryStrategy
+,
+RelationshipDiscoveryStrategy
+, and
+BoundedContextNameMappingStrategy
+. The
+BoundedContextNameMappingStrategy
+strategy can be used to map different bounded context names between the bounded context and relationship strategies.
+In this example we use the
+SpringBootBoundedContextDiscoveryStrategy
+to discover the bounded contexts via Spring annotations. It derives
+Bounded Contexts
+from applications,
+Aggregates
+from REST endpoints, and Entities from the REST endpoint methods. The
+DockerComposeRelationshipDiscoveryStrategy
+strategy is used to derive the relationships between the bounded context from the
+docker-compose.yml
+file. The extended
+SeparatorToCamelCaseBoundedContextNameMappingStrategy
+in the example above is used to map names such as ‘customer-management-backend’ (name according to relationship strategy) to ‘CustomerManagement’ (name according the discovered bounded context).
+The code above creates the following context map for the application:
+ContextMap
+{
+contains
+PolicyManagement
+contains
+CustomerManagement
+contains
+CustomerSelfService
+contains
+CustomerCore CustomerCore -> PolicyManagement CustomerCore -> CustomerManagement PolicyManagement -> CustomerSelfService CustomerCore -> CustomerSelfService }
+BoundedContext
+PolicyManagement {
+implementationTechnology
+"Spring Boot"
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.policymanagement.interfaces.RiskComputationService.
+Aggregate
+riskfactor
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.policymanagement.interfaces.InsuranceQuoteRequestInformationHolder.
+Aggregate
+PolicyManagement_insurance_quote_requests {
+/* removed to save space here */
+}
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.policymanagement.interfaces.PolicyInformationHolder.
+Aggregate
+policies {
+/* removed to save space here */
+}
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.policymanagement.interfaces.CustomerInformationHolder.
+Aggregate
+PolicyManagement_customers {
+/* removed to save space here */
+} }
+BoundedContext
+CustomerManagement {
+implementationTechnology
+"Spring Boot"
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customermanagement.interfaces.CustomerInformationHolder.
+Aggregate
+CustomerManagement_customers {
+/* removed to save space here */
+}
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customermanagement.interfaces.InteractionLogInformationHolder.
+Aggregate
+interaction_logs {
+/* removed to save space here */
+}
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customermanagement.interfaces.NotificationInformationHolder.
+Aggregate
+notifications }
+BoundedContext
+CustomerSelfService {
+implementationTechnology
+"Spring Boot"
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.AuthenticationController.
+Aggregate
+auth
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.CityStaticDataHolder.
+Aggregate
+cities {
+/* removed to save space here */
+}
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.InsuranceQuoteRequestInformationHolder.
+Aggregate
+insurance_quote_requests {
+/* removed to save space here */
+}
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.CustomerInformationHolder.
+Aggregate
+customers {
+/* removed to save space here */
+}
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.UserInformationHolder.
+Aggregate
+user {
+/* removed to save space here */
+} }
+BoundedContext
+CustomerCore {
+implementationTechnology
+"Spring Boot"
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customercore.interfaces.CityStaticDataHolder.
+Aggregate
+CustomerCore_cities {
+/* removed to save space here */
+}
+// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customercore.interfaces.CustomerInformationHolder.
+Aggregate
+CustomerCore_customers {
+/* removed to save space here */
+} }
+Note that we removed the entities in the CML model above in order to save space here. The full example and the project source code can be found
+here
+.
+Improve this page
+←
+Previous
+Next
+→
+© Context Mapper 2025 | Powered by
+Jekyll Doc Theme

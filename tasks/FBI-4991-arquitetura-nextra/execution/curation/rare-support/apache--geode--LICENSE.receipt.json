@@ -1,0 +1,12 @@
+{
+  "repo": "apache/geode",
+  "path": "LICENSE",
+  "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+  "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+  "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+  "line_count": 376,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE"
+}

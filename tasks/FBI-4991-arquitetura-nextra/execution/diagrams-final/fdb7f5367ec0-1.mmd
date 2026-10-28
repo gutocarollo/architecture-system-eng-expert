@@ -1,0 +1,12 @@
+flowchart TD
+    I["Nova versão quer amount_cents"] --> B["Antes: remove amount imediatamente"]
+    B --> X["Leitor antigo recebe vazio"]
+    I --> A["financial.py::safe_release expande o contrato"]
+    A --> C["Mantém amount e amount_cents"]
+    C --> Q{"Versão está na população inicial de 5%?"}
+    Q -->|sim| N["Rota controlada usa a versão nova"]
+    Q -->|não| O["Versão antiga continua atendendo"]
+    N --> S["Shadow compara funções puras"]
+    S --> F{"Há diferença 10 contra 1000?"}
+    F -->|sim| R["Preserva primário e interrompe exposição"]
+    F -->|não| D["Ampliação exigiria sua própria decisão e prova"]

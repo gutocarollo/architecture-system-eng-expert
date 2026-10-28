@@ -1,0 +1,12 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "pilot/pkg/serviceregistry/kube/controller/controller.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--serviceregistry--kube--controller--controller.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T04:10:46.414167+00:00",
+  "sha256": "41dfaecbeb24936039f45342b56b2525c8dd0c67655cabd28991c35b7feb8471",
+  "line_count": 1265
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "eventuate-tram/eventuate-tram-core",
+  "path": "LICENSE.md",
+  "revision": "e472ed72b8635d0488a95d0892b8901c0158a7d1",
+  "url": "https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/LICENSE.md",
+  "raw_url": "https://raw.githubusercontent.com/eventuate-tram/eventuate-tram-core/e472ed72b8635d0488a95d0892b8901c0158a7d1/LICENSE.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:04:02.611318+00:00",
+  "sha256": "05ae8e8ae6c2ae313d504cd54cd60902fada54670932b3dbff2ef522ed340c6d",
+  "line_count": 13,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-eventuate-tram--eventuate-tram-core--LICENSE.md"
+}

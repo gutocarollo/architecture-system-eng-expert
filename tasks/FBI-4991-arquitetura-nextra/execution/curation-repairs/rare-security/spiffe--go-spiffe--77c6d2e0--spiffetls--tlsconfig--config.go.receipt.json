@@ -1,0 +1,15 @@
+{
+  "repo": "spiffe/go-spiffe",
+  "revision": "77c6d2e0c1203e36804e26a02faa8f893d72e7e5",
+  "path": "spiffetls/tlsconfig/config.go",
+  "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go",
+  "raw_url": "https://raw.githubusercontent.com/spiffe/go-spiffe/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spiffe--go-spiffe--77c6d2e0--spiffetls--tlsconfig--config.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.147856+00:00",
+  "sha256": "76923313bef22aa835b765c13a3e533ee4d9c1bdd1e25033ba96cb1e44df4d07",
+  "line_count": 255,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9f8a7fd7c2868c4ccf4c2e37d6ba3ab04eccd35ce7199d74d7f42c9233aaa165.txt",
+  "upstream_observed_utc": "2026-10-15T01:26:26.138209Z"
+}

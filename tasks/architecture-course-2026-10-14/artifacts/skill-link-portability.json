@@ -1,0 +1,30 @@
+[
+  {
+    "path": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+    "links": 38
+  },
+  {
+    "path": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+    "links": 23
+  },
+  {
+    "path": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+    "links": 22
+  },
+  {
+    "path": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+    "links": 16
+  },
+  {
+    "path": "content/explicacoes/code-boundaries/index.mdx",
+    "links": 4
+  },
+  {
+    "path": "content/explicacoes/business-rules/index.mdx",
+    "links": 4
+  },
+  {
+    "path": "content/explicacoes/code-patterns/index.mdx",
+    "links": 3
+  }
+]

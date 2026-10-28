@@ -1,0 +1,13 @@
+{
+  "repo": "wundergraph/graphql-go-tools",
+  "revision": "fa75a2199dce3e0924998f5ab29d09fd0d1b0b6b",
+  "path": "LICENSE",
+  "url": "https://github.com/wundergraph/graphql-go-tools/blob/fa75a2199dce3e0924998f5ab29d09fd0d1b0b6b/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/wundergraph/graphql-go-tools/fa75a2199dce3e0924998f5ab29d09fd0d1b0b6b/LICENSE",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--LICENSE",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:05.378906+00:00",
+  "sha256": "a37034638bff6772710b179744c2d3605c8d493dbc41dcfb31d6e6d217ce9a02",
+  "line_count": 21
+}

@@ -1,0 +1,17 @@
+{
+  "repository": "gutocarollo/architecture-system-eng-expert",
+  "repository_mutation_performed": false,
+  "reason": "Active catalog whitelist rejects the material course repository. Jira admin permission exists, but changing only the Jira option does not change the catalog authority.",
+  "required_contract_change": {
+    "file": "/Users/augustocarollo/.agents/skills/jira-fbi/reference/catalog-contract.json",
+    "field": "dimensions.repositories.allowedValues",
+    "add": "gutocarollo/architecture-system-eng-expert",
+    "state": "NOT_APPLY_READY: the declared Repository authority and projection were not located in the audited source paths; adding only a literal whitelist value is insufficient."
+  },
+  "asset_state": "not_registered",
+  "permission_receipt": "permissions.json",
+  "decision_state": "Document registration has a tested existing-kind proposal outside this documentation repository. Repository registration remains blocked by the exact authority gap recorded in the audit.",
+  "affected_asset_id_proposed": "doc:architecture/architecture-system-eng-expert",
+  "asset_registration_proposal": "asset-document-registration.patch",
+  "repository_authority_audit": "registration-authority-audit.md"
+}

@@ -1,0 +1,239 @@
+{
+  "observed_at": "2026-10-14T20:32:03.849Z",
+  "url": "http://127.0.0.1:59024",
+  "route_count": 52,
+  "route_reads": [
+    {
+      "path": "/explicacoes/api-integration",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/availability",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/business-rules",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/cache",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/capacity",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/code-boundaries",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/code-patterns",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/concurrency",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/data-distribution",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/data-durability",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/distributed-work",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/messages",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/observability",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/read-models",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/reliable-integration",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/safe-change",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/security",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/explicacoes/workflow",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/guias",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/guias/investigar-impacto",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/guias/recuperar-pipeline",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/01-arquiteturas-de-aplicacao",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/03-event-driven-messaging",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/05-banco-de-dados-e-armazenamento",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/06-cache",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/07-resiliencia",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/08-concorrencia",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/09-apis-e-integracao",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/10-ddd-domain-driven-design",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/11-padroes-para-decompor-sistemas",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/12-deploy-e-releases",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/13-alta-disponibilidade",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/14-seguranca",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/15-observabilidade",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/16-workflow-e-processamento",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo/17-padroes-classicos-gof",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/catalogo",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/evidencias",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/prioritarios",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/referencia/skills-e-projetos",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/tutoriais/idempotency",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/tutoriais",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/tutoriais/optimistic-concurrency",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/tutoriais/outbox",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/tutoriais/read-projection",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/tutoriais/single-flight",
+      "error": "TypeError: response.status is not a function"
+    },
+    {
+      "path": "/tutoriais/state-machine",
+      "error": "TypeError: response.status is not a function"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "/",
+      "status": 200,
+      "heading": "Aprenda a enxergar o problema antes de escolher o padrão",
+      "mermaidSvgCount": 0,
+      "screenshot": "tasks/architecture-course-2026-10-14/artifacts/final-preview-home.png"
+    },
+    {
+      "path": "/explicacoes/cache#pattern-15",
+      "status": 200,
+      "heading": "Carregar indicadores sem repetir trabalho nem misturar recortes",
+      "mermaidSvgCount": 1,
+      "screenshot": "tasks/architecture-course-2026-10-14/artifacts/final-preview-cache.png"
+    },
+    {
+      "path": "/tutoriais/idempotency",
+      "status": 200,
+      "heading": "Repita um pedido sem criar outra reserva",
+      "mermaidSvgCount": 0,
+      "screenshot": "tasks/architecture-course-2026-10-14/artifacts/final-preview-idempotency.png"
+    }
+  ],
+  "page_errors": []
+}

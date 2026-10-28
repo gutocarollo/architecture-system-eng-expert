@@ -1,0 +1,1014 @@
+{
+  "measured_at_utc": "2026-10-14 23:18 UTC",
+  "source_path": "/Users/augustocarollo/.codex/skills/jira-fbi/reference/fazgraph-catalog-v4.export.json",
+  "bytes": 29676,
+  "export_sha256": "770e1b4e13bad6c9eaf0aba6496976c7a95e1043deba55c76620cd85cb4ab6fb",
+  "canonical_sha256": "8bfdd080b084cd2518b6c118145df7fef7d976ed1d7280971180b52d172d3297",
+  "counts": {
+    "contexts": 14,
+    "capabilities": 16,
+    "relations": 38
+  },
+  "contract_allowed_repositories": [
+    "fazcapital/airflow-dags",
+    "fazcapital/faz-database",
+    "fazcapital/makershub",
+    "fazcapital/salesforce",
+    "fazcapital/scraping"
+  ],
+  "full_parsed_export": {
+    "schemaVersion": 1,
+    "contractVersion": "catalog-v4",
+    "authority": "FazGraph",
+    "effectiveDate": "2026-08-14",
+    "approval": {
+      "basis": "explicit-user-decision-after-measured-registry-gap",
+      "date": "2026-08-14",
+      "evidence": "135 cards da janela de 13 meses sem contexto possível (ranking/KPI/metas/A20/ROA/pilares)"
+    },
+    "forbiddenValues": [
+      "analytics-embedded",
+      "operations-tools",
+      "embedded-analytics",
+      "operations-tooling",
+      "personalization",
+      "calls",
+      "nps",
+      "insurance-consortium",
+      "leads-marketing",
+      "ranking-routing",
+      "access-organization",
+      "accounts-portfolio"
+    ],
+    "idGrammar": {
+      "businessContext": "^(product|value-stream):[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "businessCapability": "^capability:[a-z0-9]+(?:-[a-z0-9]+)+$"
+    },
+    "governance": {
+      "owner": "FazGraph",
+      "registryPath": "docs/canonical/_ontology/business-catalog.v4.json",
+      "projection": {
+        "businessContextsField": "Business Contexts",
+        "businessCapabilitiesField": "Business Capabilities",
+        "storeExactCanonicalIds": true,
+        "allowEmptyWhenNoEvidence": true,
+        "inheritParentWithoutDirectEvidence": false,
+        "fallbackValue": null
+      },
+      "lifecycle": {
+        "active": "May be projected into Jira when direct issue evidence supports it.",
+        "deprecated": "Remains resolvable for history but is forbidden in new writes."
+      },
+      "validation": {
+        "relationType": "supports",
+        "requiresExplicitRelations": true,
+        "requiresRealManyToMany": true
+      },
+      "evidencePolicy": "Names, parent fields and current Jira catalog values are not evidence by themselves."
+    },
+    "contexts": [
+      {
+        "id": "value-stream:lead-acquisition",
+        "kind": "value-stream",
+        "name": "Lead acquisition",
+        "definition": "Acquisition, capture, origin, ingestion and initial activation of prospective-client leads.",
+        "exclusions": [
+          "generic marketing ownership",
+          "financial capital inflow",
+          "analytics delivery"
+        ],
+        "aliases": [
+          "lead-acquisition"
+        ],
+        "status": "active",
+        "evidenceState": "corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/leads-marketing/leads-marketing-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "value-stream:lead-to-r1",
+        "kind": "value-stream",
+        "name": "Lead to first meeting",
+        "definition": "Journey from a qualified lead through advisor selection, routing, ownership and the first meeting (R1).",
+        "exclusions": [
+          "generic advisor ranking without a lead/R1 outcome",
+          "generic opportunity reporting"
+        ],
+        "aliases": [
+          "lead-to-r1",
+          "super-r1"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/pages/super-r1.md",
+          "docs/canonical/domains/ranking-routing/ranking-routing-super-r1-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "value-stream:capital-inflow",
+        "kind": "value-stream",
+        "name": "Capital inflow",
+        "definition": "Measurement and operational handling of financial-resource inflow into client portfolios.",
+        "exclusions": [
+          "lead acquisition",
+          "generic data ingestion"
+        ],
+        "aliases": [
+          "capital-inflow",
+          "captacao"
+        ],
+        "status": "active",
+        "evidenceState": "corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/captable/captable-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "value-stream:client-portfolio",
+        "kind": "value-stream",
+        "name": "Client portfolio",
+        "definition": "Client position, allocation and portfolio lifecycle across financial holdings.",
+        "exclusions": [
+          "technical account records",
+          "employee accounts"
+        ],
+        "aliases": [
+          "client-portfolio"
+        ],
+        "status": "active",
+        "evidenceState": "corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/accounts-portfolio/accounts-portfolio-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "value-stream:customer-experience",
+        "kind": "value-stream",
+        "name": "Customer experience",
+        "definition": "Collection and interpretation of customer feedback, satisfaction and NPS signals.",
+        "exclusions": [
+          "generic dashboard delivery",
+          "employee surveys"
+        ],
+        "aliases": [
+          "customer-experience"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/nps/nps-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "product:digital-advisory",
+        "kind": "product",
+        "name": "Digital advisory",
+        "definition": "Digital-advisory service proposition, including Mesa Digital and Assessoria Digital operations.",
+        "exclusions": [
+          "generic frontend or personalization work"
+        ],
+        "aliases": [
+          "digital-advisory",
+          "mesa-digital"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/advisory-digital/advisory-digital-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "value-stream:people-operations",
+        "kind": "value-stream",
+        "name": "People operations",
+        "definition": "Employee lifecycle and organizational-structure operations.",
+        "exclusions": [
+          "customer access",
+          "generic security work"
+        ],
+        "aliases": [
+          "people-operations"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/access-organization/access-organization-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "product:financial-services",
+        "kind": "product",
+        "name": "Financial services",
+        "definition": "Work explicitly scoped to the Financial Services product/service area.",
+        "exclusions": [
+          "generic finance metrics",
+          "generic operations tooling"
+        ],
+        "aliases": [
+          "financial-services"
+        ],
+        "status": "active",
+        "evidenceState": "corpus-verified",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus",
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "id": "product:insurance",
+        "kind": "product",
+        "name": "Insurance",
+        "definition": "Insurance proposition and its policy, proposal, meeting and commission lifecycle.",
+        "exclusions": [
+          "consortium"
+        ],
+        "aliases": [
+          "insurance",
+          "seguros"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-runtime-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/insurance-consortium/insurance-consortium-end-to-end.md",
+          "docs/canonical/pages/insurance-v2.md",
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "id": "product:consortium",
+        "kind": "product",
+        "name": "Consortium",
+        "definition": "Consortium proposition and its proposal, meeting, report and commission lifecycle.",
+        "exclusions": [
+          "insurance"
+        ],
+        "aliases": [
+          "consortium",
+          "consorcios"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-runtime-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/insurance-consortium/insurance-consortium-end-to-end.md",
+          "docs/canonical/pages/consortium.md",
+          "data:postgres:makershub/rpt_consortium",
+          "jira:FBI-2387"
+        ]
+      },
+      {
+        "id": "product:investments",
+        "kind": "product",
+        "name": "Investments",
+        "definition": "Investment products, orders, applications, redemptions and holdings.",
+        "exclusions": [
+          "generic investment in engineering effort"
+        ],
+        "aliases": [
+          "investments",
+          "investimentos"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus",
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "id": "product:offshore",
+        "kind": "product",
+        "name": "Offshore",
+        "definition": "Offshore financial products, positions and operational reporting.",
+        "exclusions": [
+          "generic internationalization"
+        ],
+        "aliases": [
+          "offshore"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus",
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "id": "product:foreign-exchange",
+        "kind": "product",
+        "name": "Foreign exchange",
+        "definition": "Foreign-exchange products and transactions.",
+        "exclusions": [
+          "software locale or currency formatting"
+        ],
+        "aliases": [
+          "foreign-exchange",
+          "cambio"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus",
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "id": "value-stream:advisor-performance",
+        "kind": "value-stream",
+        "name": "Advisor performance",
+        "definition": "Measurement, ranking and goal-setting of advisor performance: pillar scores, KPI rulers, coverage indices and revenue targets that decide an advisor's standing and progression.",
+        "exclusions": [
+          "generic dashboard delivery without a performance ruler",
+          "employee lifecycle and organizational structure",
+          "commission calculation for product revenue"
+        ],
+        "aliases": [
+          "advisor-performance",
+          "performance-do-assessor"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "data:postgres:makershub/fct_advisor_ranking",
+          "data:postgres:makershub/rpt_pillar_metrics",
+          "data:postgres:public/dim_revenue_goals",
+          "page:makershub:/my-kpis",
+          "page:makershub:/rankings",
+          "jira:FBI:13m-corpus"
+        ]
+      }
+    ],
+    "capabilities": [
+      {
+        "id": "capability:ingest-leads",
+        "kind": "capability",
+        "name": "Ingest leads",
+        "verb": "ingest",
+        "object": "leads",
+        "definition": "Capture or import leads into the operational data flow.",
+        "aliases": [
+          "lead-ingestion"
+        ],
+        "exclusions": [
+          "data ingestion without a lead entity"
+        ],
+        "status": "active",
+        "evidenceState": "corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/leads-marketing/leads-marketing-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "capability:score-leads",
+        "kind": "capability",
+        "name": "Score leads",
+        "verb": "score",
+        "object": "leads",
+        "definition": "Qualify or score leads using explicit criteria.",
+        "aliases": [
+          "lead-scoring"
+        ],
+        "exclusions": [
+          "visual grouping without a qualification decision"
+        ],
+        "status": "active",
+        "evidenceState": "corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/pages/super-r1.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "capability:nurture-leads",
+        "kind": "capability",
+        "name": "Nurture leads",
+        "verb": "nurture",
+        "object": "leads",
+        "definition": "Run lead-nurturing journeys or campaigns.",
+        "aliases": [
+          "lead-nurturing"
+        ],
+        "exclusions": [
+          "generic campaign reporting"
+        ],
+        "status": "active",
+        "evidenceState": "corpus-verified",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "capability:deliver-conversion-events",
+        "kind": "capability",
+        "name": "Deliver conversion events",
+        "verb": "deliver",
+        "object": "conversion-events",
+        "definition": "Deliver conversion events to an advertising or measurement destination.",
+        "aliases": [
+          "conversion-event-delivery"
+        ],
+        "exclusions": [
+          "internal analytics event without an external destination"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/leads-marketing/leads-marketing-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "capability:route-leads",
+        "kind": "capability",
+        "name": "Route leads",
+        "verb": "route",
+        "object": "leads",
+        "definition": "Assign or route leads to an advisor or team.",
+        "aliases": [
+          "lead-routing"
+        ],
+        "exclusions": [
+          "moving an opportunity card without lead ownership change"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-runtime-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/ranking-routing/ranking-routing-super-r1-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "capability:determine-advisor-eligibility",
+        "kind": "capability",
+        "name": "Determine advisor eligibility",
+        "verb": "determine",
+        "object": "advisor-eligibility",
+        "definition": "Decide whether an advisor is eligible and available for routing.",
+        "aliases": [
+          "advisor-eligibility"
+        ],
+        "exclusions": [
+          "user access authorization"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-runtime-verified",
+        "evidenceRefs": [
+          "docs/canonical/rules/advisory-digital/eligibility.md",
+          "docs/canonical/rules/ranking-routing/blocked-vs-suspended.md"
+        ]
+      },
+      {
+        "id": "capability:schedule-first-meetings",
+        "kind": "capability",
+        "name": "Schedule first meetings",
+        "verb": "schedule",
+        "object": "first-meetings",
+        "definition": "Schedule, reschedule or cancel a lead's first meeting (R1).",
+        "aliases": [
+          "r1-scheduling"
+        ],
+        "exclusions": [
+          "calendar work unrelated to a lead's first meeting"
+        ],
+        "status": "active",
+        "evidenceState": "code-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/pages/super-r1.md",
+          "docs/canonical/endpoints/post-schedule-r1.md"
+        ]
+      },
+      {
+        "id": "capability:reassign-lead-ownership",
+        "kind": "capability",
+        "name": "Reassign lead ownership",
+        "verb": "reassign",
+        "object": "lead-ownership",
+        "definition": "Move ownership of an already-routed lead to another advisor.",
+        "aliases": [
+          "lead-ownership-reassignment"
+        ],
+        "exclusions": [
+          "initial lead assignment"
+        ],
+        "status": "active",
+        "evidenceState": "code-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/ranking-routing/ranking-routing-super-r1-end-to-end.md",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "capability:consolidate-commissions",
+        "kind": "capability",
+        "name": "Consolidate commissions",
+        "verb": "consolidate",
+        "object": "commissions",
+        "definition": "Consolidate or reconcile commission records from one or more sources.",
+        "aliases": [
+          "commission-consolidation"
+        ],
+        "exclusions": [
+          "commission display without consolidation or reconciliation"
+        ],
+        "status": "active",
+        "evidenceState": "data-corpus-verified",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "capability:calculate-commissions",
+        "kind": "capability",
+        "name": "Calculate commissions",
+        "verb": "calculate",
+        "object": "commissions",
+        "definition": "Calculate commission values or percentages using product rules.",
+        "aliases": [
+          "commission-calculation"
+        ],
+        "exclusions": [
+          "commission ingestion without a calculation rule"
+        ],
+        "status": "active",
+        "evidenceState": "data-corpus-verified",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission",
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "id": "capability:ingest-product-reports",
+        "kind": "capability",
+        "name": "Ingest product reports",
+        "verb": "ingest",
+        "object": "product-reports",
+        "definition": "Import or consume product reports, statements or quota files.",
+        "aliases": [
+          "product-report-ingestion"
+        ],
+        "exclusions": [
+          "generic data file unrelated to a financial product"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-runtime-verified",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission",
+          "docs/canonical/domains/insurance-consortium/insurance-consortium-end-to-end.md"
+        ]
+      },
+      {
+        "id": "capability:collect-customer-feedback",
+        "kind": "capability",
+        "name": "Collect customer feedback",
+        "verb": "collect",
+        "object": "customer-feedback",
+        "definition": "Invite or collect customer feedback and NPS responses.",
+        "aliases": [
+          "customer-feedback-collection"
+        ],
+        "exclusions": [
+          "employee survey"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/nps/nps-end-to-end.md"
+        ]
+      },
+      {
+        "id": "capability:analyze-customer-feedback",
+        "kind": "capability",
+        "name": "Analyze customer feedback",
+        "verb": "analyze",
+        "object": "customer-feedback",
+        "definition": "Measure and analyze customer feedback and NPS results.",
+        "aliases": [
+          "customer-feedback-analysis"
+        ],
+        "exclusions": [
+          "generic dashboard analytics"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "docs/canonical/domains/nps/nps-end-to-end.md"
+        ]
+      },
+      {
+        "id": "capability:rank-advisors",
+        "kind": "capability",
+        "name": "Rank advisors",
+        "verb": "rank",
+        "object": "advisors",
+        "definition": "Order advisors against each other by a scored ruler, producing a standing.",
+        "aliases": [
+          "advisor-ranking"
+        ],
+        "exclusions": [
+          "advisor eligibility for lead routing"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "data:postgres:makershub/fct_advisor_ranking",
+          "dag:advisor_ranking__daily__orchestrator"
+        ]
+      },
+      {
+        "id": "capability:set-advisor-goals",
+        "kind": "capability",
+        "name": "Set advisor goals",
+        "verb": "set",
+        "object": "advisor-goals",
+        "definition": "Define or adjust the target an advisor is measured against in a period.",
+        "aliases": [
+          "advisor-goals",
+          "metas-do-assessor"
+        ],
+        "exclusions": [
+          "measuring achievement against an already-set goal"
+        ],
+        "status": "active",
+        "evidenceState": "data-corpus-verified",
+        "evidenceRefs": [
+          "data:postgres:public/dim_revenue_goals"
+        ]
+      },
+      {
+        "id": "capability:score-advisor-kpis",
+        "kind": "capability",
+        "name": "Score advisor KPIs",
+        "verb": "score",
+        "object": "advisor-kpis",
+        "definition": "Compute an advisor's KPI or pillar index from its ruler, including which records enter the numerator and denominator.",
+        "aliases": [
+          "advisor-kpi",
+          "kpi-do-assessor"
+        ],
+        "exclusions": [
+          "displaying an already-computed KPI without changing its ruler"
+        ],
+        "status": "active",
+        "evidenceState": "code-data-corpus-verified",
+        "evidenceRefs": [
+          "data:postgres:makershub/rpt_pillar_metrics",
+          "page:makershub:/my-kpis"
+        ]
+      }
+    ],
+    "relations": [
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-acquisition",
+        "capabilityId": "capability:ingest-leads",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/leads-marketing/leads-marketing-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-acquisition",
+        "capabilityId": "capability:score-leads",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-acquisition",
+        "capabilityId": "capability:nurture-leads",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-acquisition",
+        "capabilityId": "capability:deliver-conversion-events",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/leads-marketing/leads-marketing-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-acquisition",
+        "capabilityId": "capability:route-leads",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/pages/super-r1.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-to-r1",
+        "capabilityId": "capability:route-leads",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/pages/super-r1.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-to-r1",
+        "capabilityId": "capability:determine-advisor-eligibility",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/rules/ranking-routing/blocked-vs-suspended.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-to-r1",
+        "capabilityId": "capability:schedule-first-meetings",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/endpoints/post-schedule-r1.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:lead-to-r1",
+        "capabilityId": "capability:reassign-lead-ownership",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/ranking-routing/ranking-routing-super-r1-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:customer-experience",
+        "capabilityId": "capability:collect-customer-feedback",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/nps/nps-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:customer-experience",
+        "capabilityId": "capability:analyze-customer-feedback",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/nps/nps-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:digital-advisory",
+        "capabilityId": "capability:route-leads",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/advisory-digital/advisory-digital-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:digital-advisory",
+        "capabilityId": "capability:determine-advisor-eligibility",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/rules/advisory-digital/eligibility.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:digital-advisory",
+        "capabilityId": "capability:schedule-first-meetings",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/advisory-digital/advisory-digital-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:digital-advisory",
+        "capabilityId": "capability:reassign-lead-ownership",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/advisory-digital/advisory-digital-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:financial-services",
+        "capabilityId": "capability:consolidate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:financial-services",
+        "capabilityId": "capability:calculate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:financial-services",
+        "capabilityId": "capability:ingest-product-reports",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:insurance",
+        "capabilityId": "capability:ingest-product-reports",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/domains/insurance-consortium/insurance-consortium-end-to-end.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:insurance",
+        "capabilityId": "capability:consolidate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:insurance",
+        "capabilityId": "capability:calculate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:consortium",
+        "capabilityId": "capability:ingest-product-reports",
+        "status": "active",
+        "evidenceRefs": [
+          "docs/canonical/pages/consortium.md"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:consortium",
+        "capabilityId": "capability:consolidate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:consortium",
+        "capabilityId": "capability:calculate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:consortium",
+        "capabilityId": "capability:route-leads",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI-2387"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:consortium",
+        "capabilityId": "capability:determine-advisor-eligibility",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI-2387"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:investments",
+        "capabilityId": "capability:ingest-product-reports",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:investments",
+        "capabilityId": "capability:consolidate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:investments",
+        "capabilityId": "capability:calculate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:offshore",
+        "capabilityId": "capability:ingest-product-reports",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:offshore",
+        "capabilityId": "capability:consolidate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:offshore",
+        "capabilityId": "capability:calculate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:foreign-exchange",
+        "capabilityId": "capability:ingest-product-reports",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:12m-corpus"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:foreign-exchange",
+        "capabilityId": "capability:consolidate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "product:foreign-exchange",
+        "capabilityId": "capability:calculate-commissions",
+        "status": "active",
+        "evidenceRefs": [
+          "data:postgres:public/rpt_commission"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:advisor-performance",
+        "capabilityId": "capability:rank-advisors",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:13m-corpus"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:advisor-performance",
+        "capabilityId": "capability:set-advisor-goals",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:13m-corpus"
+        ]
+      },
+      {
+        "type": "supports",
+        "contextId": "value-stream:advisor-performance",
+        "capabilityId": "capability:score-advisor-kpis",
+        "status": "active",
+        "evidenceRefs": [
+          "jira:FBI:13m-corpus"
+        ]
+      }
+    ]
+  }
+}

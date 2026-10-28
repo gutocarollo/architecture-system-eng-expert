@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "assembled_at": "2026-10-15T03:16:57.563181+00:00",
+  "package_kind": "SANITIZED_BOUNDED_AIRFLOW_HISTORY_DELTA",
+  "files": [
+    {
+      "path": "candidate-packet.json",
+      "size_bytes": 13804,
+      "sha256": "628f3785e0a0a7966deb6773adf1f6610788db90d539158599fbf676dc818d32"
+    },
+    {
+      "path": "capture_kernels.py",
+      "size_bytes": 4946,
+      "sha256": "d277a03298c809a9c8a7aa138f3ec63dbb7baded8f8b1980977101f964a7631c"
+    },
+    {
+      "path": "census.json",
+      "size_bytes": 213603,
+      "sha256": "9bf68d1ccbe056ebcb8f58ac068fb90d2324ae95f0684d1a8a5a4cf891f1a659"
+    },
+    {
+      "path": "historical-bridge.json",
+      "size_bytes": 900,
+      "sha256": "5f89ff50ffd936c9867c7d7dbd89fb30afc2ba7405603db7bb56b69da0f48c95"
+    },
+    {
+      "path": "read-receipt.json",
+      "size_bytes": 1532,
+      "sha256": "39edd6f94fbe169d5528d241e0eedf629bfb297c80cf4e3f3a41fd8a5adfc9eb"
+    },
+    {
+      "path": "retry.patch",
+      "size_bytes": 2391,
+      "sha256": "b7394d12aba8fb34b52a24173576b140b053a174cf541dd8868e2ff2a1e16233"
+    },
+    {
+      "path": "source-kernels.json",
+      "size_bytes": 36631,
+      "sha256": "cf6cd340e0b1c3cc6fa7006cdda89a453aad8f716f2c49ae389845cfc391588e"
+    }
+  ],
+  "file_count_excluding_manifest": 7,
+  "max_file_bytes": 213603,
+  "coverage": {
+    "local_refs": 155,
+    "local_reachable_unique_commits": 914,
+    "selected_before_after_kernels": 5,
+    "other_commits_causally_adjudicated": 0
+  },
+  "original_raw_payloads_exported": false,
+  "redactions": [
+    "Complete Jira and PR descriptions and comments omitted",
+    "Customer data, HTML content, contacts and credentials omitted",
+    "Only selected literal source functions and one selected retry diff retained"
+  ],
+  "privacy_scan": {
+    "scanner": "gitleaks dir --redact",
+    "measured_at": "2026-10-15T03:16:57.563207+00:00",
+    "exit_code": 0,
+    "findings": 0,
+    "scope": "Every payload file listed here, scanned as plain text; no gzip in this delta"
+  },
+  "proof_boundaries": [
+    "All source changes are historical Git objects.",
+    "Disk .70 receipt is not current-production or scheduler proof.",
+    "Registry and dated Epic disagree on production topology.",
+    "Selected source-reported causes have not been independently re-established in runtime.",
+    "No Airflow source write, branch change, deployment, DAG run, test run, database or cluster query occurred."
+  ],
+  "independent_review_status": "PENDING_PARENT_INTEGRATION_REVIEW"
+}

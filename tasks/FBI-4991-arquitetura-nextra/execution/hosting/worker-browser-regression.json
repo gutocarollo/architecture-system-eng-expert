@@ -1,0 +1,73 @@
+{
+  "measuredAt": "2026-10-15T17:55:31.980Z",
+  "sourceHash": "3afee5efd34af4dbc9e8b6b50f031b6f6b09b325e4a1b9ee0b8e2010414cf825",
+  "bundleSha256": "d529084f4b9e776258cebee912bede540b65b8f89faa4abebc07bd7d143256c2",
+  "bundleBytes": 75623,
+  "realBrowser": "Chrome/155.0.0.0 on macOS via CUA; normal form fill and click, no supplied Origin header",
+  "before": {
+    "origin": "null",
+    "status": 403,
+    "r2Reads": 0,
+    "report": "worker-browser-before.json",
+    "screenshot": "worker-browser-before.jpg",
+    "platformScriptMarkerVisible": false
+  },
+  "after": {
+    "posts": [
+      {
+        "measuredAt": "2026-10-15T17:53:55.698Z",
+        "method": "POST",
+        "path": "/login",
+        "origin": "http://localhost:61167",
+        "referer": "http://localhost:61167/login",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+        "status": 303,
+        "referrerPolicy": "same-origin",
+        "contentSecurityPolicy": null,
+        "hasSessionCookie": false,
+        "r2Reads": 0
+      },
+      {
+        "measuredAt": "2026-10-15T17:54:08.462Z",
+        "method": "POST",
+        "path": "/login",
+        "origin": "null",
+        "referer": null,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+        "status": 403,
+        "referrerPolicy": "same-origin",
+        "contentSecurityPolicy": null,
+        "hasSessionCookie": true,
+        "r2Reads": 2
+      },
+      {
+        "measuredAt": "2026-10-15T17:54:12.080Z",
+        "method": "POST",
+        "path": "/login",
+        "origin": "http://127.0.0.1:61167",
+        "referer": "http://127.0.0.1:61167/",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+        "status": 403,
+        "referrerPolicy": "same-origin",
+        "contentSecurityPolicy": null,
+        "hasSessionCookie": false,
+        "r2Reads": 2
+      }
+    ],
+    "protectedDocumentOpened": true,
+    "platformScriptMarkerVisible": true,
+    "report": "worker-browser-after.json",
+    "screenshot": "worker-browser-after.jpg"
+  },
+  "regression": {
+    "allExpectationsMet": true,
+    "baselineTests": 15,
+    "mutationsKilled": 5,
+    "exportDiagnostic": "actual_export_files=1397; anonymous_r2_reads=0"
+  },
+  "scope": "Local Hono Worker fixture with fake R2; server records actual Chrome request headers. Synthetic platform script verifies CSP compatibility, not the actual Sites vendor script.",
+  "sources": [
+    "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy#effect_on_the_origin_header"
+  ],
+  "liveDeploymentVerified": false
+}

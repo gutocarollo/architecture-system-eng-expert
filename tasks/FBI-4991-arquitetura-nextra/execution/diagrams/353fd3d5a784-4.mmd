@@ -1,0 +1,6 @@
+flowchart LR
+    Elect[Eleição conforme o protocolo] --> B[Líder B autorizado]
+    A[Líder A antigo retorna] --> Guard[Destino valida autoridade]
+    B --> Guard
+    Guard -->|autoridade válida| Write[Escrita aceita]
+    Guard -->|autoridade antiga| Reject[Escrita rejeitada]

@@ -1,0 +1,12 @@
+{
+  "repo": "mastodon/mastodon",
+  "path": "LICENSE",
+  "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+  "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:09:57.583504+00:00",
+  "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+  "line_count": 661,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-mastodon--mastodon--LICENSE"
+}

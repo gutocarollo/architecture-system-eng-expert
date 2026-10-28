@@ -1,0 +1,19 @@
+{
+  "document_id": "explicacoes/capacity/index",
+  "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "s5",
+    "l5b",
+    "airflow-client-code",
+    "task-worker-code",
+    "nextbilling-code",
+    "s5-high-repair"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792006436-QbpJQoV4TCVABnjYu1y8",
+  "context_sha256": "bd0f970323f695965131efbc2e4e3ab7612be61262c2bf65a7d40021c7f321f5"
+}

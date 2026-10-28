@@ -1,0 +1,12 @@
+{
+  "repo": "istio/api",
+  "path": "LICENSE",
+  "revision": "15dd444282ea453178d13f72a6485dcc6da932de",
+  "url": "https://github.com/istio/api/blob/15dd444282ea453178d13f72a6485dcc6da932de/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/istio/api/15dd444282ea453178d13f72a6485dcc6da932de/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:43:04.380669+00:00",
+  "sha256": "9fa6e54dafda853bb3cdc01486b677a55102f0d488282a85ba6e426d9125f8c5",
+  "line_count": 202,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/istio--api--LICENSE"
+}

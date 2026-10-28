@@ -1,0 +1,13 @@
+stateDiagram-v2
+    state "Objeto ausente" as missing
+    state "Objeto presente, metadado pendente" as object_stored
+    state "Objeto e metadado disponíveis" as available
+    state "Resultado precisa de investigação" as unknown
+    [*] --> missing
+    missing --> object_stored: armazenamento confirma envio
+    object_stored --> available: banco confirma a mesma chave
+    object_stored --> object_stored: falha SQL e nova tentativa
+    missing --> unknown: confirmação de envio se perde
+    unknown --> object_stored: consulta confirma objeto esperado
+    unknown --> missing: consulta confirma ausência
+    available --> [*]

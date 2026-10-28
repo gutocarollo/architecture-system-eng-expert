@@ -1,0 +1,18 @@
+{
+  "document_id": "referencia/catalogo/08-concorrencia",
+  "document_sha256": "74352a0a8596912c9f28f854c056f039cea0a0a960b7fc459950bce6192e4665",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "s5",
+    "l5c",
+    "task-worker-code",
+    "singleflight-code",
+    "original-request"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "context_sha256": "10ab15d26277294eb7b584afe7aec3ffe75aa85d8553ceac29f185e0d0b1a3f8"
+}

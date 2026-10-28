@@ -1,0 +1,19 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/14-seguranca",
+  "document_sha256": "a3796d6b8fc46e40e5cc319f37a7bc162914e348002ecddf295a82cc8487dad0",
+  "context_sha256": "37dad030d3dcd9c6aebf215036f77961e7fd3991b7b0cea7280d2e23644d1b3b",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "l6c",
+    "original-catalog",
+    "original-request",
+    "s5",
+    "s6",
+    "s6-reference-repair"
+  ]
+}

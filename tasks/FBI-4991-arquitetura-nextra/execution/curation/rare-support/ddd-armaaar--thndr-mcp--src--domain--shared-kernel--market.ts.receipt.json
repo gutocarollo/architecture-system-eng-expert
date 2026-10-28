@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/shared-kernel/market.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/market.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:02:17.564176+00:00",
+  "sha256": "fd83a7c59e5797b02dc1334f694cbd2f26328680b929afb239b873894c75bcd6",
+  "line_count": 134,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--shared-kernel--market.ts"
+}

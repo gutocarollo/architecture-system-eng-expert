@@ -1,0 +1,38 @@
+{
+  "observed_at_utc": "2026-10-15T02:26:30.210116+00:00",
+  "scope": "Official references used for selected API/security models; runnable observations are bounded local models, except the real SDK and TLS mechanisms explicitly identified.",
+  "official_sources": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc6749",
+      "use": "authorization-code binding and one-time code redemption model"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc7636",
+      "use": "S256 verifier/challenge comparison"
+    },
+    {
+      "url": "https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation",
+      "use": "selected issuer/audience/nonce/signature ID-token checks"
+    },
+    {
+      "url": "https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode",
+      "use": "CERT_REQUIRED mutual peer certificate verification"
+    },
+    {
+      "url": "https://opentelemetry.io/docs/languages/python/instrumentation/",
+      "use": "TracerProvider, spans, processors and in-memory export"
+    }
+  ],
+  "openssl_cli": "OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)",
+  "python_ssl": "OpenSSL 3.6.5 29 Sep 2026",
+  "installed_sdk_lock": [
+    "opentelemetry-api==1.45.1",
+    "opentelemetry-sdk==1.45.1",
+    "opentelemetry-semantic-conventions==0.66b1",
+    "typing_extensions==4.16.0"
+  ],
+  "dependency_lock_sha256": "841785a57c311269ea748d6792000931c8f78367fde0e0736c41d5b9545ad66b",
+  "external_exporters_enabled": false,
+  "generated_tls_private_keys_retained": false,
+  "synthetic_hmac_fixtures_in_source": true
+}

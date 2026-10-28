@@ -1,0 +1,512 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-15T01:58:26.998442+00:00",
+  "concept_id": "space-based-architecture",
+  "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_BOUNDED_INFRASTRUCTURE",
+  "independent_review": "PENDING",
+  "supersedes": "Somente a conclusão KEEP_PENDING do item space-based-architecture em rare-support/source-recommendations.json. As outras três recomendações permanecem históricas e independentes desta rechecagem.",
+  "prior_assumption": {
+    "verdict": "UNSUPPORTED_EXTRA_REQUIREMENT",
+    "assumption": "Exigir persistência assíncrona do mesmo estado como condição obrigatória do item.",
+    "correction": "A definição fornecida pelo orquestrador é Estado distribuído em memória; alta escala. A fonte primária GigaSpaces trata persistência externa como opcional. O catálogo local também usa pode ocorrer. Persistência é uma opção e um assunto de limites; sua ausência não basta para reprovar o conceito.",
+    "original_definition_provenance": "Mensagem de retomada do orquestrador /root nesta sessão; a definição original foi entregue inline.",
+    "local_catalog": {
+      "path": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "sha256": "bef49c8b2fd3a0f3d4b6e67cbf9b61cf7e7d66ec4d890c1769c8b08de059e447",
+      "start_line": 161,
+      "end_line": 163,
+      "excerpt": "161: ## Space-Based Architecture\n162: \n163: Unidades de processamento executam perto de um conjunto de dados particionado e replicado em memória; persistência pode ocorrer de forma assíncrona. Não é sinônimo de cache Redis. Para estudo, a proposta é só estudar para um caminho transacional de alta contenção após medir o gargalo; a consulta de KPIs em Seguros não basta como justificativa."
+    }
+  },
+  "application_kind": "PRODUCT_OSS",
+  "application_scope": "O servidor de cache Apache Geode e seu caminho entregue de consultas administrativas distribuídas.",
+  "role_distinction": "A base é a biblioteca Geode que define regiões e execução por partição. A aplicação é o daemon com main e ciclo de vida ServerLauncher, somado ao serviço administrativo DataQueryEngine/QueryDataFunction que usa a biblioteca. Ambos pertencem ao mesmo produto e repositório; nenhum dos arquivos escolhidos pertence a examples ou tests.",
+  "classification_basis": "A correspondência com SBA é uma interpretação desta curadoria baseada na definição primária e na cadeia de código. Não se atribui ao Apache uma declaração de que o produto inteiro, em todas as configurações, tenha o rótulo SBA.",
+  "mechanism": "O servidor Geode cria o cache, abre o serviço de rede e pode distribuir e rebalancear buckets. As regiões PARTITION_REDUNDANT mantêm partições de estado e uma cópia adicional em memória entre os membros. No serviço de consultas, DataQueryEngine envia o trabalho aos membros do cluster. QueryDataFunction executa a consulta nos buckets primários locais ou usa a execução por região. O núcleo PartitionedRegion agrupa chaves por bucket e por membro e encaminha a função aos nós que possuem esses dados. Cada servidor reúne dados e processamento; o aumento do número de membros permite distribuir partições e trabalho.",
+  "limits": "O recorte é uma aplicação de infraestrutura: servidor de dados e consultas administrativas. A classificação descreve esse caminho e não todas as configurações possíveis do Geode. Regiões sem persistência perdem estado se todas as cópias em memória forem perdidas; persistência e redundância são decisões distintas. A leitura de código demonstra mecanismos de distribuição, não uma medição de capacidade, latência ou desempenho na Faz Capital.",
+  "persistence_required_by_verified_contract": false,
+  "proof_level": "Código de produto e documentação primária em revisão fixada; nenhuma instância foi iniciada e nenhum benchmark foi executado.",
+  "base": [
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/cache/RegionShortcut.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/RegionShortcut.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/RegionShortcut.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:01.782919+00:00",
+      "sha256": "da02664e6cb1f6665f6ee23cb5e7e94eb5fca6f2d57370f248988947b3d97aa9",
+      "line_count": 246,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--cache--RegionShortcut.java",
+      "claim": "O contrato distingue regiões particionadas com cópia adicional em memória das variantes persistentes.",
+      "evidence": [
+        {
+          "start_line": 28,
+          "end_line": 56,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/RegionShortcut.java#L28-L56",
+          "excerpt": "28: public enum RegionShortcut {\n29:   /**\n30:    * A PARTITION has local state that is partitioned across each peer member that created the\n31:    * region. The actual RegionAttributes for a PARTITION region set the {@code DataPolicy} to\n32:    * {@code DataPolicy.PARTITION}.\n33:    */\n34:   PARTITION,\n35:   /**\n36:    * A PARTITION_REDUNDANT has local state that is partitioned across each peer member that created\n37:    * the region. In addition an extra copy of the data is kept in memory. The actual\n38:    * RegionAttributes for a PARTITION_REDUNDANT region set the {@code DataPolicy} to\n39:    * {@code DataPolicy.PARTITION} and the redundant-copies to 1.\n40:    */\n41:   PARTITION_REDUNDANT,\n42:   /**\n43:    * A PARTITION_PERSISTENT has local state that is partitioned across each peer member that created\n44:    * the region. In addition its state is written to disk and recovered from disk when the region is\n45:    * created. The actual RegionAttributes for a PARTITION_PERSISTENT region set the\n46:    * {@code DataPolicy} to {@code DataPolicy.PERSISTENT_PARTITION}.\n47:    */\n48:   PARTITION_PERSISTENT,\n49:   /**\n50:    * A PARTITION_REDUNDANT_PERSISTENT has local state that is partitioned across each peer member\n51:    * that created the region. In addition its state is written to disk and recovered from disk when\n52:    * the region is created. In addition an extra copy of the data is kept in memory. The actual\n53:    * RegionAttributes for a PARTITION_REDUNDANT_PERSISTENT region set the {@code DataPolicy} to\n54:    * {@code DataPolicy.PERSISTENT_PARTITION} and the redundant-copies to 1.\n55:    */\n56:   PARTITION_REDUNDANT_PERSISTENT,"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    },
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/cache/DataPolicy.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/DataPolicy.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/DataPolicy.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:01.834149+00:00",
+      "sha256": "dbe26956aa4b7bdbd557a5ea6183868bcc384b661720a5263755d4fde3cbef3a",
+      "line_count": 369,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--cache--DataPolicy.java",
+      "claim": "withPersistence exclui PARTITION e REPLICATE; withPartitioning aceita PARTITION com ou sem persistência.",
+      "evidence": [
+        {
+          "start_line": 235,
+          "end_line": 258,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/DataPolicy.java#L235-L258",
+          "excerpt": "235:    * Return whether this policy does persistence.\n236:    *\n237:    * @return true if this policy does persistence.\n238:    * @see #PERSISTENT_PARTITION\n239:    * @see #PERSISTENT_REPLICATE\n240:    * @since GemFire 6.5\n241:    */\n242:   public boolean withPersistence() {\n243:     return this == PERSISTENT_PARTITION || this == PERSISTENT_REPLICATE;\n244:   }\n245: \n246:   /**\n247:    * Return whether this policy does partitioning.\n248:    *\n249:    * @return true if this policy does partitioning\n250:    * @see #PARTITION\n251:    * @see #PERSISTENT_PARTITION\n252:    * @since GemFire 6.5\n253:    */\n254:   public boolean withPartitioning() {\n255:     return this == PARTITION || this == PERSISTENT_PARTITION;\n256:   }\n257: \n258:   /**"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    },
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/internal/cache/execute/PartitionedRegionFunctionExecutor.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/execute/PartitionedRegionFunctionExecutor.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/execute/PartitionedRegionFunctionExecutor.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:01.804431+00:00",
+      "sha256": "b40c25d394c2e83cded585ad174d3bc649195461411850f836eaa8ff1842c4c4",
+      "line_count": 364,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--internal--cache--execute--PartitionedRegionFunctionExecutor.java",
+      "claim": "A execução por região delega a função ao motor de partições, em vez de tratar a função como cálculo local desconectado dos dados.",
+      "evidence": [
+        {
+          "start_line": 214,
+          "end_line": 230,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/execute/PartitionedRegionFunctionExecutor.java#L214-L230",
+          "excerpt": "214: \n215:   @Override\n216:   public ResultCollector executeFunction(final Function function, long timeout, TimeUnit unit) {\n217:     try {\n218:       if (!function.hasResult()) /* NO RESULT:fire-n-forget */ {\n219:         pr.executeFunction(function, this, null, executeOnBucketSet);\n220:         return NO_RESULT;\n221:       }\n222:       ResultCollector inRc = (rc == null) ? new DefaultResultCollector() : rc;\n223:       ResultCollector rcToReturn =\n224:           pr.executeFunction(function, this, inRc, executeOnBucketSet);\n225:       if (timeout > 0) {\n226:         try {\n227:           rcToReturn.getResult(timeout, unit);\n228:         } catch (Exception exception) {\n229:           throw new FunctionException(exception);\n230:         }"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    }
+  ],
+  "application": [
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:01.848532+00:00",
+      "sha256": "0601afeb72411862839c3c1f4c97b95f397c231e607fa617747fbd894a2ac121",
+      "line_count": 2949,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--distributed--ServerLauncher.java",
+      "claim": "A aplicação tem main, cria o cache, inicia o servidor e executa assignBuckets/rebalance.",
+      "evidence": [
+        {
+          "start_line": 259,
+          "end_line": 269,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java#L259-L269",
+          "excerpt": "259:   public static void main(final String... args) {\n260:     try {\n261:       new Builder(args).build().run();\n262:     } catch (AttachAPINotFoundException handled) {\n263:       System.err.println(handled.getMessage());\n264:     }\n265:   }\n266: \n267:   private static Integer getDefaultServerPort() {\n268:     return Integer.getInteger(AbstractCacheServer.TEST_OVERRIDE_DEFAULT_PORT_PROPERTY,\n269:         CacheServer.DEFAULT_PORT);"
+        },
+        {
+          "start_line": 813,
+          "end_line": 844,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java#L813-L844",
+          "excerpt": "813:             });\n814: \n815:         try {\n816:           final Properties gemfireProperties = getDistributedSystemProperties(getProperties());\n817:           cache = createCache(gemfireProperties);\n818: \n819:           if (serializationFilterConfigured) {\n820:             log.info(\"Global serial filter is now configured.\");\n821:           }\n822: \n823:           // Set the resource manager options\n824:           if (criticalHeapPercentage != null) {\n825:             cache.getResourceManager().setCriticalHeapPercentage(getCriticalHeapPercentage());\n826:           }\n827:           if (evictionHeapPercentage != null) {\n828:             cache.getResourceManager().setEvictionHeapPercentage(getEvictionHeapPercentage());\n829:           }\n830:           if (criticalOffHeapPercentage != null) {\n831:             cache.getResourceManager()\n832:                 .setCriticalOffHeapPercentage(getCriticalOffHeapPercentage());\n833:           }\n834:           if (evictionOffHeapPercentage != null) {\n835:             cache.getResourceManager()\n836:                 .setEvictionOffHeapPercentage(getEvictionOffHeapPercentage());\n837:           }\n838: \n839:           cache.setIsServer(true);\n840:           startCacheServer(cache);\n841: \n842:           assignBuckets(cache);\n843:           rebalance(cache);\n844:         } finally {"
+        },
+        {
+          "start_line": 1017,
+          "end_line": 1025,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java#L1017-L1025",
+          "excerpt": "1017:   private void startCacheServer(final Cache cache) throws IOException {\n1018:     if (isDefaultServerEnabled(cache)) {\n1019:       final String serverBindAddress =\n1020:           getServerBindAddress() == null ? null : getServerBindAddress().getHostAddress();\n1021:       final Integer serverPort = getServerPort();\n1022:       final CacheServer cacheServer = cache.addCacheServer();\n1023:       cacheServer.setBindAddress(serverBindAddress);\n1024:       cacheServer.setPort(serverPort);\n1025: "
+        },
+        {
+          "start_line": 1048,
+          "end_line": 1053,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java#L1048-L1053",
+          "excerpt": "1048:       }\n1049: \n1050:       CacheServerHelper.setIsDefaultServer(cacheServer);\n1051: \n1052:       cacheServer.start();\n1053:     }"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    },
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/distributed/internal/DefaultServerLauncherCacheProvider.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/internal/DefaultServerLauncherCacheProvider.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/internal/DefaultServerLauncherCacheProvider.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:57.107141+00:00",
+      "sha256": "88af97bc57676bb81d3ca01e9ae96c2124547c970bf2b9b49c0525bedd769fa3",
+      "line_count": 54,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--distributed--internal--DefaultServerLauncherCacheProvider.java",
+      "claim": "O daemon instancia a biblioteca CacheFactory e cria seu cache efetivo.",
+      "evidence": [
+        {
+          "start_line": 27,
+          "end_line": 53,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/internal/DefaultServerLauncherCacheProvider.java#L27-L53",
+          "excerpt": "27:   @Override\n28:   public Cache createCache(Properties gemfireProperties, ServerLauncher serverLauncher) {\n29:     final CacheConfig cacheConfig = serverLauncher.getCacheConfig();\n30:     final CacheFactory cacheFactory = new CacheFactory(gemfireProperties);\n31: \n32:     if (cacheConfig.pdxPersistentUserSet) {\n33:       cacheFactory.setPdxPersistent(cacheConfig.isPdxPersistent());\n34:     }\n35: \n36:     if (cacheConfig.pdxDiskStoreUserSet) {\n37:       cacheFactory.setPdxDiskStore(cacheConfig.getPdxDiskStore());\n38:     }\n39: \n40:     if (cacheConfig.pdxIgnoreUnreadFieldsUserSet) {\n41:       cacheFactory.setPdxIgnoreUnreadFields(cacheConfig.getPdxIgnoreUnreadFields());\n42:     }\n43: \n44:     if (cacheConfig.pdxReadSerializedUserSet) {\n45:       cacheFactory.setPdxReadSerialized(cacheConfig.isPdxReadSerialized());\n46:     }\n47: \n48:     if (cacheConfig.pdxSerializerUserSet) {\n49:       cacheFactory.setPdxSerializer(cacheConfig.getPdxSerializer());\n50:     }\n51: \n52:     return cacheFactory.create();\n53:   }"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    },
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/management/internal/beans/DistributedSystemBridge.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DistributedSystemBridge.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DistributedSystemBridge.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:57.132780+00:00",
+      "sha256": "3c2f051b2765121248c5b8400228b9f92568529864df409fe149ce7b875005ed",
+      "line_count": 1630,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--management--internal--beans--DistributedSystemBridge.java",
+      "claim": "A operação administrativa queryData delega ao motor de consultas entregue no produto.",
+      "evidence": [
+        {
+          "start_line": 1441,
+          "end_line": 1452,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DistributedSystemBridge.java#L1441-L1452",
+          "excerpt": "1441:   public String queryData(String query, String members, int limit) throws Exception {\n1442:     Object result = dataQueryEngine.queryData(query, members, limit, false, queryResultSetLimit,\n1443:         queryCollectionsDepth);\n1444:     return (String) result;\n1445:   }\n1446: \n1447:   public byte[] queryDataForCompressedResult(String query, String members, int limit)\n1448:       throws Exception {\n1449:     Object result = dataQueryEngine.queryData(query, members, limit, true, queryResultSetLimit,\n1450:         queryCollectionsDepth);\n1451:     return (byte[]) result;\n1452:   }"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    },
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/management/internal/beans/DataQueryEngine.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DataQueryEngine.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DataQueryEngine.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:57.106554+00:00",
+      "sha256": "cd6f486ede4b26e0fadaa0a3fc3a02bed8c2f158cbd6aae7f24b17ce5ff5e498",
+      "line_count": 303,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--management--internal--beans--DataQueryEngine.java",
+      "claim": "O motor envia a função de consulta a um ou vários membros e recolhe seus resultados.",
+      "evidence": [
+        {
+          "start_line": 191,
+          "end_line": 201,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DataQueryEngine.java#L191-L201",
+          "excerpt": "191:   private static Object callFunction(final Object functionArgs,\n192:       final Set<DistributedMember> members, final boolean zipResult) throws Exception {\n193: \n194:     try {\n195:       if (members.size() == 1) {\n196:         DistributedMember member = members.iterator().next();\n197:         ResultCollector collector = FunctionService.onMember(member).setArguments(functionArgs)\n198:             .execute(ManagementConstants.QUERY_DATA_FUNCTION);\n199:         List list = (List) collector.getResult();\n200:         Object object = null;\n201:         if (list.size() > 0) {"
+        },
+        {
+          "start_line": 225,
+          "end_line": 231,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DataQueryEngine.java#L225-L231",
+          "excerpt": "225: \n226:       } else { // More than 1 Member\n227:         ResultCollector coll = FunctionService.onMembers(members).setArguments(functionArgs)\n228:             .execute(ManagementConstants.QUERY_DATA_FUNCTION);\n229: \n230:         List list = (List) coll.getResult();\n231:         Object object = list.get(0);"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    },
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/management/internal/beans/QueryDataFunction.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/QueryDataFunction.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/QueryDataFunction.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:02.095960+00:00",
+      "sha256": "85b5d2a8042686cf88a88a333ce84cf7448b36dfd3a526b73b3fb950a1712ec2",
+      "line_count": 311,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--management--internal--beans--QueryDataFunction.java",
+      "claim": "A consulta aplicada opera nos buckets primários locais ou executa uma função na região e devolve os resultados.",
+      "evidence": [
+        {
+          "start_line": 115,
+          "end_line": 122,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/QueryDataFunction.java#L115-L122",
+          "excerpt": "115:   private byte[] selectWithType(final FunctionContext context, String queryString,\n116:       final boolean showMember, final String regionName, final int limit,\n117:       final int queryResultSetLimit, final int queryCollectionsDepth) throws Exception {\n118:     InternalCache cache = (InternalCache) context.getCache();\n119:     Function localQueryFunc = new LocalQueryFunction(\"LocalQueryFunction\", regionName, showMember)\n120:         .setOptimizeForWrite(true);\n121:     queryString = applyLimitClause(queryString, limit, queryResultSetLimit);\n122: "
+        },
+        {
+          "start_line": 144,
+          "end_line": 168,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/QueryDataFunction.java#L144-L168",
+          "excerpt": "144:         ResultCollector rcollector;\n145: \n146:         PartitionedRegion parRegion =\n147:             PartitionedRegionHelper.getPartitionedRegion(regionName, cache);\n148:         if (parRegion != null && showMember) {\n149:           if (parRegion.isDataStore()) {\n150: \n151:             Set<BucketRegion> localPrimaryBucketRegions =\n152:                 parRegion.getDataStore().getAllLocalPrimaryBucketRegions();\n153:             Set<Integer> localPrimaryBucketSet = new HashSet<>();\n154:             for (BucketRegion bRegion : localPrimaryBucketRegions) {\n155:               localPrimaryBucketSet.add(bRegion.getId());\n156:             }\n157:             LocalDataSet lds =\n158:                 new LocalDataSet(parRegion, localPrimaryBucketSet);\n159:             DefaultQuery query = (DefaultQuery) cache.getQueryService().newQuery(queryString);\n160:             final ExecutionContext executionContext = new QueryExecutionContext(null, cache, query);\n161:             results = lds.executeQuery(query, executionContext, null, localPrimaryBucketSet);\n162:           }\n163:         } else {\n164:           rcollector = FunctionService.onRegion(cache.getRegion(regionName))\n165:               .setArguments(queryString).execute(localQueryFunc);\n166:           results = rcollector.getResult();\n167:         }\n168:       }"
+        },
+        {
+          "start_line": 284,
+          "end_line": 301,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/QueryDataFunction.java#L284-L301",
+          "excerpt": "284:     @Override\n285:     public void execute(final FunctionContext context) {\n286:       InternalCache cache = (InternalCache) context.getCache();\n287:       QueryService queryService = cache.getQueryService();\n288:       String qstr = (String) context.getArguments();\n289:       Region r = cache.getRegion(regionName);\n290:       try {\n291:         Query query = queryService.newQuery(qstr);\n292:         SelectResults sr;\n293:         if (r.getAttributes().getPartitionAttributes() != null && showMembers) {\n294:           sr = (SelectResults) query.execute((RegionFunctionContext) context);\n295:           context.getResultSender().lastResult(sr.asList());\n296:         } else {\n297:           sr = (SelectResults) query.execute();\n298:           context.getResultSender().lastResult(sr.asList());\n299:         }\n300: \n301:       } catch (Exception e) {"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    },
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-core/src/main/java/org/apache/geode/internal/cache/PartitionedRegion.java",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/PartitionedRegion.java",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/PartitionedRegion.java",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:01.893207+00:00",
+      "sha256": "b4a1cc0bef50636a7c776b21140a9e9be0b20e6e783cbabc6d305303752affa9",
+      "line_count": 10192,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--internal--cache--PartitionedRegion.java",
+      "claim": "O motor agrupa trabalho pelos proprietários dos buckets e executa a função nos membros locais e remotos correspondentes.",
+      "evidence": [
+        {
+          "start_line": 3590,
+          "end_line": 3637,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/PartitionedRegion.java#L3590-L3637",
+          "excerpt": "3590:   public ResultCollector executeFunction(final Function function,\n3591:       final PartitionedRegionFunctionExecutor execution, ResultCollector rc,\n3592:       boolean executeOnBucketSet) {\n3593:     if (execution.isPrSingleHop()) {\n3594:       if (!executeOnBucketSet) {\n3595:         switch (execution.getFilter().size()) {\n3596:           case 1:\n3597:             if (logger.isDebugEnabled()) {\n3598:               logger.debug(\"Executing Function: (Single Hop) {} on single node.\", function.getId());\n3599:             }\n3600:             return executeOnSingleNode(function, execution, rc, true, false);\n3601:           default:\n3602:             if (logger.isDebugEnabled()) {\n3603:               logger.debug(\"Executing Function: (Single Hop) {} on multiple nodes.\",\n3604:                   function.getId());\n3605:             }\n3606:             return executeOnMultipleNodes(function, execution, rc, true, false);\n3607:         }\n3608:       } else {\n3609:         if (logger.isDebugEnabled()) {\n3610:           logger.debug(\"Executing Function: (Single Hop) {} on a set of buckets nodes.\",\n3611:               function.getId());\n3612:         }\n3613:         return executeOnBucketSet(function, execution, rc, execution.getFilter());\n3614:       }\n3615:     } else {\n3616:       switch (execution.getFilter().size()) {\n3617:         case 0:\n3618:           if (logger.isDebugEnabled()) {\n3619:             logger.debug(\"Executing Function: {} setArguments={} on all buckets.\", function.getId(),\n3620:                 execution.getArguments());\n3621:           }\n3622:           return executeOnAllBuckets(function, execution, rc, false);\n3623:         case 1:\n3624:           if (logger.isDebugEnabled()) {\n3625:             logger.debug(\"Executing Function: {} setArguments={} on single node.\", function.getId(),\n3626:                 execution.getArguments());\n3627:           }\n3628:           return executeOnSingleNode(function, execution, rc, false, executeOnBucketSet);\n3629:         default:\n3630:           if (logger.isDebugEnabled()) {\n3631:             logger.debug(\"Executing Function: {} setArguments={} on multiple nodes.\",\n3632:                 function.getId(), execution.getArguments());\n3633:           }\n3634:           return executeOnMultipleNodes(function, execution, rc, false, executeOnBucketSet);\n3635:       }\n3636:     }\n3637:   }"
+        },
+        {
+          "start_line": 3644,
+          "end_line": 3656,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/PartitionedRegion.java#L3644-L3656",
+          "excerpt": "3644:       boolean isBucketSetAsFilter) {\n3645:     final Set routingKeys = execution.getFilter();\n3646:     final boolean primaryMembersNeeded = function.optimizeForWrite();\n3647:     Map<Integer, Set> bucketToKeysMap = FunctionExecutionNodePruner.groupByBucket(this,\n3648:         routingKeys, primaryMembersNeeded, false, isBucketSetAsFilter);\n3649:     HashMap<InternalDistributedMember, HashSet> memberToKeysMap =\n3650:         new HashMap<>();\n3651:     HashMap<InternalDistributedMember, int[]> memberToBuckets =\n3652:         FunctionExecutionNodePruner.groupByMemberToBuckets(this, bucketToKeysMap.keySet(),\n3653:             primaryMembersNeeded);\n3654: \n3655:     if (isPRSingleHop && (memberToBuckets.size() > 1)) {\n3656:       // memberToBuckets.remove(getMyId()); // don't remove"
+        },
+        {
+          "start_line": 3759,
+          "end_line": 3799,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/PartitionedRegion.java#L3759-L3799",
+          "excerpt": "3759: \n3760:     if (localKeys != null) {\n3761:       final RegionFunctionContextImpl prContext =\n3762:           new RegionFunctionContextImpl(cache, function.getId(), this,\n3763:               execution.getArgumentsForMember(getMyId().getId()),\n3764:               localKeys, ColocationHelper\n3765:                   .constructAndGetAllColocatedLocalDataSet(this, localBucketSet),\n3766:               localBucketSet, resultSender, execution.isReExecute());\n3767:       if (logger.isDebugEnabled()) {\n3768:         logger.debug(\"FunctionService: Executing on local node with keys.{}\", localKeys);\n3769:       }\n3770:       execution.executeFunctionOnLocalPRNode(function, prContext, resultSender, dm, isTX());\n3771:     }\n3772: \n3773:     if (!memberToKeysMap.isEmpty()) {\n3774:       HashMap<InternalDistributedMember, FunctionRemoteContext> recipMap =\n3775:           new HashMap<>();\n3776:       for (Map.Entry me : memberToKeysMap.entrySet()) {\n3777:         InternalDistributedMember recip = (InternalDistributedMember) me.getKey();\n3778:         HashSet memKeys = (HashSet) me.getValue();\n3779:         FunctionRemoteContext context = new FunctionRemoteContext(function,\n3780:             execution.getArgumentsForMember(recip.getId()), memKeys,\n3781:             FunctionExecutionNodePruner.getBucketSet(this, memKeys, false, isBucketSetAsFilter),\n3782:             execution.isReExecute(), execution.isFnSerializationReqd(), getPrincipal());\n3783:         recipMap.put(recip, context);\n3784:       }\n3785:       if (logger.isDebugEnabled()) {\n3786:         logger.debug(\"FunctionService: Executing on remote nodes with member to keys map.{}\",\n3787:             memberToKeysMap);\n3788:       }\n3789:       PartitionedRegionFunctionResultWaiter resultReceiver =\n3790:           new PartitionedRegionFunctionResultWaiter(getSystem(), getPRId(),\n3791:               localResultCollector, function, resultSender);\n3792:       return resultReceiver.getPartitionedDataFrom(recipMap, this, execution);\n3793:     }\n3794:     return localResultCollector;\n3795:   }\n3796: \n3797:   private Object getPrincipal() {\n3798:     return cache.getSecurityService().getPrincipal();\n3799:   }"
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    }
+  ],
+  "primary_architecture_sources": [
+    {
+      "url": "https://docs.gigaspaces.com/latest/overview/the-in-memory-data-grid.html",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:57.970687+00:00",
+      "sha256": "a0a437a936cc01fd5538d77f09fc65b0ec72aefc12bedbf740cc9416767f0247",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/gigaspaces-in-memory-grid.html",
+      "claim": "A fonte primária de SBA trata o espaço como estado distribuído e associa sua escalabilidade a unidades de processamento; persistência relacional é usada se necessária.",
+      "text_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/gigaspaces-in-memory-grid.txt",
+      "text_sha256": "af30c95167c5b7943aac6683c71a9bd96c0439392f5a95e4c0bc1ff637bab338",
+      "evidence": [
+        {
+          "text_start_line": 245,
+          "text_end_line": 246,
+          "excerpt": "245: The Space as the System of Record\n246: One of the unique concepts of GigaSpaces is that its data grid serves as the system of record for your application. This means that all or major parts of your application's data are stored in the space and your data access layer interacts with it via the various space APIs. This allows for ultra-fast read and write performance, while still maintaining a high level of reliability and fault tolerance via data replication to peer space instances in the cluster, and eventual persistency to a relational database if needed."
+        },
+        {
+          "text_start_line": 341,
+          "text_end_line": 350,
+          "excerpt": "341: Besides its ability to function as an in-memory data grid, the Space's core features and the services on top of it, form the foundation for\n342: Space-Based Architecture (SBA)\n343: . By using SBA, you can gain performance and scalability benefits not available with traditional tier-based architectures, even when these include an in-memory data grid, such as the Space. The basic unit of scalability in SBA is the\n344: Processing Unit\n345: . The Space can be embedded into the processing unit, or accessed remotely from it. When embedded into the processing unit, local services, such as event handler and\n346: service bean\n347: An application component that interacts with the space (using the read, write, take and notify operations), and implements a certain functionality.\n348: exposed remotely over the space, can interact with the local space instance to achieve unparalleled performance and scalability. The Space's built-in support for data partitioning is used to distribute the data and processing across the nodes, and for scaling the application.\n349: Different applications might have different caching requirements. Some applications require on-demand loading from an external, slower data source, due to limited memory; others use the cache for read-mostly purposes; transactional applications need a cache that handles both write and read operations, maintains consistency and serves as the application's system of record.\n350: In order to address these different requirements, GigaSpaces provides an in-memory data grid that is policy-driven. Most of the policies do not affect the actual application code, but rather affect the way each data grid instance interacts with other instances."
+        }
+      ]
+    },
+    {
+      "url": "https://docs.gigaspaces.com/17.1/started/xap-tutorial-part5.html",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:58.597332+00:00",
+      "sha256": "fcad77d663c5023177be47068f39a75781aedc60e74802940b57f0ff9104ac0d",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/gigaspaces-processing-unit.html",
+      "claim": "A descrição de unidades de processamento admite unidades somente de dados, somente de lógica e mistas; não exige uma interface de negócio para cada unidade.",
+      "text_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/gigaspaces-processing-unit.txt",
+      "text_sha256": "e4a25b74c52238c0e968996e4bee9c115a7726fa9271b783e95c808d3289556f",
+      "evidence": [
+        {
+          "text_start_line": 73,
+          "text_end_line": 80,
+          "excerpt": "73: Where GigaSpaces data is stored. It is the logical cache that holds data objects in memory and might also hold them in layered in tiering. Data is hosted from multiple SoRs, consolidated as a unified data model.\n74: Based Architecture (\n75: SBA\n76: Space-Based Architecture. This architecture implementation is a set of Processing Units, with the following properties: Each processing unit instances holds a partitioned space instance and one or more services that are registered on events on that specific partition. Together they form an application cluster. Utlized by Utilized GigaSpaces cloud-native IMDG.\n77: ). The PU is a combination of service beans and/or an embedded space instance. The artifacts that belong to a PU are packaged as a JAR or WAR file.\n78: There are several types of PUs; data only, business-logic only, mixed PUs (which contain both data and business logic) and special purpose PUs.\n79: Data Only PU\n80: This type of PU does not include any business logic, only a Space. The PU simply defines the runtime characteristics of the space, i.e. its runtime topology, the number of space replicas/partitions, etc."
+        }
+      ]
+    },
+    {
+      "kind": "FILE",
+      "repo": "apache/geode",
+      "path": "geode-docs/getting_started/product_intro.html.md.erb",
+      "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+      "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-docs/getting_started/product_intro.html.md.erb",
+      "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-docs/getting_started/product_intro.html.md.erb",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T01:55:02.077684+00:00",
+      "sha256": "12fa8680bd40ed534a8198e6ef4f4f8949f3c3f57dccbe82927e4e40b97224f1",
+      "line_count": 113,
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-docs--getting_started--product_intro.html.md.erb",
+      "claim": "A documentação primária Geode explica dados em memória, persistência configurável e execução de funções junto às partições.",
+      "evidence": [
+        {
+          "start_line": 38,
+          "end_line": 40,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-docs/getting_started/product_intro.html.md.erb#L38-L40",
+          "excerpt": "38: ## <a id=\"concept_3B5E445B19884680900161BDF25E32C9__section_CF0E3E5C4F884374B8F2F536DD2A375C\" class=\"no-quick-link\"></a>High Read-and-Write Throughput\n39: \n40: Read-and-write throughput is provided by concurrent main-memory data structures and a highly optimized distribution infrastructure. Applications can make copies of data dynamically in memory through synchronous or asynchronous replication for high read throughput or partition the data across many system members to achieve high read-and-write throughput. Data partitioning doubles the aggregate throughput if the data access is fairly balanced across the entire data set. Linear increase in throughput is limited only by the backbone network capacity."
+        },
+        {
+          "start_line": 54,
+          "end_line": 58,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-docs/getting_started/product_intro.html.md.erb#L54-L58",
+          "excerpt": "54: You can also improve scalability by implementing asynchronous \"write behind\" of data changes to external data stores, like a database. This avoids a bottleneck by queuing all updates in order and redundantly. You can also conflate updates and propagate them in batch to the database.\n55: \n56: ## <a id=\"concept_3B5E445B19884680900161BDF25E32C9__section_CEB4ABFF83054AF6A47EA2FA09C240B1\" class=\"no-quick-link\"></a>Continuous Availability\n57: \n58: In addition to guaranteed consistent copies of data in memory, applications can persist data to disk on one or more members synchronously or asynchronously by using a \"shared nothing disk architecture.\" All asynchronous events (store-forward events) are redundantly managed in at least two members such that if one server fails, the redundant one takes over. All clients connect to logical servers, and the client fails over automatically to alternate servers in a group during failures or when servers become unresponsive."
+        },
+        {
+          "start_line": 66,
+          "end_line": 72,
+          "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-docs/getting_started/product_intro.html.md.erb#L66-L72",
+          "excerpt": "66: ## <a id=\"concept_3B5E445B19884680900161BDF25E32C9__section_A65B5F0DE8BF4AA6AFF16E3A75D4E0AD\" class=\"no-quick-link\"></a>Parallelized Application Behavior on Data Stores\n67: \n68: You can execute application business logic in parallel on members. The data-aware function-execution service permits execution of arbitrary, data-dependent application functions on the members where the data is partitioned for locality of reference and scale.\n69: \n70: By colocating the relevant data and parallelizing the calculation, you increase overall throughput. The calculation latency is inversely proportional to the number of members on which it can be parallelized.\n71: \n72: The fundamental premise is to route the function transparently to the application that carries the data subset required by the function and to avoid moving data around on the network. Application function can be executed on only one member, in parallel on a subset of members, or in parallel across all members. This programming model is similar to the popular Map-Reduce model from Google. Data-aware function routing is most appropriate for applications that require iteration over multiple data items (such as a query or custom aggregation function)."
+        }
+      ],
+      "license": {
+        "repo": "apache/geode",
+        "path": "LICENSE",
+        "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+        "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T01:55:01.776500+00:00",
+        "sha256": "68a8b5996f9f17bb4c1aeccd1ca55b087d6d3691cd8cf1aed984f62d62f6507f",
+        "line_count": 376,
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--LICENSE",
+        "status": "READ",
+        "spdx": "Apache-2.0",
+        "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n"
+      }
+    }
+  ],
+  "context7": {
+    "queries": [
+      "Apache Geode",
+      "Apache Geode distributed in-memory data management"
+    ],
+    "result": "As duas resoluções devolveram apenas /geode-sdk/docs, que é um SDK de Geometry Dash. Esse resultado foi descartado por produto incompatível. A evidência usa documentação oficial Apache fixada na mesma revisão do código."
+  },
+  "writes": "Somente tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/."
+}

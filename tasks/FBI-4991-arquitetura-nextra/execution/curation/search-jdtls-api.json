@@ -1,0 +1,6 @@
+{
+  "query": "repo:eclipse-jdtls/eclipse.jdt.ls JDTLanguageServer path:handlers",
+  "observed_utc": "2026-10-15T02:01:51.868797Z",
+  "total_count": 0,
+  "items": []
+}

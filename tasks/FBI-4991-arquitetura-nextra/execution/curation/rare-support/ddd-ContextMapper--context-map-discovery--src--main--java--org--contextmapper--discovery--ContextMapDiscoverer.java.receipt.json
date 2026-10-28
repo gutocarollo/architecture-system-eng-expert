@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-map-discovery",
+  "path": "src/main/java/org/contextmapper/discovery/ContextMapDiscoverer.java",
+  "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+  "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/ContextMapDiscoverer.java",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/ContextMapDiscoverer.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:06:44.825098+00:00",
+  "sha256": "fcb14707c2144b4cbb740a13ac6db303eca571d9c171945d161416ff046da121",
+  "line_count": 114,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--src--main--java--org--contextmapper--discovery--ContextMapDiscoverer.java"
+}

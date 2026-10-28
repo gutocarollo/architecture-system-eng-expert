@@ -1,0 +1,11 @@
+flowchart TD
+    I["Tenants A e B consultam position"] --> B["Antes: chave contém só position"]
+    B --> X["B recebe recorte de A"]
+    I --> A["financial.py::cache_policy inclui tenant e consulta"]
+    A --> Q{"Entrada ainda válida?"}
+    Q -->|sim| V["Devolve valor do recorte correto"]
+    Q -->|não| P["Recarrega pelo produtor"]
+    P --> C["Invalidação permite atualizar cópia local"]
+    C --> W{"Crédito precisa sobreviver à queda?"}
+    W -->|sim| D["Write-through confirma depois da escrita durável"]
+    W -->|buffer apenas| L["Write-behind pode perder pendência sem recuperação"]

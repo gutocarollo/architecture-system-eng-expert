@@ -1,0 +1,17 @@
+{
+  "query": "repo:cloudnative-pg/cloudnative-pg BuildPrimaryBootstrapCommandViaRestoreSnapshot",
+  "observed_utc": "2026-10-15T02:01:51.942589Z",
+  "total_count": 2,
+  "items": [
+    {
+      "repo": "cloudnative-pg/cloudnative-pg",
+      "path": "pkg/specs/jobs.go",
+      "url": "https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/pkg/specs/jobs.go"
+    },
+    {
+      "repo": "cloudnative-pg/cloudnative-pg",
+      "path": "internal/controller/cluster_create.go",
+      "url": "https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/controller/cluster_create.go"
+    }
+  ]
+}

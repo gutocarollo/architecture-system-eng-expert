@@ -1,0 +1,48 @@
+diff --git a/dags/inflow__xp__stg_to_fct.py b/dags/inflow__xp__stg_to_fct.py
+index 5f664142..2fa3dd68 100644
+--- a/dags/inflow__xp__stg_to_fct.py
++++ b/dags/inflow__xp__stg_to_fct.py
+@@ -229,11 +229,13 @@ with DAG(
+         Escreve dim_account_assignment + dim_advisor_coverage (PROD), atomico.
+         ~13x mais rapido que o Python (16s vs 214s) e corrige periodos invalidos
+         (end<start) e contas multi-current. Mede o pico de RSS (getrusage).
+-        Fail-loud: qualquer falha derruba a task (esta no caminho critico).
++        Fail-loud: qualquer falha derruba a task (esta no caminho critico). Unica
++        excecao: lock timeout do Postgres (55P03), repetido ate 2 vezes (FBI-4797).
+         """
+         import json
+         import resource
+         import subprocess
++        import time
+         from urllib.parse import quote
+ 
+         binary = os.path.join(
+@@ -250,9 +252,25 @@ with DAG(
+             h=c.host, port=c.port or 5432, db=c.schema)
+ 
+         env = {**os.environ, 'PG_CONN_STRING': uri}
+-        proc = subprocess.run(
+-            [binary, '--mode', 'prod', '--json'],
+-            env=env, capture_output=True, text=True, timeout=300)
++        # 55P03 = lock_timeout (60 s) do Postgres: o TRUNCATE de dim_account_assignment e
++        # dim_advisor_coverage espera todo leitor terminar, e uma consulta longa naquelas
++        # tabelas estoura a espera (05/10 22:32 UTC, 1 em 6 runs). A escrita e atomica (uma
++        # transacao, a falha desfaz tudo) e idempotente: repetir e seguro. So esse erro
++        # repete; qualquer outro derruba a task na hora.
++        lock_retries, lock_retry_delay_s = 2, 30
++        attempt = 0
++        while True:
++            proc = subprocess.run(
++                [binary, '--mode', 'prod', '--json'],
++                env=env, capture_output=True, text=True, timeout=300)
++            lock_timeout = proc.returncode != 0 and '55P03' in (proc.stderr or '')
++            if not lock_timeout or attempt >= lock_retries:
++                break
++            attempt += 1
++            logger.warning(
++                "[HASKELL 60d PROD] lock timeout (55P03) na escrita atomica; "
++                "tentativa %s/%s em %ss", attempt, lock_retries, lock_retry_delay_s)
++            time.sleep(lock_retry_delay_s)
+ 
+         peak_mb = round(
+             resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024.0, 1)

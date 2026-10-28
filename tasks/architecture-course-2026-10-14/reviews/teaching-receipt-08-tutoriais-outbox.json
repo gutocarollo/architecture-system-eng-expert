@@ -1,0 +1,15 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "tutoriais/outbox",
+  "document_sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+  "context_sha256": "f44415487f6fcdb7ab2a016fe905d43ada4a85f1cb1daa73d91848e741336e85",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "l1c"
+  ]
+}

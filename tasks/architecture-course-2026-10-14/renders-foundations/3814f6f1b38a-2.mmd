@@ -1,0 +1,10 @@
+flowchart TD
+    REQUEST[Pedido fictício de R$ 100] --> RESERVE[Reservar valor com identidade estável]
+    RESERVE --> BUSINESS{Regra principal aceita o pedido?}
+    BUSINESS -->|não| RELEASE[Liberar a reserva e registrar a decisão]
+    BUSINESS -->|sim| VALID[Preservar a operação válida]
+    VALID --> NOTICE{Aviso acessório confirmado?}
+    NOTICE -->|sim| COMPLETE[Concluir]
+    NOTICE -->|não| RETRY[Registrar aviso pendente e tentar novamente]
+    RETRY --> COMPLETE
+    RELEASE --> CANCELLED[Pedido rejeitado]

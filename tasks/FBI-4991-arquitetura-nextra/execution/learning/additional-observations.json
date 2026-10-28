@@ -1,0 +1,2320 @@
+{
+  "observations": [
+    {
+      "case": "access-policy",
+      "probe": "oauth-code-pkce",
+      "names": [
+        "OAuth2"
+      ],
+      "before": {
+        "code_without_binding_can_be_replayed": true
+      },
+      "after": {
+        "wrong_verifier_rejected": true,
+        "wrong_redirect_rejected": true,
+        "code_reuse_rejected": true,
+        "resource_subject": "SYNTHETIC-USER",
+        "resource_scope": "order:read"
+      },
+      "action": "Troque o código por token usando o verificador PKCE e a redirect URI vinculada. Antes da troca válida, tente os dois valores errados; depois tente reutilizar o código.",
+      "guarantee": "The local authorization-code model binds verifier and redirect, permits one code redemption and issues an audience/scope-limited signed access token.",
+      "limit": "A teaching model of RFC 6749/7636 message checks; it is not an authorization-server library, browser login, refresh flow or production OAuth security implementation.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    {
+      "case": "access-policy",
+      "probe": "oidc-id-token-validation",
+      "names": [
+        "OIDC"
+      ],
+      "before": {
+        "claims_read_without_signature_or_client_binding": true
+      },
+      "after": {
+        "verified_subject": "SYNTHETIC-USER",
+        "wrong_nonce_rejected": true,
+        "wrong_audience_rejected": true,
+        "tampered_signature_rejected": true
+      },
+      "action": "Valide o ID token assinado e repita com nonce diferente, audience diferente e assinatura alterada. Confira que conhecer um sub no JSON não basta para aceitar a identidade.",
+      "guarantee": "The ID-token validation property checks issuer, audience, nonce, expiration and the configured HS256 signature before accepting the subject.",
+      "limit": "The synthetic client uses a preconfigured shared key. Discovery, JWKS, key negotiation, all claim rules and an actual OpenID Provider are not implemented.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    {
+      "case": "access-policy",
+      "probe": "signed-key-rotation",
+      "names": [
+        "Secrets Rotation"
+      ],
+      "before": {
+        "old_token_accepted_during_overlap": true
+      },
+      "after": {
+        "new_token_accepted": true,
+        "old_token_rejected_after_retirement": true,
+        "tampered_new_token_rejected": true
+      },
+      "action": "Emita tokens com old e new, aceite ambos na janela de sobreposição e retire old do verificador. Confira a validação criptográfica, a recusa do token antigo e a recusa da assinatura alterada.",
+      "guarantee": "A signed credential remains valid through the overlap and becomes inadmissible after its signing key is removed from trust.",
+      "limit": "Keys are fixed synthetic HMAC material. Secret storage, asymmetric key distribution and coordinated live-service rotation are outside the experiment.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    {
+      "case": "access-policy",
+      "probe": "signed-service-identity",
+      "names": [
+        "Service-to-Service Identity"
+      ],
+      "before": {
+        "self_declared_service_header_accepted": true
+      },
+      "after": {
+        "unauthenticated_client_rejected": true,
+        "authenticated_service_subject": "order-service",
+        "resource_audience": "order-api",
+        "permission_scope": "order:read"
+      },
+      "action": "Autentique o cliente de serviço antes de emitir a credencial e valide sua assinatura no recurso. Compare com aceitar um nome de serviço apenas declarado pelo chamador.",
+      "guarantee": "The resource authenticates a signed service principal and validates its intended audience/scope rather than trusting a caller-supplied service label.",
+      "limit": "Client secrets and tokens are synthetic; there is no real identity provider, protected key store or live service deployment.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    {
+      "case": "access-policy",
+      "probe": "downscoped-token-exchange",
+      "names": [
+        "Token Exchange"
+      ],
+      "before": {
+        "original_token_wrong_resource_rejected": true
+      },
+      "after": {
+        "exchanged_audience": "order-api",
+        "exchanged_scope": "order:read",
+        "subject": "SYNTHETIC-USER",
+        "actor": "gateway-service",
+        "expires": 5
+      },
+      "action": "Valide o token destinado ao gateway e troque-o por uma credencial mais curta para order-api. Confira o usuário preservado, o ator do serviço e a redução de escopo.",
+      "guarantee": "The exchanged credential is bound to the target resource and a narrower delegated scope, preserving subject and actor identities.",
+      "limit": "This is an RFC 8693-style claim transformation model, without a token-exchange endpoint or a complete delegation authorization policy.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    {
+      "case": "access-policy",
+      "probe": "verify-internal-request",
+      "names": [
+        "Zero Trust"
+      ],
+      "before": {
+        "internal_origin_alone_grants_access": true
+      },
+      "after": {
+        "internal_rogue_rejected": true,
+        "verified_service_allowed": true,
+        "internal_flag_bypasses_verification": false
+      },
+      "action": "Marque os dois pedidos como internos. Recuse o serviço rogue mesmo com token assinado válido e aceite somente o principal e a permissão esperados para o recurso.",
+      "guarantee": "Network location does not replace per-request identity and resource-policy verification in the tested boundary.",
+      "limit": "This demonstrates one zero-trust access property, not an organization-wide zero-trust architecture, device posture or continuous risk engine.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    {
+      "case": "access-policy",
+      "probe": "bastion-admin-hop",
+      "names": [
+        "Bastion Host"
+      ],
+      "before": {
+        "unrestricted_direct_admin_path": true
+      },
+      "after": {
+        "direct_path_allowed": false,
+        "authorized_two_hops": true,
+        "hops": [
+          [
+            "workstation",
+            "bastion"
+          ],
+          [
+            "bastion",
+            "ledger-admin"
+          ]
+        ],
+        "non_admin_rejected": true
+      },
+      "action": "Tente o acesso administrativo direto e depois os dois saltos permitidos via bastion. Repita o primeiro salto com uma pessoa sem papel administrativo.",
+      "guarantee": "Administrative access is funneled through an authenticated jump boundary and direct access to the protected target is denied.",
+      "limit": "The graph executes authorization and routing decisions, not SSH, a real bastion host, firewall rules or session recording.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    {
+      "case": "access-policy",
+      "probe": "mutual-tls-peer-certs",
+      "names": [
+        "mTLS"
+      ],
+      "before": {
+        "client_without_certificate_accepted": true
+      },
+      "after": {
+        "client_without_certificate_accepted": false,
+        "trusted_client_accepted": true,
+        "client_authenticated_by_server": true,
+        "server_authenticated_by_client": true,
+        "payload_exchange_completed": true
+      },
+      "action": "Execute três handshakes TLS por socketpair: servidor sem exigir cliente, servidor exigindo cliente ausente e cliente com certificado confiável. Confira a autenticação dos dois pares e a troca de ORDER-1.",
+      "guarantee": "Real SSLContext handshakes reject a client missing its certificate when mutual verification is required and authenticate both trusted peers before exchanging data.",
+      "limit": "Certificates and keys are generated only in a temporary directory and removed. No listening port, external connection, production CA or service configuration is changed.",
+      "source_file": "labs/architecture/models_security.py"
+    },
+    {
+      "case": "cache-policy",
+      "probe": "distributed-cache-owner",
+      "names": [
+        "Distributed Cache"
+      ],
+      "before": {
+        "independent_worker_cache_source_calls": 2
+      },
+      "after": {
+        "shared_owner_source_calls": 1,
+        "worker_values": [
+          1000,
+          1000
+        ],
+        "owner_partitions": 2
+      },
+      "action": "Faça dois workers lógicos consultarem a mesma posição pelo dono da chave no cache compartilhado. Confira que a segunda leitura não volta à fonte.",
+      "guarantee": "Different logical workers use the same partition owner and share its populated cache entry, unlike independent per-worker caches.",
+      "limit": "The owners are local dictionaries; the experiment isolates shared-owner cache semantics without claiming a networked cache product or cross-machine durability.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "paxos-accepted-carry",
+      "names": [
+        "Paxos"
+      ],
+      "before": {
+        "new_round_proposal": "ORDER-B",
+        "would_replace_chosen_value": true
+      },
+      "after": {
+        "new_round_proposal": "ORDER-A",
+        "accepted_nodes": 2,
+        "ballot": 8
+      },
+      "action": "Prepare a rodada 8 em dois acceptors que já aceitaram ORDER-A na rodada 7. Proponha ORDER-B e confira por que o novo proposer precisa carregar o valor previamente aceito.",
+      "guarantee": "A prepare quorum reports accepted values; the proposer carries the value at the highest accepted ballot rather than inventing a different value.",
+      "limit": "A finite single-decree Paxos schedule with reliable local messages; persistence, liveness and arbitrary faults are not implemented.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "raft-log-prefix",
+      "names": [
+        "Raft"
+      ],
+      "before": {
+        "blind_append_accepts_mismatched_prefix": true
+      },
+      "after": {
+        "mismatched_prefix_rejected": true,
+        "length_after_rejection": 2,
+        "retry_accepted": true,
+        "matches_leader": true,
+        "log_terms": [
+          1,
+          3,
+          3
+        ]
+      },
+      "action": "Envie AppendEntries com prevLogIndex=2 e prevLogTerm=3 para uma réplica cujo termo no índice 2 é 2. Confira a recusa e a repetição a partir do prefixo comum.",
+      "guarantee": "The follower checks the previous index/term before appending; a retry from a matching prefix replaces conflicting suffix entries.",
+      "limit": "This isolates Raft log matching, without election, durable storage, commitment or a complete replicated state machine.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "election-one-vote",
+      "names": [
+        "Leader Election"
+      ],
+      "before": {
+        "candidates_with_unrestricted_votes": 2
+      },
+      "after": {
+        "A_votes": 2,
+        "C_votes": 1,
+        "elected_candidates": 1,
+        "B_voted_for": "A"
+      },
+      "action": "Faça B votar em A no termo 2 e depois receber C no mesmo termo. Confira que B não vota nos dois candidatos e que só A reúne a maioria.",
+      "guarantee": "A voter remembers its vote in the term and refuses a second different candidate in that term.",
+      "limit": "The fixture does not implement log freshness, randomized timeouts, persistence or all election transitions.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "three-phase-precommit",
+      "names": [
+        "Three-Phase Commit / 3PC"
+      ],
+      "before": {
+        "two_phase_prepared_timeout": "wait_for_coordinator"
+      },
+      "after": {
+        "phases_before_timeout": [
+          "canCommit",
+          "preCommit"
+        ],
+        "all_precommitted": true,
+        "decision_under_synchronous_no_partition_assumption": "commit",
+        "decision_if_partition_possible": "wait"
+      },
+      "action": "Faça os dois participantes reconhecerem canCommit e preCommit. Compare a decisão no modelo síncrono declarado com o caso em que uma partição ainda é possível.",
+      "guarantee": "The extra precommit state distinguishes the modeled 3PC decision from an uncertain 2PC prepare, under the explicit timing and no-partition assumptions.",
+      "limit": "This is not a partition-tolerant atomic commit implementation; the autonomous commit decision is not generalized outside those assumptions.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "hybrid-clock-receive",
+      "names": [
+        "Hybrid Logical Clock"
+      ],
+      "before": {
+        "naive_physical_receive_time": 1005
+      },
+      "after": {
+        "hybrid_wall": 1010,
+        "hybrid_logical": 4,
+        "causal_order_preserved": true
+      },
+      "action": "Receba o evento 1010:3 com relógio físico em 1005 e relógio local em 1006:1. Confira a parte física máxima e o contador lógico que conserva a ordem causal.",
+      "guarantee": "The receive rule combines the physical maximum with a logical counter when the received wall component wins.",
+      "limit": "The one receive schedule does not synchronize physical clocks or prove a distributed implementation under every skew pattern.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "synchronous-replica-ack",
+      "names": [
+        "Synchronous Replication"
+      ],
+      "before": {
+        "writer_ack_before_replica_applied": true
+      },
+      "after": {
+        "ack_while_replica_behind": false,
+        "ack_after_replica_applied": true,
+        "read_version_after_ack": 2
+      },
+      "action": "Mantenha a réplica na versão 1 enquanto o primário está na 2. Confira que a confirmação sincronizada espera a aplicação e que a leitura dessa réplica após a confirmação vê a versão 2.",
+      "guarantee": "The writer acknowledgement is ordered after this replica applies the write, providing the tested after-ack visibility property.",
+      "limit": "This bounded primary/replica schedule does not alone prove linearizability, all replica routing or consistency under partitions.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "cascading-replication",
+      "names": [
+        "Cascading Replication"
+      ],
+      "before": {
+        "C_before_B_relay": 1
+      },
+      "after": {
+        "A_version": 2,
+        "B_version": 2,
+        "C_version": 2,
+        "C_source": "B"
+      },
+      "action": "Aplique a versão de A em B e só depois replique B em C. Observe que C depende do intermediário, em vez de consultar diretamente A.",
+      "guarantee": "Replication follows A to B to C, exposing the intermediate replica as the source of the final replica.",
+      "limit": "The model has one ordered update, no WAL streams, failover or network delay.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "multi-writer-reconcile",
+      "names": [
+        "Active/Active",
+        "Multi-Leader",
+        "Multi-Primary"
+      ],
+      "before": {
+        "last_absolute_balance_wins": 1050,
+        "lost_credit": 100
+      },
+      "after": {
+        "sites_accepting_writes": 2,
+        "merged_balance": 1150,
+        "unique_credits": 2
+      },
+      "action": "Aceite um crédito distinto em A e B. Compare a última substituição absoluta de saldo com a reconciliação das identidades dos dois créditos.",
+      "guarantee": "Both sites accept writes and reconciliation preserves distinct additive credits instead of choosing one absolute snapshot.",
+      "limit": "This merge is valid only for the declared independent credits; noncommutative debits and invariants need a business conflict policy.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "owner-latest-read",
+      "names": [
+        "Strong Consistency"
+      ],
+      "before": {
+        "read_from_uncoordinated_stale_replica_after_write": 1000
+      },
+      "after": {
+        "read_before_write": 1000,
+        "read_after_completed_write": 1100,
+        "latest_version": 2,
+        "ordered_history": [
+          [
+            "read",
+            1,
+            1000
+          ],
+          [
+            "write",
+            2,
+            1100
+          ],
+          [
+            "read",
+            2,
+            1100
+          ]
+        ]
+      },
+      "action": "Leia 1.000, conclua o crédito de 100 no dono serializado e faça outra leitura sem carregar um token de sessão. Confira a versão e a ordem das operações no histórico.",
+      "guarantee": "Every read in this single-owner schedule observes the latest preceding completed write, independently of a client session hint.",
+      "limit": "This is one serialized-owner history, not a universal linearizability proof or a distributed strong-consistency system under failures.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "standby-recovery-work",
+      "names": [
+        "Cold Standby",
+        "Warm Standby",
+        "Hot Standby",
+        "Active/Passive",
+        "Failover"
+      ],
+      "before": {
+        "failed_primary_available": false
+      },
+      "after": {
+        "recovery_steps": {
+          "cold": [
+            "restore",
+            "start",
+            "catch-up",
+            "promote"
+          ],
+          "warm": [
+            "catch-up",
+            "promote"
+          ],
+          "hot": [
+            "promote"
+          ]
+        },
+        "all_promoted": true,
+        "all_versions": [
+          2,
+          2,
+          2
+        ]
+      },
+      "action": "Recupere a mesma versão com uma cópia fria, uma morna e uma quente. Execute os passos que faltam em cada uma antes de promover seu papel para primário.",
+      "guarantee": "Standby readiness changes the restore/start/catch-up work required before the role transition.",
+      "limit": "The steps are state transitions in a finite model, not measured RTO, restored backups or real database promotion.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "automatic-failover-detection",
+      "names": [
+        "Automatic Failover",
+        "Heartbeat"
+      ],
+      "before": {
+        "primary_responded_at": 0,
+        "automatic_successor": null
+      },
+      "after": {
+        "heartbeat_stale": true,
+        "successor": "B",
+        "successor_version": 2,
+        "old_primary_healthy": false
+      },
+      "action": "Avance o relógio de 0 para 6 com prazo 5, detecte o heartbeat antigo e promova a cópia que já alcançou a versão necessária.",
+      "guarantee": "A failure detector based on heartbeat age triggers the modeled role transition automatically.",
+      "limit": "A timeout suspects failure; this local model does not prove the old primary stopped or supply fencing under a network partition.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "consensus",
+      "probe": "failure-domain-spread",
+      "names": [
+        "Multi-AZ",
+        "Multi-Region"
+      ],
+      "before": {
+        "survivors_after_zone_A_loss": 0,
+        "survivors_after_region_R1_loss": 0
+      },
+      "after": {
+        "survivors_after_zone_A_loss": 1,
+        "survivors_after_region_R1_loss": 1
+      },
+      "action": "Distribua as duas instâncias entre zonas e regiões distintas e remova uma zona ou região inteira. Compare as instâncias que sobrevivem aos mesmos domínios de falha.",
+      "guarantee": "Replica placement across different failure domains leaves one instance after the declared zone or region outage.",
+      "limit": "Replication freshness, routing, shared dependencies, quorum and regulatory placement are not inferred from the survivor count.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "diagnostics",
+      "probe": "golden-use-resource-signals",
+      "names": [
+        "Golden Signals",
+        "USE Method (Utilization, Saturation, Errors)"
+      ],
+      "before": {
+        "process_health": "ok",
+        "resource_saturation_measured": false
+      },
+      "after": {
+        "traffic_requests_per_second": 2.0,
+        "maximum_duration_ms": 800,
+        "failed_requests": 1,
+        "queued_requests": 3,
+        "active_slots": 2,
+        "slot_capacity": 2,
+        "cpu_utilization": 0.8
+      },
+      "action": "Mantenha o processo saudável enquanto as duas vagas estão ocupadas e três pedidos aguardam. Calcule tráfego, duração, erros, utilização e saturação em seus grãos declarados.",
+      "guarantee": "The sample distinguishes healthy process status from traffic/latency/errors/saturation and from resource utilization/saturation/errors.",
+      "limit": "These are controlled sample measurements, not production percentiles, SLOs or a capacity benchmark.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "diagnostics",
+      "probe": "opentelemetry-sdk-export",
+      "names": [
+        "OpenTelemetry",
+        "Distributed Tracing"
+      ],
+      "before": {
+        "exported_spans": 0,
+        "traceparent_propagated": false
+      },
+      "after": {
+        "exported_spans": 2,
+        "failed_spans": 1,
+        "parent_matches": true,
+        "request_ids": 1,
+        "same_trace": true,
+        "span_names": [
+          "gateway",
+          "provider"
+        ],
+        "traceparent_propagated": true
+      },
+      "action": "Execute o SDK OpenTelemetry fixado, injete e extraia traceparent entre gateway e provider e exporte para memória. Confira o mesmo trace, o parent span e o erro, sem confundir dois spans com duas requisições.",
+      "guarantee": "The real SDK exports two parent/child spans in one trace, propagates context and records one failed span for one request.",
+      "limit": "The exporter is in memory with SDK 1.45.1. There is no collector, network service or claim of production instrumentation.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "mvc-controller-model-view",
+      "names": [
+        "MVC"
+      ],
+      "before": {
+        "view_writes": 1
+      },
+      "after": {
+        "view_writes": 0,
+        "controller_writes": 1,
+        "rendered": [
+          "Balance 1100"
+        ]
+      },
+      "action": "Execute o crédito pelo controlador e confira que a apresentação recebe apenas os dados finais, sem realizar a escrita do modelo.",
+      "guarantee": "The controller changes the model and selects a view; the view renders a DTO and never owns the write.",
+      "limit": "A local role model; routing, templates and a web framework are not implemented.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "mvp-passive-view",
+      "names": [
+        "MVP"
+      ],
+      "before": {
+        "view_source_reads": 1,
+        "display": "1100"
+      },
+      "after": {
+        "view_source_reads": 0,
+        "presenter_source_reads": 1,
+        "display": "R$ 1100,00"
+      },
+      "action": "Substitua a view por uma lista que recebe chamadas do presenter. Confira quem lê o modelo e quem transforma a informação para apresentação.",
+      "guarantee": "The presenter loads and prepares the model result; a passive view only receives the display value.",
+      "limit": "The recording view models the interface boundary rather than a full UI toolkit.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "mvvm-binding",
+      "names": [
+        "MVVM"
+      ],
+      "before": {
+        "view_after_plain_assignment": "1000"
+      },
+      "after": {
+        "view_after_bound_assignment": "1100",
+        "view_model_balance": 1100,
+        "binding_callbacks": 1
+      },
+      "action": "Altere a propriedade balance do view model e observe o callback de binding atualizar a apresentação sem uma chamada explícita de renderização no comando.",
+      "guarantee": "A binding propagates an observable view-model property change into the view.",
+      "limit": "The model covers one-way binding; validation, two-way binding and UI lifecycle remain outside it.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "pac-agent-controls",
+      "names": [
+        "PAC"
+      ],
+      "before": {
+        "shared_view_last_child_value": 50
+      },
+      "after": {
+        "parent_total": 150,
+        "parent_display": "150",
+        "controls_visited": [
+          "orders",
+          "fees",
+          "parent"
+        ]
+      },
+      "action": "Faça dois controles filhos atualizarem suas abstrações e peça ao controle pai para compor o total. Compare com a última escrita isolada de uma apresentação compartilhada.",
+      "guarantee": "Each agent owns abstraction, presentation and control; parent control coordinates the child agents.",
+      "limit": "This is a small hierarchical PAC model, not a recommendation to adopt PAC in MakersHub.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "inward-ports-and-layers",
+      "names": [
+        "Layered / N-Tier",
+        "Clean Architecture",
+        "Onion Architecture",
+        "Hexagonal / Ports & Adapters"
+      ],
+      "before": {
+        "domain_imports_storage_driver": true
+      },
+      "after": {
+        "domain_imports_storage_driver": false,
+        "saved_per_adapter": {
+          "memory-A": 1,
+          "memory-B": 1
+        },
+        "call_order": [
+          "presentation",
+          "application",
+          "domain"
+        ]
+      },
+      "action": "Siga presentation, application e domain e troque a implementação da porta de gravação entre dois adaptadores. Confira a regra e os imports do domínio.",
+      "guarantee": "Ordered invocation exhibits layers; the domain depends on its port and two replaceable adapters implement that port, exhibiting the inward dependency property of Clean/Onion/Hexagonal designs.",
+      "limit": "Only these boundary properties are modeled. The four styles have further distinctions not erased by sharing the exercise.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "module-public-contract",
+      "names": [
+        "Modular Monolith",
+        "Component-Based Architecture",
+        "Vertical Slice Architecture"
+      ],
+      "before": {
+        "cross_module_internal_writes": 1
+      },
+      "after": {
+        "cross_module_internal_writes": 0,
+        "public_calls": [
+          "orders.public.place",
+          "positions.public.project"
+        ],
+        "order_feature_parts": [
+          "validate",
+          "place",
+          "persist"
+        ],
+        "single_process": true
+      },
+      "action": "Execute a ordem pelo contrato público do módulo e atualize posições pelo contrato do outro módulo. Examine o agrupamento da validação, do handler e da persistência na fatia de ordens.",
+      "guarantee": "Public component contracts separate modules in one process; the order feature groups the steps of one vertical use case.",
+      "limit": "The model demonstrates module and feature boundaries, not automatic proof of a repository-wide architecture.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "microkernel-plugin",
+      "names": [
+        "Microkernel / Plugin Architecture"
+      ],
+      "before": {
+        "premium_available": false
+      },
+      "after": {
+        "premium_available": true,
+        "fee": 5.0,
+        "core_dispatch_branches_added": 0
+      },
+      "action": "Registre um plugin premium no catálogo e execute a política pelo contrato já usado pelo núcleo. Confira que o dispatcher não ganha um novo condicional.",
+      "guarantee": "A stable kernel invokes a registered extension through a shared contract.",
+      "limit": "Isolation, signing, lifecycle and dependency policy of untrusted plugins are not implemented.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "blackboard-specialists",
+      "names": [
+        "Blackboard Architecture"
+      ],
+      "before": {
+        "allocation": null
+      },
+      "after": {
+        "allocation": "reserved",
+        "rounds": 2,
+        "risk_approved": true
+      },
+      "action": "Execute os especialistas na ordem em que alocação tenta agir antes de risco. Observe o quadro de fatos permitir que a próxima rodada conclua a alocação.",
+      "guarantee": "Independent specialists read and contribute to a shared problem state until their prerequisites become available.",
+      "limit": "The fixture has monotonic facts and two rounds; conflict resolution and an unrestricted expert scheduler are outside it.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "actor-mailbox-writer",
+      "names": [
+        "Actor Model",
+        "Single Writer Principle"
+      ],
+      "before": {
+        "counter_after_two_stale_writers": 1
+      },
+      "after": {
+        "counter": 2,
+        "mailbox_empty": true,
+        "state_writer_count": 1
+      },
+      "action": "Envie dois incrementos ao ator e deixe somente seu consumidor de mailbox escrever o estado. Compare com dois leitores que gravam a partir do mesmo valor antigo.",
+      "guarantee": "A private state owner serializes messages and provides a single writer for this actor.",
+      "limit": "The mailbox is local; supervision, distributed actors and message durability are not claimed.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "event-driven-handler",
+      "names": [
+        "Event-Driven Architecture"
+      ],
+      "before": {
+        "projection_before_event_dispatch": 1000
+      },
+      "after": {
+        "projection_after_event_dispatch": 1100,
+        "producer_balance": 1100,
+        "producer_direct_projection_writes": 0
+      },
+      "action": "Aceite o crédito no produtor e observe a projeção só avançar quando seu handler recebe o evento. Inspecione que o produtor não chama a projeção diretamente.",
+      "guarantee": "The producer emits a fact and a subscribed handler reacts to it asynchronously in the local schedule.",
+      "limit": "Transport, delivery guarantees and cross-process execution are not part of this event-driven property model.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "service-boundaries",
+      "names": [
+        "Microservices",
+        "SOA"
+      ],
+      "before": {
+        "shared_failure_stops_balance_read": true
+      },
+      "after": {
+        "balance_results": [
+          1100,
+          1100
+        ],
+        "read_after_other_service_failure": 1100,
+        "public_operations": [
+          "credit",
+          "read",
+          "read"
+        ]
+      },
+      "action": "Execute o mesmo contrato de conta por duas operações e provoque uma falha no serviço vizinho. Confira que a leitura do dono da conta continua independente.",
+      "guarantee": "An explicit business service owns its store and operation contract; the other service failure does not mutate or prevent its operation in this controlled schedule.",
+      "limit": "Services are logical local participants. Network independence, deployment, discovery and distributed transactions are not proven.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "serverless-invocation",
+      "names": [
+        "Serverless"
+      ],
+      "before": {
+        "next_fresh_local_balance": 1000
+      },
+      "after": {
+        "invocation_balances": [
+          1100,
+          1100
+        ],
+        "local_counters": [
+          1,
+          1
+        ],
+        "state_owner": "external_port"
+      },
+      "action": "Inicie cada invocação com memória local nova e conserve o crédito pela porta externa. Confira que a segunda invocação vê 1.100 sem depender de um processo aquecido.",
+      "guarantee": "The handler tolerates fresh invocation memory and keeps authoritative state outside that ephemeral environment.",
+      "limit": "No cloud runtime, billing, autoscaling or vendor-specific execution contract is simulated.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "space-based-grid",
+      "names": [
+        "Space-Based Architecture"
+      ],
+      "before": {
+        "central_store_failure_processed": 0
+      },
+      "after": {
+        "grid_partitions": 3,
+        "processed": 12,
+        "value_sum": 90,
+        "per_partition": [
+          4,
+          4,
+          4
+        ],
+        "external_database_calls": 0
+      },
+      "action": "Distribua as doze entradas pelo dono da chave e execute a alteração dentro de cada partição em memória. Confira a distribuição e a soma sem consultar um banco central.",
+      "guarantee": "A partitioned memory grid owns data and co-locates processing; the same owner partitions can serve shared cache reads to different logical workers.",
+      "limit": "The grid is a finite local model, without durable replication, network partitions or a deployed distributed-cache product.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "cell-failure-boundary",
+      "names": [
+        "Cell-Based Architecture"
+      ],
+      "before": {
+        "shared_failure_successes": 0
+      },
+      "after": {
+        "isolated_cell_successes": 1,
+        "responses": [
+          "accepted-B"
+        ]
+      },
+      "action": "Provoque a falha da célula A e continue o pedido destinado à célula B. Confira que a recuperação não redireciona silenciosamente dados de A para B.",
+      "guarantee": "Independent cells contain one failure while the other cell completes its own request.",
+      "limit": "Capacity, routing safety, replication and failover between real regions remain outside this local failure-boundary experiment.",
+      "source_file": "labs/architecture/models_architecture.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "aggregate-root-invariant",
+      "names": [
+        "Aggregate",
+        "Aggregate Root"
+      ],
+      "before": {
+        "bypassed_total": 130,
+        "exceeds_limit": true
+      },
+      "after": {
+        "protected_total": 50,
+        "second_add_refused": true,
+        "public_children_are_tuple": true
+      },
+      "action": "Tente acrescentar 50 e 80 a uma cesta com limite 100. Compare a escrita direta dos filhos com a única entrada pública da raiz, que preserva o total válido.",
+      "guarantee": "The root owns the public mutation operation and checks the invariant spanning its children before accepting the next item.",
+      "limit": "The aggregate is in memory; Python private attributes are a convention and distributed transaction boundaries are not established.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "domain-service-transfer",
+      "names": [
+        "Domain Service"
+      ],
+      "before": {
+        "credit_without_debit_total": 1100
+      },
+      "after": {
+        "source_balance": 900,
+        "target_balance": 100,
+        "conserved_total": 1000
+      },
+      "action": "Transfira 100 entre duas entidades pelo serviço de domínio e confira a conservação do total, em vez de creditar o destino isoladamente.",
+      "guarantee": "A domain operation involving two entities preserves the stated transfer invariant without belonging naturally to either entity alone.",
+      "limit": "Only an in-memory operation is executed; durable atomic transfer, fees and real financial rules are not claimed.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "repository-storage-contract",
+      "names": [
+        "Repository"
+      ],
+      "before": {
+        "domain_storage_shapes": [
+          "dictionary",
+          "row-list"
+        ]
+      },
+      "after": {
+        "domain_account_type": "Account",
+        "balances_from_each_adapter": [
+          1100,
+          1100
+        ]
+      },
+      "action": "Troque o armazenamento entre dicionário e lista de linhas mantendo get/save e a entidade Account usados pela operação. Confira 1.100 nas duas implementações.",
+      "guarantee": "The repository presents a domain collection contract while storage representation changes behind it.",
+      "limit": "The adapters are local fakes, without SQL mapping, identity maps or unit-of-work concurrency.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "application-service-order",
+      "names": [
+        "Application Service"
+      ],
+      "before": {
+        "save_before_validation_calls": 1
+      },
+      "after": {
+        "accepted": false,
+        "operations": [
+          "load",
+          "reject"
+        ],
+        "balance": 1000,
+        "save_calls": 0
+      },
+      "action": "Envie um comando inválido ao serviço de aplicação. Siga carregamento, validação e rejeição e confira que ele não manda persistir uma operação recusada.",
+      "guarantee": "The application service coordinates the use case and calls domain behavior before persistence instead of embedding a write before validation.",
+      "limit": "The ordering model does not supply an ORM transaction, authentication or a production application layer.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "domain-factory-validity",
+      "names": [
+        "Factory"
+      ],
+      "before": {
+        "raw_invalid_amount": -100
+      },
+      "after": {
+        "created_amount": 100,
+        "created_source": "A",
+        "created_target": "B",
+        "invalid_construction_rejected": true
+      },
+      "action": "Construa a transferência pela fábrica e tente repetir com valor negativo. Confira que uma transferência inválida não chega a existir pelo contrato público.",
+      "guarantee": "A factory centralizes the valid construction of the domain object and rejects invalid combinations.",
+      "limit": "The construction rule belongs only to this hypothetical transfer fixture.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "specification-reuse",
+      "names": [
+        "Specification"
+      ],
+      "before": {
+        "query_candidates": [
+          "A",
+          "B"
+        ],
+        "validator_candidates": [
+          "A"
+        ]
+      },
+      "after": {
+        "query_candidates": [
+          "A"
+        ],
+        "validator_candidates": [
+          "A"
+        ],
+        "same_predicate_result": true
+      },
+      "action": "Aplique a mesma specification na seleção e na validação das três contas fictícias. Confira que a conta inativa deixa de aparecer como candidata em apenas um caminho.",
+      "guarantee": "One named criterion is reused across selection and validation, eliminating the duplicated inconsistent predicate in this fixture.",
+      "limit": "The threshold is a synthetic teaching rule, not an advisor or customer eligibility rule from Faz.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "context-contract-change",
+      "names": [
+        "Bounded Context",
+        "Context Map",
+        "DDD",
+        "Ubiquitous Language",
+        "Customer/Supplier"
+      ],
+      "before": {
+        "uncoordinated_change_breaks_consumers": [
+          "portfolio-screen",
+          "order-check"
+        ],
+        "old_shared_available": 1000
+      },
+      "after": {
+        "portfolio_available": 1000,
+        "trading_order_900_allowed": false,
+        "trading_available": 800,
+        "impacted_consumers": [
+          "order-check",
+          "portfolio-screen",
+          "trading-adapter"
+        ],
+        "broken_after_context_adaptation": 0
+      },
+      "action": "Altere o contrato do fornecedor de available para settled_balance e reserved_balance. Execute os dois consumidores, identifique os quebrados no mapa e adapte os significados de disponibilidade em cada contexto.",
+      "guarantee": "An actual schema change exposes affected consumers; bounded contexts give available different meanings, and the supplier/consumer agreement restores explicit contracts and a shared vocabulary within each context.",
+      "limit": "The context map and language belong to this hypothetical business exercise. They do not assert the canonical Faz glossary or a historical organizational decision.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "conformist-contract",
+      "names": [
+        "Conformist"
+      ],
+      "before": {
+        "local_consumer_assumes_accepted": false
+      },
+      "after": {
+        "consumer_uses_upstream_state": true,
+        "translation_layer_added": false
+      },
+      "action": "Adapte o consumidor para usar diretamente provider_state=AUTHORISED, sem criar tradução local. Compare essa escolha com o adaptador semântico do caso anterior.",
+      "guarantee": "The downstream deliberately adopts the upstream vocabulary and schema, including its coupling cost.",
+      "limit": "The exercise demonstrates the relationship choice, not a recommendation to accept every provider concept.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "separate-ways-change",
+      "names": [
+        "Separate Ways"
+      ],
+      "before": {
+        "unrelated_context_fee_after_shared_mutation": 2.0
+      },
+      "after": {
+        "changed_context_fee": 2.0,
+        "independent_context_fee": 1.0,
+        "integration_edges": 0
+      },
+      "action": "Mude a política de taxa de um contexto e execute o outro. Compare o objeto compartilhado acidentalmente com contratos independentes sem integração.",
+      "guarantee": "Choosing separate ways prevents an unrelated context from inheriting the other context change through a shared mutable object.",
+      "limit": "Duplication has a maintenance cost; this fixture does not decide the real organizational boundary.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "shared-kernel-impact",
+      "names": [
+        "Shared Kernel"
+      ],
+      "before": {
+        "independent_rounding_results": [
+          1,
+          2
+        ]
+      },
+      "after": {
+        "shared_results": [
+          1,
+          1
+        ],
+        "consumers_affected_by_shared_rule_change": 2,
+        "changed_results": [
+          2,
+          2
+        ]
+      },
+      "action": "Execute os dois consumidores com a mesma regra compartilhada e altere o arredondamento do kernel. Observe que ambos mudam e precisam do mesmo acordo de versão.",
+      "guarantee": "The shared kernel makes a small domain rule genuinely shared and exposes the joint impact of changing it.",
+      "limit": "The rounding is synthetic. Joint ownership and release coordination are required rather than inferred from a common helper.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "open-host-service",
+      "names": [
+        "Open Host Service"
+      ],
+      "before": {
+        "clients_broken_by_internal_schema": 2
+      },
+      "after": {
+        "client_balances": [
+          1000.0,
+          1000.0
+        ],
+        "public_contract_version": 1,
+        "internal_field_exposed": false
+      },
+      "action": "Altere o armazenamento interno para settled_cents e mantenha uma operação pública versionada para os dois clientes. Confira que a forma interna não vaza para o contrato público.",
+      "guarantee": "A stable public service contract supports multiple consumers while internal representation changes behind it.",
+      "limit": "Version governance, authentication and remote transport are not provided by this local contract exercise.",
+      "source_file": "labs/architecture/models_domain.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "rest-resource-methods",
+      "names": [
+        "REST"
+      ],
+      "before": {
+        "GET_with_unconditional_write_calls": 1
+      },
+      "after": {
+        "GET_status": 200,
+        "GET_amount": 100,
+        "GET_writes": 0,
+        "POST_status": 201,
+        "total_writes": 1,
+        "unsupported_method_status": 405
+      },
+      "action": "Leia o recurso por GET, crie outro por POST e tente um método não atendido. Confira a ausência de escrita no GET e os códigos 200, 201 e 405.",
+      "guarantee": "Resource paths, method semantics and response status are explicit; GET does not become an operation that writes.",
+      "limit": "Requests are local dictionaries and function calls, without an HTTP server, caching intermediaries or complete REST constraints.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "rpc-operation-contract",
+      "names": [
+        "RPC",
+        "Request/Reply"
+      ],
+      "before": {
+        "unmatched_reply_request_id": "OTHER"
+      },
+      "after": {
+        "request_id": "REQUEST-1",
+        "reply_request_id": "REQUEST-1",
+        "result": {
+          "reserved_amount": 100
+        },
+        "operation": "reserve"
+      },
+      "action": "Envie a operação reserve com seus parâmetros e correlacione a resposta com REQUEST-1. Diferencie esse contrato por operação da rota de recurso do exercício REST.",
+      "guarantee": "The dispatcher invokes an explicit operation and returns its result to the matching requester.",
+      "limit": "The finite request/reply dispatcher does not implement a remote transport, deadlines or an RPC framework.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "gateway-route-offload",
+      "names": [
+        "API Gateway",
+        "Gateway Routing",
+        "Gateway Offloading",
+        "Reverse Proxy",
+        "API Gateway Security"
+      ],
+      "before": {
+        "unprotected_guest_backend_calls": 1
+      },
+      "after": {
+        "guest_status": 403,
+        "guest_backend_calls": 0,
+        "routed_backends": [
+          "orders",
+          "positions"
+        ],
+        "forwarded_method": "POST",
+        "forwarded_amount": 100,
+        "entry_auth_checks": 3,
+        "position_status": 200
+      },
+      "action": "Tente uma chamada sem permissão e depois chamadas para ordens e posições. Confira que o gateway recusa antes do backend, escolhe a rota e preserva método, corpo e resposta no encaminhamento.",
+      "guarantee": "The entry point routes requests, offloads authentication checks and forwards the accepted method/payload to the selected backend.",
+      "limit": "This models gateway/proxy properties, not a deployed reverse proxy, token verification, TLS termination or every HTTP forwarding rule.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "bff-composed-view",
+      "names": [
+        "Backend for Frontend (BFF)",
+        "API Composition",
+        "Gateway Aggregation"
+      ],
+      "before": {
+        "frontend_round_trips_per_view": 2
+      },
+      "after": {
+        "frontend_round_trips_per_view": 1,
+        "mobile": {
+          "balance": 1100,
+          "pending_count": 1
+        },
+        "web_order_count": 2,
+        "backend_calls_for_two_views": 4
+      },
+      "action": "Monte a mesma visão a partir de posição e ordens para web e mobile. Observe uma chamada do cliente e os formatos distintos preparados no servidor.",
+      "guarantee": "A server-side composition calls two owners and returns a client-specific view, reducing client round trips without pretending the backend calls disappear.",
+      "limit": "Partial failures, freshness and authorization of each constituent service need separate contracts.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "federated-entity-key",
+      "names": [
+        "GraphQL Federation"
+      ],
+      "before": {
+        "join_by_unrelated_display_label": null
+      },
+      "after": {
+        "entity_type": "Account",
+        "composed_account": {
+          "account_id": "SYNTHETIC-1",
+          "balance": 1100,
+          "open_orders": 2
+        },
+        "subgraph_owners": [
+          "portfolio",
+          "orders"
+        ]
+      },
+      "action": "Passe a representação da entidade Account com sua chave aos dois subgraphs lógicos e componha balance e open_orders pelo mesmo identificador.",
+      "guarantee": "Entity-reference resolution joins fields owned by different subgraphs through the declared entity key instead of a display label.",
+      "limit": "This is the entity-key resolution property of federation. It does not include a GraphQL parser, supergraph schema, query planner or Apollo runtime.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "hypermedia-affordance",
+      "names": [
+        "HATEOAS"
+      ],
+      "before": {
+        "hardcoded_client_attempts_cancel_after_settlement": true
+      },
+      "after": {
+        "representation_state": "settled",
+        "cancel_link": null,
+        "client_attempts_cancel": false
+      },
+      "action": "Mude a ordem de accepted para settled e deixe o cliente procurar a relação cancel na representação recebida. Confira que ele não inventa uma ação que o servidor deixou de oferecer.",
+      "guarantee": "The representation exposes state-dependent action links and the client follows an available relation rather than hardcoding every transition.",
+      "limit": "The exercise covers one affordance and not an entire hypermedia API or authorization policy.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "poll-vs-long-poll",
+      "names": [
+        "Polling",
+        "Long Polling"
+      ],
+      "before": {
+        "periodic_requests_until_ready": 3,
+        "value": "position-ready"
+      },
+      "after": {
+        "long_poll_requests": 1,
+        "value": "position-ready"
+      },
+      "action": "Consulte três vezes até a posição existir e compare com uma requisição que aguarda o evento de atualização antes de responder.",
+      "guarantee": "Polling issues repeated requests; long polling holds one request until the result becomes available.",
+      "limit": "The wait uses a local asyncio event, with no HTTP timeout, intermediary buffering or reconnect loop.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "sse-event-resume",
+      "names": [
+        "Server-Sent Events"
+      ],
+      "before": {
+        "reconnect_without_cursor_events": 2
+      },
+      "after": {
+        "content_type": "text/event-stream",
+        "resumed_event_ids": [
+          2
+        ],
+        "resumed_balance": 1100,
+        "messages_are_server_to_client": true
+      },
+      "action": "Codifique e leia registros id/event/data, desconecte depois do id 1 e retome com esse cursor. Confira que somente o id 2 é entregue de novo ao cliente.",
+      "guarantee": "SSE event records carry IDs and data; a server can honor the last received ID when selecting the resumed stream.",
+      "limit": "The record parser is local. HTTP streaming, browser EventSource, retry timing and proxy behavior are not executed.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "websocket-duplex-frames",
+      "names": [
+        "WebSocket"
+      ],
+      "before": {
+        "server_push_requires_new_poll": true
+      },
+      "after": {
+        "client_to_server": "reserve:ORDER-1",
+        "server_to_client": "position:1100",
+        "client_frame_masked": true,
+        "new_client_poll_for_server_message": false
+      },
+      "action": "Envie um frame de texto mascarado do cliente e um frame independente do servidor. Decodifique os dois sentidos sem criar uma nova consulta para a mensagem do servidor.",
+      "guarantee": "Two independent text-frame directions share the duplex model; client frames are masked and server frames are decoded without a new poll.",
+      "limit": "Only small unfragmented text frames are modeled, without the HTTP upgrade handshake, extensions, control frames or a production WebSocket implementation.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "signed-webhook-callback",
+      "names": [
+        "Webhook"
+      ],
+      "before": {
+        "polling_receiver_callback_effects": 0
+      },
+      "after": {
+        "callback_status": 200,
+        "repeat_status": 200,
+        "invalid_signature_status": 401,
+        "effects": [
+          100
+        ]
+      },
+      "action": "Receba o callback assinado, repita a mesma entrega e altere a assinatura. Confira um único efeito e a recusa 401 da mensagem que não passa na verificação.",
+      "guarantee": "The provider pushes the event to a callback; signature verification precedes the receiver effect and the event identity suppresses a repeat.",
+      "limit": "All keys and payloads are synthetic. Timestamp replay windows, secret distribution, TLS and a live callback server are not implemented.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "sidecar-outbound-policy",
+      "names": [
+        "Sidecar",
+        "Ambassador",
+        "Service Mesh"
+      ],
+      "before": {
+        "old_policy_status": 403
+      },
+      "after": {
+        "updated_statuses": [
+          200,
+          200
+        ],
+        "identities": [
+          "order-service",
+          "position-service"
+        ],
+        "policy_versions": [
+          2,
+          2
+        ],
+        "workload_business_code_changed": false
+      },
+      "action": "Faça cada workload usar seu proxy de saída. Atualize a política nos dois proxies e confira identidade, versão e resposta sem alterar a operação de negócio.",
+      "guarantee": "A companion outbound proxy adds transport policy and identity; distributing the same policy to both companion proxies exhibits one mesh control/data-plane property.",
+      "limit": "The proxies are logical local companions, not separate pods or a deployed service mesh. mTLS has its own distinct experiment.",
+      "source_file": "labs/architecture/models_api.py"
+    },
+    {
+      "case": "order-delivery",
+      "probe": "tcc-resource-states",
+      "names": [
+        "TCC — Try/Confirm/Cancel"
+      ],
+      "before": {
+        "immediate_debit_after_peer_refusal": 900
+      },
+      "after": {
+        "cancelled_cash": 1000,
+        "cancelled_units": 1,
+        "confirmed": {
+          "cash": 900,
+          "units": 0,
+          "state": "confirmed"
+        }
+      },
+      "action": "Reserve dinheiro e unidade na fase Try. Siga uma cópia pela confirmação e outra pelo cancelamento; confira quais recursos ficam disponíveis em cada caminho.",
+      "guarantee": "Try holds resources; Confirm consumes the hold, while Cancel releases the same held resources.",
+      "limit": "The two local outcomes model one reservation contract; distributed recovery, timeout races and idempotent callbacks remain separate obligations.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "order-delivery",
+      "probe": "at-most-once-loss",
+      "names": [
+        "At-Most-Once Delivery"
+      ],
+      "before": {
+        "retry_without_dedup_effects": 2
+      },
+      "after": {
+        "ack_lost_effects_without_retry": 1,
+        "delivery_lost_effects_without_retry": 0,
+        "maximum_attempts": 1
+      },
+      "action": "Perdida a confirmação, compare repetir sem deduplicação com fazer somente uma tentativa. Depois perca a própria entrega e observe que nenhuma tentativa adicional a recupera.",
+      "guarantee": "At most one attempt avoids repeat delivery in this fixture but can lose the operation entirely.",
+      "limit": "This is a sender-attempt model, not a broker delivery guarantee or proof of the external effect.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "order-delivery",
+      "probe": "cdc-committed-change",
+      "names": [
+        "Change Data Capture (CDC)",
+        "CDC Migration",
+        "Dual Write Migration"
+      ],
+      "before": {
+        "independent_target_cents_after_second_write_failure": 100000
+      },
+      "after": {
+        "captured_committed_changes": 1,
+        "rolled_back_changes": 0,
+        "target_cents": 110000
+      },
+      "action": "Atualize a origem dentro de uma transação que faz rollback e depois numa que faz commit. Leia o feed capturado e aplique o valor no destino da migração.",
+      "guarantee": "A database trigger captures only the committed after-image visible to the feed reader, allowing a destination to catch up instead of relying on a second independent application write.",
+      "limit": "Trigger-based CDC in SQLite is not WAL decoding, Debezium or a cross-database atomic transaction; cutover still requires reconciliation.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "order-delivery",
+      "probe": "outbox-cdc-feed",
+      "names": [
+        "Outbox + CDC"
+      ],
+      "before": {
+        "order_saved_external_delivery_intention_lost": true
+      },
+      "after": {
+        "captured_outbox_events": [
+          "EVENT-1"
+        ],
+        "resume_after_sequence": 1
+      },
+      "action": "Grave a ordem e a outbox na mesma transação e acompanhe o capturador da outbox gerar EVENT-1 no feed com uma posição de retomada.",
+      "guarantee": "The transactional outbox is the captured table, and its committed insert becomes the CDC feed item.",
+      "limit": "The learning connector is a SQLite trigger plus feed query; transport, source-log offsets and recipient deduplication are not implemented.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "order-delivery",
+      "probe": "at-least-once-ack-retry",
+      "names": [
+        "At-Least-Once Delivery"
+      ],
+      "before": {
+        "acknowledged": false,
+        "attempts": 1
+      },
+      "after": {
+        "acknowledged": true,
+        "attempts": 2,
+        "deliveries": 2,
+        "unique_event_ids": 1
+      },
+      "action": "Entregue EVENT-1 e perca somente sua confirmação. Repita até receber a confirmação e conte as duas entregas da mesma identidade.",
+      "guarantee": "Retry after an ambiguous acknowledgement restores acknowledgement while admitting repeat delivery of the same event.",
+      "limit": "Only this bounded acknowledgement-loss schedule is modeled; an exactly-once effect still needs the recipient transaction or idempotency mechanism.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "bulkhead-independent-pools",
+      "names": [
+        "Bulkhead"
+      ],
+      "before": {
+        "order_allowed_while_quotes_fill_global_pool": false
+      },
+      "after": {
+        "order_allowed_with_separate_pool": true,
+        "quote_capacity": 2,
+        "order_capacity": 1
+      },
+      "action": "Ocupe as duas vagas de cotações e tente executar uma ordem. Compare o pool global com os pools independentes de cotações e ordens.",
+      "guarantee": "A saturated dependency consumes only its own budget; the independent order pool retains capacity.",
+      "limit": "The actual semaphore admissions are local. Memory, CPU and cross-process resource isolation require additional budgets.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "watchdog-restart",
+      "names": [
+        "Self-Healing",
+        "Watchdog"
+      ],
+      "before": {
+        "healthy": false,
+        "generation": 1
+      },
+      "after": {
+        "healthy_after_restart": true,
+        "generation": 2
+      },
+      "action": "Pare o serviço lógico e execute a supervisão. Confira que ela cria uma nova geração e que a leitura de saúde volta a responder.",
+      "guarantee": "The supervisor detects the failed local state and rearms it through a replacement generation.",
+      "limit": "It is a finite restart model, without a real container, crash loop budget or a guarantee that every restart repairs the underlying cause.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "fallback-limited-function",
+      "names": [
+        "Fallback",
+        "Graceful Degradation"
+      ],
+      "before": {
+        "dependency_failure_result": "error"
+      },
+      "after": {
+        "response": {
+          "balance": 1000,
+          "fresh": false,
+          "writes_enabled": false
+        },
+        "source": "last-known-cache"
+      },
+      "action": "Provoque o timeout da fonte atual. Confira que a consulta limitada usa o último valor conhecido, sinaliza que ele não é atual e desabilita operações que exigiriam a informação fresca.",
+      "guarantee": "The fallback preserves a deliberately reduced read function and labels the stale result instead of silently claiming full service.",
+      "limit": "The cached value is synthetic; the acceptable age and permitted actions need the actual product contract.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "chaos-delivery-experiment",
+      "names": [
+        "Chaos Engineering"
+      ],
+      "before": {
+        "effects_after_injected_drop": 0
+      },
+      "after": {
+        "injected_faults": [
+          "delivery_dropped"
+        ],
+        "orders": 1,
+        "effects_after_recovery": 1,
+        "debit": 100,
+        "steady_invariant_restored": true
+      },
+      "action": "Declare uma ordem e um efeito como estado esperado, injete a perda da primeira entrega e execute a recuperação com repetição. Confira a violação inicial e a recuperação sem débito duplicado.",
+      "guarantee": "A declared steady-state invariant is observed before/after an intentional fault and recovery experiment.",
+      "limit": "The fault is injected only in a controlled local model, not in a production system or distributed chaos platform.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "stream-offset-resume",
+      "names": [
+        "Event Streaming"
+      ],
+      "before": {
+        "replay_all_after_first_effect": 230
+      },
+      "after": {
+        "resume_offsets": [
+          1,
+          2
+        ],
+        "position_after_resume": 130,
+        "last_offset": 2
+      },
+      "action": "Consuma o offset 0, interrompa e retome somente depois do checkpoint. Confira offsets 1 e 2 e a posição 130, sem repetir o crédito inicial.",
+      "guarantee": "An ordered event log and an explicit consumer position let the consumer resume the remaining events.",
+      "limit": "The log is a local immutable fixture. Retention, partitioned offsets, broker transactions and durable checkpoint atomicity are separate concerns.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "batch-stream-emission",
+      "names": [
+        "Batch Processing",
+        "Stream Processing"
+      ],
+      "before": {
+        "batch_outputs_at_end": [
+          130
+        ]
+      },
+      "after": {
+        "incremental_outputs": [
+          100,
+          80,
+          130
+        ],
+        "final_position": 130,
+        "updates_before_last_event": 2
+      },
+      "action": "Processe os três eventos como um lote completo e depois um por vez. Observe quando cada modelo produz uma posição e confira o mesmo total final.",
+      "guarantee": "Batch emits after the chosen finite input set completes; stream processing updates the result as each event arrives.",
+      "limit": "The finite input demonstrates emission semantics rather than an unbounded engine, watermark or event-time guarantee.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "mapreduce-grouping",
+      "names": [
+        "MapReduce"
+      ],
+      "before": {
+        "ungrouped_partial_values": [
+          100,
+          20,
+          50
+        ]
+      },
+      "after": {
+        "grouped_totals": {
+          "buy": 150,
+          "sell": 20
+        },
+        "mapped_records": 3
+      },
+      "action": "Mapeie as ordens para pares de tipo e valor, agrupe pela chave e reduza cada grupo. Confira buy=150 e sell=20.",
+      "guarantee": "The map/group/reduce stages aggregate values per key instead of confusing all partial values with one total.",
+      "limit": "This is local grouping, not a distributed shuffle, combiner or fault-tolerant MapReduce runtime.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "lambda-disjoint-views",
+      "names": [
+        "Lambda Architecture"
+      ],
+      "before": {
+        "batch_plus_overlapping_all_stream": 210
+      },
+      "after": {
+        "batch_cutoff_offset": 1,
+        "batch_value": 80,
+        "speed_after_cutoff": 50,
+        "merged_position": 130
+      },
+      "action": "Defina o cutoff no offset 1, mantenha o lote até esse ponto e a visão rápida somente depois dele. Compare a soma sobreposta incorreta com 80 + 50 = 130.",
+      "guarantee": "Batch and speed-layer views cover disjoint input positions before being merged, preventing double counting at their boundary.",
+      "limit": "The example models the Lambda view boundary, without two deployed engines, backfill orchestration or full event-time handling.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "kappa-one-log-replay",
+      "names": [
+        "Kappa Architecture"
+      ],
+      "before": {
+        "buggy_projection_before_replay": 170
+      },
+      "after": {
+        "replayed_position": 130,
+        "position_after_new_event": 140,
+        "processing_implementations": 1,
+        "log_offsets": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "action": "Corrija a interpretação do débito e reexecute o mesmo processador sobre o log. Acrescente um evento e confira que a mesma lógica atende reconstrução e continuidade.",
+      "guarantee": "One retained event log and one processing path support replay and ongoing processing rather than a separate batch algorithm.",
+      "limit": "Retention, reprocessing isolation and operational cutover of a new stream version are not implemented.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "choreographed-compensation",
+      "names": [
+        "Choreography",
+        "Choreography Saga"
+      ],
+      "before": {
+        "debit_without_reaction_to_failed_allocation": 900
+      },
+      "after": {
+        "final_balance": 1000,
+        "event_trace": [
+          "order-placed",
+          "funds-reserved",
+          "allocation-failed",
+          "compensated"
+        ],
+        "top_level_step_coordinator": false
+      },
+      "action": "Publique order-placed e deixe cada participante reagir ao fato que conhece. Observe funds-reserved, allocation-failed e compensated recomporem o saldo sem um coordenador que chame todos os passos.",
+      "guarantee": "Local subscribers emit the next facts and a compensation handler reacts to the failure, exhibiting choreographed saga collaboration.",
+      "limit": "Delivery, duplicate events, distributed recovery and cycles are not solved by this in-memory choreography.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "fire-forget-return",
+      "names": [
+        "Fire-and-Forget"
+      ],
+      "before": {
+        "caller_waiting_for_failed_handler": true
+      },
+      "after": {
+        "caller_result": "accepted",
+        "trace": [
+          "caller-returned",
+          "worker-failed"
+        ],
+        "caller_completed_before_failure": true
+      },
+      "action": "Retorne ao chamador depois de emitir a intenção e provoque a falha do worker mais tarde. Diferencie a confirmação da chamada da conclusão do trabalho.",
+      "guarantee": "The caller does not await the later handler result, so its successful return does not prove eventual delivery or business completion.",
+      "limit": "The outgoing queue is not durable and no delivery guarantee is claimed.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "fanin-source-correlation",
+      "names": [
+        "Fan-in"
+      ],
+      "before": {
+        "single_source_messages": 2
+      },
+      "after": {
+        "merged_messages": 3,
+        "source_counts": {
+          "orders": 2,
+          "settlements": 1
+        },
+        "identities": [
+          "ORDER-1",
+          "ORDER-2",
+          "SETTLEMENT-1"
+        ]
+      },
+      "action": "Reúna o fluxo de ordens e o de liquidações preservando a origem de cada mensagem. Confira três entradas e as duas contagens por fonte.",
+      "guarantee": "Multiple input streams converge into one correlated output without discarding source ownership.",
+      "limit": "The finite merge does not order independent clocks or wait for a distributed completeness barrier.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "durable-workflow-resume",
+      "names": [
+        "Workflow Engine"
+      ],
+      "before": {
+        "restart_from_beginning_credit_attempts": 2
+      },
+      "after": {
+        "phase_loaded_after_reopen": "credited",
+        "final_phase": "complete",
+        "effect_keys": [
+          "credit:ORDER-1",
+          "notify:ORDER-1"
+        ],
+        "credit_effects": 1
+      },
+      "action": "Interrompa depois de persistir credited, feche a conexão e reabra o arquivo de progresso. Confira que a retomada executa a notificação e não repete o crédito já registrado.",
+      "guarantee": "A persisted workflow identity and phase drive recovery after process-state loss, skipping the completed local step.",
+      "limit": "The local effects and checkpoints share SQLite transactions. External activity retries, timers, worker leasing and a full durable-workflow framework are not implemented.",
+      "source_file": "labs/architecture/models_workflow.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "lease-expiry-owner",
+      "names": [
+        "Lease"
+      ],
+      "before": {
+        "B_can_acquire_unexpired_static_lock": false
+      },
+      "after": {
+        "B_acquired_after_expiry": true,
+        "owner": "B",
+        "old_owner_release_allowed": false,
+        "expires": 11
+      },
+      "action": "Avance o relógio além da validade de A, deixe B adquirir a autorização e tente liberar a lease com a identidade antiga de A.",
+      "guarantee": "Expiry makes the abandoned authorization reclaimable, while owner comparison prevents an old owner from releasing the new lease.",
+      "limit": "The model uses a controlled clock; expiration is not destination fencing and does not stop an old external side effect.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "shared-arbiter-lock",
+      "names": [
+        "Distributed Lock"
+      ],
+      "before": {
+        "independent_local_locks_allow_both": true
+      },
+      "after": {
+        "second_connection_allowed": false,
+        "wrong_owner_deleted_rows": 0,
+        "held_claims": 1
+      },
+      "action": "Use duas conexões independentes ao mesmo coordenador SQLite. Dispute a chave ORDER-1 e tente liberar a chave com o dono errado.",
+      "guarantee": "Both participants use one atomic unique-key arbiter instead of independent local locks; ownership is checked at release.",
+      "limit": "SQLite is local to this machine. The experiment proves shared-arbiter coordination, not a networked lease service under partitions.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "pessimistic-writer-lock",
+      "names": [
+        "Pessimistic Locking"
+      ],
+      "before": {
+        "uncoordinated_stale_balance": 105000
+      },
+      "after": {
+        "second_writer_blocked_before_release": true,
+        "balance_after_serial_writes": 115000
+      },
+      "action": "Mantenha BEGIN IMMEDIATE aberto no primeiro escritor. Confira a recusa imediata da segunda conexão, finalize a primeira e repita a segunda escrita.",
+      "guarantee": "The writer obtains exclusion before changing the record; the second writer cannot begin its write transaction until release.",
+      "limit": "This is SQLite database-writer exclusion, not PostgreSQL row locking or a recommendation to hold locks during network calls.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "copy-on-write-snapshot",
+      "names": [
+        "Copy-on-Write"
+      ],
+      "before": {
+        "reader_original_after_shared_mutation": 1100
+      },
+      "after": {
+        "reader_original": 1000,
+        "writer_new_copy": 1100,
+        "different_objects": true
+      },
+      "action": "Mantenha um leitor com o snapshot anterior, copie antes da escrita e altere a nova cópia. Confira que o leitor continua em 1.000 enquanto a cópia chega a 1.100.",
+      "guarantee": "A writer changes a new copy instead of mutating the snapshot held by the old reader.",
+      "limit": "The fixture is a flat dictionary; deep object graphs, memory reclamation and lock-free publication require additional contracts.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "semaphore-permits",
+      "names": [
+        "Semaphore"
+      ],
+      "before": {
+        "unbounded_simultaneous_tasks": 4
+      },
+      "after": {
+        "maximum_simultaneous_tasks": 2,
+        "completed": 4,
+        "active_at_end": 0
+      },
+      "action": "Execute quatro tarefas que cedem a execução enquanto seguram a permissão. Confira no máximo duas dentro da seção e quatro conclusões.",
+      "guarantee": "A real asyncio semaphore bounds concurrent entry to two and releases its permits after each task.",
+      "limit": "The semaphore is local to this event loop and does not limit the producer buffer or sum capacity across processes.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "reused-thread-workers",
+      "names": [
+        "Thread Pool",
+        "Worker Pool",
+        "Fork/Join",
+        "Scatter/Gather"
+      ],
+      "before": {
+        "new_worker_per_task": 4
+      },
+      "after": {
+        "threads_used": 2,
+        "tasks_completed": 4,
+        "partials": [
+          2,
+          4,
+          6,
+          8
+        ],
+        "joined_total": 20
+      },
+      "action": "Submeta quatro tarefas a duas threads reutilizadas, aguarde as respostas e reúna os resultados parciais. Confira a quantidade de executores e o total composto.",
+      "guarantee": "The executor reuses two workers, forks four computations and joins their four results into one total.",
+      "limit": "No process pool, distributed worker, work durability or network scatter/gather is claimed.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "idle-worker-steal",
+      "names": [
+        "Work Stealing"
+      ],
+      "before": {
+        "idle_B_completed": 0,
+        "A_remaining_work": 2
+      },
+      "after": {
+        "A_completed": [
+          1
+        ],
+        "B_completed": [
+          2
+        ],
+        "unique_completed": 2
+      },
+      "action": "Deixe B ocioso enquanto A tem duas tarefas. Faça B retirar uma tarefa elegível da outra ponta da fila de A e confira uma execução de cada tarefa.",
+      "guarantee": "An idle worker steals eligible queued work from another worker while task ownership changes exactly once in this schedule.",
+      "limit": "The deques are manipulated sequentially; a real concurrent deque requires its own atomicity and memory-order guarantees.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "reader-writer-exclusion",
+      "names": [
+        "Reader/Writer Lock"
+      ],
+      "before": {
+        "uncoordinated_writer_during_two_reads": true
+      },
+      "after": {
+        "simultaneous_readers": 2,
+        "writer_blocked_during_reads": true,
+        "writer_acquired_after_release": true,
+        "reader_blocked_during_write": true
+      },
+      "action": "Adquira duas leituras, tente a escrita, libere as leituras e depois tente ler durante a escrita. Confira as duas formas diferentes de exclusão.",
+      "guarantee": "Concurrent readers are compatible with each other and incompatible with an exclusive writer in the finite state model.",
+      "limit": "This is a serialized lock-state schedule, not a thread-safe RWLock implementation or a fairness proof.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "spinlock-active-attempts",
+      "names": [
+        "Spinlock"
+      ],
+      "before": {
+        "owner_paused_initially_held": true
+      },
+      "after": {
+        "active_attempts": 4,
+        "acquired_after_scheduled_release": true,
+        "blocking_sleep_calls": 0
+      },
+      "action": "Execute tentativas ativas enquanto a trava está ocupada e programe sua liberação depois da terceira tentativa. Conte quatro tentativas até a aquisição.",
+      "guarantee": "The contender repeatedly tests the lock state without blocking, consuming execution steps while the owner is paused.",
+      "limit": "The model uses serialized test-and-set steps, not a hardware spinlock, CPU benchmark or permission to spin while waiting for HTTP.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "cas-system-progress",
+      "names": [
+        "Lock-Free"
+      ],
+      "before": {
+        "mutex_owner_paused_blocks_all": true
+      },
+      "after": {
+        "counter": 2,
+        "A_completed": 2,
+        "B_completed": 0,
+        "B_retry_needed": true
+      },
+      "action": "Faça A e B lerem o mesmo contador, deixe A ganhar o CAS e pause B depois de sua falha. Confira que A ainda consegue concluir outra operação.",
+      "guarantee": "The CAS retry pattern permits system progress while one contender stalls; this schedule also shows why that is not a per-thread bounded completion guarantee.",
+      "limit": "The CAS primitive is atomic by model assumption. This is a concrete progress/starvation schedule, not a universal proof for a native-memory implementation.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "bounded-spsc-steps",
+      "names": [
+        "Wait-Free"
+      ],
+      "before": {
+        "retry_loop_steps_have_no_per_operation_bound": true
+      },
+      "after": {
+        "put_results": [
+          true,
+          true,
+          false
+        ],
+        "take_values": [
+          10,
+          20,
+          null
+        ],
+        "maximum_steps": 4
+      },
+      "action": "Preencha a fila SPSC de duas posições, tente a terceira inclusão e faça três retiradas. Confira que até a recusa por cheia e o resultado vazio terminam em até quatro passos do modelo.",
+      "guarantee": "With one producer, one consumer and atomic ordered index publication, each straight-line operation returns success/full/empty in at most four modeled steps without a retry loop.",
+      "limit": "The bounded-step argument belongs to this SPSC atomic-index model; Python execution time, allocation, native memory ordering and multiple producers are not covered.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    {
+      "case": "reservation",
+      "probe": "reactive-demand-contract",
+      "names": [
+        "Reactive Streams"
+      ],
+      "before": {
+        "unrequested_push_count": 4
+      },
+      "after": {
+        "delivered_before_request": 0,
+        "after_request_two": [
+          1,
+          2
+        ],
+        "delivered_after_request_three_and_cancel": [
+          1,
+          2,
+          3
+        ],
+        "unconsumed": 1
+      },
+      "action": "Solicite dois elementos e depois mais um. Cancele antes do quarto e confira que uma solicitação posterior não reativa a assinatura cancelada.",
+      "guarantee": "Demand gates delivery and cancellation stops subsequent onNext-style emissions in this local publisher/subscriber contract.",
+      "limit": "No Reactive Streams library, asynchronous serialization rule or full TCK conformance is claimed.",
+      "source_file": "labs/architecture/models_concurrency.py"
+    },
+    {
+      "case": "safe-release",
+      "probe": "rolling-recreate-capacity",
+      "names": [
+        "Rolling Deployment",
+        "Recreate Deployment"
+      ],
+      "before": {
+        "recreate_ready_history": [
+          2,
+          0,
+          2
+        ],
+        "minimum_ready": 0
+      },
+      "after": {
+        "rolling_ready_history": [
+          2,
+          1,
+          2,
+          1,
+          2
+        ],
+        "minimum_ready": 1,
+        "new_instances": 2
+      },
+      "action": "Troque as duas instâncias encerrando todas antes de criar as novas e depois uma por vez. Conte a menor capacidade pronta de cada sequência.",
+      "guarantee": "Recreate produces a zero-ready interval in this schedule, while a one-at-a-time rolling replacement preserves one ready instance.",
+      "limit": "Readiness and resource capacity are assumed by the fixture; Kubernetes scheduling and actual service availability are not executed.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "safe-release",
+      "probe": "blue-green-route",
+      "names": [
+        "Blue/Green Deployment"
+      ],
+      "before": {
+        "visible_version": 1
+      },
+      "after": {
+        "visible_after_switch": 2,
+        "visible_after_rollback": 1,
+        "blue_still_ready": true,
+        "provisioned_environments": 2
+      },
+      "action": "Mantenha blue e green prontos, altere a rota para green e volte a blue. Confira as versões visíveis e a capacidade antiga que precisou permanecer disponível.",
+      "guarantee": "Traffic changes between two already-provisioned environments and can return to the previous ready environment.",
+      "limit": "The route switch does not undo incompatible data written by the new environment; no deployment platform is contacted.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "safe-release",
+      "probe": "versioned-desired-reconcile",
+      "names": [
+        "GitOps",
+        "Infrastructure as Code"
+      ],
+      "before": {
+        "observed": {
+          "image": "v1",
+          "replicas": 0
+        }
+      },
+      "after": {
+        "planned_fields": [
+          "image",
+          "replicas"
+        ],
+        "selected_revision": "revision-2",
+        "drift_before_reconcile": {
+          "image": "v2",
+          "replicas": 0
+        },
+        "after_reconcile": {
+          "image": "v2",
+          "replicas": 2
+        }
+      },
+      "action": "Selecione a revisão 2 da fonte declarativa, calcule o plano e aplique-o. Depois introduza drift manual nas réplicas e reconcilie de novo pela mesma revisão.",
+      "guarantee": "A versioned desired-state source drives the plan and reconciliation instead of allowing manual runtime drift to become the desired source.",
+      "limit": "The revision store is a local model, not actual Git commits, Terraform state, a cluster operator or deployment proof.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "safe-release",
+      "probe": "immutable-replacement",
+      "names": [
+        "Immutable Infrastructure"
+      ],
+      "before": {
+        "in_place_image_change_owner": "instance-1"
+      },
+      "after": {
+        "old_instance_unchanged": true,
+        "new_active_id": "instance-2",
+        "new_active_image": "v2",
+        "old_image_retained": "v1"
+      },
+      "action": "Crie a instância 2 com a imagem nova e altere o destino ativo, preservando a instância 1. Compare isso com editar a imagem do recurso existente.",
+      "guarantee": "The new infrastructure instance is created as a replacement while the prior instance remains unchanged.",
+      "limit": "Instance identity and images are logical fixtures, without a cloud API, image build or real infrastructure mutation.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "safe-release",
+      "probe": "strangler-abstraction-route",
+      "names": [
+        "Branch by Abstraction",
+        "Service Extraction",
+        "Strangler Fig",
+        "Transitional Architecture"
+      ],
+      "before": {
+        "orders_owner": "legacy",
+        "result": 100
+      },
+      "after": {
+        "calls": [
+          [
+            "/orders",
+            "legacy"
+          ],
+          [
+            "/orders",
+            "new"
+          ],
+          [
+            "/positions",
+            "legacy"
+          ]
+        ],
+        "new_order_result": 100,
+        "legacy_position_result": 50,
+        "client_contract_preserved": true
+      },
+      "action": "Faça o cliente usar a fachada, migre somente /orders para a implementação nova e mantenha /positions na antiga. Confira os donos chamados e o contrato observado pelo cliente.",
+      "guarantee": "An abstraction preserves the caller contract while routing one extracted capability to its new owner, leaving the rest on the legacy path during transition.",
+      "limit": "The services are logical functions. This does not implement independent deployment, a data migration or a transactional cutover.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "safe-release",
+      "probe": "decomposed-data-owners",
+      "names": [
+        "Database Decomposition",
+        "Modularization"
+      ],
+      "before": {
+        "shared_rows": 2,
+        "applications_share_same_mutable_table": true
+      },
+      "after": {
+        "order_value": 150,
+        "position_value": 1000,
+        "separate_stores": true,
+        "owner_count": 2
+      },
+      "action": "Extraia as linhas por dono, altere o armazenamento de ordens e confira que a posição não é reescrita pelo acesso direto à mesma tabela.",
+      "guarantee": "Data is split into stores with explicit capability owners, exposing the need for an integration contract between the formerly shared consumers.",
+      "limit": "The stores are local maps; schema migrations, foreign-key removal and cross-database reconciliation are not executed.",
+      "source_file": "labs/architecture/models_ops.py"
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "directory-shard",
+      "names": [
+        "Directory-Based Sharding"
+      ],
+      "before": {
+        "lookup_in_default_A": null
+      },
+      "after": {
+        "directory_owner": "B",
+        "value": 700
+      },
+      "action": "Mude a localização da chave 7 para B no diretório e resolva o dono antes de consultar. Confira que adivinhar A não encontra a posição.",
+      "guarantee": "An explicit directory maps an entity key to its owning shard, independently of a hash function.",
+      "limit": "Directory durability, stale entries and live moves are not modeled.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "range-boundary",
+      "names": [
+        "Range Sharding"
+      ],
+      "before": {
+        "inclusive_upper_boundary_owners": [
+          0,
+          1
+        ]
+      },
+      "after": {
+        "half_open_boundary_owners": [
+          1
+        ],
+        "key": 100
+      },
+      "action": "Procure a chave 100 nos intervalos 0 até antes de 100 e 100 até antes de 200. Confira que a borda pertence a um único shard.",
+      "guarantee": "Half-open ranges assign the boundary key to exactly one shard rather than overlapping owners.",
+      "limit": "Range balancing, splits and hotspot control are separate concerns.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "geographic-owner",
+      "names": [
+        "Geographic Sharding"
+      ],
+      "before": {
+        "all_accounts_owner": "US"
+      },
+      "after": {
+        "account_region": "BR",
+        "BR_rows": 1,
+        "US_rows": 0
+      },
+      "action": "Use a região declarada da conta fictícia para escolher a partição e confira onde seu valor foi guardado.",
+      "guarantee": "A geographic attribute chooses the data owner rather than a key hash.",
+      "limit": "The geography is hypothetical and is not a claim about a regulatory residency rule.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "vertical-attributes",
+      "names": [
+        "Vertical Partitioning"
+      ],
+      "before": {
+        "position_read_columns": [
+          "account_key",
+          "cents",
+          "contact_label"
+        ]
+      },
+      "after": {
+        "position_read_columns": [
+          "account_key",
+          "cents"
+        ],
+        "contact_columns": [
+          "account_key",
+          "contact_label"
+        ],
+        "rejoin_preserves_row": true
+      },
+      "action": "Separe os atributos de contato dos atributos de posição pela mesma chave. Confira quais colunas a consulta de posição precisa ler e reuna a linha somente quando necessário.",
+      "guarantee": "Vertical partitions divide attributes while preserving the key needed to reconstruct the logical entity.",
+      "limit": "The example models attribute ownership and does not measure physical page savings or authorization by itself.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "log-structured-latest",
+      "names": [
+        "Log Structured Storage"
+      ],
+      "before": {
+        "in_place_record_history": 1
+      },
+      "after": {
+        "append_records": 2,
+        "latest_value": 1100,
+        "latest_version": 2
+      },
+      "action": "Acrescente a nova versão em vez de sobrescrever a antiga e resolva a leitura pelo registro mais recente da chave.",
+      "guarantee": "Updates append records and reads resolve the latest version, exposing the read/compaction work introduced by a log-structured representation.",
+      "limit": "This is a tiny append-log model, not an LSM tree with SSTables, bloom filters or crash recovery.",
+      "source_file": "labs/architecture/models_distribution.py"
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "coalesced-snapshot-writes",
+      "names": [
+        "Write Amplification Control"
+      ],
+      "before": {
+        "physical_snapshot_writes": 10
+      },
+      "after": {
+        "physical_batch_writes": 1,
+        "latest_snapshot": 1009,
+        "updates_in_acknowledged_batch": 10
+      },
+      "action": "Agrupe dez substituições do mesmo snapshot de posição antes de confirmar o lote e grave o último valor uma vez. Compare as escritas físicas necessárias.",
+      "guarantee": "Coalescing repeated overwrites of one snapshot reduces physical writes before the batch acknowledgement.",
+      "limit": "This applies to replaceable snapshots, not ten independent ledger facts. No per-update durability is promised before the batch flush.",
+      "source_file": "labs/architecture/models_distribution.py"
+    }
+  ]
+}

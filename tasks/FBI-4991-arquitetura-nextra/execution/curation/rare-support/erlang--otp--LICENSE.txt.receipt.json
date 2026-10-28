@@ -1,0 +1,12 @@
+{
+  "repo": "erlang/otp",
+  "path": "LICENSE.txt",
+  "revision": "b4b337c351e8c5bff4e0c48b58081080bae2a4be",
+  "url": "https://github.com/erlang/otp/blob/b4b337c351e8c5bff4e0c48b58081080bae2a4be/LICENSE.txt",
+  "raw_url": "https://raw.githubusercontent.com/erlang/otp/b4b337c351e8c5bff4e0c48b58081080bae2a4be/LICENSE.txt",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:46:56.072351+00:00",
+  "sha256": "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0",
+  "line_count": 178,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/erlang--otp--LICENSE.txt"
+}

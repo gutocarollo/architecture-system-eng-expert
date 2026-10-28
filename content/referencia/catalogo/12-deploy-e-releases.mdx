@@ -1,0 +1,158 @@
+---
+title: "12. Deploy e releases"
+description: "Os 12 conceitos de implantação, liberação e reconciliação da infraestrutura."
+diataxis: reference
+---
+
+# Deploy e releases
+
+Esta referência contém as 12 entradas do grupo 12. Implantar coloca uma versão no ambiente; liberar permite o uso da função. A captura Airflow/RKE2 de **14/10/2026 às 16:11 UTC** sustenta os exemplos de RollingUpdate e Recreate. Argo Rollouts, Unleash e GitOps completo ficam como **blueprints**. **REF** identifica uma referência OSS, sem instalação presumida. Os [recibos](/referencia/evidencias/) fixam a fonte, e [mudanças seguras](/explicacoes/safe-change/) desenvolve as decisões.
+
+As bases e aplicações de comparação são [Kubernetes Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/), [Argo Rollouts com rollouts-demo](https://github.com/argoproj/rollouts-demo), [Unleash](https://github.com/Unleash/unleash) e [Argo CD](https://github.com/argoproj/argo-cd). O Kubernetes é **PROD** na captura; os demais são **REF**. As skills locais `devops-progressive-delivery`, `backend-feature-flags` e `devops-gitops-advanced`, em `~/.codex/skills/`, apoiam critérios e operação. Consulte a [curadoria](/referencia/skills-e-projetos/) para o papel e os metadados datados de cada projeto.
+
+Os pares específicos abaixo foram verificados em fontes primárias em 14/10/2026 e têm links fixados à revisão capturada. **APP** identifica código ou contrato de um produto OSS; **REF** identifica uma aplicação-exemplo ou configuração reproduzível. Esses rótulos não afirmam implantação na Faz. O registro de captura conserva URL, revisão, SHA-256 e os símbolos examinados.
+
+<span id="g12-e001" />
+
+## Blue/Green Deployment
+
+Dois conjuntos de aplicação ficam disponíveis, com um recebendo o tráfego principal. No blueprint, a versão candidata passa por preview antes da troca do Service ativo. O benefício é preparar a versão antes da exposição; o custo é capacidade duplicada e administração da transição. Retornar tráfego depende da compatibilidade do banco e das conexões. Argo Rollouts e `rollouts-demo` são base e aplicação **REF**; [core 25](/explicacoes/safe-change/#pattern-25).
+
+**Par de base e aplicação.** A base é [Argo Rollouts](https://github.com/argoproj/argo-rollouts). A **REF executável** [rollouts-demo — bluegreen-rollout.yaml](https://github.com/argoproj/rollouts-demo/blob/4e8c844fe9e23b7586f95b5f6b5365693cf318ad/examples/blue-green/bluegreen-rollout.yaml) declara `strategy.blueGreen`, `activeService` e `previewService`. O manifesto vincula a imagem da aplicação aos dois caminhos de atendimento. É configuração aplicada ao demo oficial, sem prova de instalação no cluster Airflow.
+
+{/* current-curation:blue-green-deployment */}
+
+A [curadoria de Blue/Green Deployment](/referencia/curadoria/12-deploy-e-releases/#blue-green-deployment) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e002" />
+
+## Canary Release
+
+A versão candidata recebe uma participação delimitada do tráfego, ampliada após critérios de observação. No exercício, 10 de 100 requisições sintéticas representam 10%. O ganho é reduzir a exposição inicial; o custo é operar versões e análise juntas. Uma amostra pequena pode omitir erros raros, e HTTP 200 não comprova escolha de negócio correta. Argo Rollouts e `rollouts-demo` são **REF**; [core 26](/explicacoes/safe-change/#pattern-26).
+
+**Par de base e aplicação.** A base é [Argo Rollouts](https://github.com/argoproj/argo-rollouts). A **REF executável** [rollouts-demo — canary-rollout.yaml](https://github.com/argoproj/rollouts-demo/blob/4e8c844fe9e23b7586f95b5f6b5365693cf318ad/examples/canary/canary-rollout.yaml) define a imagem do demo, os Services e etapas `setWeight` de 20, 40, 60 e 80 com pausas. O par oferece a aplicação e o contrato de exposição progressiva, sem afirmar um rollout executado na Faz.
+
+{/* current-curation:canary-release */}
+
+A [curadoria de Canary Release](/referencia/curadoria/12-deploy-e-releases/#canary-release) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e003" />
+
+## Rolling Deployment
+
+A troca substitui réplicas progressivamente sob limites de capacidade e indisponibilidade. Na captura, a API Airflow tinha duas réplicas com `maxSurge=0` e `maxUnavailable=1`: pode restar uma atendendo se continuar saudável. O benefício é manter capacidade durante parte da troca; o custo é coexistência de versões e compatibilidade. A estratégia lida não mede duração ou sucesso de rollout. Kubernetes é a base OSS **PROD**; [caso de disponibilidade](/explicacoes/availability/).
+
+**Par de base e aplicação.** A base é [Kubernetes](https://github.com/kubernetes/kubernetes). O **APP Airflow** [renderiza o Deployment da API](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/api-server/api-server-deployment.yaml) com `apiServer.strategy` ou seu padrão `RollingUpdate`. O template liga a estratégia às réplicas da aplicação. Os limites padrão do upstream são diferentes dos valores capturados na Faz; a comparação não substitui o manifesto efetivo datado.
+
+{/* current-curation:rolling-deployment */}
+
+A [curadoria de Rolling Deployment](/referencia/curadoria/12-deploy-e-releases/#rolling-deployment) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e004" />
+
+## Recreate Deployment
+
+A estratégia encerra os pods antigos antes de criar os novos. O scheduler Airflow medido tinha uma réplica e `Recreate`, portanto uma atualização pode ter um intervalo sem esse processo. O benefício é evitar coexistência dos pods dessa troca; o custo é a janela de indisponibilidade. Isso não elimina writers externos nem mede recuperação de tasks. Kubernetes é **PROD** na captura; a skill `devops-progressive-delivery` ajuda a comparar a consequência operacional.
+
+**Par de base e aplicação.** A base é [Kubernetes](https://github.com/kubernetes/kubernetes). O **APP Airflow** [renderiza scheduler.strategy no Deployment](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/scheduler/scheduler-deployment.yaml#L62-L73). Esse binding permite configurar `Recreate` para o componente; a captura S6 comprova que a configuração efetiva era essa. A fonte upstream e o recibo de runtime têm escopos distintos, e nenhum rollout foi executado neste reparo.
+
+{/* current-curation:recreate-deployment */}
+
+A [curadoria de Recreate Deployment](/referencia/curadoria/12-deploy-e-releases/#recreate-deployment) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e005" />
+
+## Shadow Deployment
+
+Uma implantação candidata recebe entradas para comparação sem fornecer a resposta principal. No exercício, o novo cálculo opera sem gravações e seu resultado fica disponível para análise. O ganho é observar diferenças antes da promoção; o custo é capacidade, tratamento de dados e critérios de comparação. Uma infraestrutura separada não neutraliza automaticamente seus efeitos. Envoy é base **REF** para roteamento; [Shadow Traffic](/referencia/catalogo/11-padroes-para-decompor-sistemas/#shadow-traffic) descreve a entrega da cópia.
+
+**Par de base e aplicação.** A base é [Istio](https://github.com/istio/istio), com proxies Envoy. A **REF executável** [httpbin v1/v2 do Istio](https://github.com/istio/istio.io/blob/25007a0c275dcbdd41cadcad8569f1e9cb447d82/content/en/docs/tasks/traffic-management/mirroring/index.md) contém os dois Deployments e a política que espelha requisições para v2 mantendo v1 como destino principal. Aqui, os Deployments demonstram a presença do candidato; a regra de `mirror` demonstra a entrega da cópia. Seus efeitos precisam permanecer adequados à comparação.
+
+{/* current-curation:shadow-deployment */}
+
+A [curadoria de Shadow Deployment](/referencia/curadoria/12-deploy-e-releases/#shadow-deployment) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e006" />
+
+## Dark Launch
+
+Uma função implantada é exercitada por controles internos antes da exposição na experiência da pessoa. No blueprint, o resumo novo permanece desabilitado para os usuários e é observado com dados sintéticos. O benefício é separar preparação e uso; o custo é manter controles internos e sinais. Uma função escondida continua precisando de autorização e contenção de efeitos. Unleash é base **REF**; [core 27](/explicacoes/safe-change/#pattern-27).
+
+**Par de base e aplicação.** A base é [Flipper](https://github.com/flippercloud/flipper). O **APP** [GitLab — MultiStore](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L163-L173) disponibiliza o store novo para gravação antes de direcionar as leituras a ele, por duas flags distintas. Essa capacidade interna aparece no código e é controlada pela [camada Feature/Flipper](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb). O exemplo demonstra exposição separada, sem afirmar ativação atual ou ausência de risco de dual write.
+
+{/* current-curation:dark-launch */}
+
+A [curadoria de Dark Launch](/referencia/curadoria/11-padroes-para-decompor-sistemas/#dark-launch) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e007" />
+
+## Feature Flags
+
+Flags selecionam comportamento para contextos ou grupos definidos. No exercício, dez de cem usuários sintéticos autorizados recebem o resumo novo, ou 10%. O benefício é ativação controlada; o custo é testar combinações, falhas da consulta e remoção posterior. Desligar a flag preserva efeitos já gravados. Unleash e a API compatível do GitLab são referências OSS **REF**; a skill `backend-feature-flags` apoia o ciclo. [Core 27](/explicacoes/safe-change/#pattern-27).
+
+**Par de base e aplicação.** A base é [Flipper](https://github.com/flippercloud/flipper). O **APP** [GitLab — Feature](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb) oferece habilitação por ator e porcentagem, e o [GitLab — MultiStore](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L284-L303) consome suas decisões. É um par biblioteca/aplicação com efeito concreto sobre o caminho escolhido. A política de autorização continua sendo um contrato separado.
+
+{/* current-curation:feature-flags */}
+
+A [curadoria de Feature Flags](/referencia/curadoria/11-padroes-para-decompor-sistemas/#feature-flags) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e008" />
+
+## Progressive Delivery
+
+A entrega amplia exposição por etapas e usa critérios para avançar, interromper ou retornar tráfego. No blueprint de qualificação, latência, erros e escolha de pessoa elegível precisam de critérios próprios. O ganho é uma decisão baseada no resultado; o custo é instrumentação e operação de versões. Automatizar um gate inadequado automatiza a decisão inadequada. Argo Rollouts é a base **REF**, com `rollouts-demo`; a skill `devops-progressive-delivery` apoia esse contrato.
+
+**Par de base e aplicação.** A base é [Argo Rollouts](https://github.com/argoproj/argo-rollouts). O produto OSS **APP Argo Rollouts** [reconcilia AnalysisRuns](https://github.com/argoproj/argo-rollouts/blob/ee7e28a1365553a3d2563a2c11ffea5ec0b7644a/rollout/analysis.go) e trata fases `Failed`/`Error` por aborto ou pausa do rollout. A [aplicação rollouts-demo](https://github.com/argoproj/rollouts-demo/blob/4e8c844fe9e23b7586f95b5f6b5365693cf318ad/examples/canary/canary-rollout.yaml) fornece uma configuração de exposição por etapas. O controller mostra o gate implementado, sem certificar a qualidade de uma métrica escolhida.
+
+{/* current-curation:progressive-delivery */}
+
+A [curadoria de Progressive Delivery](/referencia/curadoria/12-deploy-e-releases/#progressive-delivery) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e009" />
+
+## A/B Deployment
+
+O desenho expõe grupos a variantes para comparar uma hipótese de comportamento ou resultado. No exercício, grupos sintéticos recebem resumos diferentes sob o mesmo contrato de acesso. O benefício é comparar o resultado de variantes; o custo é desenho experimental e controle de vieses. Uma A/B não tem obrigatoriamente a promoção gradual e o gate operacional de uma Canary. Flags Unleash são base **REF** de exposição; a validade da conclusão depende do experimento.
+
+**Par de base e aplicação.** A base é [Istio](https://github.com/istio/istio), com proxies Envoy. A **REF executável Bookinfo** [envia o usuário de demonstração jason à variante v2](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml) pelo header `end-user`; o ramo padrão usa v1. A configuração mostra seleção de variantes na aplicação real do demo. Ela fornece exposição A/B, sem demonstrar por si só desenho experimental ou uma conclusão estatística.
+
+{/* current-curation:a-b-deployment */}
+
+A [curadoria de A/B Deployment](/referencia/curadoria/12-deploy-e-releases/#a-b-deployment) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e010" />
+
+## Immutable Infrastructure
+
+Uma mudança substitui uma unidade identificada em vez de alterá-la manualmente em execução. Imagens por digest ajudam a identificar conteúdo. No Airflow medido, a imagem e a revisão git-sync eram entradas distintas; `main` podia mudar as DAGs sem mudar a imagem. O benefício é reprodução e comparação; o custo é construir, guardar e substituir unidades. Um digest de imagem não torna toda a release imutável. [Sidecar do caso real](/explicacoes/availability/#pattern-35).
+
+**Par de base e aplicação.** A base é [Kubernetes](https://github.com/kubernetes/kubernetes). O produto OSS **APP Kubernetes** [calcula o hash do PodTemplate e cria outro ReplicaSet](https://github.com/kubernetes/kubernetes/blob/2fb87b41a29b74e95c06b70fb61ba318fb580bf3/pkg/controller/deployment/sync.go#L198-L232) quando precisa da nova unidade. O mecanismo substitui instâncias a partir do template identificado. Esse exemplo não transforma tags mutáveis, configuração externa ou DAGs git-sync em conteúdo imutável de toda a release.
+
+{/* current-curation:immutable-infrastructure */}
+
+A [curadoria de Immutable Infrastructure](/referencia/curadoria/12-deploy-e-releases/#immutable-infrastructure) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e011" />
+
+## Infrastructure as Code
+
+Configuração versionada descreve recursos de infraestrutura e permite revisar sua mudança. No blueprint, o manifesto registra réplicas, estratégia e referências de imagem junto às decisões. O ganho é reprodução e revisão; o custo é tratar parâmetros, drift e estados de execução. Ler um Deployment vivo não prova sua procedência num repositório de IaC. Kubernetes e Helm são bases de comparação **REF** para autoria; `devops-gitops-advanced` apoia o ciclo operacional.
+
+**Par de base e aplicação.** A base é [provider Google para Terraform](https://github.com/hashicorp/terraform-provider-google). A aplicação OSS **REF Online Boutique** [declara google_container_cluster e aplica os manifests Kubernetes](https://github.com/GoogleCloudPlatform/microservices-demo/blob/38e7348eb289eb5b87c0c6e8cb19ced0449dc389/terraform/main.tf) em seu `terraform/main.tf`. O provider realiza o binding de recursos Google, e o exemplo associa a infraestrutura à aplicação. Ler o arquivo comprova IaC declarado, sem criar recursos ou demonstrar drift reconciliado.
+
+{/* current-curation:infrastructure-as-code */}
+
+A [curadoria de Infrastructure as Code](/referencia/curadoria/12-deploy-e-releases/#infrastructure-as-code) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g12-e012" />
+
+## GitOps
+
+Um agente reconcilia continuamente o estado do ambiente com um estado desejado declarativo, versionado e obtido automaticamente. No blueprint, Argo CD observa diferenças e aplica a política de reconciliação acordada. O benefício é comparar intenção e ambiente; o custo é administrar permissões, feedback e exceções. Git-sync de arquivos não comprova esse contrato completo nem define liberação de funções. [Princípios OpenGitOps](https://opengitops.dev/); Argo CD é aplicação OSS **REF**, sem implantação confirmada aqui.
+
+**Par de base e aplicação.** A base é [Argo CD](https://github.com/argoproj/argo-cd). A **REF executável** [argocd-example-apps](https://github.com/argoproj/argocd-example-apps/blob/8088f4c0d970abb09e250248cc97e35623447cb5/apps/templates/applications.yaml) declara `Application`, repositório, revisão, path e sincronização automática com `prune`/`selfHeal`. Os [valores](https://github.com/argoproj/argocd-example-apps/blob/8088f4c0d970abb09e250248cc97e35623447cb5/apps/values.yaml) incluem guestbook. É o binding de uma aplicação ao reconciliador GitOps; nenhum controller ou política desses foi confirmado no ambiente da Faz.
+
+{/* current-curation:gitops */}
+
+A [curadoria de GitOps](/referencia/curadoria/12-deploy-e-releases/#gitops) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

@@ -1,0 +1,101 @@
+{
+  "profile_version": 2,
+  "project_root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "mode": "REFACTOR",
+  "context": {
+    "adapter": "generic",
+    "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+    "bounded_anchor": "Executar e revisar as pendências da FBI-4991: conectar a totalidade dos conceitos em jornadas Diátaxis, executar antes/depois históricos e práticas financeiras, fechar curadoria por conceito, investigar histórico com evidência causal, registrar catálogo, versionar e publicar com revisão independente e read-back.",
+    "protocol_root": null,
+    "method_skill": null,
+    "provided_packet": null,
+    "preparation": {
+      "kind": "metadata",
+      "receipt_path": null
+    },
+    "review_contract": null
+  },
+  "sources": [
+    {
+      "id": "project",
+      "root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+      "required": true
+    },
+    {
+      "id": "makershub",
+      "root": "/Users/augustocarollo/Developer/makershub",
+      "required": true
+    },
+    {
+      "id": "workflow-evidence",
+      "root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/architecture-course-2026-10-14/evidence",
+      "required": true
+    }
+  ],
+  "output": {
+    "root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+    "glossary": "content/referencia/catalogo",
+    "adr_directory": "tasks/FBI-4991-arquitetura-nextra/execution/adrs",
+    "allow_domain_writes": false
+  },
+  "council": {
+    "planners": [
+      "/root",
+      "/root/makershub_nextra_compare",
+      "/root/applied_learning_build",
+      "/root/curation_complete",
+      "/root/rare_oss_sources",
+      "/root/jira_story_catalog",
+      "/root/sites_password_feasibility"
+    ],
+    "reviewers": [
+      "/root/story_requirements_review",
+      "/root/curation_independent",
+      "/root/curation_second",
+      "/root/terminal_delivery",
+      "/root/diagram_semantics_one",
+      "/root/diagram_semantics_two"
+    ],
+    "max_rechecks": 1
+  },
+  "skills": [
+    {
+      "id": "mapping",
+      "path": "skills/mapping-blast-radius-autoagents/SKILL.md",
+      "base": "package",
+      "role": "mapper",
+      "enabled": true,
+      "depends_on": []
+    },
+    {
+      "id": "orchestrator",
+      "path": "skills/orchestrating-docs-autoagents/SKILL.md",
+      "base": "package",
+      "role": "orchestrator",
+      "enabled": true,
+      "depends_on": [
+        "mapping"
+      ]
+    },
+    {
+      "id": "diataxis",
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/SKILL.md",
+      "base": "absolute",
+      "role": "documentation-method",
+      "enabled": true,
+      "depends_on": [],
+      "resources": [
+        "/Users/augustocarollo/.agents/skills/diataxis/references/explanation.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/tutorials.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/how-to-guides.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/reference.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/complex-hierarchies.md"
+      ]
+    }
+  ],
+  "mermaid": {
+    "require_syntax": true,
+    "require_render": true
+  },
+  "max_evidence_age_hours": 24
+}

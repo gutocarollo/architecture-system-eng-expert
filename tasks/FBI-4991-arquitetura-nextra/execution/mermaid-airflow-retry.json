@@ -1,0 +1,33 @@
+{
+  "observed_at": "2026-10-15T03:40:37.073Z",
+  "parser_self_test": "PASS",
+  "syntax_only": false,
+  "module_sha256": "8937e64a0bc872c0c908cf8e432511c6ec63720213b54aae32ff46cd9ee56e16",
+  "blocks_total": 1,
+  "blocks": [
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/airflow-lock-retry/index.mdx",
+      "document_sha256": "6a7bf7310a7629493984e4abd790bb075edc0ac773092477865a90922e0abcd2",
+      "fence_index": 1,
+      "line_start": 20,
+      "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-airflow-retry/fc01d0e06b14-1.png",
+        "artifact_sha256": "34dd2124c80bf0a8940691f297f7fa9578e7f40b0bca503b22e8ce35d74fb99a"
+      },
+      "semantic_review": "NOT_RUN"
+    }
+  ],
+  "errors": [],
+  "status": "PASS"
+}

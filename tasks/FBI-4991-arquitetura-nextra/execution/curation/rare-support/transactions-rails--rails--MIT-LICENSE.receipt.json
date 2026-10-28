@@ -1,0 +1,12 @@
+{
+  "repo": "rails/rails",
+  "path": "MIT-LICENSE",
+  "revision": "c3466ea00d7121798e3aa3144ffdf7174b81d8cb",
+  "url": "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/MIT-LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/rails/rails/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/MIT-LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:58:29.396684+00:00",
+  "sha256": "717ba1949502290f8e47688ae2e323acd06c8ca47aec9f7596b15f678c1af4a2",
+  "line_count": 20,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-rails--rails--MIT-LICENSE"
+}

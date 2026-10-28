@@ -1,0 +1,1129 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-15T02:15:02.062554+00:00",
+  "scope": "Somente quatro relações estratégicas DDD: Shared Kernel, Customer/Supplier, Conformist e Separate Ways.",
+  "independent_review": "PENDING",
+  "proof_level": "Decisões, código e licenças em revisões fixadas. Nenhum software foi iniciado; a suíte de arquitetura foi apenas lida.",
+  "rows": [
+    {
+      "concept_id": "shared-kernel",
+      "decision": "RECOMMEND_SOURCE_MATCH_BOUNDED_DOMAIN_KERNEL",
+      "application_kind": "PRODUCT_OSS",
+      "application": "thndr-mcp, aplicativo MCP e CLI para mercado e carteira de investimentos.",
+      "mechanism": "O ADR aceito separa Market Data, Portfolio, Engagement e Identity e reserva um núcleo pequeno de identidade de instrumentos, mercados e moedas. Ticker e AssetId preservam regras de identificação comuns. Os modelos independentes Instrument e Position usam esses tipos; o container mantém os serviços de cada contexto separados. A documentação reconhece que uma alteração no núcleo afeta todos e determina que ele permaneça mínimo.",
+      "limits": "O recorte comprovado é AssetId, Ticker, Market e Currency. Money existe no núcleo, mas os dois modelos examinados consomem Currency, não a aritmética da classe Money; não se afirma que os dois contextos executem a mesma aritmética monetária. O caso prova a decisão e o código do aplicativo, sem alegar duas equipes organizacionais ou adoção em produção.",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-dsl",
+          "path": "org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:06:44.875513+00:00",
+          "sha256": "440d9a081c28c89b5fbaac3764ad9ed946701df98c098a8de086527e70540d54",
+          "line_count": 556,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--org.contextmapper.dsl--src--org--contextmapper--dsl--ContextMappingDSL.xtext",
+          "claim": "CML representa Shared Kernel, Customer/Supplier e o papel Conformist. É um modelo formal de relações; a gramática não cria acordos entre equipes nem comprova sua execução.",
+          "evidence": [
+            {
+              "start_line": 99,
+              "end_line": 126,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L99-L126",
+              "excerpt": "99: Relationship:\n100: \tSymmetricRelationship | UpstreamDownstreamRelationship\n101: ;\n102: \n103: SymmetricRelationship:\n104: \tPartnership | SharedKernel\n105: ;\n106: \n107: Partnership:\n108: \t(\n109: \t\t(participant1 = [BoundedContext] '[''P'']' '<->' '[''P'']' participant2 = [BoundedContext]) |\n110: \t\t('[''P'']' participant1 = [BoundedContext] '<->' '[''P'']' participant2 = [BoundedContext]) |\n111: \t\t(participant1 = [BoundedContext] '[''P'']' '<->' participant2 = [BoundedContext] '[''P'']') |\n112: \t\t('[''P'']' participant1 = [BoundedContext] '<->' participant2 = [BoundedContext] '[''P'']') |\n113: \t\t(participant1 = [BoundedContext] 'Partnership' participant2 = [BoundedContext])\n114: \t)\n115: \t(':' name=ID)?\n116: \t(OPEN\n117: \t\t('implementationTechnology' ('=')? implementationTechnology=STRING)?\n118: \tCLOSE)?\n119: ;\n120: \n121: SharedKernel:\n122: \t(\n123: \t\t(participant1 = [BoundedContext] '[''SK'']' '<->' '[''SK'']' participant2 = [BoundedContext]) |\n124: \t\t('[''SK'']' participant1 = [BoundedContext] '<->' '[''SK'']' participant2 = [BoundedContext]) |\n125: \t\t(participant1 = [BoundedContext] '[''SK'']' '<->' participant2 = [BoundedContext] '[''SK'']') |\n126: \t\t('[''SK'']' participant1 = [BoundedContext] '<->' participant2 = [BoundedContext] '[''SK'']') |"
+            },
+            {
+              "start_line": 136,
+              "end_line": 164,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L136-L164",
+              "excerpt": "136: UpstreamDownstreamRelationship:\n137: \tCustomerSupplierRelationship |\n138: \t(\n139: \t\t(\n140: \t\t\t(upstream = [BoundedContext] (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? '->' (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? downstream = [BoundedContext]) |\n141: \t\t\t(downstream = [BoundedContext] (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? '<-' (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? upstream = [BoundedContext]) |\n142: \t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Upstream-Downstream'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext]) |\n143: \t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Downstream-Upstream'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext])\n144: \t\t)\n145: \t\t(':' name=ID)?\n146: \t\t(OPEN (\n147: \t\t\t('implementationTechnology' ('=')? implementationTechnology=STRING)? &\n148: \t\t\t(('exposedAggregates' ('=')? upstreamExposedAggregates += [Aggregate]) (\",\" upstreamExposedAggregates += [Aggregate])* (exposedAggregatesComment=SL_COMMENT)?)? &\n149: \t\t\t('downstreamRights' ('=')? downstreamGovernanceRights=DownstreamGovernanceRights)?\n150: \t\t)\n151: \t\tCLOSE)?\n152: \t)\n153: ;\n154: \n155: CustomerSupplierRelationship:\n156: \t(\n157: \t\t(\n158: \t\t\t(upstream = [BoundedContext] '['('U'',')?'S'(','(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']' '->' '['('D'',')?'C'(','(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']' downstream = [BoundedContext]) |\n159: \t\t\t(downstream = [BoundedContext] '['('D'',')?'C'(','(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']' '<-' '['('U'',')?'S'(','(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']' upstream = [BoundedContext]) |\n160: \t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Customer-Supplier'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext]) |\n161: \t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Supplier-Customer'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext])\n162: \t\t)\n163: \t\t(':' name=ID)?\n164: \t\t(OPEN ("
+            },
+            {
+              "start_line": 489,
+              "end_line": 492,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L489-L492",
+              "excerpt": "489: \n490: enum DownstreamRole:\n491: \tANTICORRUPTION_LAYER = 'ACL' | CONFORMIST = 'CF'\n492: ;"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-mapper-dsl",
+            "path": "LICENSE",
+            "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+            "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.804849+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions."
+          }
+        }
+      ],
+      "application_sources": [
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:02:17.272026+00:00",
+          "sha256": "8bac1f5c296cc32363a000ae88248da14b029211f575a382d7b4539c6102308c",
+          "line_count": 70,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--docs--adr--0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "claim": "O ADR aceito identifica os contextos e declara o Shared Kernel.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 11,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md#L1-L11",
+              "excerpt": "1: # 0015. Five-layer Clean Architecture, CQS and an enforced context map\n2: \n3: - Status: Accepted\n4: - Date: 2026-10-06\n5: - Supersedes: [0011](0011-ddd-layered-architecture.md) (layout)\n6: \n7: ## Context\n8: \n9: ADR 0011 grouped repositories and data sources under one `infrastructure/` folder, and its bounded-context rules\n10: existed only on paper. Commands returned read models, so they doubled as queries. The Portfolio and Engagement domains\n11: imported Market Data's domain types directly. We want five explicit layers, Command–Query Separation and bounded"
+            },
+            {
+              "start_line": 40,
+              "end_line": 54,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md#L40-L54",
+              "excerpt": "40: ### Bounded contexts and context map\n41: \n42: | Context | Role | Upstream dependencies |\n43: | --- | --- | --- |\n44: | Identity & Access | Generic subdomain: login, device approval, session | none (consumed by repositories through the `AccessTokenProvider` port) |\n45: | Market Data | Core, upstream **supplier** (Open Host Service: `application/market-data/services/*` and its domain types as published language) | none |\n46: | Portfolio | Core, **customer** of Market Data | Market Data |\n47: | Engagement | Supporting, **customer** of Market Data | Market Data |\n48: \n49: - **Shared Kernel** (`domain/shared-kernel/`): `Money`, `Ticker`, `AssetId`, `Market`, domain errors and guards. It is\n50:   shared by every context and depends on nothing.\n51: - No context depends on Portfolio or Engagement. Portfolio and Engagement never depend on each other or on Identity.\n52: \n53: ### Enforcement\n54: "
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "docs/domains/README.md",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:02:17.276887+00:00",
+          "sha256": "6ab6077950f18352048006de04420d78fb12490b9b234e630fcefd44dce902cf",
+          "line_count": 164,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--docs--domains--README.md",
+          "claim": "A política do núcleo reconhece seu impacto em todos os contextos e enumera os conceitos de negócio compartilhados.",
+          "evidence": [
+            {
+              "start_line": 101,
+              "end_line": 116,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md#L101-L116",
+              "excerpt": "101:   read models are built by `createX(...)` factories that validate and derive fields.\n102: - Nothing writes to stdout except the delivery mechanism that owns it (the MCP channel for `thndr-mcp`, command\n103:   output for `thndr`). Tokens, cookies and the session file are never logged.\n104: \n105: ## Shared kernel — `src/domain/shared-kernel/`\n106: \n107: Small, stable concepts every context may use. Changes here affect everyone, so keep it minimal.\n108: \n109: | Module | Contents |\n110: | --- | --- |\n111: | `errors.ts` | `DomainError` (abstract, has `code`), `ValidationError` (`VALIDATION_ERROR`), `BusinessRuleViolation` (custom code). |\n112: | `guards.ts` | `assertFiniteNumber`, `assertPositive`, `assertPositiveInteger`, `assertNonEmpty`, `roundTo` (float-safe rounding). |\n113: | `money.ts` | `Money` value object (amount rounded to 4 decimals, currency `EGP`, `USD` or `AED`, same-currency arithmetic). |\n114: | `ticker.ts` | `Ticker` value object: trimmed, upper-cased, `^[A-Z0-9][A-Z0-9._-]{0,14}$`. |\n115: | `asset-id.ts` | `AssetId` value object: Thndr's instrument identifier (a UUID, lower-cased). |\n116: | `market.ts` | `Market` (`egypt` default, `us`, `uae`, `simulator`) with `parseMarket`, `MARKET_PROFILES` (name, currency, time zone) and the per-market feature table (`marketSupports`, `marketsSupporting`, ADR 0021); `AssetClass` with `parseAssetClass`. |"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/domain/shared-kernel/ticker.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/ticker.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:02:17.542729+00:00",
+          "sha256": "f6ba7c623023d2b5612c104c09745a05a8af76c1efd6a45eda05891e648f1ee1",
+          "line_count": 28,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--shared-kernel--ticker.ts",
+          "claim": "A identificação do instrumento tem normalização e validação únicas no núcleo.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 28,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/ticker.ts#L1-L28",
+              "excerpt": "1: import { ValidationError } from './errors';\n2: \n3: const TICKER_PATTERN = /^[A-Z0-9][A-Z0-9._-]{0,14}$/;\n4: \n5: /** Exchange ticker symbol such as `COMI` or `HRHO`. Case-insensitive on input, upper-case internally. */\n6: export class Ticker {\n7:   private constructor(readonly value: string) {\n8:     Object.freeze(this);\n9:   }\n10: \n11:   static of(raw: string): Ticker {\n12:     const normalized = typeof raw === 'string' ? raw.trim().toUpperCase() : '';\n13:     if (!TICKER_PATTERN.test(normalized)) throw new ValidationError(`Invalid ticker symbol: \"${raw}\"`);\n14:     return new Ticker(normalized);\n15:   }\n16: \n17:   equals(other: Ticker): boolean {\n18:     return other.value === this.value;\n19:   }\n20: \n21:   toString(): string {\n22:     return this.value;\n23:   }\n24: \n25:   toJSON(): string {\n26:     return this.value;\n27:   }\n28: }"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/domain/shared-kernel/asset-id.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/asset-id.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:02:17.276185+00:00",
+          "sha256": "edf1d4cdaf5fdc5998dce5955dcf7cc97c3a5de6e3e556bd29c6bd4444b83391",
+          "line_count": 32,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--shared-kernel--asset-id.ts",
+          "claim": "O núcleo valida o identificador de instrumento compartilhado.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 32,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/asset-id.ts#L1-L32",
+              "excerpt": "1: import { ValidationError } from './errors';\n2: \n3: const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;\n4: \n5: /** Thndr's instrument identifier (a UUID). */\n6: export class AssetId {\n7:   private constructor(readonly value: string) {\n8:     Object.freeze(this);\n9:   }\n10: \n11:   static of(raw: string): AssetId {\n12:     const value = typeof raw === 'string' ? raw.trim().toLowerCase() : '';\n13:     if (!UUID.test(value)) throw new ValidationError(`Invalid asset id: \"${raw}\"`);\n14:     return new AssetId(value);\n15:   }\n16: \n17:   static isAssetId(raw: string): boolean {\n18:     return typeof raw === 'string' && UUID.test(raw.trim());\n19:   }\n20: \n21:   equals(other: AssetId): boolean {\n22:     return other.value === this.value;\n23:   }\n24: \n25:   toString(): string {\n26:     return this.value;\n27:   }\n28: \n29:   toJSON(): string {\n30:     return this.value;\n31:   }\n32: }"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/domain/market-data/instrument.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/market-data/instrument.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:07:04.526239+00:00",
+          "sha256": "39c192743b36acdfba17d3d92fd8bd02905747fe6b8bb6f50c87d48ecf7d43cf",
+          "line_count": 79,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--market-data--instrument.ts",
+          "claim": "O contexto de mercado define seu Instrument com os tipos do núcleo.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 22,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/market-data/instrument.ts#L1-L22",
+              "excerpt": "1: import type { AssetId } from '../shared-kernel/asset-id';\n2: import type { AssetClass, Market } from '../shared-kernel/market';\n3: import type { Currency } from '../shared-kernel/money';\n4: import type { Ticker } from '../shared-kernel/ticker';\n5: \n6: /** A tradable (or reference) instrument listed on a market. */\n7: export interface Instrument {\n8:   readonly id: AssetId;\n9:   readonly ticker: Ticker;\n10:   readonly name: string;\n11:   readonly assetClass: AssetClass;\n12:   readonly market: Market;\n13:   readonly currency: Currency | null;\n14:   readonly sector: string | null;\n15:   /** EGX board (`NOPL` main, `OOTC`, `SME`, `INDX`, `FNDS`…), when known. */\n16:   readonly board: string | null;\n17:   readonly tradable: boolean | null;\n18:   readonly suspended: boolean;\n19:   /** Price precision (EGX quotes have 2 or 3 decimals). */\n20:   readonly priceDecimals: number | null;\n21:   readonly description?: string | null;\n22:   readonly logoUrl?: string | null;"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/domain/portfolio/position.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/portfolio/position.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:04:19.584614+00:00",
+          "sha256": "5485ce324911f422fe336ab438fa5265602b318787d081dc8db447344144ab15",
+          "line_count": 176,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--portfolio--position.ts",
+          "claim": "O contexto de carteira define outro modelo, Position, com o mesmo núcleo de identidade e moeda.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 22,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/portfolio/position.ts#L1-L22",
+              "excerpt": "1: import type { AssetId } from '../shared-kernel/asset-id';\n2: import { ValidationError } from '../shared-kernel/errors';\n3: import { assertFiniteNumber, roundTo } from '../shared-kernel/guards';\n4: import type { AssetClass } from '../shared-kernel/market';\n5: import type { Currency } from '../shared-kernel/money';\n6: import type { Ticker } from '../shared-kernel/ticker';\n7: \n8: export interface PositionInput {\n9:   readonly instrumentId: AssetId | null;\n10:   readonly ticker: Ticker;\n11:   readonly assetClass: AssetClass;\n12:   readonly currency: Currency;\n13:   readonly quantity: number;\n14:   /** Average entry price per unit, when the broker sends it (wire `avg_cost`). */\n15:   readonly averageCost: number | null;\n16:   /** Total cost of the position (wire `cost_value`). */\n17:   readonly costValue: number | null;\n18:   readonly marketPrice: number | null;\n19:   readonly unrealizedPnl: number | null;\n20:   readonly unrealizedPnlPercent: number | null;\n21:   /** Quantity unit when not shares (e.g. `grams` for gold funds). */\n22:   readonly unit?: string | null;"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/__tests__/architecture.test.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:04:19.905213+00:00",
+          "sha256": "4cca0fe29fcb1f51a749dc9a5a6ebc3d58fa8c66903fa8a57b8cd7dfe5ff401f",
+          "line_count": 235,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--__tests__--architecture.test.ts",
+          "claim": "O código entregue contém uma regra para manter o núcleo independente. Essa suíte foi lida e não executada nesta investigação.",
+          "evidence": [
+            {
+              "start_line": 190,
+              "end_line": 200,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts#L190-L200",
+              "excerpt": "190:   });\n191: \n192:   it('the shared kernel depends on nothing but itself', () => {\n193:     const found = violations((file, target) =>\n194:       file.path.startsWith('domain/shared-kernel/') && !target.startsWith('domain/shared-kernel/')\n195:         ? `${file.path} → ${target}`\n196:         : null,\n197:     );\n198:     expect(found).toEqual([]);\n199:   });\n200: });"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        }
+      ],
+      "canonical_reference": {
+        "url": "https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf",
+        "observed_utc": "2026-10-15T02:09:00.090962+00:00",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-evans-reference.pdf",
+        "sha256": "cf82dc7b4736bb24f4a1b69a3213c25cbd38aa98e37b99c2facfb94ff5cacb99",
+        "text_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-evans-reference.txt",
+        "printed_pages": [
+          31
+        ],
+        "summary": "Shared Kernel compartilha uma parte pequena do modelo e do código, com coordenação explícita de mudanças.",
+        "observation_scope": "Arquivo primário obtido nesta investigação; o hash identifica os bytes locais consultados."
+      }
+    },
+    {
+      "concept_id": "customer-supplier",
+      "decision": "KEEP_PENDING_ORGANIZATIONAL_CONTRACT",
+      "application_kind": "PRODUCT_OSS_CANDIDATE",
+      "application": "thndr-mcp: Market Data fornece resolução de instrumentos a Portfolio e Engagement.",
+      "mechanism": "O ADR chama Market Data de supplier e os dois outros contextos de customers. InstrumentResolver pertence a Market Data; GetPosition e CreateAlert o consomem. O container conecta os dois consumidores à implementação fornecida pelo contexto de mercado. Essa parte técnica e os responsáveis pelo contrato estão demonstrados.",
+      "limits": "A referência primária de Evans exige que prioridades do downstream entrem no planejamento upstream. O material localizado declara os papéis, mas não mostra negociação, compromisso de atendimento ou prioridade de mudança. O ADR também usa Open Host Service; a gramática CML distingue relações Customer/Supplier das relações genéricas com OHS. Não se converte toda dependência técnica ou o rótulo do autor em prova da relação organizacional completa.",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-dsl",
+          "path": "org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:06:44.875513+00:00",
+          "sha256": "440d9a081c28c89b5fbaac3764ad9ed946701df98c098a8de086527e70540d54",
+          "line_count": 556,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--org.contextmapper.dsl--src--org--contextmapper--dsl--ContextMappingDSL.xtext",
+          "claim": "CML representa Shared Kernel, Customer/Supplier e o papel Conformist. É um modelo formal de relações; a gramática não cria acordos entre equipes nem comprova sua execução.",
+          "evidence": [
+            {
+              "start_line": 99,
+              "end_line": 126,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L99-L126",
+              "excerpt": "99: Relationship:\n100: \tSymmetricRelationship | UpstreamDownstreamRelationship\n101: ;\n102: \n103: SymmetricRelationship:\n104: \tPartnership | SharedKernel\n105: ;\n106: \n107: Partnership:\n108: \t(\n109: \t\t(participant1 = [BoundedContext] '[''P'']' '<->' '[''P'']' participant2 = [BoundedContext]) |\n110: \t\t('[''P'']' participant1 = [BoundedContext] '<->' '[''P'']' participant2 = [BoundedContext]) |\n111: \t\t(participant1 = [BoundedContext] '[''P'']' '<->' participant2 = [BoundedContext] '[''P'']') |\n112: \t\t('[''P'']' participant1 = [BoundedContext] '<->' participant2 = [BoundedContext] '[''P'']') |\n113: \t\t(participant1 = [BoundedContext] 'Partnership' participant2 = [BoundedContext])\n114: \t)\n115: \t(':' name=ID)?\n116: \t(OPEN\n117: \t\t('implementationTechnology' ('=')? implementationTechnology=STRING)?\n118: \tCLOSE)?\n119: ;\n120: \n121: SharedKernel:\n122: \t(\n123: \t\t(participant1 = [BoundedContext] '[''SK'']' '<->' '[''SK'']' participant2 = [BoundedContext]) |\n124: \t\t('[''SK'']' participant1 = [BoundedContext] '<->' '[''SK'']' participant2 = [BoundedContext]) |\n125: \t\t(participant1 = [BoundedContext] '[''SK'']' '<->' participant2 = [BoundedContext] '[''SK'']') |\n126: \t\t('[''SK'']' participant1 = [BoundedContext] '<->' participant2 = [BoundedContext] '[''SK'']') |"
+            },
+            {
+              "start_line": 136,
+              "end_line": 164,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L136-L164",
+              "excerpt": "136: UpstreamDownstreamRelationship:\n137: \tCustomerSupplierRelationship |\n138: \t(\n139: \t\t(\n140: \t\t\t(upstream = [BoundedContext] (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? '->' (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? downstream = [BoundedContext]) |\n141: \t\t\t(downstream = [BoundedContext] (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? '<-' (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? upstream = [BoundedContext]) |\n142: \t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Upstream-Downstream'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext]) |\n143: \t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Downstream-Upstream'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext])\n144: \t\t)\n145: \t\t(':' name=ID)?\n146: \t\t(OPEN (\n147: \t\t\t('implementationTechnology' ('=')? implementationTechnology=STRING)? &\n148: \t\t\t(('exposedAggregates' ('=')? upstreamExposedAggregates += [Aggregate]) (\",\" upstreamExposedAggregates += [Aggregate])* (exposedAggregatesComment=SL_COMMENT)?)? &\n149: \t\t\t('downstreamRights' ('=')? downstreamGovernanceRights=DownstreamGovernanceRights)?\n150: \t\t)\n151: \t\tCLOSE)?\n152: \t)\n153: ;\n154: \n155: CustomerSupplierRelationship:\n156: \t(\n157: \t\t(\n158: \t\t\t(upstream = [BoundedContext] '['('U'',')?'S'(','(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']' '->' '['('D'',')?'C'(','(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']' downstream = [BoundedContext]) |\n159: \t\t\t(downstream = [BoundedContext] '['('D'',')?'C'(','(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']' '<-' '['('U'',')?'S'(','(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']' upstream = [BoundedContext]) |\n160: \t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Customer-Supplier'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext]) |\n161: \t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Supplier-Customer'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext])\n162: \t\t)\n163: \t\t(':' name=ID)?\n164: \t\t(OPEN ("
+            },
+            {
+              "start_line": 489,
+              "end_line": 492,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L489-L492",
+              "excerpt": "489: \n490: enum DownstreamRole:\n491: \tANTICORRUPTION_LAYER = 'ACL' | CONFORMIST = 'CF'\n492: ;"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-mapper-dsl",
+            "path": "LICENSE",
+            "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+            "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.804849+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions."
+          }
+        }
+      ],
+      "application_sources": [
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:02:17.272026+00:00",
+          "sha256": "8bac1f5c296cc32363a000ae88248da14b029211f575a382d7b4539c6102308c",
+          "line_count": 70,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--docs--adr--0015-five-layer-clean-architecture-cqs-and-context-map.md",
+          "claim": "Os papéis pretendidos e os donos dos contextos estão declarados.",
+          "evidence": [
+            {
+              "start_line": 40,
+              "end_line": 54,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md#L40-L54",
+              "excerpt": "40: ### Bounded contexts and context map\n41: \n42: | Context | Role | Upstream dependencies |\n43: | --- | --- | --- |\n44: | Identity & Access | Generic subdomain: login, device approval, session | none (consumed by repositories through the `AccessTokenProvider` port) |\n45: | Market Data | Core, upstream **supplier** (Open Host Service: `application/market-data/services/*` and its domain types as published language) | none |\n46: | Portfolio | Core, **customer** of Market Data | Market Data |\n47: | Engagement | Supporting, **customer** of Market Data | Market Data |\n48: \n49: - **Shared Kernel** (`domain/shared-kernel/`): `Money`, `Ticker`, `AssetId`, `Market`, domain errors and guards. It is\n50:   shared by every context and depends on nothing.\n51: - No context depends on Portfolio or Engagement. Portfolio and Engagement never depend on each other or on Identity.\n52: \n53: ### Enforcement\n54: "
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/application/market-data/services/instrument-resolver.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/market-data/services/instrument-resolver.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:04:19.594724+00:00",
+          "sha256": "3d3e7b1460bd3688a203b9da45e0d6c5e27e2573569300b3ab7ad3662bfdd643",
+          "line_count": 53,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--application--market-data--services--instrument-resolver.ts",
+          "claim": "O fornecedor técnico resolve o instrumento e controla a representação retornada.",
+          "evidence": [
+            {
+              "start_line": 8,
+              "end_line": 43,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/market-data/services/instrument-resolver.ts#L8-L43",
+              "excerpt": "8: /**\n9:  * Resolves what a user types (`COMI`, `comi`, or a Thndr asset UUID) to an instrument.\n10:  * Results are cached for the process lifetime: listings rarely change.\n11:  */\n12: export class InstrumentResolver {\n13:   private readonly byTicker = new Map<string, Instrument>();\n14:   private readonly byId = new Map<string, Instrument>();\n15: \n16:   constructor(private readonly repository: MarketDataRepository) {}\n17: \n18:   async resolve(symbolOrId: string, market: Market): Promise<Instrument> {\n19:     if (AssetId.isAssetId(symbolOrId)) {\n20:       const id = AssetId.of(symbolOrId);\n21:       const cached = this.byId.get(id.value);\n22:       if (cached) return cached;\n23:       return this.remember(await this.repository.getInstrument(id));\n24:     }\n25:     const ticker = Ticker.of(symbolOrId);\n26:     const key = `${market}:${ticker.value}`;\n27:     const cached = this.byTicker.get(key);\n28:     if (cached) return cached;\n29:     const results = await this.repository.searchInstruments(ticker.value, market);\n30:     const exact = results.find((instrument) => instrument.ticker.equals(ticker));\n31:     if (!exact) {\n32:       const suggestions = results\n33:         .slice(0, 5)\n34:         .map((i) => i.ticker.value)\n35:         .join(', ');\n36:       throw new NotFoundError(\n37:         `No ${market} instrument with ticker ${ticker.value}.${suggestions ? ` Did you mean: ${suggestions}?` : ' Try search_instruments.'}`,\n38:       );\n39:     }\n40:     return this.remember(exact);\n41:   }\n42: \n43:   async resolveMany(symbolsOrIds: readonly string[], market: Market): Promise<Instrument[]> {"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/application/portfolio/queries/get-position.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/portfolio/queries/get-position.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:04:19.582136+00:00",
+          "sha256": "fa44d1753764b7f499a02a745d04e7768d1a9ea22789bcca52462bf45e52e5f1",
+          "line_count": 46,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--application--portfolio--queries--get-position.ts",
+          "claim": "A carteira consome o identificador resolvido pelo contexto de mercado.",
+          "evidence": [
+            {
+              "start_line": 34,
+              "end_line": 45,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/portfolio/queries/get-position.ts#L34-L45",
+              "excerpt": "34: \n35:   async execute(params: InputOf<typeof input>): Promise<PositionResult> {\n36:     const market = parseMarket(params.market);\n37:     const instrument = await this.deps.resolver.resolve(params.symbol, market);\n38:     const position = await this.deps.repository.getPosition(instrument.id, market);\n39:     const held = position !== null && position.quantity > 0;\n40:     const sellable =\n41:       held && params.includeSellable !== false\n42:         ? await this.deps.repository.getSellableQuantity(instrument.id, market)\n43:         : null;\n44:     return { ticker: instrument.ticker.value, held, position, sellable };\n45:   }"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/application/engagement/commands/create-alert.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/engagement/commands/create-alert.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:04:19.602164+00:00",
+          "sha256": "820b34ded53b260b227c52c832d709ef4f8b4fa8189c2a0945827100d1194927",
+          "line_count": 56,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--application--engagement--commands--create-alert.ts",
+          "claim": "O contexto de alertas consome o mesmo contrato para outro fluxo de negócio.",
+          "evidence": [
+            {
+              "start_line": 42,
+              "end_line": 55,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/engagement/commands/create-alert.ts#L42-L55",
+              "excerpt": "42:   async execute(params: InputOf<typeof input>): Promise<AlertReceipt> {\n43:     assertPositive(params.price, 'Alert price');\n44:     const explicitDirection = parseAlertDirection(params.direction);\n45:     const frequency = parseAlertFrequency(params.frequency) ?? DEFAULT_ALERT_FREQUENCY;\n46:     const market = parseMarket(params.market);\n47:     requireMarketFeature(market, 'priceAlerts');\n48:     const instrument = await this.deps.resolver.resolve(params.symbol, market);\n49:     const direction =\n50:       explicitDirection ??\n51:       (await decideDirection(this.deps, instrument.id, instrument.ticker.value, params.price, market));\n52:     return toAlertReceipt(\n53:       await placeAlert(this.deps, instrument.id, params.price, direction, frequency, market),\n54:     );\n55:   }"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "armaaar/thndr-mcp",
+          "path": "src/container.ts",
+          "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+          "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/container.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:04:19.905836+00:00",
+          "sha256": "ee10e31be753e15e61612acc7d7289a58a29dc6f71eb8fccac6357eefec4b83c",
+          "line_count": 220,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--container.ts",
+          "claim": "O ponto de composição conecta o produtor e os dois consumidores efetivos.",
+          "evidence": [
+            {
+              "start_line": 132,
+              "end_line": 163,
+              "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/container.ts#L132-L163",
+              "excerpt": "132:   // Market Data\n133:   const marketRepository = new ThndrMarketDataRepository(api, krakend, appGateway);\n134:   const resolver = new InstrumentResolver(marketRepository);\n135:   const quotes = new MarketQuotesCache(marketRepository, clock);\n136:   const indices = new IndexMembership(marketRepository, quotes, clock);\n137:   const market: MarketDataDependencies = {\n138:     repository: marketRepository,\n139:     research: new ThndrResearchRepository(api, web, appGateway),\n140:     discovery: new ThndrDiscoveryRepository(api, appGateway),\n141:     resolver,\n142:     quotes,\n143:     indices,\n144:     clock,\n145:   };\n146: \n147:   // Portfolio\n148:   const portfolio: PortfolioDependencies = {\n149:     repository: new ThndrPortfolioRepository(api, krakend),\n150:     resolver,\n151:     quotes,\n152:     indices,\n153:     clock,\n154:   };\n155: \n156:   // Engagement\n157:   const engagement: EngagementDependencies = {\n158:     repository: new ThndrEngagementRepository(api, krakend),\n159:     resolver,\n160:     quotes,\n161:   };\n162: \n163:   /** Every use case of the application, in the order they are listed to users. */"
+            }
+          ],
+          "license": {
+            "repo": "armaaar/thndr-mcp",
+            "path": "LICENSE",
+            "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+            "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:02:17.247266+00:00",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n"
+          }
+        }
+      ],
+      "canonical_reference": {
+        "url": "https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf",
+        "observed_utc": "2026-10-15T02:09:00.090962+00:00",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-evans-reference.pdf",
+        "sha256": "cf82dc7b4736bb24f4a1b69a3213c25cbd38aa98e37b99c2facfb94ff5cacb99",
+        "text_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-evans-reference.txt",
+        "printed_pages": [
+          32
+        ],
+        "summary": "O padrão exige que o planejamento upstream considere prioridades e requisitos negociados com o downstream.",
+        "observation_scope": "Arquivo primário obtido nesta investigação; o hash identifica os bytes locais consultados."
+      },
+      "next_required_evidence": "Uma decisão ou discussão pública com compromisso de atendimento a um requisito de Portfolio ou Engagement, acompanhada da mudança do contrato do fornecedor. Alternativamente, outro produto com essa coordenação documentada."
+    },
+    {
+      "concept_id": "conformist",
+      "decision": "KEEP_PENDING_APPLICATION_CATEGORY_WITH_STRATEGIC_PROOF",
+      "application_kind": "LIBRARY_PROTOTYPE_CANDIDATE",
+      "application": "A biblioteca de descoberta do próprio Context Mapper adota o modelo da linguagem CML.",
+      "mechanism": "A tese do autor modela a arquitetura do próprio Context Mapper. A figura 3.1 identifica LanguageCore como upstream e DiscoveryLibrary como downstream Conformist; o texto explica quem controla o modelo. O serializer usa o setup CML, converte os resultados para o metamodelo da linguagem e grava esse modelo. O build fixa a dependência CML em 6.11.0.",
+      "limits": "Isso é evidência da relação interna do produto de ferramentas e não o exemplo fictício de seguros. Entretanto, o README da biblioteca ainda a apresenta como prototype e não foi localizado um aplicativo hospedeiro real consumindo essa função. Diante do critério que pede framework e aplicação real distintos em seus papéis, a biblioteca não foi promovida silenciosamente a aplicação. A conversão técnica também deve ser distinguida de uma ACL com linguagem própria. O thndr-mcp foi descartado como Conformist em relação ao Thndr porque declara e implementa uma ACL.",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-dsl",
+          "path": "org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:06:44.875513+00:00",
+          "sha256": "440d9a081c28c89b5fbaac3764ad9ed946701df98c098a8de086527e70540d54",
+          "line_count": 556,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--org.contextmapper.dsl--src--org--contextmapper--dsl--ContextMappingDSL.xtext",
+          "claim": "CML representa Shared Kernel, Customer/Supplier e o papel Conformist. É um modelo formal de relações; a gramática não cria acordos entre equipes nem comprova sua execução.",
+          "evidence": [
+            {
+              "start_line": 99,
+              "end_line": 126,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L99-L126",
+              "excerpt": "99: Relationship:\n100: \tSymmetricRelationship | UpstreamDownstreamRelationship\n101: ;\n102: \n103: SymmetricRelationship:\n104: \tPartnership | SharedKernel\n105: ;\n106: \n107: Partnership:\n108: \t(\n109: \t\t(participant1 = [BoundedContext] '[''P'']' '<->' '[''P'']' participant2 = [BoundedContext]) |\n110: \t\t('[''P'']' participant1 = [BoundedContext] '<->' '[''P'']' participant2 = [BoundedContext]) |\n111: \t\t(participant1 = [BoundedContext] '[''P'']' '<->' participant2 = [BoundedContext] '[''P'']') |\n112: \t\t('[''P'']' participant1 = [BoundedContext] '<->' participant2 = [BoundedContext] '[''P'']') |\n113: \t\t(participant1 = [BoundedContext] 'Partnership' participant2 = [BoundedContext])\n114: \t)\n115: \t(':' name=ID)?\n116: \t(OPEN\n117: \t\t('implementationTechnology' ('=')? implementationTechnology=STRING)?\n118: \tCLOSE)?\n119: ;\n120: \n121: SharedKernel:\n122: \t(\n123: \t\t(participant1 = [BoundedContext] '[''SK'']' '<->' '[''SK'']' participant2 = [BoundedContext]) |\n124: \t\t('[''SK'']' participant1 = [BoundedContext] '<->' '[''SK'']' participant2 = [BoundedContext]) |\n125: \t\t(participant1 = [BoundedContext] '[''SK'']' '<->' participant2 = [BoundedContext] '[''SK'']') |\n126: \t\t('[''SK'']' participant1 = [BoundedContext] '<->' participant2 = [BoundedContext] '[''SK'']') |"
+            },
+            {
+              "start_line": 136,
+              "end_line": 164,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L136-L164",
+              "excerpt": "136: UpstreamDownstreamRelationship:\n137: \tCustomerSupplierRelationship |\n138: \t(\n139: \t\t(\n140: \t\t\t(upstream = [BoundedContext] (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? '->' (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? downstream = [BoundedContext]) |\n141: \t\t\t(downstream = [BoundedContext] (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? '<-' (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? upstream = [BoundedContext]) |\n142: \t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Upstream-Downstream'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext]) |\n143: \t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Downstream-Upstream'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext])\n144: \t\t)\n145: \t\t(':' name=ID)?\n146: \t\t(OPEN (\n147: \t\t\t('implementationTechnology' ('=')? implementationTechnology=STRING)? &\n148: \t\t\t(('exposedAggregates' ('=')? upstreamExposedAggregates += [Aggregate]) (\",\" upstreamExposedAggregates += [Aggregate])* (exposedAggregatesComment=SL_COMMENT)?)? &\n149: \t\t\t('downstreamRights' ('=')? downstreamGovernanceRights=DownstreamGovernanceRights)?\n150: \t\t)\n151: \t\tCLOSE)?\n152: \t)\n153: ;\n154: \n155: CustomerSupplierRelationship:\n156: \t(\n157: \t\t(\n158: \t\t\t(upstream = [BoundedContext] '['('U'',')?'S'(','(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']' '->' '['('D'',')?'C'(','(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']' downstream = [BoundedContext]) |\n159: \t\t\t(downstream = [BoundedContext] '['('D'',')?'C'(','(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']' '<-' '['('U'',')?'S'(','(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']' upstream = [BoundedContext]) |\n160: \t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Customer-Supplier'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext]) |\n161: \t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Supplier-Customer'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext])\n162: \t\t)\n163: \t\t(':' name=ID)?\n164: \t\t(OPEN ("
+            },
+            {
+              "start_line": 489,
+              "end_line": 492,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L489-L492",
+              "excerpt": "489: \n490: enum DownstreamRole:\n491: \tANTICORRUPTION_LAYER = 'ACL' | CONFORMIST = 'CF'\n492: ;"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-mapper-dsl",
+            "path": "LICENSE",
+            "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+            "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.804849+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions."
+          }
+        }
+      ],
+      "application_sources": [
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-map-discovery",
+          "path": "src/main/java/org/contextmapper/discovery/ContextMapSerializer.java",
+          "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+          "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/ContextMapSerializer.java",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/ContextMapSerializer.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:06:44.843322+00:00",
+          "sha256": "e5098229fcd5032fa8d1b038f0c6ad1b1610e02d8fc80b796834b5ce397355a1",
+          "line_count": 51,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--src--main--java--org--contextmapper--discovery--ContextMapSerializer.java",
+          "claim": "A saída da descoberta é construída e serializada no modelo CML controlado pelo upstream.",
+          "evidence": [
+            {
+              "start_line": 18,
+              "end_line": 25,
+              "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/ContextMapSerializer.java#L18-L25",
+              "excerpt": "18: import org.apache.commons.io.FilenameUtils;\n19: import org.contextmapper.discovery.cml.ContextMapToCMLConverter;\n20: import org.contextmapper.discovery.model.ContextMap;\n21: import org.contextmapper.dsl.ContextMappingDSLStandaloneSetup;\n22: import org.contextmapper.dsl.contextMappingDSL.ContextMappingModel;\n23: import org.eclipse.emf.common.util.URI;\n24: import org.eclipse.emf.ecore.resource.Resource;\n25: import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;"
+            },
+            {
+              "start_line": 34,
+              "end_line": 48,
+              "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/ContextMapSerializer.java#L34-L48",
+              "excerpt": "34:  * @author Stefan Kapferer\n35:  */\n36: public class ContextMapSerializer {\n37: \n38:     public void serializeContextMap(ContextMap contextMap, File cmlFile) throws IOException {\n39:         if (!FilenameUtils.getExtension(cmlFile.toString()).equals(\"cml\"))\n40:             throw new IllegalArgumentException(\"The CML file must end with the file extension '*.cml'!\");\n41:         if (contextMap.getBoundedContexts().size() <= 0)\n42:             throw new IllegalArgumentException(\"The Context Map must at least contain one Bounded Context to be serialized!\");\n43: \n44:         ContextMappingDSLStandaloneSetup.doSetup();\n45:         Resource resource = new ResourceSetImpl().createResource(URI.createURI(cmlFile.toURI().toString()));\n46:         ContextMappingModel model = new ContextMapToCMLConverter().convert(contextMap);\n47:         resource.getContents().add(model);\n48:         resource.save(SaveOptions.defaultOptions().toOptionsMap());"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-map-discovery",
+            "path": "LICENSE",
+            "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+            "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.651368+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions."
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-map-discovery",
+          "path": "src/main/java/org/contextmapper/discovery/cml/ContextMapToCMLConverter.java",
+          "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+          "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/cml/ContextMapToCMLConverter.java",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/cml/ContextMapToCMLConverter.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:08:59.762041+00:00",
+          "sha256": "08290fdc006a1d57d1e4418d712a383a98286adbaa848ddeb3a0fb74f9a3fb45",
+          "line_count": 209,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--src--main--java--org--contextmapper--discovery--cml--ContextMapToCMLConverter.java",
+          "claim": "A conversão preserva os conceitos do metamodelo CML e usa suas factories e relações.",
+          "evidence": [
+            {
+              "start_line": 40,
+              "end_line": 67,
+              "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/cml/ContextMapToCMLConverter.java#L40-L67",
+              "excerpt": "40:     public ContextMappingModel convert(org.contextmapper.discovery.model.ContextMap inputMap) {\n41:         ContextMappingModel model = ContextMappingDSLFactory.eINSTANCE.createContextMappingModel();\n42:         ContextMap contextMap = ContextMappingDSLFactory.eINSTANCE.createContextMap();\n43:         model.setMap(contextMap);\n44: \n45:         for (org.contextmapper.discovery.model.BoundedContext boundedContext : inputMap.getBoundedContexts()) {\n46:             BoundedContext bc = convert(boundedContext);\n47:             model.getBoundedContexts().add(bc);\n48:             contextMap.getBoundedContexts().add(bc);\n49:         }\n50: \n51:         for (Relationship relationship : inputMap.getRelationships()) {\n52:             contextMap.getRelationships().add(convert(relationship));\n53:         }\n54: \n55:         updateEntityAttributesAndReferences();\n56: \n57:         return model;\n58:     }\n59: \n60:     private BoundedContext convert(org.contextmapper.discovery.model.BoundedContext inputContext) {\n61:         BoundedContext bc = ContextMappingDSLFactory.eINSTANCE.createBoundedContext();\n62:         bc.setName(inputContext.getName());\n63:         bc.setImplementationTechnology(inputContext.getTechnology());\n64:         for (org.contextmapper.discovery.model.Aggregate aggregate : inputContext.getAggregates()) {\n65:             bc.getAggregates().add(convert(aggregate));\n66:         }\n67:         this.boundedContextMap.put(inputContext.getName(), bc);"
+            },
+            {
+              "start_line": 151,
+              "end_line": 159,
+              "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/cml/ContextMapToCMLConverter.java#L151-L159",
+              "excerpt": "151:     private UpstreamDownstreamRelationship convert(Relationship relationship) {\n152:         UpstreamDownstreamRelationship upstreamDownstreamRelationship = ContextMappingDSLFactory.eINSTANCE.createUpstreamDownstreamRelationship();\n153:         upstreamDownstreamRelationship.setUpstream(this.boundedContextMap.get(relationship.getUpstream().getName()));\n154:         upstreamDownstreamRelationship.setDownstream(this.boundedContextMap.get(relationship.getDownstream().getName()));\n155:         for (org.contextmapper.discovery.model.Aggregate aggregate : relationship.getExposedAggregates()) {\n156:             Optional<Aggregate> cmlAggregate = upstreamDownstreamRelationship.getUpstream().getAggregates().stream().filter(a -> a.getName().equals(aggregate.getName())).findFirst();\n157:             if (cmlAggregate.isPresent())\n158:                 upstreamDownstreamRelationship.getUpstreamExposedAggregates().add(cmlAggregate.get());\n159:         }"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-map-discovery",
+            "path": "LICENSE",
+            "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+            "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.651368+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions."
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-map-discovery",
+          "path": "build.gradle",
+          "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+          "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/build.gradle",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/build.gradle",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:06:44.647051+00:00",
+          "sha256": "a2529ff36dbea258f458bfc7522464e5f7e8cba16e9c27ec6bd9ba810331c3c9",
+          "line_count": 173,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--build.gradle",
+          "claim": "O downstream depende da biblioteca oficial da linguagem.",
+          "evidence": [
+            {
+              "start_line": 22,
+              "end_line": 29,
+              "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/build.gradle#L22-L29",
+              "excerpt": "22:     implementation \"org.reflections:reflections:${reflectionsVersion}\"\n23:     implementation \"org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}\"\n24:     implementation \"org.springframework:spring-web:${springWebVersion}\"\n25:     implementation \"org.apache.commons:commons-lang3:${commonsLangVersion}\"\n26:     implementation \"commons-io:commons-io:${commonsIOVersion}\"\n27:     implementation \"org.yaml:snakeyaml:${snakeYMLVersion}\"\n28:     implementation \"org.contextmapper:context-mapper-dsl:${cmlVersion}\"\n29:     implementation \"io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}\""
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-map-discovery",
+            "path": "LICENSE",
+            "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+            "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.651368+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions."
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-map-discovery",
+          "path": "gradle.properties",
+          "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+          "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/gradle.properties",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/gradle.properties",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:08:59.772037+00:00",
+          "sha256": "053306c2d7d0bfb081107efa4d63d12fc579cc8767d5e9cd607d744172381e07",
+          "line_count": 15,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--gradle.properties",
+          "claim": "O projeto declara cmlVersion=6.11.0.",
+          "evidence": [
+            {
+              "start_line": 5,
+              "end_line": 8,
+              "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/gradle.properties#L5-L8",
+              "excerpt": "5: # dependency versions\n6: jUnitVersion=5.11.0\n7: cmlVersion=6.11.0\n8: reflectionsVersion=0.10.2"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-map-discovery",
+            "path": "LICENSE",
+            "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+            "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.651368+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions."
+          }
+        }
+      ],
+      "author_architecture": {
+        "url": "https://eprints.ost.ch/821/1/HS19-MSE-Master-Thesis-Report-PUBLIC-Stefan-Kapferer-SDDD-Modeling-Framework.pdf",
+        "observed_utc": "2026-10-15T02:09:00.094271+00:00",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-contextmapper-thesis.pdf",
+        "sha256": "36c40c567e2cbbaedf601f8545fab8d66fe96bc6454e048c5c300eab8add36d1",
+        "text_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-contextmapper-thesis.txt",
+        "printed_pages": [
+          17,
+          18,
+          38
+        ],
+        "summary": "A tese identifica explicitamente o Conformist na arquitetura que os próprios autores implementam, e limita a influência do downstream sobre a linguagem.",
+        "short_quote": "it acts as a Conformist (CF) and thus conforms to the published language of the core component.",
+        "observation_scope": "Arquivo primário obtido nesta investigação; o hash identifica os bytes locais consultados."
+      },
+      "diagram_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-contextmapper-own-context-map.png",
+      "diagram_pdf_page": 27,
+      "canonical_reference": {
+        "url": "https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf",
+        "observed_utc": "2026-10-15T02:09:00.090962+00:00",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-evans-reference.pdf",
+        "sha256": "cf82dc7b4736bb24f4a1b69a3213c25cbd38aa98e37b99c2facfb94ff5cacb99",
+        "text_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-evans-reference.txt",
+        "printed_pages": [
+          33
+        ],
+        "summary": "Conformist adota o modelo upstream quando não consegue obter um contrato moldado às necessidades downstream.",
+        "observation_scope": "Arquivo primário obtido nesta investigação; o hash identifica os bytes locais consultados."
+      },
+      "next_required_evidence": "Um consumidor de produto que use a biblioteca de descoberta, ou outro aplicativo real cuja adoção do modelo upstream e controle de decisão estejam documentados. Não basta reclassificar o exemplo de modelagem como produto."
+    },
+    {
+      "concept_id": "separate-ways",
+      "decision": "RECOMMEND_SOURCE_MATCH_NATIVE_INTEROPERABILITY_BOUNDARY",
+      "application_kind": "PRODUCT_OSS",
+      "application": "AT Protocol/Bluesky e Mastodon/ActivityPub, no limite de modelo e interoperabilidade nativa.",
+      "mechanism": "A documentação oficial do AT Protocol explica a decisão de criar um protocolo separado de ActivityPub, motivada pela portabilidade de contas e por diferenças de modelo que seriam caras de incorporar. O PDS trabalha com identidade DID, coleções e registros em repositórios assinados. O Mastodon mantém seu caminho ActivityPub de atividades, objetos e atores. Os dois produtos têm modelos nativos próprios por uma escolha publicada; a conclusão não decorre de uma busca sem imports.",
+      "limits": "A correspondência com Separate Ways é uma interpretação delimitada da decisão de interoperabilidade nativa, e não uma classificação publicada pelos autores com esse nome. Ela não afirma que todas as funções dos produtos estejam isoladas, que nenhuma ponte externa exista ou que os dois protocolos sejam impossíveis de integrar. O caso não usa a proibição Portfolio/Engagement do thndr-mcp como prova, porque esses contextos compartilham o núcleo.",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "ContextMapper/context-mapper-dsl",
+          "path": "org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+          "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:06:44.875513+00:00",
+          "sha256": "440d9a081c28c89b5fbaac3764ad9ed946701df98c098a8de086527e70540d54",
+          "line_count": 556,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--org.contextmapper.dsl--src--org--contextmapper--dsl--ContextMappingDSL.xtext",
+          "claim": "CML representa Shared Kernel, Customer/Supplier e o papel Conformist. É um modelo formal de relações; a gramática não cria acordos entre equipes nem comprova sua execução.",
+          "evidence": [
+            {
+              "start_line": 99,
+              "end_line": 126,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L99-L126",
+              "excerpt": "99: Relationship:\n100: \tSymmetricRelationship | UpstreamDownstreamRelationship\n101: ;\n102: \n103: SymmetricRelationship:\n104: \tPartnership | SharedKernel\n105: ;\n106: \n107: Partnership:\n108: \t(\n109: \t\t(participant1 = [BoundedContext] '[''P'']' '<->' '[''P'']' participant2 = [BoundedContext]) |\n110: \t\t('[''P'']' participant1 = [BoundedContext] '<->' '[''P'']' participant2 = [BoundedContext]) |\n111: \t\t(participant1 = [BoundedContext] '[''P'']' '<->' participant2 = [BoundedContext] '[''P'']') |\n112: \t\t('[''P'']' participant1 = [BoundedContext] '<->' participant2 = [BoundedContext] '[''P'']') |\n113: \t\t(participant1 = [BoundedContext] 'Partnership' participant2 = [BoundedContext])\n114: \t)\n115: \t(':' name=ID)?\n116: \t(OPEN\n117: \t\t('implementationTechnology' ('=')? implementationTechnology=STRING)?\n118: \tCLOSE)?\n119: ;\n120: \n121: SharedKernel:\n122: \t(\n123: \t\t(participant1 = [BoundedContext] '[''SK'']' '<->' '[''SK'']' participant2 = [BoundedContext]) |\n124: \t\t('[''SK'']' participant1 = [BoundedContext] '<->' '[''SK'']' participant2 = [BoundedContext]) |\n125: \t\t(participant1 = [BoundedContext] '[''SK'']' '<->' participant2 = [BoundedContext] '[''SK'']') |\n126: \t\t('[''SK'']' participant1 = [BoundedContext] '<->' participant2 = [BoundedContext] '[''SK'']') |"
+            },
+            {
+              "start_line": 136,
+              "end_line": 164,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L136-L164",
+              "excerpt": "136: UpstreamDownstreamRelationship:\n137: \tCustomerSupplierRelationship |\n138: \t(\n139: \t\t(\n140: \t\t\t(upstream = [BoundedContext] (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? '->' (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? downstream = [BoundedContext]) |\n141: \t\t\t(downstream = [BoundedContext] (('[''D'']') | ('['('D'',')?(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)']')? '<-' (('[''U'']') | ('['('U'',')?(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)']')? upstream = [BoundedContext]) |\n142: \t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Upstream-Downstream'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext]) |\n143: \t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Downstream-Upstream'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext])\n144: \t\t)\n145: \t\t(':' name=ID)?\n146: \t\t(OPEN (\n147: \t\t\t('implementationTechnology' ('=')? implementationTechnology=STRING)? &\n148: \t\t\t(('exposedAggregates' ('=')? upstreamExposedAggregates += [Aggregate]) (\",\" upstreamExposedAggregates += [Aggregate])* (exposedAggregatesComment=SL_COMMENT)?)? &\n149: \t\t\t('downstreamRights' ('=')? downstreamGovernanceRights=DownstreamGovernanceRights)?\n150: \t\t)\n151: \t\tCLOSE)?\n152: \t)\n153: ;\n154: \n155: CustomerSupplierRelationship:\n156: \t(\n157: \t\t(\n158: \t\t\t(upstream = [BoundedContext] '['('U'',')?'S'(','(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']' '->' '['('D'',')?'C'(','(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']' downstream = [BoundedContext]) |\n159: \t\t\t(downstream = [BoundedContext] '['('D'',')?'C'(','(downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']' '<-' '['('U'',')?'S'(','(upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']' upstream = [BoundedContext]) |\n160: \t\t\t(downstream = [BoundedContext] ('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')?'Customer-Supplier'('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')? upstream = [BoundedContext]) |\n161: \t\t\t(upstream = [BoundedContext] ('['((upstreamRoles+=UpstreamRole) (\",\" upstreamRoles+=UpstreamRole)*)?']')?'Supplier-Customer'('['((downstreamRoles+=DownstreamRole) (\",\" downstreamRoles+=DownstreamRole)*)?']')? downstream = [BoundedContext])\n162: \t\t)\n163: \t\t(':' name=ID)?\n164: \t\t(OPEN ("
+            },
+            {
+              "start_line": 489,
+              "end_line": 492,
+              "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext#L489-L492",
+              "excerpt": "489: \n490: enum DownstreamRole:\n491: \tANTICORRUPTION_LAYER = 'ACL' | CONFORMIST = 'CF'\n492: ;"
+            }
+          ],
+          "license": {
+            "repo": "ContextMapper/context-mapper-dsl",
+            "path": "LICENSE",
+            "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+            "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:06:44.804849+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-mapper-dsl--LICENSE",
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions."
+          }
+        }
+      ],
+      "framework_category_constraint": "Separate Ways é uma decisão de limite e custo de integração. Context Mapper serve para estudar e registrar relações; não se encontrou um componente de runtime que implemente essa decisão automaticamente. Não se inventa uma exceção ao critério de framework: o papel da base é modelagem, e o código do produto prova a escolha aplicada.",
+      "application_sources": [
+        {
+          "kind": "FILE",
+          "repo": "bluesky-social/atproto",
+          "path": "packages/pds/src/api/com/atproto/repo/putRecord.ts",
+          "revision": "388dac9f7fdfa5ba8e4af08217b4afdc30d993ee",
+          "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/pds/src/api/com/atproto/repo/putRecord.ts",
+          "raw_url": "https://raw.githubusercontent.com/bluesky-social/atproto/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/pds/src/api/com/atproto/repo/putRecord.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:09:57.584137+00:00",
+          "sha256": "fbfd58999ea6478de156d409ce1bbfed598831b1981564f971dfec6eaafe56e2",
+          "line_count": 211,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-bluesky-social--atproto--packages--pds--src--api--com--atproto--repo--putRecord.ts",
+          "claim": "O PDS recebe registros por coleção e resolve/autentica a identidade do repositório pelo DID.",
+          "evidence": [
+            {
+              "start_line": 59,
+              "end_line": 82,
+              "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/pds/src/api/com/atproto/repo/putRecord.ts#L59-L82",
+              "excerpt": "59:     handler: async ({ auth, input }) => {\n60:       const {\n61:         repo,\n62:         collection,\n63:         rkey,\n64:         record,\n65:         validate,\n66:         swapCommit,\n67:         swapRecord,\n68:       } = input.body\n69: \n70:       const account = await ctx.authVerifier.findAccount(repo, {\n71:         checkDeactivated: true,\n72:         checkTakedown: true,\n73:       })\n74: \n75:       const did = account.did\n76:       if (did !== auth.credentials.did) {\n77:         throw new AuthRequiredError()\n78:       }\n79: \n80:       // We can't compute permissions based on the request payload (\"input\") in\n81:       // the 'auth' phase, so we do it here.\n82:       if (auth.credentials.type === 'oauth') {"
+            },
+            {
+              "start_line": 115,
+              "end_line": 143,
+              "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/pds/src/api/com/atproto/repo/putRecord.ts#L115-L143",
+              "excerpt": "115:             validate,\n116:           }\n117: \n118:           let write: PreparedCreate | PreparedUpdate\n119:           try {\n120:             write = isUpdate\n121:               ? await prepareUpdate(writeInfo)\n122:               : await prepareCreate(writeInfo)\n123:           } catch (err) {\n124:             if (err instanceof InvalidRecordError) {\n125:               throw new InvalidRequestError(err.message)\n126:             }\n127:             throw err\n128:           }\n129: \n130:           // no-op\n131:           if (current && current.cid === write.cid.toString()) {\n132:             return {\n133:               commit: null,\n134:               write,\n135:             }\n136:           }\n137: \n138:           const commit = await actorTxn.repo\n139:             .processWrites([write], swapCommitCid)\n140:             .catch((err) => {\n141:               if (\n142:                 err instanceof BadCommitSwapError ||\n143:                 err instanceof BadRecordSwapError"
+            }
+          ],
+          "license": {
+            "repo": "bluesky-social/atproto",
+            "path": "LICENSE.txt",
+            "revision": "388dac9f7fdfa5ba8e4af08217b4afdc30d993ee",
+            "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/LICENSE.txt",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:11:07.324986+00:00",
+            "sha256": "6187b4a0ac575f87358486c3aafcfbe08148e012ef76a2f6c6ea58f661703285",
+            "line_count": 7,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-bluesky-social--atproto--LICENSE.txt",
+            "status": "READ",
+            "spdx": "MIT OR Apache-2.0",
+            "excerpt": "Dual MIT/Apache-2.0 License\n\nCopyright (c) 2022-2026 Bluesky Social PBC, and Contributors\n\nExcept as otherwise noted in individual files, this software is licensed under the MIT license (<http://opensource.org/licenses/MIT>), or the Apache License, Version 2.0 (<http://www.apache.org/licenses/LICENSE-2.0>).\n\nDownstream projects and end users may chose either license individually, or both together, at their discretion. The motivation for this dual-licensing is the additional software patent assurance provided by Apache 2.0."
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "bluesky-social/atproto",
+          "path": "packages/repo/src/repo.ts",
+          "revision": "388dac9f7fdfa5ba8e4af08217b4afdc30d993ee",
+          "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/repo/src/repo.ts",
+          "raw_url": "https://raw.githubusercontent.com/bluesky-social/atproto/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/repo/src/repo.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:09:57.584121+00:00",
+          "sha256": "ce4f38dcbb0691584f9e97dd907ddb21173461d140cf85d19143e5657e4834fa",
+          "line_count": 236,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-bluesky-social--atproto--packages--repo--src--repo.ts",
+          "claim": "O modelo nativo gera repositórios e commits assinados associados ao DID.",
+          "evidence": [
+            {
+              "start_line": 37,
+              "end_line": 69,
+              "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/repo/src/repo.ts#L37-L69",
+              "excerpt": "37:   static async formatInitCommit(\n38:     storage: RepoStorage,\n39:     did: string,\n40:     keypair: crypto.Keypair,\n41:     initialWrites: RecordCreateOp[] = [],\n42:     revOverride?: string,\n43:   ): Promise<CommitData> {\n44:     const newBlocks = new BlockMap()\n45: \n46:     let data = await MST.create(storage)\n47:     for (const record of initialWrites) {\n48:       const cid = await newBlocks.add(record.record)\n49:       const dataKey = util.formatDataKey(record.collection, record.rkey)\n50:       data = await data.add(dataKey, cid)\n51:     }\n52:     const dataCid = await data.getPointer()\n53:     const diff = await DataDiff.of(data, null)\n54:     newBlocks.addMap(diff.newMstBlocks)\n55: \n56:     const rev = revOverride ?? TID.nextStr()\n57:     const commit = await util.signCommit(\n58:       {\n59:         did,\n60:         version: 3,\n61:         rev,\n62:         prev: null, // added for backwards compatibility with v2\n63:         data: dataCid,\n64:       },\n65:       keypair,\n66:     )\n67:     const commitCid = await newBlocks.add(commit)\n68:     return {\n69:       cid: commitCid,"
+            },
+            {
+              "start_line": 158,
+              "end_line": 174,
+              "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/repo/src/repo.ts#L158-L174",
+              "excerpt": "158:     newBlocks.addMap(addedLeaves.blocks)\n159:     relevantBlocks.addMap(addedLeaves.blocks)\n160: \n161:     const rev = TID.nextStr(this.commit.rev)\n162:     const commit = await util.signCommit(\n163:       {\n164:         did: this.did,\n165:         version: 3,\n166:         rev,\n167:         prev: null, // added for backwards compatibility with v2\n168:         data: dataCid,\n169:       },\n170:       keypair,\n171:     )\n172: \n173:     const commitBytes = encode(commit)\n174:     const commitCid = await cidForCbor(commitBytes)"
+            }
+          ],
+          "license": {
+            "repo": "bluesky-social/atproto",
+            "path": "LICENSE.txt",
+            "revision": "388dac9f7fdfa5ba8e4af08217b4afdc30d993ee",
+            "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/LICENSE.txt",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:11:07.324986+00:00",
+            "sha256": "6187b4a0ac575f87358486c3aafcfbe08148e012ef76a2f6c6ea58f661703285",
+            "line_count": 7,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-bluesky-social--atproto--LICENSE.txt",
+            "status": "READ",
+            "spdx": "MIT OR Apache-2.0",
+            "excerpt": "Dual MIT/Apache-2.0 License\n\nCopyright (c) 2022-2026 Bluesky Social PBC, and Contributors\n\nExcept as otherwise noted in individual files, this software is licensed under the MIT license (<http://opensource.org/licenses/MIT>), or the Apache License, Version 2.0 (<http://www.apache.org/licenses/LICENSE-2.0>).\n\nDownstream projects and end users may chose either license individually, or both together, at their discretion. The motivation for this dual-licensing is the additional software patent assurance provided by Apache 2.0."
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/lib/activitypub/activity.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:09:57.588052+00:00",
+          "sha256": "4f36787a794cebc6d719b0aa9177327c711a26f0a1e5382fac43494d1c9eedbb",
+          "line_count": 192,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-mastodon--mastodon--app--lib--activitypub--activity.rb",
+          "claim": "O outro produto interpreta tipos de atividades e seus objetos no modelo ActivityPub.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 16,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity.rb#L1-L16",
+              "excerpt": "1: # frozen_string_literal: true\n2: \n3: class ActivityPub::Activity\n4:   include JsonLdHelper\n5:   include Redisable\n6:   include Lockable\n7: \n8:   MAX_JSON_SIZE = 1.megabyte\n9:   SUPPORTED_TYPES = %w(Note Question).freeze\n10:   CONVERTED_TYPES = %w(Image Audio Video Article Page Event).freeze\n11: \n12:   def initialize(json, account, **options)\n13:     @json    = json\n14:     @account = account\n15:     @object  = @json['object']\n16:     @options = options"
+            },
+            {
+              "start_line": 23,
+              "end_line": 45,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity.rb#L23-L45",
+              "excerpt": "23:   class << self\n24:     def factory(json, account, **)\n25:       klass_for(json)&.new(json, account, **)\n26:     end\n27: \n28:     private\n29: \n30:     def klass_for(json)\n31:       case json['type']\n32:       when 'Create'\n33:         ActivityPub::Activity::Create\n34:       when 'Announce'\n35:         ActivityPub::Activity::Announce\n36:       when 'Delete'\n37:         ActivityPub::Activity::Delete\n38:       when 'Follow'\n39:         ActivityPub::Activity::Follow\n40:       when 'Like'\n41:         ActivityPub::Activity::Like\n42:       when 'Block'\n43:         ActivityPub::Activity::Block\n44:       when 'Update'\n45:         ActivityPub::Activity::Update"
+            }
+          ],
+          "license": {
+            "repo": "mastodon/mastodon",
+            "path": "LICENSE",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:09:57.583504+00:00",
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-mastodon--mastodon--LICENSE",
+            "status": "READ",
+            "spdx": "AGPL-3.0-or-later",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/lib/activitypub/activity/create.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/create.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/create.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:09:57.583675+00:00",
+          "sha256": "e859f35398cb736f2b5e1de178c19abac6447175b76e76bc504b0ad908876222",
+          "line_count": 508,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-mastodon--mastodon--app--lib--activitypub--activity--create.rb",
+          "claim": "O caminho de criação processa a atividade e interpreta o ator e o objeto nativos desse contexto.",
+          "evidence": [
+            {
+              "start_line": 3,
+              "end_line": 27,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/create.rb#L3-L27",
+              "excerpt": "3: class ActivityPub::Activity::Create < ActivityPub::Activity\n4:   DISTRIBUTE_DELAY = 1.minute\n5:   PROCESSING_DELAY = (30.seconds)..(10.minutes)\n6: \n7:   def perform\n8:     @account.schedule_refresh_if_stale!\n9: \n10:     dereference_object!\n11: \n12:     create_status\n13:   end\n14: \n15:   private\n16: \n17:   def create_status\n18:     return reject_payload! if unsupported_object_type? || non_matching_uri_hosts?(@account.uri, object_uri) || tombstone_exists?\n19: \n20:     @status_parser = ActivityPub::Parser::StatusParser.new(\n21:       @json,\n22:       followers_collection: @account.followers_url,\n23:       following_collection: @account.following_url,\n24:       actor_uri: ActivityPub::TagManager.instance.uri_for(@account),\n25:       object: @object\n26:     )\n27: "
+            }
+          ],
+          "license": {
+            "repo": "mastodon/mastodon",
+            "path": "LICENSE",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:09:57.583504+00:00",
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-mastodon--mastodon--LICENSE",
+            "status": "READ",
+            "spdx": "AGPL-3.0-or-later",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "package.json",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/package.json",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/package.json",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:10:21.207966+00:00",
+          "sha256": "b9c959e38beca12354b7be4df1051ffcaae34b044e3f4117facb2755e0a6f5b7",
+          "line_count": 206,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-mastodon--mastodon--package.json",
+          "claim": "O manifesto fixa a declaração AGPL-3.0-or-later, complementando o texto integral da licença lido.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 12,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/package.json#L1-L12",
+              "excerpt": "1: {\n2:   \"name\": \"@mastodon/mastodon\",\n3:   \"license\": \"AGPL-3.0-or-later\",\n4:   \"packageManager\": \"yarn@4.18.1\",\n5:   \"engines\": {\n6:     \"node\": \">=22\"\n7:   },\n8:   \"workspaces\": [\n9:     \".\",\n10:     \"streaming\"\n11:   ],\n12:   \"scripts\": {"
+            }
+          ],
+          "license": {
+            "repo": "mastodon/mastodon",
+            "path": "LICENSE",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:09:57.583504+00:00",
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-mastodon--mastodon--LICENSE",
+            "status": "READ",
+            "spdx": "AGPL-3.0-or-later",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        }
+      ],
+      "published_decision": {
+        "url": "https://atproto.com/guides/faq",
+        "http_status": 200,
+        "observed_utc": "2026-10-15T02:09:58.152435+00:00",
+        "sha256": "b9cf873aed187f3ef07dc2e8b5bc26384a6d94e895d0c8715f931c1f702f9643",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-atproto-separate-protocol-decision.html",
+        "claim": "A decisão oficial identifica ActivityPub, explica o custo de adaptar o modelo e escolhe o protocolo separado.",
+        "text_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-atproto-separate-protocol-decision.txt",
+        "evidence": [
+          {
+            "text_start_line": 69,
+            "text_end_line": 85,
+            "excerpt": "69: Why not use ActivityPub?\n70: ActivityPub\n71: is a federated social networking technology popularized by\n72: Mastodon\n73: .\n74: Account portability is a major reason why we chose to build a separate protocol. We consider portability to be crucial because it protects users from sudden bans, server shutdowns, and policy disagreements. Our solution for portability requires both\n75: signed data repositories\n76: and\n77: DIDs\n78: , neither of which are easy to retrofit into ActivityPub. The migration tools for ActivityPub are comparatively limited; they require the original server to provide a redirect and cannot migrate the user's previous data.\n79: Another major reason is scalability. ActivityPub depends heavily on delivering messages between a wide network of small-to-medium sized nodes, which can cause individual nodes to be flooded with traffic and generally struggles to provide global views of activity. The AT Protocol uses aggregating applications to merge activity from the users' hosts, reducing the overall traffic and dramatically reducing the load on individual hosts.\n80: Other smaller differences include: a different viewpoint about how schemas should be handled, a preference for domain usernames over AP's double-@ email usernames, and the goal of having large scale search and algorithmic feeds.\n81: Why create Lexicon instead of using JSON-LD or RDF?\n82: Atproto exchanges data and RPC commands across organizations. For the data and RPC to be useful, the software needs to correctly handle schemas created by separate teams. This is the purpose of\n83: Lexicon\n84: .\n85: We want engineers to feel comfortable using and creating new schemas, and we want developers to enjoy the DX of the system. Lexicon helps us produce strongly typed APIs which are extremely familiar to developers and which provides a variety of runtime correctness checks."
+          }
+        ]
+      },
+      "canonical_reference": {
+        "url": "https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf",
+        "observed_utc": "2026-10-15T02:09:00.090962+00:00",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-evans-reference.pdf",
+        "sha256": "cf82dc7b4736bb24f4a1b69a3213c25cbd38aa98e37b99c2facfb94ff5cacb99",
+        "text_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-evans-reference.txt",
+        "printed_pages": [
+          37
+        ],
+        "summary": "Separate Ways escolhe independência quando a integração acrescenta custo maior que seu benefício, em vez de supor que todo domínio deve ser integrado.",
+        "observation_scope": "Arquivo primário obtido nesta investigação; o hash identifica os bytes locais consultados."
+      }
+    }
+  ],
+  "summary": {
+    "recommended_source_matches": 2,
+    "kept_pending_with_primary_evidence": 2
+  },
+  "write_scope": "Somente execution/curation/rare-support/ddd*; nenhum MDX, matriz ou seleção do curador foi alterado."
+}

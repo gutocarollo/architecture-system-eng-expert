@@ -1,0 +1,13 @@
+{
+  "repo": "apache/hadoop",
+  "revision": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+  "path": "hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAContext.java",
+  "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAContext.java",
+  "raw_url": "https://raw.githubusercontent.com/apache/hadoop/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAContext.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--ha--HAContext.java",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:05.014095+00:00",
+  "sha256": "1e3dc2782a21549a196549bc686a2cf7733f1fa176912689ec4acb0372fc15b9",
+  "line_count": 86
+}

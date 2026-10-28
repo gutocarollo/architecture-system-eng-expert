@@ -1,0 +1,23 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/05-banco-de-dados-e-armazenamento",
+  "document_sha256": "7a1b0ab4b2c6d6c92dcb417b87d927eded00417be45052662462b957ab718d12",
+  "context_sha256": "5bf3775332c512f03135482f87ba414b23ee24c02949bb81d010a36c2d811e66",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "bootstrap",
+    "inflow-query",
+    "l4c",
+    "l6a",
+    "original-catalog",
+    "original-request",
+    "s4",
+    "s4-reference-repair",
+    "s6",
+    "s6-reference-repair"
+  ]
+}

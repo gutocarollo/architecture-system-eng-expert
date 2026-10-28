@@ -1,0 +1,26 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "guias/recuperar-pipeline",
+  "document_sha256": "b7bebd9830f6e0f0d155a6c29bb4f980aa68b3f9a10ef4a3dc0b01f296207bd6",
+  "context_sha256": "836a98862fcf414b73177311b78826eeddab583b771f57f61d3f8b35bd6e1d68",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "bootstrap",
+    "guide-minio-columns",
+    "guide-minio-lineage",
+    "guide-minio-readback",
+    "l3a",
+    "l3b",
+    "l3c",
+    "l6a",
+    "original-catalog",
+    "original-request",
+    "s3",
+    "s4",
+    "s6"
+  ]
+}

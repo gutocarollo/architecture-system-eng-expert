@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant A as Leitor A
+    participant B as Leitores B a E
+    participant C as Cache single-flight
+    participant P as Produtor local
+    A->>C: pede dado
+    B->>C: pedem o mesmo dado
+    C->>P: inicia uma busca
+    A--xC: cancela somente A
+    P-->>C: rows-1
+    C-->>B: compartilha rows-1
+    Note over C: janela antecipada, valor ainda válido
+    C->>P: renova em segundo plano
+    C-->>B: devolve rows-1 sem esperar
+    P-->>C: rows-2

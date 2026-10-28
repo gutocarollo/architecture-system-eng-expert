@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant T as Transação
+    participant W as Registro WAL
+    participant D as Páginas de dados
+    T->>W: Registra alterações conforme a política de durabilidade
+    W->>W: Persiste registros necessários
+    alt Páginas atualizadas sem queda
+        W->>D: Permite persistir páginas alteradas
+    else Queda antes de concluir as páginas
+        Note over W,D: Na recuperação, registros podem ser reaplicados
+        W->>D: Recupera alterações cobertas pelo log
+    end

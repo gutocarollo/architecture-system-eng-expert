@@ -1,0 +1,94 @@
+{
+  "reviewer": "/root/diagram_semantics_one",
+  "route": "WARM_REUSE",
+  "model": "gpt-6.1-sol",
+  "effort": "xhigh",
+  "scope": "Only the HIGH D72-DIRECT-EDGE; first and only warm recheck. The other 45 judgments and Medium 42/94 were not reopened.",
+  "reviewed_at_utc": "2026-10-15T18:39:15.377276+00:00",
+  "source_root_HEAD": "623ae1d3d34143df53c571327a508de47ab58951",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "verdict": "PASS_BOUNDED",
+  "high_open_in_lane": 0,
+  "item": {
+    "id": "diagram-72",
+    "status": "PASS_BOUNDED",
+    "document": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+    "previous_documentSHA": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+    "current_documentSHA": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+    "previous_bodySHA": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+    "current_bodySHA": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1",
+    "exact_hunk": "- Model --> Ranking[dbt.fct_ranking]\n+ Dashboard --> Ranking[dbt.fct_ranking]",
+    "only_requested_document_delta": true,
+    "source_receipt": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one-graph-primary.json",
+      "sha256": "7cfe6e8a3dbe814ffd6858b04a7883047d6a9339be9f72430a57104efac4b5c5",
+      "delta": "none; reused the exact existing primary receipt without any new source measurement",
+      "snapshot_graph_mtime_utc": "2026-10-13T03:08:04+00:00",
+      "literal_evidence": "- dbt.fct_advisor_dashboard → dbt.fct_ranking  (via dbt:fct_ranking)"
+    },
+    "render": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-3.png",
+      "sha256": "b9f87f91474d94ff6ba8750a4e30e60642eea1796a97096ea3e2639daba4981d",
+      "visually_inspected": true,
+      "judgment": "O PNG mostra captação para dashboard e dashboard para ranking; rótulos e direções são legíveis."
+    },
+    "syntax_receipt": {
+      "status": "PASS",
+      "tool": "mermaid.parse",
+      "version": "11.17.2",
+      "source_sha256": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1"
+    },
+    "rationale": "A aresta reparada corresponde ao caminho que o snapshot primário devolveu: fct_captacao alimenta fct_advisor_dashboard, e este alimenta fct_ranking. A figura atual preserva essa etapa.",
+    "limit": "O parecer certifica a representação desse snapshot e desse hunk; não certifica execução de DAG, deploy, frescor dos dados ou estado de produção atual."
+  },
+  "deterministic_doc_rebinds": [
+    {
+      "id": "diagram-70",
+      "fence_index": 1,
+      "body_unchanged": true,
+      "bodySHA": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+      "previous_documentSHA": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "current_documentSHA": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "semantic_judgment_reopened": false,
+      "operation": "deterministic document-hash rebind only; preserve prior owner and judgment"
+    },
+    {
+      "id": "diagram-71",
+      "fence_index": 2,
+      "body_unchanged": true,
+      "bodySHA": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe",
+      "previous_documentSHA": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "current_documentSHA": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "semantic_judgment_reopened": false,
+      "operation": "deterministic document-hash rebind only; preserve prior owner and judgment"
+    },
+    {
+      "id": "diagram-73",
+      "fence_index": 4,
+      "body_unchanged": true,
+      "bodySHA": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
+      "previous_documentSHA": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "current_documentSHA": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "semantic_judgment_reopened": false,
+      "operation": "deterministic document-hash rebind only; preserve prior owner and judgment"
+    }
+  ],
+  "repair_receipt": {
+    "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-repair-receipt.json",
+    "sha256": "35a5748e15e5ae57fd363646bdf1b3beb18f4aa923211f86cca04655500b8f4f"
+  },
+  "renderer_receipt": {
+    "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/mermaid-semantic-repairs.json",
+    "sha256": "8126326abbd0c9527c39315ae3d3f912abe4063ce62f076e0ea5361e85d81543"
+  },
+  "prior_first_pass_receipt": {
+    "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one.json",
+    "sha256": "940047d35ba4a9e566cee0b47767df6ed0f516243025e4e92a11421593318d20",
+    "operation": "preserved as the historical first-pass finding; this delta closes D72-DIRECT-EDGE"
+  },
+  "backlog_preserved": [
+    "D42-LABELS",
+    "D94-LABELS"
+  ],
+  "stop": "The authorized HIGH-only warm recheck is complete; park this reviewer."
+}

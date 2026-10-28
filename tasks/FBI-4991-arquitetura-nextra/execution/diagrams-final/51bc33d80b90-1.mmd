@@ -1,0 +1,11 @@
+flowchart TD
+    Request[Pedido fictício com data e horário] --> Active{Cadastro permite atender?}
+    Active -->|Não| RegistrationRefusal[Explicar a condição cadastral]
+    Active -->|Sim| Eligible{Regra do caso permite atender?}
+    Eligible -->|Não| EligibilityRefusal[Explicar a regra do caso]
+    Eligible -->|Sim| Available{Horário está disponível?}
+    Available -->|Não| SlotRefusal[Solicitar outro horário]
+    Available -->|Sim| Concurrency[Confirmar a proteção da reserva]
+    Concurrency --> Result{Reserva aceita?}
+    Result -->|Não| Refresh[Atualizar disponibilidade e permitir nova escolha]
+    Result -->|Sim| Intent[Registrar a intenção confirmada]

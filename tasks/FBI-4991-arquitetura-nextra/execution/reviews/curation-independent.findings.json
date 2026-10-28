@@ -1,0 +1,988 @@
+{
+  "verdict": "REPAIR",
+  "matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "assigned_concepts": 183,
+  "material_high_concepts": 20,
+  "findings": [
+    {
+      "finding_id": "CUR-H01",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "anti-corruption-layer",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx:155",
+        "requirement": "A boundary translates external model meaning into local domain meaning."
+      },
+      "evidence": {
+        "mechanism_claim": "Immich declara a separação entre repositórios e serviços como uso de Hexagonal e mostra essa separação no código.",
+        "limits_claim": "O documento declara adoção parcial de Hexagonal. Essa evidência não fecha Clean Architecture, Onion nem uma ACL semântica; esses conceitos exigem limites e tradução adicionais.",
+        "primary_sources": [
+          {
+            "repo": "immich-app/immich",
+            "path": "docs/docs/developer/architecture.mdx",
+            "revision": "2a8f8324e43487f29fd475832107f279da1c39c3",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/cb7134a19acfd6f2da600c07e6862253b4f0e109a5f384a0ff11e271e47e3412.txt"
+          },
+          {
+            "repo": "immich-app/immich",
+            "path": "server/src/repositories/user.repository.ts",
+            "revision": "2a8f8324e43487f29fd475832107f279da1c39c3",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c1b6c862c4c44e93557886716cb9c0ad0567d121c78407fcf1489f6907be772b.txt"
+          },
+          {
+            "repo": "immich-app/immich",
+            "path": "server/src/services/user.service.ts",
+            "revision": "2a8f8324e43487f29fd475832107f279da1c39c3",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/064f281522b56cc5d370eab1e447b271fa63484638bb3af5744bdce712b2a900.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/cb7134a19acfd6f2da600c07e6862253b4f0e109a5f384a0ff11e271e47e3412.txt",
+            "sha256": "e8e7197b68c57afc44e45c68de675c8f70a6bd19fb93e86d9032a05cb18e230e",
+            "revision": "2a8f8324e43487f29fd475832107f279da1c39c3",
+            "start_line": 57,
+            "end_line": 74,
+            "source_url": "https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/docs/docs/developer/architecture.mdx#L57-L74",
+            "literal_excerpt": "\n### Immich Server\n\nThe Immich Server is a [TypeScript](https://www.typescriptlang.org/) project written for [Node.js](https://nodejs.org/). It uses the [Nest.js](https://nestjs.com) framework, [Express](https://expressjs.com/) server, and the query builder [Kysely](https://kysely.dev/). The server codebase also loosely follows the [Hexagonal Architecture](<https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)>). Specifically, we aim to separate technology specific implementations (`src/repositories`) from core business logic (`src/services`).\n\n### API Endpoints\n\nAn incoming HTTP request is mapped to a controller (`src/controllers`). Controllers are collections of HTTP endpoints. Each controller usually implements the following CRUD operations for its respective resource type:\n\n- `POST` `/<type>` - **Create**\n- `GET` `/<type>` - **Read** (all)\n- `GET` `/<type>/:id` - **Read** (by id)\n- `PUT` `/<type>/:id` - **Updated** (by id)\n- `DELETE` `/<type>/:id` - **Delete** (by id)\n\n### Domain Transfer Objects (DTOs)\n\nThe server uses [Domain Transfer Objects](https://en.wikipedia.org/wiki/Data_transfer_object) as public interfaces for the inputs (query, params, and body) and outputs (response) for each endpoint. DTOs translate to [OpenAPI](/api.md) schemas and control the generated code used by each client.",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/064f281522b56cc5d370eab1e447b271fa63484638bb3af5744bdce712b2a900.txt",
+            "sha256": "4d7339b2ed6c711810ad50040927a829359755c50a488a9d2ec439560ff3ff9f",
+            "revision": "2a8f8324e43487f29fd475832107f279da1c39c3",
+            "start_line": 37,
+            "end_line": 54,
+            "source_url": "https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/server/src/services/user.service.ts#L37-L54",
+            "literal_excerpt": "      users = authUser ? [authUser] : [];\n    }\n\n    return users.map((user) => mapUser(user));\n  }\n\n  async getMe(auth: AuthDto): Promise<UserAdminResponseDto> {\n    const user = await this.userRepository.get(auth.user.id, {});\n    if (!user) {\n      throw new BadRequestException('User not found');\n    }\n\n    return mapUserAdmin(user);\n  }\n\n  getCalendarHeatmap(auth: AuthDto, dto: CalendarHeatmapDto): Promise<CalendarHeatmapResponseDto> {\n    return getCalendarHeatmap(auth.user.id, dto, { asset: this.assetRepository });\n  }",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Immich repository/service separation proves an adapter boundary; selected flow lacks semantic translation from external model. Limits explicitly say ACL not closed.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:21:59.212265+00:00"
+    },
+    {
+      "finding_id": "CUR-H02",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "at-least-once-delivery",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+        "requirement": "Acknowledgement and redelivery of unacknowledged messages, distinct from broker deduplication."
+      },
+      "evidence": {
+        "mechanism_claim": "Pulsar acompanha sequências de mensagens e conserva o progresso de deduplicação; Kafka fornece a base comparada de transação e produtor idempotente.",
+        "limits_claim": "Deduplicação do broker não prova inbox transacional nem exactly once sobre efeitos no banco externo. Esses dois conceitos permanecem pendentes até localizar a fronteira transacional do consumidor.",
+        "primary_sources": [
+          {
+            "repo": "apache/pulsar",
+            "path": "pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/MessageDeduplication.java",
+            "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/53bd1fe2e5b47f222f367fd394fdafab0388408c1d8f20fbb6254b98a2ccd24e.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/53bd1fe2e5b47f222f367fd394fdafab0388408c1d8f20fbb6254b98a2ccd24e.txt",
+            "sha256": "deb8a174cebcf289a7f44f6fb612c491a03a24bc7dac2416e7a9085c53ddf7a0",
+            "revision": "7ddf52beef98fec691802ef90334d9c5ed375816",
+            "start_line": 50,
+            "end_line": 67,
+            "source_url": "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/MessageDeduplication.java#L50-L67",
+            "literal_excerpt": "import org.apache.pulsar.common.protocol.Markers;\n\n/**\n * Class that contains all the logic to control and perform the deduplication on the broker side.\n */\npublic class MessageDeduplication {\n\n    private static final Logger LOG = Logger.get(MessageDeduplication.class);\n    private final Logger log;\n\n    private final PulsarService pulsar;\n    private final PersistentTopic topic;\n    private final ManagedLedger managedLedger;\n    private final ManagedLedgerReplayTask replayTask;\n    private ManagedCursor managedCursor;\n\n    private static final String IS_LAST_CHUNK = \"isLastChunk\";\n",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Pulsar selected file implements producer-side/broker deduplication, not consumer acknowledgement and redelivery. At-least-once delivery is not proved.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:21:59.212406+00:00"
+    },
+    {
+      "finding_id": "CUR-H03",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "circuit-breaker",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/07-resiliencia.mdx:43",
+        "requirement": "Failure-dependent refusal and recovery policy are distinct from resource budgets."
+      },
+      "evidence": {
+        "mechanism_claim": "A base mantém os estados do circuit breaker. Envoy mantém orçamentos de recursos por cluster para impedir admissão acima da capacidade.",
+        "limits_claim": "O circuit breaker Resilience4j reage a resultados; circuit breaking Envoy limita recursos. Uma comparação exige conservar essa diferença. Bulkhead completo exige provar a separação de pools por cluster.",
+        "primary_sources": [
+          {
+            "repo": "envoyproxy/envoy",
+            "path": "source/common/upstream/upstream_impl.cc",
+            "revision": "960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d955d28cf4ba358bd98f1bd7993c4b35e13710f54c1b9d449618cd36b1524379.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d955d28cf4ba358bd98f1bd7993c4b35e13710f54c1b9d449618cd36b1524379.txt",
+            "sha256": "072212fcb19253ec031e7d9c9314277e2388f3dcfa10e77be85fffe071c738c7",
+            "revision": "960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1",
+            "start_line": 2330,
+            "end_line": 2347,
+            "source_url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/upstream_impl.cc#L2330-L2347",
+            "literal_excerpt": "                                        Runtime::Loader& runtime, const std::string& cluster_name,\n                                        Stats::Scope& stats_scope,\n                                        const envoy::config::core::v3::RoutingPriority& priority) {\n  uint64_t max_connections = 1024;\n  uint64_t max_pending_requests = 1024;\n  uint64_t max_requests = 1024;\n  uint64_t max_retries = 3;\n  uint64_t max_connection_pools = std::numeric_limits<uint64_t>::max();\n  uint64_t max_connections_per_host = std::numeric_limits<uint64_t>::max();\n\n  bool track_remaining = false;\n\n  Stats::StatName priority_stat_name;\n  std::string priority_name;\n  switch (priority) {\n    PANIC_ON_PROTO_ENUM_SENTINEL_VALUES;\n  case envoy::config::core::v3::DEFAULT:\n    priority_stat_name = circuit_breakers_stat_names_.default_;",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Catalog requires failure/recovery policy. Selected Envoy file constructs capacity budgets, not failure-triggered open/half-open recovery. Resilience4j base is correct but no selected real app consumes that failure-state mechanism. Captured Mastodon Stoplight path may be reused.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:40:56.174135+00:00"
+    },
+    {
+      "finding_id": "CUR-H04",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "compensating-transaction",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+        "requirement": "A concrete completed effect is counteracted by a subsequent semantic action."
+      },
+      "evidence": {
+        "mechanism_claim": "O fluxo de criação de ordem Medusa compõe etapas e o SDK registra a ação de compensação de cada etapa. A classe Saga Temporal fornece uma implementação alternativa da pilha de compensações.",
+        "limits_claim": "Os mecanismos são comparados; Medusa usa seu próprio workflows SDK e não é descrito como consumidor de Temporal. A compensação é uma nova ação, sujeita a falha, não o apagamento do histórico.",
+        "primary_sources": [
+          {
+            "repo": "medusajs/medusa",
+            "path": "packages/core/workflows-sdk/src/utils/composer/create-step.ts",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c1bfbd83b8fb2f0ce2078af54e14ec0117ef4d7fd8d62141e0eaf9197c863b06.txt"
+          },
+          {
+            "repo": "medusajs/medusa",
+            "path": "packages/core/core-flows/src/order/workflows/create-order.ts",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/551e6e4a41ecdda6f2e46f5be8450233fc96c2dc8bf93896839d198d547d9142.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c1bfbd83b8fb2f0ce2078af54e14ec0117ef4d7fd8d62141e0eaf9197c863b06.txt",
+            "sha256": "f745406988dfbd94b1cd71b60022495538a67665d902fed5f82048c074215345",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "start_line": 181,
+            "end_line": 198,
+            "source_url": "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts#L181-L198",
+            "literal_excerpt": "    )\n\n    stepConfig.uuid = ulid()\n    stepConfig.noCompensation = !compensateFn\n\n    this.flow.addAction(stepName, stepConfig)\n\n    this.isAsync ||= !!(stepConfig.async || stepConfig.compensateAsync)\n\n    this.overriddenHandler.set(stepName, this.handlers.get(stepName)!)\n\n    this.handlers.set(stepName, handler)\n\n    const ret = {\n      __type: OrchestrationUtils.SymbolWorkflowStep,\n      __step__: stepName,\n    }\n",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/551e6e4a41ecdda6f2e46f5be8450233fc96c2dc8bf93896839d198d547d9142.txt",
+            "sha256": "45807b1684060c6144133aaa6d534ac8faae4fdb88ccbbc8b7ac60a7fe25a84a",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "start_line": 419,
+            "end_line": 436,
+            "source_url": "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts#L419-L436",
+            "literal_excerpt": "      }\n    )\n\n    const orders = createOrdersStep([orderToCreate])\n    const order = transform({ orders }, (data) => data.orders?.[0])\n\n    const appliedPromoCodes: string[] = transform(\n      input,\n      (order) => order.promo_codes ?? []\n    )\n\n    /**\n     * TODO: Currently need the refresh because when the order module creates the order, even though\n     * the totals are calculated, the order is being queried and without the totals. There is some\n     * point of discussion for improvements here down the line.\n     */\n    const { data: freshOrder } = useQueryGraphStep({\n      entity: \"orders\",",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected create-order workflow invokes createOrdersStep but its actual mutation/compensation callback is not selected. SDK createStep accepts optional compensateFn and marks noCompensation when absent. Registration capability alone does not prove that order flow compensates its effects. Captured Medusa inventory reservation callback is reusable if scope/prose/links change.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:40:56.174358+00:00"
+    },
+    {
+      "finding_id": "CUR-H05",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "consistent-hashing",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+        "requirement": "A key lookup against a consistent ring determines ownership; byte hashing alone is insufficient."
+      },
+      "evidence": {
+        "mechanism_claim": "Loki monta seu ring para distribuição de responsabilidade. A base xxhash fornece o hash usado como primitiva de comparação.",
+        "limits_claim": "Um hash não implementa consistent hashing sozinho. O ring e o caminho de lookup devem ser lidos em conjunto.",
+        "primary_sources": [
+          {
+            "repo": "grafana/loki",
+            "path": "pkg/util/ring/ringmanager.go",
+            "revision": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b85ada8130f1c074b77f5ad439af3a3673a129b649e38375fad711ae5ae5f481.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b85ada8130f1c074b77f5ad439af3a3673a129b649e38375fad711ae5ae5f481.txt",
+            "sha256": "10ab7793a07518ec74bd3ef8882b957a7ecfa795326183fd36e692ad37a3f77e",
+            "revision": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+            "start_line": 79,
+            "end_line": 96,
+            "source_url": "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/util/ring/ringmanager.go#L79-L96",
+            "literal_excerpt": "\n\t// instantiate ring for both mode modes.\n\tringCfg := rm.cfg.ToRingConfig(rf)\n\trm.Ring, err = ring.NewWithStoreClientAndStrategy(\n\t\tringCfg,\n\t\tname,\n\t\tname,\n\t\tringStore,\n\t\tring.NewIgnoreUnhealthyInstancesReplicationStrategy(),\n\t\tprometheus.WrapRegistererWithPrefix(\"loki_\", registerer),\n\t\trm.logger,\n\t)\n\tif err != nil {\n\t\treturn nil, errors.Wrapf(err, \"%s ring manager create ring client\", name)\n\t}\n\n\tswitch mode {\n\tcase ServerMode:",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Loki selected ring manager configures membership/tokens but shows no key-to-owner lookup, while xxhash base only hashes bytes. Own limits require lookup plus ring; selected evidence omits it.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:30:38.696044+00:00"
+    },
+    {
+      "finding_id": "CUR-H06",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "context-map",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx:165",
+        "requirement": "Contexts and their relationships/contracts are represented, beyond a namespace list."
+      },
+      "evidence": {
+        "mechanism_claim": "GitLab declara contextos de negócio e aplica uma regra de namespace sobre o código. Context Mapper fornece uma linguagem para modelar fronteiras e relações.",
+        "limits_claim": "A configuração e o cop provam uma fronteira nomeada. Eles não provam um monólito modular inteiro nem o processo de negociação do vocabulário; esses itens continuam delimitados na matriz.",
+        "primary_sources": [
+          {
+            "repo": "gitlabhq/gitlabhq",
+            "path": "config/bounded_contexts.yml",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/584bb74134ca8033785fa13b971bd8a53b83c5a0fee5fb3816e7a816eec0b07e.txt"
+          },
+          {
+            "repo": "gitlabhq/gitlabhq",
+            "path": "rubocop/cop/gitlab/bounded_contexts.rb",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/69e8acb197672f5cfc91bf652947fbf8fab22f7b8390b41147bca568ba0a8b09.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/584bb74134ca8033785fa13b971bd8a53b83c5a0fee5fb3816e7a816eec0b07e.txt",
+            "sha256": "6217440c8939715a115fcd916dd1c8e7744fa907dabba6e650182266233a48f0",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "start_line": 1,
+            "end_line": 16,
+            "source_url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/config/bounded_contexts.yml#L1-L16",
+            "literal_excerpt": "###\n# This file defines the list of bounded contexts in the domain layer and platform layer.\n# Bounded contexts are represented in the form of Ruby namespaces.\n# Only the defined bounded contexts are allowed.\n#\n# Application layer (controllers, REST endpoints) and view layer are exempt from having\n# to use this list.\n#\n# New bounded contexts can be registered in this file if:\n#   - a new product domain is emerging.\n#   - an existing domain is split into smaller ones.\n#   - a platform library (under `lib`) cannot be directly extracted as gem.\n#     We can opt for allowlisting the domain.\n#\n# Similarly, we can remove entries from this list if:\n#   - a domain is merged into another one.",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "GitLab bounded_contexts.yml enumerates namespaces; cop enforces namespace membership. Neither records relationships/contract between contexts required by catalog definition.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:21:59.212417+00:00"
+    },
+    {
+      "finding_id": "CUR-H07",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "denormalization",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx:339",
+        "requirement": "Stored/repeated read representation has maintenance and freshness, not simply a current query aggregate."
+      },
+      "evidence": {
+        "mechanism_claim": "PostgreSQL materializa e atualiza resultados; Druid agrega os registros para obter uma representação de consulta.",
+        "limits_claim": "Pré cálculo e desnormalização não são sinônimos de qualquer agregado. A aplicação e a base oferecem mecanismos comparáveis com manutenção e frescor distintos.",
+        "primary_sources": [
+          {
+            "repo": "apache/druid",
+            "path": "processing/src/main/java/org/apache/druid/query/groupby/epinephelinae/GroupByQueryEngine.java",
+            "revision": "b4b0fe5789d285157fdf2010821ae7bcadf8c2f1",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/99075d7b7ea27bd8f8768a814f8d1c65188660b48d46a54bba3820bd2a9b732d.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/99075d7b7ea27bd8f8768a814f8d1c65188660b48d46a54bba3820bd2a9b732d.txt",
+            "sha256": "9c56cc3507402a64d8c4af05f19831918530e99bc493c9d539bff26a46df5b3a",
+            "revision": "b4b0fe5789d285157fdf2010821ae7bcadf8c2f1",
+            "start_line": 93,
+            "end_line": 110,
+            "source_url": "https://github.com/apache/druid/blob/b4b0fe5789d285157fdf2010821ae7bcadf8c2f1/processing/src/main/java/org/apache/druid/query/groupby/epinephelinae/GroupByQueryEngine.java#L93-L110",
+            "literal_excerpt": "    // No instantiation\n  }\n\n  public static Sequence<ResultRow> process(\n      final GroupByQuery query,\n      @Nullable final TimeBoundaryInspector timeBoundaryInspector,\n      final CursorHolder cursorHolder,\n      final CursorBuildSpec buildSpec,\n      final ByteBuffer processingBuffer,\n      @Nullable final DateTime fudgeTimestamp,\n      final GroupByQueryConfig querySpecificConfig,\n      final DruidProcessingConfig processingConfig\n  )\n  {\n    final Cursor cursor = cursorHolder.asCursor();\n    if (cursor == null) {\n      return Sequences.empty();\n    }",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Druid selected application runs GroupByQueryEngine.process for current query and returns Sequence<ResultRow>; no persisted/precomputed representation or denormalized model is selected. PG matview base may be reused with explicit actual product role.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:36:50.218451+00:00"
+    },
+    {
+      "finding_id": "CUR-H08",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "distributed-cache",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/06-cache.mdx:97",
+        "requirement": "A shared cache backend serves multiple processes or machines."
+      },
+      "evidence": {
+        "mechanism_claim": "Superset tenta obter o resultado no cache e executa a consulta quando precisa produzir um novo valor.",
+        "limits_claim": "A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.",
+        "primary_sources": [
+          {
+            "repo": "apache/superset",
+            "path": "superset/common/query_context_processor.py",
+            "revision": "54d2421ded3572dc2ae328b7d4fd698acec48c11",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4862a886ac0620ec74309106a28e7ab1d3acb9a1cbdea660c990d502f317ed72.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4862a886ac0620ec74309106a28e7ab1d3acb9a1cbdea660c990d502f317ed72.txt",
+            "sha256": "4a44a642778a4065caa87bc5aeb6fdb5e01b79838a85d7bd6b41b50c4ff599ba",
+            "revision": "54d2421ded3572dc2ae328b7d4fd698acec48c11",
+            "start_line": 285,
+            "end_line": 302,
+            "source_url": "https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/common/query_context_processor.py#L285-L302",
+            "literal_excerpt": "        query_planning_ns = max(0, time.perf_counter_ns() - query_planning_start_ns)\n\n        cache_resolution_start_ns = time.perf_counter_ns()\n        cache = QueryCacheManager.get(\n            key=cache_key,\n            region=CacheRegion.DATA,\n            force_query=force_query,\n            force_cached=force_cached,\n        )\n\n        # Entries without any filter reporting predate applied/rejected metadata.\n        # Rejected-only results are complete too (e.g. incompatible dashboard filters).\n        if (\n            query_obj\n            and cache_key\n            and cache.is_loaded\n            and not cache.applied_filter_columns\n            and not cache.rejected_filter_columns",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected Superset query processor has a configurable cache abstraction; no selected source establishes a shared cross-process backend. Catalog itself says backend was not confirmed.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:30:38.695907+00:00"
+    },
+    {
+      "finding_id": "CUR-H09",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "domain-service",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx:81",
+        "requirement": "A domain operation that does not naturally belong to an entity remains distinct from application orchestration."
+      },
+      "evidence": {
+        "mechanism_claim": "O empréstimo Fineract conserva identidade e comportamento sobre seus componentes; métodos do domínio validam e aplicam mudanças no empréstimo.",
+        "limits_claim": "JPA é base de persistência, não prova DDD sozinho. A fronteira do agregado é a entidade e seus métodos citados; uma transação entre serviços exige outra garantia.",
+        "primary_sources": [
+          {
+            "repo": "apache/fineract",
+            "path": "fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt",
+            "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "start_line": 89,
+            "end_line": 106,
+            "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L89-L106",
+            "literal_excerpt": "@Table(name = \"m_loan\", uniqueConstraints = { @UniqueConstraint(columnNames = { \"account_no\" }, name = \"loan_account_no_UNIQUE\"),\n        @UniqueConstraint(columnNames = { \"external_id\" }, name = \"loan_externalid_UNIQUE\") })\n@Getter\npublic class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {\n\n    public static final String RECALCULATE_LOAN_SCHEDULE = \"recalculateLoanSchedule\";\n    public static final String EXTERNAL_ID = \"externalId\";\n    public static final String DATE_FORMAT = \"dateFormat\";\n    public static final String LOCALE = \"locale\";\n    public static final String EXPECTED_DISBURSEMENT_DATE = \"expectedDisbursementDate\";\n    public static final String PARAM_STATUS = \"status\";\n    public static final String REJECTED_ON_DATE = \"rejectedOnDate\";\n    public static final String CLOSED_ON_DATE = \"closedOnDate\";\n    public static final String EVENT_DATE = \"eventDate\";\n    public static final String WITHDRAWN_ON_DATE = \"withdrawnOnDate\";\n    public static final String APPROVED_ON_DATE = \"approvedOnDate\";\n    public static final String ACTUAL_DISBURSEMENT_DATE = \"actualDisbursementDate\";\n    public static final String INTEREST = \"interest\";",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected Fineract Loan is the entity/aggregate itself. Its instance methods do not supply a domain operation outside entities required by catalog Domain Service.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:21:59.212424+00:00"
+    },
+    {
+      "finding_id": "CUR-H10",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "materialized-view",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx:49",
+        "requirement": "A defined query result is persisted and refreshed."
+      },
+      "evidence": {
+        "mechanism_claim": "PostgreSQL materializa e atualiza resultados; Druid agrega os registros para obter uma representação de consulta.",
+        "limits_claim": "Pré cálculo e desnormalização não são sinônimos de qualquer agregado. A aplicação e a base oferecem mecanismos comparáveis com manutenção e frescor distintos.",
+        "primary_sources": [
+          {
+            "repo": "apache/druid",
+            "path": "processing/src/main/java/org/apache/druid/query/groupby/epinephelinae/GroupByQueryEngine.java",
+            "revision": "b4b0fe5789d285157fdf2010821ae7bcadf8c2f1",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/99075d7b7ea27bd8f8768a814f8d1c65188660b48d46a54bba3820bd2a9b732d.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/99075d7b7ea27bd8f8768a814f8d1c65188660b48d46a54bba3820bd2a9b732d.txt",
+            "sha256": "9c56cc3507402a64d8c4af05f19831918530e99bc493c9d539bff26a46df5b3a",
+            "revision": "b4b0fe5789d285157fdf2010821ae7bcadf8c2f1",
+            "start_line": 93,
+            "end_line": 110,
+            "source_url": "https://github.com/apache/druid/blob/b4b0fe5789d285157fdf2010821ae7bcadf8c2f1/processing/src/main/java/org/apache/druid/query/groupby/epinephelinae/GroupByQueryEngine.java#L93-L110",
+            "literal_excerpt": "    // No instantiation\n  }\n\n  public static Sequence<ResultRow> process(\n      final GroupByQuery query,\n      @Nullable final TimeBoundaryInspector timeBoundaryInspector,\n      final CursorHolder cursorHolder,\n      final CursorBuildSpec buildSpec,\n      final ByteBuffer processingBuffer,\n      @Nullable final DateTime fudgeTimestamp,\n      final GroupByQueryConfig querySpecificConfig,\n      final DruidProcessingConfig processingConfig\n  )\n  {\n    final Cursor cursor = cursorHolder.asCursor();\n    if (cursor == null) {\n      return Sequences.empty();\n    }",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Druid selected application runs GroupByQueryEngine.process for current query and returns Sequence<ResultRow>; no persisted/precomputed representation or denormalized model is selected. PG matview base may be reused with explicit actual product role.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:36:50.218454+00:00"
+    },
+    {
+      "finding_id": "CUR-H11",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "mvc",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx:151",
+        "requirement": "The selected controller/model/view roles and rendering path are explicit."
+      },
+      "evidence": {
+        "mechanism_claim": "Fineract recebe operações na API e encaminha a tarefa aos serviços e ao domínio; a base Spring mostra despacho de requisições MVC.",
+        "limits_claim": "O recurso Fineract usa JAX-RS. A referência Spring MVC é uma comparação de fronteiras; ela não altera o framework usado pelo produto.",
+        "primary_sources": [
+          {
+            "repo": "apache/fineract",
+            "path": "fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/api/LoansApiResource.java",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ba0088b8d80282fede50255155d50769f306d3ec64202d59c6b8ba56a7ac4d3a.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ba0088b8d80282fede50255155d50769f306d3ec64202d59c6b8ba56a7ac4d3a.txt",
+            "sha256": "fb53c51083b3bada3bc02186a8a7099ead6c676aa124c0771ab27463503de267",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "start_line": 325,
+            "end_line": 342,
+            "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/api/LoansApiResource.java#L325-L342",
+            "literal_excerpt": "\n    @GET\n    @Path(\"{loanId}/template\")\n    @Produces({ MediaType.APPLICATION_JSON })\n    @ApiResponses({\n            @ApiResponse(responseCode = \"200\", description = \"OK\", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.GetLoansApprovalTemplateResponse.class))) })\n    @Operation(summary = \"Retrieve Loan Approval Template\", operationId = \"retrieveApprovalTemplate\")\n    public String retrieveApprovalTemplate(@PathParam(\"loanId\") @Parameter(description = \"loanId\", required = true) final Long loanId,\n            @QueryParam(\"templateType\") @Parameter(description = \"templateType\") final String templateType,\n            @Context final UriInfo uriInfo) {\n        return retrieveApprovalTemplate(loanId, null, templateType, uriInfo);\n    }\n\n    @GET\n    @Path(\"template\")\n    @Produces({ MediaType.APPLICATION_JSON })\n    @Operation(summary = \"Retrieve Loan Details Template\", operationId = \"retrieveTemplateLoan\", description = \"This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\\n\"\n            + \"\\n\" + \"Field Defaults\\n\" + \"Allowed description Lists\\n\" + \"Example Requests:\\n\" + \"\\n\"",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected Fineract source is a JAX-RS JSON API resource; no selected view, UI event/controller link or rendering path proves MVC required by catalog. Layered API alone is adjacent.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:36:50.218495+00:00"
+    },
+    {
+      "finding_id": "CUR-H12",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "orchestration-saga",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+        "requirement": "A concrete coordinator runs participating local effects and their compensation path."
+      },
+      "evidence": {
+        "mechanism_claim": "O fluxo de criação de ordem Medusa compõe etapas e o SDK registra a ação de compensação de cada etapa. A classe Saga Temporal fornece uma implementação alternativa da pilha de compensações.",
+        "limits_claim": "Os mecanismos são comparados; Medusa usa seu próprio workflows SDK e não é descrito como consumidor de Temporal. A compensação é uma nova ação, sujeita a falha, não o apagamento do histórico.",
+        "primary_sources": [
+          {
+            "repo": "medusajs/medusa",
+            "path": "packages/core/workflows-sdk/src/utils/composer/create-step.ts",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c1bfbd83b8fb2f0ce2078af54e14ec0117ef4d7fd8d62141e0eaf9197c863b06.txt"
+          },
+          {
+            "repo": "medusajs/medusa",
+            "path": "packages/core/core-flows/src/order/workflows/create-order.ts",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/551e6e4a41ecdda6f2e46f5be8450233fc96c2dc8bf93896839d198d547d9142.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c1bfbd83b8fb2f0ce2078af54e14ec0117ef4d7fd8d62141e0eaf9197c863b06.txt",
+            "sha256": "f745406988dfbd94b1cd71b60022495538a67665d902fed5f82048c074215345",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "start_line": 181,
+            "end_line": 198,
+            "source_url": "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts#L181-L198",
+            "literal_excerpt": "    )\n\n    stepConfig.uuid = ulid()\n    stepConfig.noCompensation = !compensateFn\n\n    this.flow.addAction(stepName, stepConfig)\n\n    this.isAsync ||= !!(stepConfig.async || stepConfig.compensateAsync)\n\n    this.overriddenHandler.set(stepName, this.handlers.get(stepName)!)\n\n    this.handlers.set(stepName, handler)\n\n    const ret = {\n      __type: OrchestrationUtils.SymbolWorkflowStep,\n      __step__: stepName,\n    }\n",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/551e6e4a41ecdda6f2e46f5be8450233fc96c2dc8bf93896839d198d547d9142.txt",
+            "sha256": "45807b1684060c6144133aaa6d534ac8faae4fdb88ccbbc8b7ac60a7fe25a84a",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "start_line": 419,
+            "end_line": 436,
+            "source_url": "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts#L419-L436",
+            "literal_excerpt": "      }\n    )\n\n    const orders = createOrdersStep([orderToCreate])\n    const order = transform({ orders }, (data) => data.orders?.[0])\n\n    const appliedPromoCodes: string[] = transform(\n      input,\n      (order) => order.promo_codes ?? []\n    )\n\n    /**\n     * TODO: Currently need the refresh because when the order module creates the order, even though\n     * the totals are calculated, the order is being queried and without the totals. There is some\n     * point of discussion for improvements here down the line.\n     */\n    const { data: freshOrder } = useQueryGraphStep({\n      entity: \"orders\",",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected create-order workflow invokes createOrdersStep but its actual mutation/compensation callback is not selected. SDK createStep accepts optional compensateFn and marks noCompensation when absent. Registration capability alone does not prove that order flow compensates its effects. Captured Medusa inventory reservation callback is reusable if scope/prose/links change.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:40:56.174367+00:00"
+    },
+    {
+      "finding_id": "CUR-H13",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "precomputation",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx:351",
+        "requirement": "Work happens before the consuming query and its result is maintained for reuse."
+      },
+      "evidence": {
+        "mechanism_claim": "PostgreSQL materializa e atualiza resultados; Druid agrega os registros para obter uma representação de consulta.",
+        "limits_claim": "Pré cálculo e desnormalização não são sinônimos de qualquer agregado. A aplicação e a base oferecem mecanismos comparáveis com manutenção e frescor distintos.",
+        "primary_sources": [
+          {
+            "repo": "apache/druid",
+            "path": "processing/src/main/java/org/apache/druid/query/groupby/epinephelinae/GroupByQueryEngine.java",
+            "revision": "b4b0fe5789d285157fdf2010821ae7bcadf8c2f1",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/99075d7b7ea27bd8f8768a814f8d1c65188660b48d46a54bba3820bd2a9b732d.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/99075d7b7ea27bd8f8768a814f8d1c65188660b48d46a54bba3820bd2a9b732d.txt",
+            "sha256": "9c56cc3507402a64d8c4af05f19831918530e99bc493c9d539bff26a46df5b3a",
+            "revision": "b4b0fe5789d285157fdf2010821ae7bcadf8c2f1",
+            "start_line": 93,
+            "end_line": 110,
+            "source_url": "https://github.com/apache/druid/blob/b4b0fe5789d285157fdf2010821ae7bcadf8c2f1/processing/src/main/java/org/apache/druid/query/groupby/epinephelinae/GroupByQueryEngine.java#L93-L110",
+            "literal_excerpt": "    // No instantiation\n  }\n\n  public static Sequence<ResultRow> process(\n      final GroupByQuery query,\n      @Nullable final TimeBoundaryInspector timeBoundaryInspector,\n      final CursorHolder cursorHolder,\n      final CursorBuildSpec buildSpec,\n      final ByteBuffer processingBuffer,\n      @Nullable final DateTime fudgeTimestamp,\n      final GroupByQueryConfig querySpecificConfig,\n      final DruidProcessingConfig processingConfig\n  )\n  {\n    final Cursor cursor = cursorHolder.asCursor();\n    if (cursor == null) {\n      return Sequences.empty();\n    }",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Druid selected application runs GroupByQueryEngine.process for current query and returns Sequence<ResultRow>; no persisted/precomputed representation or denormalized model is selected. PG matview base may be reused with explicit actual product role.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:36:50.218458+00:00"
+    },
+    {
+      "finding_id": "CUR-H14",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "range-sharding",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+        "requirement": "Nontrivial bounded key intervals resolve to physical shard owners."
+      },
+      "evidence": {
+        "mechanism_claim": "Vitess mapeia chaves de negócio para destinos por hash ou lookup. Faixas de keyspace ID definem o roteamento para shards.",
+        "limits_claim": "Hash, lookup e ranges são estratégias diferentes. Nenhuma delas distribui uma tabela só porque um índice comum foi criado.",
+        "primary_sources": [
+          {
+            "repo": "vitessio/vitess",
+            "path": "go/vt/vtgate/vindexes/lookup.go",
+            "revision": "a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/1ec18342f709546357fa40f8bf5473982c9db6693db509b450eea02d0da0c8bd.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/1ec18342f709546357fa40f8bf5473982c9db6693db509b450eea02d0da0c8bd.txt",
+            "sha256": "180cf0ebad6dbb9a7db77a510d3f5e2069165deca27baed983444388d4195bd0",
+            "revision": "a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e",
+            "start_line": 99,
+            "end_line": 116,
+            "source_url": "https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/lookup.go#L99-L116",
+            "literal_excerpt": "// Map can map ids to key.ShardDestination objects.\nfunc (ln *LookupNonUnique) Map(ctx context.Context, vcursor VCursor, ids []sqltypes.Value) ([]key.ShardDestination, error) {\n\tout := make([]key.ShardDestination, 0, len(ids))\n\tif ln.writeOnly {\n\t\tfor range ids {\n\t\t\tout = append(out, key.DestinationKeyRange{KeyRange: &topodatapb.KeyRange{}})\n\t\t}\n\t\treturn out, nil\n\t}\n\n\t// if ignore_nulls is set and the query is about single null value, then fallback to all shards\n\tif len(ids) == 1 && ids[0].IsNull() && ln.lkp.IgnoreNulls {\n\t\tfor range ids {\n\t\t\tout = append(out, key.DestinationKeyRange{KeyRange: &topodatapb.KeyRange{}})\n\t\t}\n\t\treturn out, nil\n\t}\n",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected Vitess Hash/Lookup files map hashes or directory rows to keyspace IDs. Empty DestinationKeyRange in writeOnly/null branches broadcasts full range; no bounded interval-to-shard resolver shows range sharding. Needs actual range routing source.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:40:56.174391+00:00"
+    },
+    {
+      "finding_id": "CUR-H15",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "refresh-ahead",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/06-cache.mdx:61",
+        "requirement": "A new value begins loading before the old value expires."
+      },
+      "evidence": {
+        "mechanism_claim": "O produto Superset executa tarefas para aquecer consultas. A base Guava demonstra recarga assíncrona sob outra política; o intervalo e o TTL precisam ser comparados.",
+        "limits_claim": "A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.",
+        "primary_sources": [
+          {
+            "repo": "apache/superset",
+            "path": "superset/tasks/cache.py",
+            "revision": "54d2421ded3572dc2ae328b7d4fd698acec48c11",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/582e18d97129b87fc8339d6d9b19b64b201645521e2ebca94fe5524152e9a316.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/582e18d97129b87fc8339d6d9b19b64b201645521e2ebca94fe5524152e9a316.txt",
+            "sha256": "06b4cf8896d3990068e169025b3e2de20d9c5f15d6b943d6b09baba9cfdc5c0c",
+            "revision": "54d2421ded3572dc2ae328b7d4fd698acec48c11",
+            "start_line": 356,
+            "end_line": 373,
+            "source_url": "https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/cache.py#L356-L373",
+            "literal_excerpt": "    \"\"\"\n    Warm up cache.\n\n    This task periodically hits dashboards to warm up the cache.\n\n    \"\"\"\n    logger.info(\"Loading strategy\")\n    class_: type[Strategy] | None = strategy_registry.get(strategy_name)\n    if class_ is None:\n        message: str = \"No strategy %s found!\" % strategy_name\n        logger.error(message, exc_info=True)\n        return message\n\n    logger.info(\"Loading %s\", class_.__name__)\n    try:\n        strategy: Strategy = class_(*args, **kwargs)\n        logger.info(\"Success!\")\n    except TypeError:",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/582e18d97129b87fc8339d6d9b19b64b201645521e2ebca94fe5524152e9a316.txt",
+            "sha256": "06b4cf8896d3990068e169025b3e2de20d9c5f15d6b943d6b09baba9cfdc5c0c",
+            "revision": "54d2421ded3572dc2ae328b7d4fd698acec48c11",
+            "start_line": 411,
+            "end_line": 428,
+            "source_url": "https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/cache.py#L411-L428",
+            "literal_excerpt": "                    logger.info(\"Warming up cache for %s\", task_name)\n                    command: Any = ChartDataCommand(task.query_context)\n                    command.validate()\n                    command.run(cache=True)\n                    results[\"success\"].append(task_name)\n                except Exception:  # noqa: BLE001\n                    logger.exception(\"Error warming up cache for %s\", task_name)\n                    results[\"errors\"].append(task_name)\n\n        return results\n\n    _warmup_urls(\n        strategy.get_urls(),\n        user,\n        current_app.config[\"WEBDRIVER_WINDOW\"][\"dashboard\"],\n        results,\n    )\n    return results",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Superset periodic cache-warmup performs normal reads and has no before-expiry trigger or forced refresh condition. Cache warming does not establish refresh ahead. CoreDNS prefetch code already captured could be reused.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:30:38.695911+00:00"
+    },
+    {
+      "finding_id": "CUR-H16",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "saga",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+        "requirement": "A concrete sequence of local effects has corresponding semantic compensation behavior."
+      },
+      "evidence": {
+        "mechanism_claim": "O fluxo de criação de ordem Medusa compõe etapas e o SDK registra a ação de compensação de cada etapa. A classe Saga Temporal fornece uma implementação alternativa da pilha de compensações.",
+        "limits_claim": "Os mecanismos são comparados; Medusa usa seu próprio workflows SDK e não é descrito como consumidor de Temporal. A compensação é uma nova ação, sujeita a falha, não o apagamento do histórico.",
+        "primary_sources": [
+          {
+            "repo": "medusajs/medusa",
+            "path": "packages/core/workflows-sdk/src/utils/composer/create-step.ts",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c1bfbd83b8fb2f0ce2078af54e14ec0117ef4d7fd8d62141e0eaf9197c863b06.txt"
+          },
+          {
+            "repo": "medusajs/medusa",
+            "path": "packages/core/core-flows/src/order/workflows/create-order.ts",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/551e6e4a41ecdda6f2e46f5be8450233fc96c2dc8bf93896839d198d547d9142.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c1bfbd83b8fb2f0ce2078af54e14ec0117ef4d7fd8d62141e0eaf9197c863b06.txt",
+            "sha256": "f745406988dfbd94b1cd71b60022495538a67665d902fed5f82048c074215345",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "start_line": 181,
+            "end_line": 198,
+            "source_url": "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts#L181-L198",
+            "literal_excerpt": "    )\n\n    stepConfig.uuid = ulid()\n    stepConfig.noCompensation = !compensateFn\n\n    this.flow.addAction(stepName, stepConfig)\n\n    this.isAsync ||= !!(stepConfig.async || stepConfig.compensateAsync)\n\n    this.overriddenHandler.set(stepName, this.handlers.get(stepName)!)\n\n    this.handlers.set(stepName, handler)\n\n    const ret = {\n      __type: OrchestrationUtils.SymbolWorkflowStep,\n      __step__: stepName,\n    }\n",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          },
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/551e6e4a41ecdda6f2e46f5be8450233fc96c2dc8bf93896839d198d547d9142.txt",
+            "sha256": "45807b1684060c6144133aaa6d534ac8faae4fdb88ccbbc8b7ac60a7fe25a84a",
+            "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+            "start_line": 419,
+            "end_line": 436,
+            "source_url": "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts#L419-L436",
+            "literal_excerpt": "      }\n    )\n\n    const orders = createOrdersStep([orderToCreate])\n    const order = transform({ orders }, (data) => data.orders?.[0])\n\n    const appliedPromoCodes: string[] = transform(\n      input,\n      (order) => order.promo_codes ?? []\n    )\n\n    /**\n     * TODO: Currently need the refresh because when the order module creates the order, even though\n     * the totals are calculated, the order is being queried and without the totals. There is some\n     * point of discussion for improvements here down the line.\n     */\n    const { data: freshOrder } = useQueryGraphStep({\n      entity: \"orders\",",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected create-order workflow invokes createOrdersStep but its actual mutation/compensation callback is not selected. SDK createStep accepts optional compensateFn and marks noCompensation when absent. Registration capability alone does not prove that order flow compensates its effects. Captured Medusa inventory reservation callback is reusable if scope/prose/links change.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:40:56.174373+00:00"
+    },
+    {
+      "finding_id": "CUR-H17",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "scatter-gather",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/16-workflow-e-processamento.mdx:153",
+        "requirement": "One request fans out work and gathers correlated responses under a completion criterion."
+      },
+      "evidence": {
+        "mechanism_claim": "Prometheus executa loops concorrentes para alvos. Errgroup fornece uma base para aguardar e reunir tarefas.",
+        "limits_claim": "Scrapes concorrentes não comprovam que uma mesma operação distribui e reúne respostas. O aplicativo é adjacente e o conceito continua pendente.",
+        "primary_sources": [
+          {
+            "repo": "prometheus/prometheus",
+            "path": "scrape/scrape.go",
+            "revision": "6e69e843b38d22ded60a13e0163f6326136f59fa",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/80cb93eed75612e9b521b767376ee0880bed66d8dea8e33624e53394ff460ad8.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/80cb93eed75612e9b521b767376ee0880bed66d8dea8e33624e53394ff460ad8.txt",
+            "sha256": "8a561345d791f2e6fe96fdbdd8b8965ddb450addade15fb17c9ec792d37a12eb",
+            "revision": "6e69e843b38d22ded60a13e0163f6326136f59fa",
+            "start_line": 278,
+            "end_line": 295,
+            "source_url": "https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go#L278-L295",
+            "literal_excerpt": "\tfor fp, l := range sp.loops {\n\t\twg.Add(1)\n\n\t\tgo func(l loop) {\n\t\t\tl.stop()\n\t\t\twg.Done()\n\t\t}(l)\n\n\t\tdelete(sp.loops, fp)\n\t\tdelete(sp.activeTargets, fp)\n\t}\n\n\tsp.targetMtx.Unlock()\n\n\twg.Wait()\n\t// Cancel the context after all loops have stopped. This is required for\n\t// scrapeOnShutdown to work properly, as the shutdown scrape uses this\n\t// context (via sl.parentCtx) and would fail if the context was cancelled early.",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Prometheus scrape pool shutdown waits for loops, not correlated responses to a distributed request. Selection explicitly says concept remains pending.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:21:59.212453+00:00"
+    },
+    {
+      "finding_id": "CUR-H18",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "single-flight",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/06-cache.mdx",
+        "requirement": "Concurrent callers for the same in-flight work share the operation/result in the declared scope."
+      },
+      "evidence": {
+        "mechanism_claim": "CoreDNS distingue cache de respostas negativas, validade TTL e coordenação de consultas concorrentes para a mesma chave.",
+        "limits_claim": "Cada termo conserva sua condição: TTL não equivale a frescor autoritativo e single flight só reúne requisições dentro do grupo coordenado.",
+        "primary_sources": [
+          {
+            "repo": "coredns/coredns",
+            "path": "plugin/cache/handler.go",
+            "revision": "9d1343c54c2526dd6424e46b0f17ca79d9b1a557",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d6b793560a343c0df70ab0aeccd1ff8f51f9c4fa1b275c74cd2fcfe90b48a6e3.txt"
+          },
+          {
+            "repo": "coredns/coredns",
+            "path": "plugin/cache/cache.go",
+            "revision": "9d1343c54c2526dd6424e46b0f17ca79d9b1a557",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8e59e8ab7ada4497cf257af7fb1413cff891c8780441f4603441299d3147fdc6.txt"
+          },
+          {
+            "repo": "coredns/coredns",
+            "path": "plugin/pkg/singleflight/singleflight.go",
+            "revision": "9d1343c54c2526dd6424e46b0f17ca79d9b1a557",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e2ccdea7e2debeaf547be6d90296a776d0ef2b0fdbc0d9721511c03b7d7767fe.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/d6b793560a343c0df70ab0aeccd1ff8f51f9c4fa1b275c74cd2fcfe90b48a6e3.txt",
+            "sha256": "8a9b74f8de6cfcc817d9a44e09baa95117a2d2d50a21435adc042b860cccae98",
+            "revision": "9d1343c54c2526dd6424e46b0f17ca79d9b1a557",
+            "start_line": 165,
+            "end_line": 182,
+            "source_url": "https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L165-L182",
+            "literal_excerpt": "\treturn true\n}\n\nfunc (c *Cache) doRefresh(ctx context.Context, state request.Request, cw dns.ResponseWriter) (int, error) {\n\treturn plugin.NextOrFailure(c.Name(), c.Next, ctx, cw, state.Req)\n}\n\n// verifyWithTimeout runs the upstream verify in a background goroutine and races it\n// against verifyStaleTimeout. If the verify completes within the timeout and the\n// response is accepted by verifyStaleResponseWriter, the freshly cached entry is\n// served to the client and served is true. Otherwise served is false and the caller\n// falls through to serve stale; the goroutine continues to run and any cacheable\n// response updates the cache without writing to the detached client connection.\nfunc (c *Cache) verifyWithTimeout(ctx context.Context, state request.Request, w dns.ResponseWriter, cw *verifyStaleResponseWriter, r *dns.Msg, do, ad bool, i *item, failureRecheck time.Duration, now func() time.Time) (served bool, code int, err error) {\n\ttype result struct {\n\t\tcode int\n\t\terr  error\n\t}",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "CoreDNS internal Group.Do implementation exists, but selected cache consumer never invokes it; doRefresh directly calls NextOrFailure. Per-item background prefetch CAS does not make duplicate cold-miss callers share one result.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:30:38.695936+00:00"
+    },
+    {
+      "finding_id": "CUR-H19",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "thread-pool",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/08-concorrencia.mdx",
+        "requirement": "Multiple reusable execution threads accept work from a pool; event-loop identity alone is insufficient."
+      },
+      "evidence": {
+        "mechanism_claim": "A base CPython fornece futures e pool de threads; a aplicação precisa demonstrar o caminho de await e delegação.",
+        "limits_claim": "O localizador da aplicação será validado. Caminho ausente permanece lacuna e não é substituído por uma suposição.",
+        "primary_sources": [
+          {
+            "repo": "apache/airflow",
+            "path": "airflow-core/src/airflow/jobs/triggerer_job_runner.py",
+            "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8fb3a33f39fbb6d49196b4e86470b52c3fc5fe31962a48b8278f477f8e763336.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/8fb3a33f39fbb6d49196b4e86470b52c3fc5fe31962a48b8278f477f8e763336.txt",
+            "sha256": "7efdc2e8ad64a14551d8ce82920aaf617f5c4fd3ca3b4e6de58c418f0006a42e",
+            "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+            "start_line": 1202,
+            "end_line": 1219,
+            "source_url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/triggerer_job_runner.py#L1202-L1219",
+            "literal_excerpt": "            return greenback.await_(self.asend(msg))\n        return asyncio.run_coroutine_threadsafe(self.asend(msg), self._loop).result()\n\n    async def asend(self, msg: ToTriggerSupervisor) -> ToTriggerRunner | None:\n        if self._loop is None:\n            raise RuntimeError(\"start_reader() must be called before asend()\")\n        current_loop = asyncio.get_running_loop()\n        if self._loop is not None and current_loop is not self._loop:\n            # Called from a foreign event loop (e.g. via async_to_sync). Bridge to the main loop\n            # so _reader_loop can resolve the future, then await via wrap_future which is\n            # non-blocking for the foreign loop.\n            cf = asyncio.run_coroutine_threadsafe(self.asend(msg), self._loop)\n            return await asyncio.wrap_future(cf)\n        frame = _RequestFrame(id=next(self.id_counter), body=msg.model_dump())\n        future: asyncio.Future = current_loop.create_future()\n        self._pending[frame.id] = future\n        try:\n            self._async_writer.write(frame.as_bytes())",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected Airflow triggerer schedules asyncio tasks and tracks event-loop thread identity; no thread pool/executor dispatch appears. A thread identifier is not a pool.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:30:38.696042+00:00"
+    },
+    {
+      "finding_id": "CUR-H20",
+      "severity": "HIGH",
+      "verdict": "REAL_SOURCE_SUPPORT_GAP",
+      "class": "FONTE/OSS + TESTE/EVIDENCIA",
+      "concept_id": "websocket",
+      "expected_contract": {
+        "path": "content/referencia/catalogo/09-apis-e-integracao.mdx:233",
+        "requirement": "A bidirectional WebSocket session, not only HTTP/webhook handlers."
+      },
+      "evidence": {
+        "mechanism_claim": "Zulip expõe API de mensagens e processa webhooks de GitHub. A base FastAPI permite comparar o contrato de entrada.",
+        "limits_claim": "O trecho não demonstra WebSocket e esse conceito permanece pendente até localizar um consumidor real dessa conexão.",
+        "primary_sources": [
+          {
+            "repo": "zulip/zulip",
+            "path": "zerver/views/message_send.py",
+            "revision": "4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/3ccd326a43c5f07e3a7e794fbf664feb6bc274dfbe64c32fedca50eeb0e1dbf0.txt"
+          },
+          {
+            "repo": "zulip/zulip",
+            "path": "zerver/webhooks/github/view.py",
+            "revision": "4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f3cea58f2ce73952354021bd956934e0ea4f1c4c4491d5400573a0648430d364.txt"
+          }
+        ],
+        "primary_spans": [
+          {
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/3ccd326a43c5f07e3a7e794fbf664feb6bc274dfbe64c32fedca50eeb0e1dbf0.txt",
+            "sha256": "c12ab897a88c585046da1dcf062849825c69530b85d104eab49f035096db9eaf",
+            "revision": "4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0",
+            "start_line": 163,
+            "end_line": 180,
+            "source_url": "https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zerver/views/message_send.py#L163-L180",
+            "literal_excerpt": "\n\n@typed_endpoint\ndef render_message_backend(\n    request: HttpRequest,\n    user_profile: UserProfile,\n    *,\n    content: Annotated[str, StringConstraints(max_length=settings.MAX_MESSAGE_LENGTH)],\n    populate_url_embed_data: Json[bool] = False,\n) -> HttpResponse:\n    rendering_result = render_unsaved_message(user_profile, content)\n\n    if populate_url_embed_data:\n        url_embed_data = populate_url_embed_data_for_preview(\n            user_profile, content, rendering_result.links_for_preview\n        )\n        # A link cached as \"no preview available\" (None) renders identically,\n        # so only a real cached embed is worth a second render.",
+            "observed_utc": "2026-10-15T03:45:12.328071+00:00"
+          }
+        ]
+      },
+      "confirmed_gap": "Selected Zulip handlers are HTTP/message and webhook; own limits explicitly state WebSocket remains pending. No WebSocket handshake/session/frames shown.",
+      "impact": "The concept is published as AUTHOR_SOURCE_MATCH despite source support not establishing its distinct required mechanism. This is a curation gap, not a claim that the OSS product lacks the mechanism.",
+      "minimal_fix": "Bind the concept to a concrete matching primary mechanism and scope; add the exact missing source or reuse an already captured matching application. Until then retain PENDING rather than a match.",
+      "objective_or_subjective": "OBJECTIVE",
+      "reviewed_utc": "2026-10-15T03:21:59.212472+00:00"
+    }
+  ],
+  "medium_backlog": [
+    {
+      "concept_id": "async-await",
+      "note": "Airflow asend uses asyncio Future, nonblocking await and wrap_future. Source supports it; stale future-tense claim/limits should be rewritten."
+    },
+    {
+      "concept_id": "bulkhead",
+      "note": "Envoy creates resource budgets per cluster and routing priority, including connections/pending requests/connection pools. Supports resource bulkheads; stale demand for thread-pool proof is broader than bounded mechanism."
+    },
+    {
+      "concept_id": "cache-invalidation",
+      "note": "Superset binds cache identity to datasource.changed_on and excludes incompatible cached filter metadata; mechanism prose should name invalidation/generation rather than repeat cache-aside."
+    },
+    {
+      "concept_id": "cache-stampede-protection",
+      "note": "CoreDNS beginRefresh/tryPrefetch admits one background refresh per item. Claim must stay on refresh of existing entries; cold misses call NextOrFailure directly."
+    },
+    {
+      "concept_id": "fail-fast",
+      "note": "Actual Envoy adaptive concurrency filter in related captured source sends local rejection before forwarding. Row should link that admission source instead of only budget construction."
+    },
+    {
+      "concept_id": "futures-promises",
+      "note": "Airflow maps request IDs to asyncio Future, awaits resolution and removes pending entry on failure. Stale pending text remains."
+    },
+    {
+      "concept_id": "idempotency",
+      "note": "Historical Medusa route passes key to completion strategy. Additional already-captured same-SHA model/service have unique key, serializable initialization and persisted recovery_point/response via workStage. Add these locators to row; callback bridge remains bounded to service contract, no global charge atomicity."
+    },
+    {
+      "concept_id": "idempotency-key",
+      "note": "Historical Medusa route passes key to completion strategy. Additional already-captured same-SHA model/service have unique key, serializable initialization and persisted recovery_point/response via workStage. Add these locators to row; callback bridge remains bounded to service contract, no global charge atomicity."
+    },
+    {
+      "concept_id": "peer-to-peer",
+      "note": "Kubo module constructs libp2p connection-manager options, peer identity/store keys and reachability configuration. Source proves node-network setup; add host/exchange consumer locator before asserting content transfer details."
+    },
+    {
+      "concept_id": "semaphore",
+      "note": "Pool source counts slots; related captured scheduler locks pool rows, checks open slots and reserves them when queuing tasks. Add scheduler locator to this row for self-contained admission proof."
+    }
+  ],
+  "trend_metadata": {
+    "observed_utc": "2026-10-15T03:44:12.989511+00:00",
+    "snapshot_utc": "2026-10-15T01:10:58.519745Z",
+    "cards": 22,
+    "serialized_rows": 22,
+    "match": true,
+    "sha256": "b1aafab825dc867788f13508216e561ca756bd6f5338e4378859ff53ecc92939",
+    "scope": "Captured visible GitHub monthly cards only; parent repository star counts rank selected candidate packs, not skill quality or universal best."
+  },
+  "scope_limits": [
+    "The 127 concepts assigned to lane two have no verdict from this lane.",
+    "License artifact integrity was checked for 176 active revisions; this is not legal compatibility approval.",
+    "Source-level mechanism review is not product runtime testing or a deployment claim.",
+    "Root-owned PostgreSQL lab code remains assigned to the terminal reviewer.",
+    "The two author repair recommendation packets were received but were not applied or approved in this first pass."
+  ],
+  "gate_notes": {
+    "consumer_trace": "310 concept sections, 335 catalog occurrences, 40 priorities and 46 priority links reconciled; 59 reference pages compiled and links resolved.",
+    "data_fidelity": "No assertion about live business table values was made.",
+    "mutation_probe": "Independent verifier rejects a source record with corrupted expected digest in memory; the original packet was unchanged.",
+    "state_failure": "Relevant source state/error/compensation paths were inspected; no external OSS deployment was mutated or runtime-tested."
+  },
+  "proof_generation": {
+    "observed_utc": "2026-10-15T03:45:12.328071+00:00",
+    "command": "python3 tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.proofs.py",
+    "findings": 20,
+    "primary_spans": 25,
+    "errors": []
+  },
+  "reference_mdx_receipt": {
+    "observed_utc": "2026-10-15T03:45:56.322Z",
+    "files": 59,
+    "errors": 0
+  }
+}

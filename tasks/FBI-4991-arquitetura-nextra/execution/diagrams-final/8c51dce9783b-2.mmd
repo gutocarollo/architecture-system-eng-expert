@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Screen as Tela de agenda
+    participant Next as Rota Calendar Next
+    participant Session as Sessão e token Azure
+    participant Graph as Microsoft Graph
+    Screen->>Next: solicita eventos com período
+    Next->>Session: obtém sessão e token válido
+    alt identidade não disponível
+        Session-->>Next: falha de sessão ou token
+        Next-->>Screen: erro de autenticação
+    else identidade disponível
+        Session-->>Next: token
+        Next->>Graph: consulta calendário
+        alt calendário compartilhado encontrado
+            Graph-->>Next: eventos
+        else ramo de disponibilidade permitido
+            Next->>Graph: getSchedule para Free/Busy
+            Graph-->>Next: disponibilidade ou erro
+        end
+        Next-->>Screen: contrato da resposta obtida
+    end

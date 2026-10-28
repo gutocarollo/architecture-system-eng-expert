@@ -1,0 +1,52 @@
+[
+  {
+    "repo": "debezium/debezium-server",
+    "path": "debezium-server-core/src/main/java/io/debezium/server/DebeziumServer.java",
+    "ref": "v2.7.3.Final",
+    "url": "https://raw.githubusercontent.com/debezium/debezium-server/v2.7.3.Final/debezium-server-core/src/main/java/io/debezium/server/DebeziumServer.java",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe3-debezium--debezium-server--v2.7.3.Final--debezium-server-core--src--main--java--io--debezium--server--DebeziumServer.java",
+    "sha256": "c1abd3e5662225679d052d4e72c7df4958f9313a459d72c38cef600f743f9ee1",
+    "observed_utc": "2026-10-15T02:52:06.710878+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "grafana/grafana",
+    "path": "public/app/features/panel/components/PanelRenderer.tsx",
+    "ref": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+    "url": "https://raw.githubusercontent.com/grafana/grafana/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/panel/components/PanelRenderer.tsx",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe3-grafana--grafana--03f502a94d17f7dc4e6c34acdf8428aedd986e4c--public--app--features--panel--components--PanelRenderer.tsx",
+    "sha256": "47ded9a84606a08b4ba7eb6c56ad140dca6de45c084da74e656a7c7256bb6741",
+    "observed_utc": "2026-10-15T02:52:06.681454+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "apache/pinot",
+    "path": "pinot-broker/src/main/java/org/apache/pinot/broker/requesthandler/BaseBrokerRequestHandler.java",
+    "ref": "master",
+    "url": "https://raw.githubusercontent.com/apache/pinot/master/pinot-broker/src/main/java/org/apache/pinot/broker/requesthandler/BaseBrokerRequestHandler.java",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe3-apache--pinot--master--pinot-broker--src--main--java--org--apache--pinot--broker--requesthandler--BaseBrokerRequestHandler.java",
+    "sha256": "675865fefbfc5577f4a7a9b80d5f917620ec9a536d0ba033e48cbd2b7d434c98",
+    "observed_utc": "2026-10-15T02:52:06.681698+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "apache/pinot",
+    "path": "pinot-broker/src/main/java/org/apache/pinot/broker/routing/timeboundary/TimeBoundaryManager.java",
+    "ref": "master",
+    "url": "https://raw.githubusercontent.com/apache/pinot/master/pinot-broker/src/main/java/org/apache/pinot/broker/routing/timeboundary/TimeBoundaryManager.java",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe3-apache--pinot--master--pinot-broker--src--main--java--org--apache--pinot--broker--routing--timeboundary--TimeBoundaryManager.java",
+    "sha256": "e916ac49a86fc0e61badc1672c472424f8d47c457bf83a78a098062c227c284b",
+    "observed_utc": "2026-10-15T02:52:06.699372+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "apache/fineract",
+    "path": "fineract-core/src/main/java/org/apache/fineract/commands/service/CommandSourceService.java",
+    "ref": "d4ef4069547fba99400871877ceefadb62ad585b",
+    "url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/commands/service/CommandSourceService.java",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe3-apache--fineract--d4ef4069547fba99400871877ceefadb62ad585b--fineract-core--src--main--java--org--apache--fineract--commands--service--CommandSourceService.java",
+    "sha256": "c2d5be22561128d5b7ea3deffb48721c0e214d3d8434eb29348e4909b408bd29",
+    "observed_utc": "2026-10-15T02:52:06.512781+00:00",
+    "http_status": 200
+  }
+]

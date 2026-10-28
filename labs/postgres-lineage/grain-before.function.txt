@@ -1,0 +1,68 @@
+    async def get_family_revenue_by_period(
+            self,
+            account_id: int,
+            start_date: Any,
+            end_date: Any) -> List[Dict[str, Any]]:
+        """Office commission per family member per month within [start_date, end_date].
+
+        Family is resolved via current snapshot of mv_family_accounts (pragmatic);
+        a CROSS JOIN with month_series produces a dense matrix so months/members
+        without commission still appear with 0. monthly_roa joined from rpt_advisor__roa.
+        """
+        try:
+            sql = _FAMILY_MEMBERS_CTE + """,
+                months AS (
+                    SELECT CAST(generate_series(
+                        date_trunc('month', CAST(:start_date AS date)),
+                        date_trunc('month', CAST(:end_date AS date)),
+                        interval '1 month'
+                    ) AS date) AS month_start
+                ),
+                commission_per AS (
+                    SELECT
+                        CAST(date_trunc('month', rc.date_key) AS date) AS month_start,
+                        rc.account_code AS account_code,
+                        SUM(COALESCE(rc.office_commission_brl, 0)) AS commission
+                    FROM public.rpt_commission__detail rc
+                    INNER JOIN fam f ON f.account_code = rc.account_code
+                    WHERE rc.date_key >= :start_date
+                      AND rc.date_key <= :end_date
+                    GROUP BY 1, 2
+                ),
+                roa_per AS (
+                    SELECT
+                        CAST(date_trunc('month', r.month_end_date) AS date) AS month_start,
+                        r.account_code AS account_code,
+                        r.monthly_roa
+                    FROM public.rpt_advisor__roa r
+                    INNER JOIN fam f ON f.account_code = r.account_code
+                    WHERE r.month_end_date >= :start_date
+                      AND r.month_end_date <= :end_date
+                )
+                SELECT
+                    m.month_start AS month,
+                    f.account_code,
+                    f.name,
+                    f.cluster,
+                    COALESCE(c.commission, 0) AS commission,
+                    COALESCE(r.monthly_roa, 0) AS monthly_roa
+                FROM months m
+                CROSS JOIN fam f
+                LEFT JOIN commission_per c
+                    ON c.month_start = m.month_start AND c.account_code = f.account_code
+                LEFT JOIN roa_per r
+                    ON r.month_start = m.month_start AND r.account_code = f.account_code
+                ORDER BY m.month_start ASC, f.account_code ASC
+            """
+            result = await self.session.execute(
+                text(sql),
+                {
+                    "account_code": account_id,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                },
+            )
+            return [dict(row) for row in result.mappings().fetchall()]
+        except Exception as e:
+            logger.error("Error fetching family revenue by period: %s", e)
+            raise e

@@ -1,0 +1,1953 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-10-15T04:17:02.844791+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "checkout_sha": "32b80d5fc8eda42e2aa9b496d82c30b574120e68",
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "frozen_inputs": {
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json.gz": "b7aedc4ff85625ec0546ceded96bf5d734bf19318f12637dea964998e43c6e4d",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/sources.json": "51638c494e7cbbac9c6d7389ea4f3ab2b40239c6930501a791bafc6796ad3209"
+  },
+  "purpose": "Wave three final: exactly database-decomposition, expand-contract, parallel-run, service-extraction and transitional-architecture. Curator owns incorporation and independent reviewer owns verdict.",
+  "rows": [
+    {
+      "concept_id": "database-decomposition",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "repo": "rails/rails",
+          "revision": "ba3572c874040cfd6d4883f5ca574121968cdf6f",
+          "path": "activerecord/lib/active_record/connection_handling.rb",
+          "url": "https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord/lib/active_record/connection_handling.rb",
+          "raw_url": "https://raw.githubusercontent.com/rails/rails/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord/lib/active_record/connection_handling.rb",
+          "observed_utc": "2026-10-15T03:46:49.844560+00:00",
+          "http_status": 200,
+          "sha256": "4f447ac61815da6d6ea1e7f6c2677d2e0d445dcb13c3a55297bd242ad610ed85",
+          "line_count": 450,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/3d1f2ab66065f6fd3c7233dc8a4cacf54b0fb51ab893f28a997811b160590c73.txt",
+          "kind": "FILE",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "status": "READ",
+            "repo": "rails/rails",
+            "revision": "ba3572c874040cfd6d4883f5ca574121968cdf6f",
+            "path": "MIT-LICENSE",
+            "url": "https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/MIT-LICENSE",
+            "license_spdx": "MIT",
+            "api_license_spdx": "MIT",
+            "observed_utc": "2026-10-15T02:13:30.410122Z",
+            "http_status": 200,
+            "sha256": "717ba1949502290f8e47688ae2e323acd06c8ca47aec9f7596b15f678c1af4a2",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-e41a4442b57f0a4520ff7829e611d91c14f3e621dfaff769509f62bcbd60b4e8.txt",
+            "excerpt": "Copyright (c) David Heinemeier Hansson\n\nPermission is hereby granted, free of charge, to any person obtaining\na copy of this software and associated documentation files (the\n\"Software\"), to deal in the Software without restriction, including\nwithout limitation the rights to use, copy, modify, merge, publish,\ndistribute, sublicense, and/or sell copies of the Software, and to\npermit persons to whom the Software is furnished to do so, subject to\nthe following conditions:\n\nThe above copyright notice",
+            "kind": "LICENSE",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e41a4442b57f0a4520ff7829e611d91c14f3e621dfaff769509f62bcbd60b4e8.txt",
+            "local_verified_utc": "2026-10-15T03:46:48.588473+00:00",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 58838,
+            "observed_utc": "2026-10-15T01:13:47.843627Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T21:16:56Z"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "doc/development/database/multiple_databases.md",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.045668Z",
+          "sha256": "bbc45c034488ad948285ee9f6a74be854ce8d1b33ecd7c20a78901ad0b4c05af",
+          "line_count": 861,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/32a633917da5b0575adeaa84986ec3d12754bd9a23e15e032bf3f8345c514e94.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: ---\n2: stage: Runtime\n3: group: Cells Infrastructure\n4: info: Any user with at least the Maintainer role can merge updates to this content. For details, see <https://docs.gitlab.com/development/development_processes/#development-guidelines-review>.\n5: title: Multiple Databases\n6: ---\n7: \n8: To allow GitLab to scale further we\n9: [decomposed the GitLab application database into multiple databases](https://gitlab.com/groups/gitlab-org/-/work_items/6168).\n10: The main databases are `main`, `ci`, and `sec`. GitLab supports being run with one, two, or three databases.\n11: On GitLab.com we are using separate `main`, `ci`, and `sec` databases.\n12: \n13: ## GitLab Schema\n14: \n15: For properly discovering allowed patterns between different databases\n16: the GitLab application implements the [database dictionary](database_dictionary.md).\n17: \n18: The database dictionary provides a virtual classification of tables into a `gitlab_schema`\n19: which conceptually is similar to [PostgreSQL Schema](https://www.postgresql.org/docs/16/ddl-schemas.html).\n20: We decided as part of [using database schemas to better isolate CI decomposed features](https://gitlab.com/gitlab-org/gitlab/-/issues/333415)\n21: that we cannot use PostgreSQL schema due to complex migration procedures. Instead we implemented\n22: the concept of application-level classification.\n23: Each table of GitLab needs to have a `gitlab_schema` assigned:\n24: \n25: | Schema | Description | Notes |\n26: | -------- | ----------- | ------- |\n27: | `gitlab_main` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n28: | `gitlab_main_org` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n29: | `gitlab_main_cell_setting` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n30: | `gitlab_main_cell_local` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n31: | `gitlab_ci` | All CI tables that are being stored in the `ci:` database (for example, `ci_pipelines`, `ci_builds`) | |\n32: | `gitlab_ci_cell_local` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n33: | `gitlab_geo` | All Geo tables that are being stored in the `geo:` database (for example, `project_registry`, `secondary_usage_data`) | |\n34: | `gitlab_internal` | All internal tables of Rails and PostgreSQL (for example, `ar_internal_metadata`, `schema_migrations`, `pg_*`) | |\n35: | `gitlab_pm` | All tables that store `package_metadata`| It is an alias for `gitlab_main`, to be replaced with `gitlab_sec` |\n36: | `gitlab_sec` | All Security and Vulnerability feature tables stored in the `sec:` database | |\n37: | `gitlab_sec_cell_local` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | Cell-local, non-customer reference data on the `sec:` database that has no sharding key (for example, malware advisories) |\n38: | `gitlab_shared` | Deprecated, refer `gitlab_shared_cell_local` or `gitlab_shared_org` | |\n39: | `gitlab_shared_cell_local` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n40: | `gitlab_shared_org` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "app/models/ci/application_record.rb",
+          "revision": "917d3f7ad12438a8ec7177d32114073ec479998a",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/app/models/ci/application_record.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/app/models/ci/application_record.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/917d3f7ad12438a8ec7177d32114073ec479998a/app/models/ci/application_record.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.279769Z",
+          "sha256": "b2aef16f98a49e89695cf6755215cb03dea1372df508bcfcc6e1df1bb1a85230",
+          "line_count": 19,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e6172b5ab0ef1a55a39f2d7396e829b874770860db8fa1d303bc13ff750e6623.txt",
+          "excerpt_lines": [
+            1,
+            19
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: module Ci\n4:   class ApplicationRecord < ::ApplicationRecord\n5:     self.abstract_class = true\n6: \n7:     if Gitlab::Database.has_config?(:ci)\n8:       connects_to database: { writing: :ci, reading: :ci }\n9:     end\n10: \n11:     def self.table_name_prefix\n12:       'ci_'\n13:     end\n14: \n15:     def self.model_name\n16:       @model_name ||= ActiveModel::Name.new(self, nil, name.demodulize)\n17:     end\n18:   end\n19: end",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "917d3f7ad12438a8ec7177d32114073ec479998a",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/917d3f7ad12438a8ec7177d32114073ec479998a/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.871105+00:00",
+            "http_status": 200,
+            "sha256": "d0dec51ee8a7ba8181a9913a694943f38cb0dc21b2971f25c9fcdeaed826b58d",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/9344e1b4d0accedfd336f836993726af068502cbd4e40777da08e09900a4cb25.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "mechanism": "A decomposição de banco separa os dados de domínios e encaminha cada modelo à conexão correspondente. O Rails implementa connects_to resolvendo a configuração de cada papel e criando os pools associados à classe e ao shard. Quando o modelo pede uma conexão, o framework a busca pelo nome da classe, pelo papel e pelo shard atuais. No GitLab, Ci::ApplicationRecord liga leitura e escrita à conexão ci quando essa configuração existe, e a documentação identifica as tabelas CI como um domínio separado das tabelas main.",
+      "limits": "O Rails fornece o roteamento entre conexões; ele não escolhe os domínios do GitLab nem executa sozinho a movimentação de dados necessária para decompor um banco. A aplicação pode ser configurada com um, dois ou três bancos, conforme sua documentação. O recorte prova o roteamento lógico por domínio e não mede hosts, instâncias ou configurações de uma implantação específica. A captura do modelo e a captura da documentação estão em commits distintos; elas não são apresentadas como um snapshot de produção. O commit do Rails é uma referência fixa de implementação da API, não uma afirmação sobre a versão de gem instalada no GitLab.",
+      "base_scope": "ActiveRecord connects_to resolves each role/shard configuration and creates owner-specific connection pools; connection_pool/retrieve_connection select the corresponding current role/shard pool.",
+      "application_scope": "GitLab Ci::ApplicationRecord explicitly routes both roles to :ci, and the primary documentation explains its main/ci/sec database-domain classification.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord/lib/active_record/connection_handling.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/3d1f2ab66065f6fd3c7233dc8a4cacf54b0fb51ab893f28a997811b160590c73.txt",
+          "sha256": "4f447ac61815da6d6ea1e7f6c2677d2e0d445dcb13c3a55297bd242ad610ed85",
+          "hits": [
+            {
+              "term": "concrete connects_to implementation",
+              "start_line": 81,
+              "end_line": 109,
+              "excerpt": "    def connects_to(database: {}, shards: {})\n      raise NotImplementedError, \"`connects_to` can only be called on ActiveRecord::Base or abstract classes\" unless self == Base || abstract_class?\n\n      if database.present? && shards.present?\n        raise ArgumentError, \"`connects_to` can only accept a `database` or `shards` argument, but not both arguments.\"\n      end\n\n      connections = []\n\n      @shard_keys = shards.keys\n\n      if shards.empty?\n        shards[:default] = database\n      end\n\n      self.default_shard = shards.keys.first\n\n      shards.each do |shard, database_keys|\n        database_keys.each do |role, database_key|\n          db_config = resolve_config_for_connection(database_key)\n\n          self.connection_class = true\n          shard = shard.to_sym unless shard.is_a? Integer\n          connections << connection_handler.establish_connection(db_config, owner_name: self, role: role, shard: shard)\n        end\n      end\n\n      connections\n    end",
+              "url": "https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord/lib/active_record/connection_handling.rb#L81-L109"
+            },
+            {
+              "term": "actual connection pool selection",
+              "start_line": 366,
+              "end_line": 372,
+              "excerpt": "    def connection_pool\n      connection_handler.retrieve_connection_pool(connection_specification_name, role: current_role, shard: current_shard, strict: true)\n    end\n\n    def retrieve_connection\n      connection_handler.retrieve_connection(connection_specification_name, role: current_role, shard: current_shard)\n    end",
+              "url": "https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord/lib/active_record/connection_handling.rb#L366-L372"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/app/models/ci/application_record.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e6172b5ab0ef1a55a39f2d7396e829b874770860db8fa1d303bc13ff750e6623.txt",
+          "sha256": "b2aef16f98a49e89695cf6755215cb03dea1372df508bcfcc6e1df1bb1a85230",
+          "hits": [
+            {
+              "term": "CI domain model connection routing",
+              "start_line": 3,
+              "end_line": 12,
+              "excerpt": "module Ci\n  class ApplicationRecord < ::ApplicationRecord\n    self.abstract_class = true\n\n    if Gitlab::Database.has_config?(:ci)\n      connects_to database: { writing: :ci, reading: :ci }\n    end\n\n    def self.table_name_prefix\n      'ci_'",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/app/models/ci/application_record.rb#L3-L12"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/32a633917da5b0575adeaa84986ec3d12754bd9a23e15e032bf3f8345c514e94.txt",
+          "sha256": "bbc45c034488ad948285ee9f6a74be854ce8d1b33ecd7c20a78901ad0b4c05af",
+          "hits": [
+            {
+              "term": "upstream explanation of database decomposition",
+              "start_line": 8,
+              "end_line": 22,
+              "excerpt": "To allow GitLab to scale further we\n[decomposed the GitLab application database into multiple databases](https://gitlab.com/groups/gitlab-org/-/work_items/6168).\nThe main databases are `main`, `ci`, and `sec`. GitLab supports being run with one, two, or three databases.\nOn GitLab.com we are using separate `main`, `ci`, and `sec` databases.\n\n## GitLab Schema\n\nFor properly discovering allowed patterns between different databases\nthe GitLab application implements the [database dictionary](database_dictionary.md).\n\nThe database dictionary provides a virtual classification of tables into a `gitlab_schema`\nwhich conceptually is similar to [PostgreSQL Schema](https://www.postgresql.org/docs/16/ddl-schemas.html).\nWe decided as part of [using database schemas to better isolate CI decomposed features](https://gitlab.com/gitlab-org/gitlab/-/issues/333415)\nthat we cannot use PostgreSQL schema due to complex migration procedures. Instead we implemented\nthe concept of application-level classification.",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md#L8-L22"
+            },
+            {
+              "term": "CI tables and root classes mapped to domain",
+              "start_line": 25,
+              "end_line": 48,
+              "excerpt": "| Schema | Description | Notes |\n| -------- | ----------- | ------- |\n| `gitlab_main` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n| `gitlab_main_org` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n| `gitlab_main_cell_setting` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n| `gitlab_main_cell_local` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n| `gitlab_ci` | All CI tables that are being stored in the `ci:` database (for example, `ci_pipelines`, `ci_builds`) | |\n| `gitlab_ci_cell_local` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n| `gitlab_geo` | All Geo tables that are being stored in the `geo:` database (for example, `project_registry`, `secondary_usage_data`) | |\n| `gitlab_internal` | All internal tables of Rails and PostgreSQL (for example, `ar_internal_metadata`, `schema_migrations`, `pg_*`) | |\n| `gitlab_pm` | All tables that store `package_metadata`| It is an alias for `gitlab_main`, to be replaced with `gitlab_sec` |\n| `gitlab_sec` | All Security and Vulnerability feature tables stored in the `sec:` database | |\n| `gitlab_sec_cell_local` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | Cell-local, non-customer reference data on the `sec:` database that has no sharding key (for example, malware advisories) |\n| `gitlab_shared` | Deprecated, refer `gitlab_shared_cell_local` or `gitlab_shared_org` | |\n| `gitlab_shared_cell_local` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n| `gitlab_shared_org` | See [Cells / Organizations schemas](../cells/_index.md#available-cells--organization-schemas) | |\n\nMore schemas to be introduced with additional decomposed databases.\n\nThe usage of schema enforces the base class to be used:\n\n- `ApplicationRecord` for `gitlab_main_org`\n- `Ci::ApplicationRecord` for `gitlab_ci`\n- `Geo::TrackingBase` for `gitlab_geo`",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md#L25-L48"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "GITLAB_USES_RAILS_CONNECTS_TO_API; DISTINCT_FIXED_SOURCE_COMMITS_DO_NOT_ASSERT_INSTALLED_VERSION_OR_DEPLOYMENT"
+    },
+    {
+      "concept_id": "expand-contract",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/migrations/op_alter_column.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.921225+00:00",
+          "http_status": 200,
+          "sha256": "365d6694326966810a7c74b42e0cc07f27a597fe9b43a76e2c8c6518ef14d394",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4f607812c499614bd14d60e4201508d6ccc0a3384990083464957007b55b8d82.txt",
+          "line_count": 342,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "observed_utc": "2026-10-15T03:51:31.893256+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/roll/execute.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "query": "Pinned primary caller connecting aggregate construction or dual-write migration phases.",
+          "observed_utc": "2026-10-15T03:51:43.430109+00:00",
+          "http_status": 200,
+          "sha256": "a8172cdaf819e4eaa85cb1b625e001a1591950c27945603f0782b5e5fd230068",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/b63a2e685aad4a44e2aaee64f88d4ab97d9d242658239a89a31cd21c5abb9118.txt",
+          "line_count": 393,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "observed_utc": "2026-10-15T03:51:31.893256+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/backfill/templates/trigger.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.944788+00:00",
+          "http_status": 200,
+          "sha256": "244b07de1299418949373e342e076d94bbeb85855fc9f58f5ff3c7614f85b066",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/d458a3b449f6c9d78583b5d9c6d344dcf9f565aab2c046174f3afc80e183a1d9.txt",
+          "line_count": 10,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "observed_utc": "2026-10-15T03:51:31.893256+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/backfill/templates/function.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:07.229827+00:00",
+          "http_status": 200,
+          "sha256": "9d8f87185c64fdda2c498a092b8b1c88dd1082d0f7086ff0c739eb6f847a2fed",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cc4d6f7770a1f5950bafc8dc3b6aaafd267d33d1ce78b5df64dd013ff6a32c8c.txt",
+          "line_count": 31,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "observed_utc": "2026-10-15T03:51:31.893256+00:00"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb",
+          "revision": "39f78019749fcb2458260e65c987c59ca7a37a2c",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.252719Z",
+          "sha256": "b3034e542bdd353e0aa4e03828695d74f2d26db8bdf92bc07cc84dba82cc478e",
+          "line_count": 17,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fba08c9aef10d7369d6560adec7609719547b33e939b821e022d483eeb3a94e9.txt",
+          "excerpt_lines": [
+            1,
+            17
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: class InitializeConversionOfBulkImportEntitiesSourceXidToBigint < Gitlab::Database::Migration[2.3]\n4:   disable_ddl_transaction!\n5:   milestone '18.9'\n6: \n7:   TABLE = :bulk_import_entities\n8:   COLUMNS = %i[source_xid]\n9: \n10:   def up\n11:     initialize_conversion_of_integer_to_bigint(TABLE, COLUMNS)\n12:   end\n13: \n14:   def down\n15:     revert_initialize_conversion_of_integer_to_bigint(TABLE, COLUMNS)\n16:   end\n17: end",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "39f78019749fcb2458260e65c987c59ca7a37a2c",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/39f78019749fcb2458260e65c987c59ca7a37a2c/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.871013+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/a240b42691a9c725bbe671225260e02ec85fd8cea2da0bb69ac5354cd31abcf2.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb",
+          "revision": "39f78019749fcb2458260e65c987c59ca7a37a2c",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/39f78019749fcb2458260e65c987c59ca7a37a2c/db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.268703Z",
+          "sha256": "c596585ca11fd287bf5dcf222cd644609379c12ce36084cf4eecee1659ac1350",
+          "line_count": 17,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/03f6434642c125c9814f60648521d46f1c021f3ecbf75961eb7d1b4a89222b31.txt",
+          "excerpt_lines": [
+            1,
+            17
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: class BackfillBulkImportEntitiesSourceXidForBigintConversion < Gitlab::Database::Migration[2.3]\n4:   restrict_gitlab_migration gitlab_schema: :gitlab_main_org\n5:   milestone '18.9'\n6: \n7:   TABLE = :bulk_import_entities\n8:   COLUMNS = %i[source_xid]\n9: \n10:   def up\n11:     backfill_conversion_of_integer_to_bigint(TABLE, COLUMNS, sub_batch_size: 200)\n12:   end\n13: \n14:   def down\n15:     revert_backfill_conversion_of_integer_to_bigint(TABLE, COLUMNS)\n16:   end\n17: end",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "39f78019749fcb2458260e65c987c59ca7a37a2c",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/39f78019749fcb2458260e65c987c59ca7a37a2c/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.871013+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/a240b42691a9c725bbe671225260e02ec85fd8cea2da0bb69ac5354cd31abcf2.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:10.951471Z",
+          "sha256": "87c9d89f1714f8c4faf94efa293cd1437329df6d4efa66ed1793f3fe511f36fa",
+          "line_count": 24,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c2f8368d9151129159cdbeb0c895f27a236caf31348ca7db4682354a31cf588e.txt",
+          "excerpt_lines": [
+            1,
+            24
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: class FinalizeBulkImportEntitiesSourceXidBigintConversion < Gitlab::Database::Migration[2.3]\n4:   include Gitlab::Database::MigrationHelpers::ConvertToBigint\n5: \n6:   disable_ddl_transaction!\n7:   restrict_gitlab_migration gitlab_schema: :gitlab_main_org\n8:   milestone '19.0'\n9: \n10:   TABLE_NAME = :bulk_import_entities\n11:   COLUMN_NAME = :source_xid\n12: \n13:   def up\n14:     ensure_backfill_conversion_of_integer_to_bigint_is_finished(\n15:       TABLE_NAME,\n16:       [COLUMN_NAME],\n17:       primary_key: :id\n18:     )\n19:   end\n20: \n21:   def down\n22:     # no-op\n23:   end\n24: end",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:10.964949Z",
+          "sha256": "fbb160f25a4674a67d38cca775eb6ffab4beacc33f2c3f4e4064eca9eca72fbe",
+          "line_count": 32,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/561a9c8bf1ed8ed0fa3b89eef8c6280fb5bd45a16cbe9501d110cc387ca5895d.txt",
+          "excerpt_lines": [
+            1,
+            32
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: class SwapColumnsForBulkImportEntitiesSourceXidBigintConversion < Gitlab::Database::Migration[2.3]\n4:   include Gitlab::Database::MigrationHelpers::Swapping\n5:   include Gitlab::Database::MigrationHelpers::ConvertToBigint\n6: \n7:   disable_ddl_transaction!\n8:   milestone '19.0'\n9: \n10:   TABLE_NAME = :bulk_import_entities\n11:   COLUMN_NAME = :source_xid\n12: \n13:   def up\n14:     swap\n15:   end\n16: \n17:   def down\n18:     swap\n19:   end\n20: \n21:   private\n22: \n23:   def swap\n24:     # rubocop:disable Migration/WithLockRetriesDisallowedMethod -- bigint migration\n25:     with_lock_retries(raise_on_exhaustion: true) do\n26:       swap_columns(TABLE_NAME, COLUMN_NAME, convert_to_bigint_column(COLUMN_NAME))\n27: \n28:       reset_all_trigger_functions(TABLE_NAME)\n29:     end\n30:     # rubocop:enable Migration/WithLockRetriesDisallowedMethod\n31:   end\n32: end",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.002677Z",
+          "sha256": "9b9aa733da1e7049a4b0d1f4cfbb20cd2c96d68ea81a00346ef5852e121eab70",
+          "line_count": 16,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4669705fc1b6a67c5baf04c9daf1f8a1f8769a59ca7ff244a8495a879365e167.txt",
+          "excerpt_lines": [
+            1,
+            16
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: class CleanUpBigintConversionForBulkImportEntities < Gitlab::Database::Migration[2.3]\n4:   milestone '19.1'\n5: \n6:   TABLE = :bulk_import_entities\n7:   COLUMNS = %i[source_xid]\n8: \n9:   def up\n10:     cleanup_conversion_of_integer_to_bigint(TABLE, COLUMNS)\n11:   end\n12: \n13:   def down\n14:     restore_conversion_of_integer_to_bigint(TABLE, COLUMNS)\n15:   end\n16: end",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/database/migration.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.059401Z",
+          "sha256": "bd6b5992125ed596366cf35b0d36c5a3242debeec5b12189f1a5263be5bbeb9f",
+          "line_count": 92,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/96f0b2ef789c4af56112172f9266380612bc972e7b201d73f24c5759559711af.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: module Gitlab\n4:   module Database\n5:     class Migration\n6:       module LockRetriesConcern\n7:         extend ActiveSupport::Concern\n8: \n9:         included do\n10:           private\n11: \n12:           attr_accessor :with_lock_retries_used\n13:         end\n14: \n15:         def with_lock_retries_used!\n16:           self.with_lock_retries_used = true\n17:         end\n18: \n19:         def with_lock_retries_used?\n20:           with_lock_retries_used\n21:         end\n22:       end\n23: \n24:       # This implements a simple versioning scheme for migration helpers.\n25:       #\n26:       # We need to be able to version helpers, so we can change their behavior without\n27:       # altering the behavior of already existing migrations in incompatible ways.\n28:       #\n29:       # We can continue to change the behavior of helpers without bumping the version here,\n30:       # *if* the change is backwards-compatible.\n31:       #\n32:       # If not, we would typically override the helper method in a new MigrationHelpers::V[0-9]+\n33:       # class and create a new entry with a bumped version below.\n34:       #\n35:       # We use major version bumps to indicate significant changes and minor version bumps\n36:       # to indicate backwards-compatible or otherwise minor changes (e.g. a Rails version bump).\n37:       # However, this hasn't been strictly formalized yet.\n38: \n39:       class V1_0 < ActiveRecord::Migration[6.1]\n40:         include LockRetriesConcern",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "path": "lib/gitlab/database/migration_helpers.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration_helpers.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration_helpers.rb",
+          "query": "Resolve actual expansion, swap and cleanup helper implementations called by historical GitLab migrations.",
+          "observed_utc": "2026-10-15T04:11:45.414003+00:00",
+          "http_status": 200,
+          "sha256": "5a29a39a540ba590d45c47e0c91f5e4a5851b20c75dd442a2c4701847c0361eb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/1995c6e7a21df7899a6010a63ffee0ef613b80090309135ad0b1abc71ddad647.txt",
+          "line_count": 804,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "path": "lib/gitlab/database/migrations/conversions/bigint_converter.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/conversions/bigint_converter.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/conversions/bigint_converter.rb",
+          "query": "Implementing converter called by GitLab expansion and cleanup helpers.",
+          "observed_utc": "2026-10-15T04:12:55.221942+00:00",
+          "http_status": 200,
+          "sha256": "4146ed920382434985b5810ffc45a7fc286a1e6522c50587943872138681d3c4",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/1184e44c8e452cbff704243dd34e55ac13df0ef7e3ed296b63020040b4cc1a14.txt",
+          "line_count": 282,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "path": "lib/gitlab/database/migrations/trigger_helpers.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/trigger_helpers.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/trigger_helpers.rb",
+          "query": "Concrete compatibility trigger installed by historical GitLab conversion helper.",
+          "observed_utc": "2026-10-15T04:13:41.355801+00:00",
+          "http_status": 200,
+          "sha256": "05e09c4cc46c029f84fc3848f18732066aa91cc5f971d1dd7fee71d4ca12911e",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/f1e8f13998543abe9323636c79bb7646a772c39abd3f9e5f7fcc56a1d6330684.txt",
+          "line_count": 73,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "path": "lib/gitlab/database/unidirectional_copy_trigger.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/unidirectional_copy_trigger.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/unidirectional_copy_trigger.rb",
+          "query": "Wave three: actual comparative execution and expand-contract migration helpers.",
+          "observed_utc": "2026-10-15T04:10:10.810537+00:00",
+          "http_status": 200,
+          "sha256": "a27a0022393cf4ac0fbd4d5e04dbe484653e80bd704550b03732a049628bcf1a",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/3163722ea8f2957500001dc272a9b0192157e4e6a53461008541b6c6e13492cb.txt",
+          "line_count": 106,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "mechanism": "A mudança começa pela ampliação da estrutura, mantém a compatibilidade enquanto os dados são copiados e só depois remove a representação antiga. O pgroll implementa essas fases: duplica a coluna, instala triggers entre as representações, preenche as linhas antigas e oferece uma conclusão que remove a coluna e os auxiliares anteriores. No caso real do GitLab, as migrações de source_xid acrescentam a coluna de transição, agendam backfill em sublotes de 200, exigem sua conclusão, trocam as colunas e chamam a limpeza. O helper e seu conversor mostram como a coluna adicional e o trigger de cópia são criados e depois removidos.",
+      "limits": "O pgroll e a migração GitLab são referências independentes; o GitLab usa seus próprios helpers neste caso. Os arquivos de expansão e backfill estão em um commit histórico, enquanto a finalização, a troca e a limpeza aparecem em outro. A implementação dos helpers também está fixada e não é apresentada como prova de que seus bytes atuais foram os executados na etapa histórica. Os arquivos comprovam a definição das fases e da compatibilidade, não uma execução realizada nesta sessão. A chamada Complete do pgroll é uma etapa explícita e não prova, por si só, que todos os clientes antigos saíram ou que toda divergência foi reconciliada.",
+      "base_scope": "pgroll implements expansion by column duplication and synchronization triggers, ordered backfill, and explicit contraction that removes old storage and migration helpers.",
+      "application_scope": "GitLab historical migrations invoke initialization, bounded backfill, completion gate, swap and cleanup; concrete helper -> converter -> copy-trigger implementations establish the actual compatibility mechanism.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4f607812c499614bd14d60e4201508d6ccc0a3384990083464957007b55b8d82.txt",
+          "sha256": "365d6694326966810a7c74b42e0cc07f27a597fe9b43a76e2c8c6518ef14d394",
+          "hits": [
+            {
+              "term": "expand physical representation and forward synchronization",
+              "start_line": 34,
+              "end_line": 60,
+              "excerpt": "\t// Duplicate the column on the underlying table.\n\td := duplicatorForOperations(ops, conn, table, column).\n\t\tWithName(column.Name, TemporaryName(o.Column))\n\tif err := d.Execute(ctx); err != nil {\n\t\treturn nil, fmt.Errorf(\"failed to duplicate column: %w\", err)\n\t}\n\n\t// Copy the columns from table columns, so we can use it later\n\t// in the down trigger with the physical name\n\tupColumns := make(map[string]*schema.Column)\n\tfor name, col := range table.Columns {\n\t\tupColumns[name] = col\n\t}\n\n\t// Add a trigger to copy values from the old column to the new, rewriting values using the `up` SQL.\n\ttriggers := make([]backfill.OperationTrigger, 0, 2)\n\ttriggers = append(\n\t\ttriggers,\n\t\tbackfill.OperationTrigger{\n\t\t\tName:           backfill.TriggerName(o.Table, o.Column),\n\t\t\tDirection:      backfill.TriggerDirectionUp,\n\t\t\tTableName:      table.Name,\n\t\t\tColumns:        upColumns,\n\t\t\tPhysicalColumn: TemporaryName(o.Column),\n\t\t\tSQL:            o.upSQLForOperations(ops),\n\t\t},\n\t)",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L34-L60"
+            },
+            {
+              "term": "backward synchronization and backfill task",
+              "start_line": 76,
+              "end_line": 101,
+              "excerpt": "\t// Add a trigger to copy values from the new column to the old.\n\ttriggers = append(\n\t\ttriggers,\n\t\tbackfill.OperationTrigger{\n\t\t\tName:           backfill.TriggerName(o.Table, TemporaryName(o.Column)),\n\t\t\tDirection:      backfill.TriggerDirectionDown,\n\t\t\tTableName:      table.Name,\n\t\t\tColumns:        table.Columns,\n\t\t\tPhysicalColumn: oldPhysicalColumn,\n\t\t\tSQL:            o.downSQLForOperations(ops),\n\t\t},\n\t)\n\ttask := backfill.NewTask(table, triggers...)\n\n\tvar dbActions []DBAction\n\t// perform any operation specific start steps\n\tfor _, op := range ops {\n\t\tstartOp, err := op.Start(ctx, l, conn, s)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\ttask.AddTriggers(startOp.BackfillTask)\n\t\tdbActions = append(dbActions, startOp.Actions...)\n\t}\n\n\treturn &StartResult{Actions: dbActions, BackfillTask: task}, nil",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L76-L101"
+            },
+            {
+              "term": "contract old representation and triggers",
+              "start_line": 127,
+              "end_line": 140,
+              "excerpt": "\ttable.Name = o.Table\n\n\t// Rename the new column to the old column name\n\treturn append(dbActions, []DBAction{\n\t\tNewAlterSequenceOwnerAction(conn, table.Name, column.Name, TemporaryName(column.Name)),\n\t\tNewDropColumnAction(conn, table.Name, o.Column),\n\t\tNewDropFunctionAction(\n\t\t\tconn,\n\t\t\tbackfill.TriggerFunctionName(o.Table, o.Column),\n\t\t\tbackfill.TriggerFunctionName(o.Table, TemporaryName(o.Column)),\n\t\t),\n\t\tNewDropColumnAction(conn, o.Table, backfill.CNeedsBackfillColumn),\n\t\tNewRenameDuplicatedColumnAction(conn, table, o.Column),\n\t}...), nil",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L127-L140"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/b63a2e685aad4a44e2aaee64f88d4ab97d9d242658239a89a31cd21c5abb9118.txt",
+          "sha256": "a8172cdaf819e4eaa85cb1b625e001a1591950c27945603f0782b5e5fd230068",
+          "hits": [
+            {
+              "term": "install triggers before copying old rows",
+              "start_line": 368,
+              "end_line": 386,
+              "excerpt": "func (m *Roll) performBackfills(ctx context.Context, job *backfill.Job, cfg *backfill.Config) error {\n\tbf := backfill.New(m.pgConn, cfg)\n\n\tbf.CreateTriggers(ctx, job)\n\n\tfor _, table := range job.Tables {\n\t\tm.logger.LogBackfillStart(table.Name)\n\n\t\tif err := bf.Start(ctx, table); err != nil {\n\t\t\terrRollback := m.Rollback(ctx)\n\n\t\t\treturn errors.Join(\n\t\t\t\tfmt.Errorf(\"unable to backfill table %q: %w\", table.Name, err),\n\t\t\t\terrRollback,\n\t\t\t)\n\t\t}\n\n\t\tm.logger.LogBackfillComplete(table.Name)\n\t}",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go#L368-L386"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/d458a3b449f6c9d78583b5d9c6d344dcf9f565aab2c046174f3afc80e183a1d9.txt",
+          "sha256": "244b07de1299418949373e342e076d94bbeb85855fc9f58f5ff3c7614f85b066",
+          "hits": [
+            {
+              "term": "trigger runs on real inserts and updates",
+              "start_line": 5,
+              "end_line": 9,
+              "excerpt": "const Trigger = `CREATE OR REPLACE TRIGGER {{ .Name | qi }}\n    BEFORE UPDATE OR INSERT\n    ON {{ .TableName | qi }}\n    FOR EACH ROW\n    EXECUTE PROCEDURE {{ .Name | qi }}();",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go#L5-L9"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cc4d6f7770a1f5950bafc8dc3b6aaafd267d33d1ce78b5df64dd013ff6a32c8c.txt",
+          "sha256": "9d8f87185c64fdda2c498a092b8b1c88dd1082d0f7086ff0c739eb6f847a2fed",
+          "hits": [
+            {
+              "term": "synchronize represented column in the row",
+              "start_line": 17,
+              "end_line": 29,
+              "excerpt": "    BEGIN\n      SELECT current_setting\n        INTO search_path\n        FROM current_setting('search_path');\n\n      IF search_path {{- if eq .Direction \"up\" }} != {{- else }} = {{- end }} {{ .LatestSchema | ql }} THEN\n      {{- $physicalColumn := .PhysicalColumn | qi  }}{{ range $s := .SQL }}\n        NEW.{{ $physicalColumn  }} = {{ $s }};\n      {{- end }}\n        NEW.{{ .NeedsBackfillColumn | qi }} = false;\n      END IF;\n\n      RETURN NEW;",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go#L17-L29"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fba08c9aef10d7369d6560adec7609719547b33e939b821e022d483eeb3a94e9.txt",
+          "sha256": "b3034e542bdd353e0aa4e03828695d74f2d26db8bdf92bc07cc84dba82cc478e",
+          "hits": [
+            {
+              "term": "historical expansion call",
+              "start_line": 7,
+              "end_line": 15,
+              "excerpt": "  TABLE = :bulk_import_entities\n  COLUMNS = %i[source_xid]\n\n  def up\n    initialize_conversion_of_integer_to_bigint(TABLE, COLUMNS)\n  end\n\n  def down\n    revert_initialize_conversion_of_integer_to_bigint(TABLE, COLUMNS)",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb#L7-L15"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/03f6434642c125c9814f60648521d46f1c021f3ecbf75961eb7d1b4a89222b31.txt",
+          "sha256": "c596585ca11fd287bf5dcf222cd644609379c12ce36084cf4eecee1659ac1350",
+          "hits": [
+            {
+              "term": "historical bounded backfill call",
+              "start_line": 7,
+              "end_line": 15,
+              "excerpt": "  TABLE = :bulk_import_entities\n  COLUMNS = %i[source_xid]\n\n  def up\n    backfill_conversion_of_integer_to_bigint(TABLE, COLUMNS, sub_batch_size: 200)\n  end\n\n  def down\n    revert_backfill_conversion_of_integer_to_bigint(TABLE, COLUMNS)",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb#L7-L15"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/c2f8368d9151129159cdbeb0c895f27a236caf31348ca7db4682354a31cf588e.txt",
+          "sha256": "87c9d89f1714f8c4faf94efa293cd1437329df6d4efa66ed1793f3fe511f36fa",
+          "hits": [
+            {
+              "term": "explicit completion gate",
+              "start_line": 13,
+              "end_line": 18,
+              "excerpt": "  def up\n    ensure_backfill_conversion_of_integer_to_bigint_is_finished(\n      TABLE_NAME,\n      [COLUMN_NAME],\n      primary_key: :id\n    )",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb#L13-L18"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/561a9c8bf1ed8ed0fa3b89eef8c6280fb5bd45a16cbe9501d110cc387ca5895d.txt",
+          "sha256": "fbb160f25a4674a67d38cca775eb6ffab4beacc33f2c3f4e4064eca9eca72fbe",
+          "hits": [
+            {
+              "term": "column swap and trigger reset",
+              "start_line": 23,
+              "end_line": 29,
+              "excerpt": "  def swap\n    # rubocop:disable Migration/WithLockRetriesDisallowedMethod -- bigint migration\n    with_lock_retries(raise_on_exhaustion: true) do\n      swap_columns(TABLE_NAME, COLUMN_NAME, convert_to_bigint_column(COLUMN_NAME))\n\n      reset_all_trigger_functions(TABLE_NAME)\n    end",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb#L23-L29"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/4669705fc1b6a67c5baf04c9daf1f8a1f8769a59ca7ff244a8495a879365e167.txt",
+          "sha256": "9b9aa733da1e7049a4b0d1f4cfbb20cd2c96d68ea81a00346ef5852e121eab70",
+          "hits": [
+            {
+              "term": "cleanup and reversal are explicitly defined",
+              "start_line": 6,
+              "end_line": 15,
+              "excerpt": "  TABLE = :bulk_import_entities\n  COLUMNS = %i[source_xid]\n\n  def up\n    cleanup_conversion_of_integer_to_bigint(TABLE, COLUMNS)\n  end\n\n  def down\n    restore_conversion_of_integer_to_bigint(TABLE, COLUMNS)\n  end",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb#L6-L15"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration_helpers.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/1995c6e7a21df7899a6010a63ffee0ef613b80090309135ad0b1abc71ddad647.txt",
+          "sha256": "5a29a39a540ba590d45c47e0c91f5e4a5851b20c75dd442a2c4701847c0361eb",
+          "hits": [
+            {
+              "term": "helper calls implementing converter",
+              "start_line": 451,
+              "end_line": 454,
+              "excerpt": "      def initialize_conversion_of_integer_to_bigint(table, columns, primary_key: :id) # rubocop:disable Lint/UnusedMethodArgument -- for backward compatibility, don't remove primary_key\n        Gitlab::Database::Migrations::Conversions::BigintConverter\n          .new(self, table, columns)\n          .init",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration_helpers.rb#L451-L454"
+            },
+            {
+              "term": "cleanup calls implementing converter",
+              "start_line": 467,
+              "end_line": 483,
+              "excerpt": "      # Similar to `revert_initialize_conversion_of_integer_to_bigint`,\n      # but `cleanup_conversion_of_integer_to_bigint` updates the yaml file\n      def cleanup_conversion_of_integer_to_bigint(table, columns)\n        Gitlab::Database::Migrations::Conversions::BigintConverter\n          .new(self, table, columns)\n          .cleanup\n      end\n\n      # Reverts `cleanup_conversion_of_integer_to_bigint`\n      #\n      # table - The name of the database table containing the columns\n      # columns - The name, or array of names, of the column(s) that we have converted to bigint.\n      # primary_key - The name of the primary key column (most often :id)\n      def restore_conversion_of_integer_to_bigint(table, columns, primary_key: :id) # rubocop:disable Lint/UnusedMethodArgument -- for backward compatibility, don't remove primary_key\n        Gitlab::Database::Migrations::Conversions::BigintConverter\n          .new(self, table, columns)\n          .restore_cleanup",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration_helpers.rb#L467-L483"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/conversions/bigint_converter.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/1184e44c8e452cbff704243dd34e55ac13df0ef7e3ed296b63020040b4cc1a14.txt",
+          "sha256": "4146ed920382434985b5810ffc45a7fc286a1e6522c50587943872138681d3c4",
+          "hits": [
+            {
+              "term": "create compatibility columns and trigger",
+              "start_line": 31,
+              "end_line": 44,
+              "excerpt": "          def init\n            verify_table_and_columns_exist!\n            return if all_converted?\n\n            verify_all_integer_ids_are_included!\n            check_trigger_permissions!\n            # The reason why `disable_ddl_transaction!` is required\n            # for `initialize_conversion_of_integer_to_bigint`\n            migration.with_lock_retries do\n              # Only integer columns should be considered\n              # because in new instance, every ID will be bigint and should be skipped for conversion\n              create_bigint_columns(source: integer_columns, type: 'bigint')\n              create_trigger\n            end",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/conversions/bigint_converter.rb#L31-L44"
+            },
+            {
+              "term": "cleanup removes added columns and trigger",
+              "start_line": 47,
+              "end_line": 68,
+              "excerpt": "          def revert_init\n            verify_table_and_columns_exist!\n            check_trigger_permissions!\n            # Same as what `initialize_conversion_of_integer_to_bigint` does\n            migration.with_lock_retries do\n              remove_bigint_columns\n              remove_trigger\n            end\n          end\n\n          def restore_cleanup\n            verify_table_and_columns_exist!\n            check_trigger_permissions!\n            # All given columns should be bigint for now\n            # If source is integer_columns, there will be no columns to restore\n            create_bigint_columns(source: selected_columns, type: 'integer')\n            create_trigger\n          end\n\n          def cleanup\n            revert_init\n            update_file_for_integer_ids_not_yet_initialized_to_bigint",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/conversions/bigint_converter.rb#L47-L68"
+            },
+            {
+              "term": "actual physical expansion and trigger installation",
+              "start_line": 160,
+              "end_line": 192,
+              "excerpt": "          def create_bigint_columns(source:, type:)\n            bigint_columns_for_conversion(source: source).each do |options|\n              migration.add_column(\n                table, options[:name], type,\n                if_not_exists: true, **options.except(:name)\n              )\n            end\n\n            clear_memoization(:all_columns)\n          end\n\n          def remove_bigint_columns\n            # We don't need to worry about the `columns` are type integer or bigint\n            # For reverting the initialization, the `columns` are type integer\n            # For cleaning up the conversion, the `columns` will be type bigint\n            # We just need to remove the columns with `_convert_to_bigint` suffix\n            bigint_columns_for_conversion(source: selected_columns).each do |options|\n              migration.remove_column(table, options[:name], if_exists: true)\n            end\n\n            clear_memoization(:all_columns)\n          end\n\n          # Since trigger checks if bigint column for conversion exists or not,\n          # the full list of columns can be used to ensure same trigger name can be used\n          # across all different instances.\n          def create_trigger\n            migration.install_rename_triggers(table, *column_pair)\n          end\n\n          def remove_trigger\n            trigger_name = migration.rename_trigger_name(table, *column_pair)\n            migration.remove_rename_triggers(table, trigger_name)",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/conversions/bigint_converter.rb#L160-L192"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/trigger_helpers.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/f1e8f13998543abe9323636c79bb7646a772c39abd3f9e5f7fcc56a1d6330684.txt",
+          "sha256": "05e09c4cc46c029f84fc3848f18732066aa91cc5f971d1dd7fee71d4ca12911e",
+          "hits": [
+            {
+              "term": "converter trigger API reaches copy trigger implementation",
+              "start_line": 14,
+              "end_line": 22,
+              "excerpt": "        def install_rename_triggers(table, old, new, trigger_name: nil)\n          Gitlab::Database::UnidirectionalCopyTrigger.on_table(table, connection: connection).create(old, new,\n            trigger_name: trigger_name)\n        end\n\n        # Removes the triggers used for renaming a column concurrently.\n        def remove_rename_triggers(table, trigger)\n          Gitlab::Database::UnidirectionalCopyTrigger.on_table(table, connection: connection).drop(trigger)\n        end",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/trigger_helpers.rb#L14-L22"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/unidirectional_copy_trigger.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/3163722ea8f2957500001dc272a9b0192157e4e6a53461008541b6c6e13492cb.txt",
+          "sha256": "a27a0022393cf4ac0fbd4d5e04dbe484653e80bd704550b03732a049628bcf1a",
+          "hits": [
+            {
+              "term": "actual trigger function and BEFORE INSERT OR UPDATE trigger",
+              "start_line": 16,
+              "end_line": 49,
+              "excerpt": "      def create(from_column_names, to_column_names, trigger_name: nil)\n        from_column_names, to_column_names = check_column_names!(from_column_names, to_column_names)\n        trigger_name ||= unchecked_name(from_column_names, to_column_names)\n\n        assignment_clauses = assignment_clauses_for_columns(from_column_names, to_column_names)\n\n        connection.execute(<<~SQL)\n          CREATE OR REPLACE FUNCTION #{trigger_name}()\n          RETURNS trigger AS\n          $BODY$\n          DECLARE\n            row_data JSONB;\n          BEGIN\n            row_data := to_jsonb(NEW);\n            #{assignment_clauses.gsub(/(?<=\\n)^/, '  ')}\n            RETURN NEW;\n          END;\n          $BODY$\n          LANGUAGE 'plpgsql'\n          VOLATILE\n        SQL\n\n        connection.execute(<<~SQL)\n          DROP TRIGGER IF EXISTS #{trigger_name}\n          ON #{quoted_table_name}\n        SQL\n\n        connection.execute(<<~SQL)\n          CREATE TRIGGER #{trigger_name}\n          BEFORE INSERT OR UPDATE\n          ON #{quoted_table_name}\n          FOR EACH ROW\n          EXECUTE FUNCTION #{trigger_name}()\n        SQL",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/unidirectional_copy_trigger.rb#L16-L49"
+            },
+            {
+              "term": "actual removal of compatibility trigger/function",
+              "start_line": 52,
+              "end_line": 54,
+              "excerpt": "      def drop(trigger_name)\n        connection.execute(\"DROP TRIGGER IF EXISTS #{trigger_name} ON #{quoted_table_name}\")\n        connection.execute(\"DROP FUNCTION IF EXISTS #{trigger_name}()\")",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/unidirectional_copy_trigger.rb#L52-L54"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "PARALLEL_IMPLEMENTING_MIGRATION_BASE; GITLAB_HELPERS_ARE_DIRECT_APPLICATION_CODE; HISTORICAL_PHASE_REVISIONS_PRESERVED"
+    },
+    {
+      "concept_id": "parallel-run",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "github/scientist",
+          "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+          "path": "lib/scientist/experiment.rb",
+          "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+          "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:26.319068+00:00",
+          "http_status": 200,
+          "sha256": "7179870045960ffc150277d93d1244e2bf10edcac1f73cf5094eacef417c8379",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/21a7a3da804585d5a00705d5ce4886ffb6ab91fdf91cd8e6c8852215abf7adc6.txt",
+          "line_count": 351,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "github/scientist",
+            "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+            "observed_utc": "2026-10-15T03:52:40.711575+00:00",
+            "http_status": 200,
+            "sha256": "4db6ecff4859ffd352fe66d20c66808f3d2b6536cbca144bf3b6a737d9b0551b",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/41d254ee8d08d6ec9b9fa9a2ac778c4e0c3e0de28e391654eb747f599041e73e.txt",
+            "line_count": 22,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 7769,
+            "observed_utc": "2026-10-15T03:46:42.443264+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "github/scientist",
+          "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+          "path": "lib/scientist/observation.rb",
+          "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+          "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:26.327737+00:00",
+          "http_status": 200,
+          "sha256": "8b7b90d1ecf937687580efeb9d3e58d8b9e2e5bf879be268b63ae1ff51ffe329",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/c5b675177a339e14d7c5fa14c0e9621b2f843b3550acda46d555585cebacefdd.txt",
+          "line_count": 114,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "github/scientist",
+            "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+            "observed_utc": "2026-10-15T03:52:40.711575+00:00",
+            "http_status": 200,
+            "sha256": "4db6ecff4859ffd352fe66d20c66808f3d2b6536cbca144bf3b6a737d9b0551b",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/41d254ee8d08d6ec9b9fa9a2ac778c4e0c3e0de28e391654eb747f599041e73e.txt",
+            "line_count": 22,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 7769,
+            "observed_utc": "2026-10-15T03:46:42.443264+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "github/scientist",
+          "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+          "path": "lib/scientist/result.rb",
+          "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/result.rb",
+          "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/result.rb",
+          "query": "Wave three: actual comparative execution and expand-contract migration helpers.",
+          "observed_utc": "2026-10-15T04:10:10.810154+00:00",
+          "http_status": 200,
+          "sha256": "347e751eacdeab85474eb19917033815ac0b98c16a2832e16e328e36b3e63d75",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/c861684be0a5b348e06954d874e3a604d9f5ac7d871d1fcd57c12a0cad29fa23.txt",
+          "line_count": 77,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "github/scientist",
+            "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+            "observed_utc": "2026-10-15T03:52:40.711575+00:00",
+            "http_status": 200,
+            "sha256": "4db6ecff4859ffd352fe66d20c66808f3d2b6536cbca144bf3b6a737d9b0551b",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/41d254ee8d08d6ec9b9fa9a2ac778c4e0c3e0de28e391654eb747f599041e73e.txt",
+            "line_count": 22,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 7769,
+            "observed_utc": "2026-10-15T03:46:42.443264+00:00"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/redis/multi_store.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L439-L457",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L439-L457",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.105613Z",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "line_count": 519,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2b26e2bd43bba3e83144efd2b5247501642829c9b0b390e8c4931150a20c2cce.txt",
+          "excerpt_lines": [
+            439,
+            457
+          ],
+          "excerpt": "439:       # Run the entire pipeline on both stores. We assume that `&block` is idempotent.\n440:       def pipelined_both(command_name, ...)\n441:         result_default = send_command(default_store, command_name, ...)\n442: \n443:         begin\n444:           result_non_default = send_command(non_default_store, command_name, ...)\n445:         rescue StandardError => e\n446:           log_error(e, command_name, multi_store_error_message: FAILED_TO_RUN_PIPELINE)\n447:         end\n448: \n449:         # Pipelined commands return an array with all results. If they differ, log an error\n450:         if result_non_default && result_non_default != result_default\n451:           error = PipelinedDiffError.new(result_non_default, result_default)\n452:           error.set_backtrace(Thread.current.backtrace[1..]) # Manually set backtrace, since the error is not `raise`d\n453: \n454:           log_error(error, command_name)\n455:           increment_pipelined_command_error_count(command_name)\n456:         end\n457: ",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "mechanism": "A execução comparativa aplica os comportamentos antigo e candidato e confronta seus resultados, conservando uma resposta escolhida como autoridade. O Scientist registra os dois comportamentos, executa cada um por meio de Observation e monta um Result que compara os candidatos com o controle. A chamada run() padrão publica as observações e devolve o valor do controle. O GitLab faz esse trabalho em pipelined_both: executa o mesmo pipeline nos dois armazenamentos Redis, registra os resultados diferentes e devolve o resultado do armazenamento padrão.",
+      "limits": "O paralelismo aqui é lógico: os dois comportamentos são exercitados para comparação; os trechos citados executam as chamadas sequencialmente e não garantem simultaneidade de threads ou processos. Scientist e o MultiStore GitLab são exemplos independentes; não se afirma que o GitLab use Scientist. Os blocos podem produzir efeitos reais, e repetir um bloco não idempotente pode duplicá-los. A comparação depende das entradas, da regra de equivalência e das diferenças ignoradas. Ela não prova equivalência global de todos os comportamentos do produto.",
+      "base_scope": "Scientist actually executes each registered behavior, compares candidate observations to control through Result and returns the default control result.",
+      "application_scope": "GitLab pipelined_both executes both storage pipelines, observes mismatches and retains default-store response authority.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/21a7a3da804585d5a00705d5ce4886ffb6ab91fdf91cd8e6c8852215abf7adc6.txt",
+          "sha256": "7179870045960ffc150277d93d1244e2bf10edcac1f73cf5094eacef417c8379",
+          "hits": [
+            {
+              "term": "real comparative execution of every behavior",
+              "start_line": 322,
+              "end_line": 333,
+              "excerpt": "  # Internal: Generate the observations and create the result from those and the control.\n  def generate_result(name)\n    observations = []\n\n    behaviors.keys.shuffle.each do |key|\n      block = behaviors[key]\n      fabricated_duration = @_scientist_fabricated_durations && @_scientist_fabricated_durations[key]\n      observations << Scientist::Observation.new(key, self, fabricated_duration: fabricated_duration, &block)\n    end\n\n    control = observations.detect { |o| o.name == name }\n    Scientist::Result.new(self, observations, control)",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb#L322-L333"
+            },
+            {
+              "term": "publish and preserve control return authority",
+              "start_line": 241,
+              "end_line": 263,
+              "excerpt": "    result = generate_result(name)\n\n    if @_scientist_after_run\n      @_scientist_after_run.call(result)\n    end\n\n    begin\n      publish(result)\n    rescue StandardError => ex\n      raised :publish, ex\n    end\n\n    if raise_on_mismatches? && result.mismatched?\n      if @_scientist_custom_mismatch_error\n        raise @_scientist_custom_mismatch_error.new(self.name, result)\n      else\n        raise MismatchError.new(self.name, result)\n      end\n    end\n\n    control = result.control\n    raise control.exception if control.raised?\n    control.value",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb#L241-L263"
+            },
+            {
+              "term": "equivalence delegates to actual observation comparator",
+              "start_line": 200,
+              "end_line": 206,
+              "excerpt": "  # Internal: compare two observations, using the configured compare and compare_errors lambdas if present.\n  def observations_are_equivalent?(a, b)\n    a.equivalent_to? b, @_scientist_comparator, @_scientist_error_comparator\n  rescue StandardError => ex\n    raised :compare, ex\n    false\n  end",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb#L200-L206"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/c5b675177a339e14d7c5fa14c0e9621b2f843b3550acda46d555585cebacefdd.txt",
+          "sha256": "8b7b90d1ecf937687580efeb9d3e58d8b9e2e5bf879be268b63ae1ff51ffe329",
+          "hits": [
+            {
+              "term": "behavior block actually executes",
+              "start_line": 26,
+              "end_line": 36,
+              "excerpt": "  def initialize(name, experiment, fabricated_duration: nil, &block)\n    @name       = name\n    @experiment = experiment\n\n    start_wall_time, start_cpu_time = capture_times unless fabricated_duration\n\n    begin\n      @value = block.call\n    rescue *RESCUES => e\n      @exception = e\n    end",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb#L26-L36"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/result.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/c861684be0a5b348e06954d874e3a604d9f5ac7d871d1fcd57c12a0cad29fa23.txt",
+          "sha256": "347e751eacdeab85474eb19917033815ac0b98c16a2832e16e328e36b3e63d75",
+          "hits": [
+            {
+              "term": "control and candidates are established",
+              "start_line": 28,
+              "end_line": 35,
+              "excerpt": "  def initialize(experiment, observations = [], control = nil)\n    @experiment   = experiment\n    @observations = observations\n    @control      = control\n    @candidates   = observations - [control]\n    evaluate_candidates\n\n    freeze",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/result.rb#L28-L35"
+            },
+            {
+              "term": "candidate comparisons produce mismatch set",
+              "start_line": 63,
+              "end_line": 75,
+              "excerpt": "  # Internal: evaluate the candidates to find mismatched and ignored results\n  #\n  # Sets @ignored and @mismatched with the ignored and mismatched candidates.\n  def evaluate_candidates\n    mismatched = candidates.reject do |candidate|\n      experiment.observations_are_equivalent?(control, candidate)\n    end\n\n    @ignored = mismatched.select do |candidate|\n      experiment.ignore_mismatched_observation? control, candidate\n    end\n\n    @mismatched = mismatched - @ignored",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/result.rb#L63-L75"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2b26e2bd43bba3e83144efd2b5247501642829c9b0b390e8c4931150a20c2cce.txt",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "hits": [
+            {
+              "term": "two executions, mismatch detection and retained authority",
+              "start_line": 439,
+              "end_line": 458,
+              "excerpt": "      # Run the entire pipeline on both stores. We assume that `&block` is idempotent.\n      def pipelined_both(command_name, ...)\n        result_default = send_command(default_store, command_name, ...)\n\n        begin\n          result_non_default = send_command(non_default_store, command_name, ...)\n        rescue StandardError => e\n          log_error(e, command_name, multi_store_error_message: FAILED_TO_RUN_PIPELINE)\n        end\n\n        # Pipelined commands return an array with all results. If they differ, log an error\n        if result_non_default && result_non_default != result_default\n          error = PipelinedDiffError.new(result_non_default, result_default)\n          error.set_backtrace(Thread.current.backtrace[1..]) # Manually set backtrace, since the error is not `raise`d\n\n          log_error(error, command_name)\n          increment_pipelined_command_error_count(command_name)\n        end\n\n        result_default",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L439-L458"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "PARALLEL_PRIMARY_COMPARATIVE_EXECUTION_EXAMPLES_NOT_A_DEPENDENCY_CLAIM"
+    },
+    {
+      "concept_id": "service-extraction",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "repo": "grpc/grpc-go",
+          "revision": "4d4d42843b7154ede87a6cead454ccf8410baea8",
+          "path": "server.go",
+          "url": "https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/server.go",
+          "raw_url": "https://raw.githubusercontent.com/grpc/grpc-go/4d4d42843b7154ede87a6cead454ccf8410baea8/server.go",
+          "observed_utc": "2026-10-15T03:51:35.196562+00:00",
+          "http_status": 200,
+          "sha256": "b0d29e387a484c03a6e0333de5e0d128289a9056054a2208565a44506e369e22",
+          "line_count": 1997,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/2a0d08804dade04c1663cb3e3942ad2d26388d834406646f05b29f4b3269a7d0.txt",
+          "kind": "FILE",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "status": "READ",
+            "repo": "grpc/grpc-go",
+            "revision": "4d4d42843b7154ede87a6cead454ccf8410baea8",
+            "path": "LICENSE",
+            "url": "https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T01:28:27.428893Z",
+            "http_status": 200,
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-e3d196480056078c44c0d01491461815b03715588379488cc2d85f0668f14c8b.txt",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that i",
+            "kind": "LICENSE",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e3d196480056078c44c0d01491461815b03715588379488cc2d85f0668f14c8b.txt",
+            "local_verified_utc": "2026-10-15T03:51:33.966390+00:00",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 23092,
+            "observed_utc": "2026-10-15T01:18:56.665341Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T17:40:45Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlab-org/gitaly",
+          "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+          "path": "proto/operations.proto",
+          "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/operations.proto",
+          "raw_url": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/proto%2Foperations.proto/raw?ref=987854bc5e60a1b9c799eaf7220cb36964cc2356",
+          "query": "Primary GitLab repository API raw; compare content to previously fetched pinned Git blob.",
+          "observed_utc": "2026-10-15T04:13:17.179021+00:00",
+          "http_status": 200,
+          "sha256": "c697f9649732d18c62c67b50a09026aba9112086c8765829f995ad18306ed7ab",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/ab8b17f5f2cdb9151b2f9a044e5dbefe052217aafd5f8026eb39483e8f78a936.txt",
+          "line_count": 1191,
+          "capture_method": "PRIMARY_HTTP_API_WITH_PINNED_GIT_BLOB_CROSSCHECK",
+          "git_blob_oid": "7845b0caba648688e2c5ecce69793527b8748252",
+          "git_crosscheck_utc": "2026-10-15T04:17:02.799273+00:00",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlab-org/gitaly",
+            "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+            "path": "LICENSE",
+            "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/LICENSE",
+            "raw_url": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/LICENSE/raw?ref=987854bc5e60a1b9c799eaf7220cb36964cc2356",
+            "query": "Check primary repository API as alternate HTTP transport; preserve Git verification if denied.",
+            "observed_utc": "2026-10-15T04:12:55.222631+00:00",
+            "http_status": 200,
+            "sha256": "a60a07cfafa66191227557322bd764aee897a53fff11a1ade3630b58295042c3",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/c9a4324b1676bbd05742015efb3b5fca6bfd6004a82f2a703d560cd4b9f358bb.txt",
+            "line_count": 31,
+            "capture_method": "PRIMARY_HTTP_API_WITH_PINNED_GIT_BLOB_CROSSCHECK",
+            "git_blob_oid": "0392d4f052808d00604ad2fe446de86fde4d0d0f",
+            "git_crosscheck_utc": "2026-10-15T04:17:02.799057+00:00",
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlab-org/gitaly",
+          "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+          "path": "proto/go/gitalypb/operations_grpc.pb.go",
+          "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/go/gitalypb/operations_grpc.pb.go",
+          "raw_url": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/proto%2Fgo%2Fgitalypb%2Foperations_grpc.pb.go/raw?ref=987854bc5e60a1b9c799eaf7220cb36964cc2356",
+          "query": "Primary GitLab repository API raw; compare content to previously fetched pinned Git blob.",
+          "observed_utc": "2026-10-15T04:13:17.179551+00:00",
+          "http_status": 200,
+          "sha256": "93a023024e575e1703a65558caffe31fdab2706b4c9984abb004f174bd40b2b9",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/7b187b8e05eefa94c39bd84d9d0de8a84a0b70c6d5a6876c2fb0525f4eeb710f.txt",
+          "line_count": 882,
+          "capture_method": "PRIMARY_HTTP_API_WITH_PINNED_GIT_BLOB_CROSSCHECK",
+          "git_blob_oid": "f96626b59d499d3c67e37505a70e1e55836fae63",
+          "git_crosscheck_utc": "2026-10-15T04:17:02.799277+00:00",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlab-org/gitaly",
+            "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+            "path": "LICENSE",
+            "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/LICENSE",
+            "raw_url": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/LICENSE/raw?ref=987854bc5e60a1b9c799eaf7220cb36964cc2356",
+            "query": "Check primary repository API as alternate HTTP transport; preserve Git verification if denied.",
+            "observed_utc": "2026-10-15T04:12:55.222631+00:00",
+            "http_status": 200,
+            "sha256": "a60a07cfafa66191227557322bd764aee897a53fff11a1ade3630b58295042c3",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/c9a4324b1676bbd05742015efb3b5fca6bfd6004a82f2a703d560cd4b9f358bb.txt",
+            "line_count": 31,
+            "capture_method": "PRIMARY_HTTP_API_WITH_PINNED_GIT_BLOB_CROSSCHECK",
+            "git_blob_oid": "0392d4f052808d00604ad2fe446de86fde4d0d0f",
+            "git_crosscheck_utc": "2026-10-15T04:17:02.799057+00:00",
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlab-org/gitaly",
+          "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+          "path": "internal/gitaly/service/operations/tags.go",
+          "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/tags.go",
+          "raw_url": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/internal%2Fgitaly%2Fservice%2Foperations%2Ftags.go/raw?ref=987854bc5e60a1b9c799eaf7220cb36964cc2356",
+          "query": "Primary GitLab repository API raw; compare content to previously fetched pinned Git blob.",
+          "observed_utc": "2026-10-15T04:13:17.179678+00:00",
+          "http_status": 200,
+          "sha256": "41fee348adc797cd79b5ac50ce62745b1804bfefc85bfeb315e263a37741ef13",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/3fb67b8333a328a8e6b3e7524fed848c305764627952ac0e9d75d3c7796ddd7c.txt",
+          "line_count": 342,
+          "capture_method": "PRIMARY_HTTP_API_WITH_PINNED_GIT_BLOB_CROSSCHECK",
+          "git_blob_oid": "6145f475039bd2a2a7d2c1bec42da00cfc1ef01f",
+          "git_crosscheck_utc": "2026-10-15T04:17:02.799288+00:00",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlab-org/gitaly",
+            "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+            "path": "LICENSE",
+            "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/LICENSE",
+            "raw_url": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/LICENSE/raw?ref=987854bc5e60a1b9c799eaf7220cb36964cc2356",
+            "query": "Check primary repository API as alternate HTTP transport; preserve Git verification if denied.",
+            "observed_utc": "2026-10-15T04:12:55.222631+00:00",
+            "http_status": 200,
+            "sha256": "a60a07cfafa66191227557322bd764aee897a53fff11a1ade3630b58295042c3",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/c9a4324b1676bbd05742015efb3b5fca6bfd6004a82f2a703d560cd4b9f358bb.txt",
+            "line_count": 31,
+            "capture_method": "PRIMARY_HTTP_API_WITH_PINNED_GIT_BLOB_CROSSCHECK",
+            "git_blob_oid": "0392d4f052808d00604ad2fe446de86fde4d0d0f",
+            "git_crosscheck_utc": "2026-10-15T04:17:02.799057+00:00",
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/gitaly_client/operation_service.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.087685Z",
+          "sha256": "e9f61947ed06c6e84e89510a66034fdf657b8ad1f08b1870025ea0f64985d28d",
+          "line_count": 777,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e950b2681d62e8a9de87aa03504097df670091b748b4c780b83f35eee21b5372.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: module Gitlab\n4:   module GitalyClient\n5:     class OperationService\n6:       include Gitlab::EncodingHelper\n7:       include WithFeatureFlagActors\n8: \n9:       MAX_MSG_SIZE = 128.kilobytes.freeze\n10: \n11:       CUSTOM_HOOK_FALLBACK_MESSAGE = 'Prevented by server hooks'\n12: \n13:       MAX_CONFLICTING_FILES = 10\n14: \n15:       def initialize(repository)\n16:         @gitaly_repo = repository.gitaly_repository\n17:         @repository = repository\n18: \n19:         self.repository_actor = repository\n20:       end\n21: \n22:       def rm_tag(tag_name, user)\n23:         request = Gitaly::UserDeleteTagRequest.new(\n24:           repository: @gitaly_repo,\n25:           tag_name: encode_binary(tag_name),\n26:           user: gitaly_user(user)\n27:         )\n28: \n29:         response = gitaly_client_call(@repository.storage, :operation_service, :user_delete_tag, request, timeout: GitalyClient.long_timeout)\n30: \n31:         if pre_receive_error = response.pre_receive_error.presence\n32:           raise Gitlab::Git::PreReceiveError, pre_receive_error\n33:         end\n34:       end\n35: \n36:       def add_tag(tag_name, user, target, message)\n37:         request = Gitaly::UserCreateTagRequest.new(\n38:           repository: @gitaly_repo,\n39:           user: gitaly_user(user),\n40:           tag_name: encode_binary(tag_name),",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "mechanism": "A extração de serviço precisa de uma fronteira pela qual a aplicação continue pedindo uma operação enquanto outro processo a executa. O gRPC registra o contrato e a implementação de um serviço e entrega a requisição decodificada ao handler. No Gitaly, o contrato declara UserCreateTag, o código gerado encaminha essa chamada a OperationServiceServer e o servidor valida o pedido antes de executar a criação da tag. O cliente GitLab monta esse pedido, seleciona o armazenamento remoto, informa timeout e transforma a resposta no objeto usado pela aplicação.",
+      "limits": "As fontes demonstram o mecanismo da fronteira remota entre GitLab e Gitaly. Elas não reconstroem a cronologia inteira da extração, não provam que o monólito deixou de executar toda operação Git local e não medem a disponibilidade de um servidor. O gRPC fornece transporte e dispatch; ele não decide a fronteira de negócio nem garante que uma extração tenha sido concluída. Os commits do GitLab, do Gitaly e da biblioteca são referências fixas de código e não uma declaração das versões instaladas em uma implantação. Os links raw de página do Gitaly retornaram 403, mas a API oficial retornou 200; os arquivos foram comparados com os blobs obtidos do mesmo commit pelo protocolo Git e são idênticos.",
+      "base_scope": "gRPC registers services and invokes unary handlers. The actual Gitaly protocol, generated dispatch and tag handler implement the remote operation on the service side.",
+      "application_scope": "GitLab OperationService creates UserCreateTagRequest/UserDeleteTagRequest and makes storage-specific calls with timeout, preserving its application-facing operation and response shape.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/server.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/2a0d08804dade04c1663cb3e3942ad2d26388d834406646f05b29f4b3269a7d0.txt",
+          "sha256": "b0d29e387a484c03a6e0333de5e0d128289a9056054a2208565a44506e369e22",
+          "hits": [
+            {
+              "term": "concrete service registration",
+              "start_line": 778,
+              "end_line": 812,
+              "excerpt": "func (s *Server) RegisterService(sd *ServiceDesc, ss any) {\n\tif ss != nil {\n\t\tht := reflect.TypeOf(sd.HandlerType).Elem()\n\t\tst := reflect.TypeOf(ss)\n\t\tif !st.Implements(ht) {\n\t\t\tlogger.Fatalf(\"grpc: Server.RegisterService found the handler of type %v that does not satisfy %v\", st, ht)\n\t\t}\n\t}\n\ts.register(sd, ss)\n}\n\nfunc (s *Server) register(sd *ServiceDesc, ss any) {\n\ts.mu.Lock()\n\tdefer s.mu.Unlock()\n\ts.printf(\"RegisterService(%q)\", sd.ServiceName)\n\tif s.serve {\n\t\tlogger.Fatalf(\"grpc: Server.RegisterService after Server.Serve for %q\", sd.ServiceName)\n\t}\n\tif _, ok := s.services[sd.ServiceName]; ok {\n\t\tlogger.Fatalf(\"grpc: Server.RegisterService found duplicate service registration for %q\", sd.ServiceName)\n\t}\n\tinfo := &serviceInfo{\n\t\tserviceImpl: ss,\n\t\tstreams:     make(map[string]*StreamDesc),\n\t\tmdata:       sd.Metadata,\n\t}\n\tfor i := range sd.Streams {\n\t\td := &sd.Streams[i]\n\t\tinfo.streams[d.StreamName] = d\n\t}\n\tfor i := range sd.Methods {\n\t\td := &sd.Methods[i]\n\t\tinfo.streams[d.MethodName] = &StreamDesc{\n\t\t\tStreamName:    d.MethodName,\n\t\t\tHandler:       s.wrapUnaryHandler(d),",
+              "url": "https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/server.go#L778-L812"
+            },
+            {
+              "term": "receive request invoke implementation send response",
+              "start_line": 1278,
+              "end_line": 1288,
+              "excerpt": "// wrapUnaryHandler converts a standard Unary Method Descriptor into a\n// StreamHandler, allowing Unary RPCs to be processed via the same unified\n// pipeline as Streaming RPCs.\nfunc (s *Server) wrapUnaryHandler(md *MethodDesc) StreamHandler {\n\treturn func(srv any, stream ServerStream) error {\n\t\tdf := func(v any) error { return stream.RecvMsg(v) }\n\t\treply, err := md.Handler(srv, stream.Context(), df, s.opts.unaryInt)\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\t\treturn stream.SendMsg(reply)",
+              "url": "https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/server.go#L1278-L1288"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/operations.proto",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/ab8b17f5f2cdb9151b2f9a044e5dbefe052217aafd5f8026eb39483e8f78a936.txt",
+          "sha256": "c697f9649732d18c62c67b50a09026aba9112086c8765829f995ad18306ed7ab",
+          "hits": [
+            {
+              "term": "explicit remote tag operation contract",
+              "start_line": 66,
+              "end_line": 85,
+              "excerpt": "  // UserCreateTag creates a new tag. This RPC knows to create both lightweight and annotated tags\n  // depending on whether a message is set.\n  rpc UserCreateTag(UserCreateTagRequest) returns (UserCreateTagResponse) {\n    option (op_type) = {\n      op: MUTATOR\n    };\n  }\n\n  // UserDeleteTag deletes an existing tag. It executes hooks and contacts Rails to verify that\n  // the user is allowed to delete the tag. The following known error conditions may happen:\n  //\n  // - `InvalidArgument` if the repository, tag_name, user, or expected_old_oid (if provided)\n  //   are invalid.\n  // - `FailedPrecondition` if the tag_name can't be found, or the ref couldn't be deleted due\n  //   to a concurrent write to the same ref.\n  // - `Internal` if the tag_name can't be resolved or an unknown error occurs.\n  rpc UserDeleteTag(UserDeleteTagRequest) returns (UserDeleteTagResponse) {\n    option (op_type) = {\n      op: MUTATOR\n    };",
+              "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/operations.proto#L66-85"
+            },
+            {
+              "term": "request fields cross service boundary",
+              "start_line": 346,
+              "end_line": 364,
+              "excerpt": "message UserCreateTagRequest {\n  // repository is the repository in which the tag shall be created.\n  Repository repository = 1 [(target_repository)=true];\n  // tag_name is the name of the tag that shall be created. Note that this should be set to the name\n  // only: if you want to create a tag `refs/heads/v1.0`, you need to pass `v1.0` as TagName.\n  bytes tag_name = 2;\n  // user to execute the action as. Also used to perform authentication and\n  // authorization via an external endpoint.\n  User user = 3;\n  // target_revision is the revision that the newly created tag should be pointing to. Note that if\n  // the revision points to a tag, that tag will be peeled to the commit it is pointing to. If the\n  // target_revision does not point to a commit then the RPC will return an error.\n  bytes target_revision = 4;\n  // message is the message of the tag. If it is empty, a lightweight tag is created. Otherwise, an\n  // annotated tag is created.\n  bytes message = 5;\n  // timestamp is the optional timestamp to use for the created tag tags. If it's not set, the\n  // current time will be used. It's only used if an annotated tag is being created.\n  google.protobuf.Timestamp timestamp = 7;",
+              "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/operations.proto#L346-364"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/go/gitalypb/operations_grpc.pb.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/7b187b8e05eefa94c39bd84d9d0de8a84a0b70c6d5a6876c2fb0525f4eeb710f.txt",
+          "sha256": "93a023024e575e1703a65558caffe31fdab2706b4c9984abb004f174bd40b2b9",
+          "hits": [
+            {
+              "term": "register actual OperationService descriptor",
+              "start_line": 546,
+              "end_line": 555,
+              "excerpt": "func RegisterOperationServiceServer(s grpc.ServiceRegistrar, srv OperationServiceServer) {\n\t// If the following call panics, it indicates UnimplementedOperationServiceServer was\n\t// embedded by pointer and is nil.  This will cause panics if an\n\t// unimplemented method is ever invoked, so we test this at initialization\n\t// time to prevent it from happening at runtime later due to I/O.\n\tif t, ok := srv.(interface{ testEmbeddedByValue() }); ok {\n\t\tt.testEmbeddedByValue()\n\t}\n\ts.RegisterService(&OperationService_ServiceDesc, srv)\n}",
+              "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/go/gitalypb/operations_grpc.pb.go#L546-555"
+            },
+            {
+              "term": "decode request and invoke actual service implementation",
+              "start_line": 611,
+              "end_line": 626,
+              "excerpt": "func _OperationService_UserCreateTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {\n\tin := new(UserCreateTagRequest)\n\tif err := dec(in); err != nil {\n\t\treturn nil, err\n\t}\n\tif interceptor == nil {\n\t\treturn srv.(OperationServiceServer).UserCreateTag(ctx, in)\n\t}\n\tinfo := &grpc.UnaryServerInfo{\n\t\tServer:     srv,\n\t\tFullMethod: OperationService_UserCreateTag_FullMethodName,\n\t}\n\thandler := func(ctx context.Context, req interface{}) (interface{}, error) {\n\t\treturn srv.(OperationServiceServer).UserCreateTag(ctx, req.(*UserCreateTagRequest))\n\t}\n\treturn interceptor(ctx, in, info, handler)",
+              "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/go/gitalypb/operations_grpc.pb.go#L611-626"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/tags.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/3fb67b8333a328a8e6b3e7524fed848c305764627952ac0e9d75d3c7796ddd7c.txt",
+          "sha256": "41fee348adc797cd79b5ac50ce62745b1804bfefc85bfeb315e263a37741ef13",
+          "hits": [
+            {
+              "term": "actual service validates and prepares repository operation",
+              "start_line": 124,
+              "end_line": 148,
+              "excerpt": "func (s *Server) UserCreateTag(ctx context.Context, req *gitalypb.UserCreateTagRequest) (*gitalypb.UserCreateTagResponse, error) {\n\tif err := validateUserCreateTag(ctx, s.locator, req); err != nil {\n\t\treturn nil, structerr.NewInvalidArgument(\"%w\", err)\n\t}\n\n\ttargetRevision := git.Revision(req.GetTargetRevision())\n\treferenceName := git.ReferenceName(fmt.Sprintf(\"refs/tags/%s\", req.GetTagName()))\n\n\ttaggerSignature, err := git.SignatureFromRequest(req)\n\tif err != nil {\n\t\treturn nil, structerr.NewInvalidArgument(\"%w\", err)\n\t}\n\n\tquarantineDir, quarantineRepo, cleanup, err := s.quarantinedRepo(ctx, req.GetRepository())\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer cleanup()\n\n\tobjectHash, err := quarantineRepo.ObjectHash(ctx)\n\tif err != nil {\n\t\treturn nil, fmt.Errorf(\"detecting object hash: %w\", err)\n\t}\n\n\ttag, tagID, err := s.createTag(ctx, quarantineRepo, targetRevision, req.GetTagName(), req.GetMessage(), taggerSignature)",
+              "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/tags.go#L124-148"
+            },
+            {
+              "term": "actual Git reference update",
+              "start_line": 180,
+              "end_line": 184,
+              "excerpt": "\t}\n\n\tif err := s.updateReferenceWithHooks(ctx, req.GetRepository(), req.GetUser(), quarantineDir, referenceName, tagID, objectHash.ZeroOID); err != nil {\n\t\tvar notAllowedError hook.NotAllowedError\n\t\tvar customHookErr updateref.CustomHookError",
+              "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/tags.go#L180-184"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e950b2681d62e8a9de87aa03504097df670091b748b4c780b83f35eee21b5372.txt",
+          "sha256": "e9f61947ed06c6e84e89510a66034fdf657b8ad1f08b1870025ea0f64985d28d",
+          "hits": [
+            {
+              "term": "real application constructs and calls remote service",
+              "start_line": 22,
+              "end_line": 48,
+              "excerpt": "      def rm_tag(tag_name, user)\n        request = Gitaly::UserDeleteTagRequest.new(\n          repository: @gitaly_repo,\n          tag_name: encode_binary(tag_name),\n          user: gitaly_user(user)\n        )\n\n        response = gitaly_client_call(@repository.storage, :operation_service, :user_delete_tag, request, timeout: GitalyClient.long_timeout)\n\n        if pre_receive_error = response.pre_receive_error.presence\n          raise Gitlab::Git::PreReceiveError, pre_receive_error\n        end\n      end\n\n      def add_tag(tag_name, user, target, message)\n        request = Gitaly::UserCreateTagRequest.new(\n          repository: @gitaly_repo,\n          user: gitaly_user(user),\n          tag_name: encode_binary(tag_name),\n          target_revision: encode_binary(target),\n          message: encode_binary(message.to_s),\n          timestamp: Google::Protobuf::Timestamp.new(seconds: Time.now.utc.to_i)\n        )\n\n        response = gitaly_client_call(@repository.storage, :operation_service, :user_create_tag, request, timeout: GitalyClient.long_timeout)\n\n        Gitlab::Git::Tag.new(@repository, response.tag)",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb#L22-L48"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "GITALY_PROTOCOL_AND_HANDLER_MATCH_GITLAB_OPERATION_NAMES; GRPC_IS_IMPLEMENTING_RPC_BASE; NO_EXTRACTION_HISTORY_OR_DEPLOYMENT_CLAIM",
+      "version_contract": {
+        "kind": "FILE",
+        "repo": "gitlab-org/gitaly",
+        "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+        "path": "go.mod",
+        "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/go.mod",
+        "raw_url": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/go.mod/raw?ref=987854bc5e60a1b9c799eaf7220cb36964cc2356",
+        "query": "Primary GitLab repository API raw; compare content to previously fetched pinned Git blob.",
+        "observed_utc": "2026-10-15T04:13:17.179843+00:00",
+        "http_status": 200,
+        "sha256": "ac2465068d136d745a1e7ca94d0fa9e8170066c2d62b993d66215b6e2acb35b6",
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/8efdb07673dd763eecd30bf153c17ad1879a86e9ba826437cc3d5828a2aae8a0.txt",
+        "line_count": 228,
+        "capture_method": "PRIMARY_HTTP_API_WITH_PINNED_GIT_BLOB_CROSSCHECK",
+        "git_blob_oid": "6d69733676baf8e86494f583e5ebee56088ece94",
+        "git_crosscheck_utc": "2026-10-15T04:17:02.799292+00:00",
+        "hash_valid": true,
+        "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+        "license": {
+          "kind": "FILE",
+          "repo": "gitlab-org/gitaly",
+          "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+          "path": "LICENSE",
+          "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/LICENSE",
+          "raw_url": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/LICENSE/raw?ref=987854bc5e60a1b9c799eaf7220cb36964cc2356",
+          "query": "Check primary repository API as alternate HTTP transport; preserve Git verification if denied.",
+          "observed_utc": "2026-10-15T04:12:55.222631+00:00",
+          "http_status": 200,
+          "sha256": "a60a07cfafa66191227557322bd764aee897a53fff11a1ade3630b58295042c3",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/c9a4324b1676bbd05742015efb3b5fca6bfd6004a82f2a703d560cd4b9f358bb.txt",
+          "line_count": 31,
+          "capture_method": "PRIMARY_HTTP_API_WITH_PINNED_GIT_BLOB_CROSSCHECK",
+          "git_blob_oid": "0392d4f052808d00604ad2fe446de86fde4d0d0f",
+          "git_crosscheck_utc": "2026-10-15T04:17:02.799057+00:00",
+          "status": "READ",
+          "license_spdx": "MIT",
+          "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+        }
+      },
+      "transport_evidence": {
+        "inventory": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/git-captures.json",
+        "crosscheck": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/transport-crosscheck.json",
+        "primary_api": "https://gitlab.com/api/v4/projects/gitlab-org%2Fgitaly/repository/files/",
+        "raw_page_transport_http_status": 403,
+        "api_transport_http_status": 200,
+        "git_commit": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+        "scope": "Primary API captures used as source; Git blobs independently confirm exact captured bytes."
+      }
+    },
+    {
+      "concept_id": "transitional-architecture",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/roll/execute.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "query": "Pinned primary caller connecting aggregate construction or dual-write migration phases.",
+          "observed_utc": "2026-10-15T03:51:43.430109+00:00",
+          "http_status": 200,
+          "sha256": "a8172cdaf819e4eaa85cb1b625e001a1591950c27945603f0782b5e5fd230068",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/b63a2e685aad4a44e2aaee64f88d4ab97d9d242658239a89a31cd21c5abb9118.txt",
+          "line_count": 393,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "observed_utc": "2026-10-15T03:51:31.893256+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/migrations/op_alter_column.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.921225+00:00",
+          "http_status": 200,
+          "sha256": "365d6694326966810a7c74b42e0cc07f27a597fe9b43a76e2c8c6518ef14d394",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4f607812c499614bd14d60e4201508d6ccc0a3384990083464957007b55b8d82.txt",
+          "line_count": 342,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "observed_utc": "2026-10-15T03:51:31.893256+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/backfill/templates/function.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:07.229827+00:00",
+          "http_status": 200,
+          "sha256": "9d8f87185c64fdda2c498a092b8b1c88dd1082d0f7086ff0c739eb6f847a2fed",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cc4d6f7770a1f5950bafc8dc3b6aaafd267d33d1ce78b5df64dd013ff6a32c8c.txt",
+          "line_count": 31,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "observed_utc": "2026-10-15T03:51:31.893256+00:00"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/redis/multi_store.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L439-L457",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L439-L457",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.105613Z",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "line_count": 519,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2b26e2bd43bba3e83144efd2b5247501642829c9b0b390e8c4931150a20c2cce.txt",
+          "excerpt_lines": [
+            439,
+            457
+          ],
+          "excerpt": "439:       # Run the entire pipeline on both stores. We assume that `&block` is idempotent.\n440:       def pipelined_both(command_name, ...)\n441:         result_default = send_command(default_store, command_name, ...)\n442: \n443:         begin\n444:           result_non_default = send_command(non_default_store, command_name, ...)\n445:         rescue StandardError => e\n446:           log_error(e, command_name, multi_store_error_message: FAILED_TO_RUN_PIPELINE)\n447:         end\n448: \n449:         # Pipelined commands return an array with all results. If they differ, log an error\n450:         if result_non_default && result_non_default != result_default\n451:           error = PipelinedDiffError.new(result_non_default, result_default)\n452:           error.set_backtrace(Thread.current.backtrace[1..]) # Manually set backtrace, since the error is not `raise`d\n453: \n454:           log_error(error, command_name)\n455:           increment_pipelined_command_error_count(command_name)\n456:         end\n457: ",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:17:02.844791+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "gitlabhq/gitlabhq",
+            "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+            "path": "LICENSE",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+            "query": "Exact-revision license text for preserved current and historical application captures.",
+            "observed_utc": "2026-10-15T04:14:38.870733+00:00",
+            "http_status": 200,
+            "sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+            "line_count": 28,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:17:02.844791+00:00"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "mechanism": "Uma arquitetura de transição mantém uma ponte temporária enquanto o sistema muda de representação ou de destino. O pgroll cria views em esquemas de versão para conservar o contrato de colunas de cada versão, enquanto os triggers sincronizam as representações físicas. A conclusão remove o esquema da versão anterior e os auxiliares da migração. O MultiStore do GitLab implementa outra ponte temporária: começa no armazenamento antigo, pode executar nos dois, muda o padrão de resposta para o destino e permite desligar a execução dupla permanecendo nele.",
+      "limits": "pgroll e GitLab são referências independentes de pontes de transição; não há afirmação de dependência entre eles. O código e os comentários do GitLab definem fases e uma saída da execução dupla, mas não provam que uma implantação concluiu essas fases ou retirou a classe MultiStore. No pgroll, o chamador ainda precisa decidir quando os clientes antigos podem perder seu esquema de compatibilidade. A ponte traz custos e efeitos reais enquanto está ativa; sua existência não garante reconciliação de dados nem uma transição concluída.",
+      "base_scope": "pgroll builds versioned compatibility views with logical-to-physical column mapping, keeps representations synchronized and explicitly drops the previous version schema during Complete.",
+      "application_scope": "GitLab MultiStore documents and implements old-only, dual execution, new default and new-only phases selected by feature flags.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/b63a2e685aad4a44e2aaee64f88d4ab97d9d242658239a89a31cd21c5abb9118.txt",
+          "sha256": "a8172cdaf819e4eaa85cb1b625e001a1591950c27945603f0782b5e5fd230068",
+          "hits": [
+            {
+              "term": "create version compatibility schema",
+              "start_line": 139,
+              "end_line": 151,
+              "excerpt": "\t// create views for the new version\n\tif !m.disableVersionSchemas {\n\t\tif err := m.ensureViews(ctx, newSchema, migration); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t}\n\n\treturn job, nil\n}\n\nfunc (m *Roll) ensureViews(ctx context.Context, schema *schema.Schema, mig *migrations.Migration) error {\n\tversionSchema := VersionedSchemaName(m.schema, mig.VersionSchemaName())\n\t_, err := m.pgConn.ExecContext(ctx, fmt.Sprintf(\"CREATE SCHEMA IF NOT EXISTS %s\", pq.QuoteIdentifier(versionSchema)))",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go#L139-L151"
+            },
+            {
+              "term": "map compatibility columns and create actual view",
+              "start_line": 319,
+              "end_line": 329,
+              "excerpt": "// create view creates a view for the new version of the schema\nfunc (m *Roll) ensureView(ctx context.Context, version, name string, table *schema.Table) error {\n\tcolumns := make([]string, 0, len(table.Columns))\n\tdefaults := make(map[string]string, len(table.Columns))\n\tfor k, v := range table.Columns {\n\t\tif !v.Deleted {\n\t\t\tcolumns = append(columns, fmt.Sprintf(\"%s AS %s\", pq.QuoteIdentifier(v.Name), pq.QuoteIdentifier(k)))\n\t\t\tif v.Default != nil {\n\t\t\t\tdefaults[k] = *v.Default\n\t\t\t}\n\t\t}",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go#L319-L329"
+            },
+            {
+              "term": "actual version-specific compatibility view SQL",
+              "start_line": 345,
+              "end_line": 361,
+              "excerpt": "\tfor column, defaultVal := range defaults {\n\t\taddDefaultsToView += fmt.Sprintf(\"ALTER VIEW %s.%s ALTER %s SET DEFAULT %s; \",\n\t\t\tpq.QuoteIdentifier(VersionedSchemaName(m.schema, version)),\n\t\t\tpq.QuoteIdentifier(name),\n\t\t\tpq.QuoteIdentifier(column),\n\t\t\tdefaultVal)\n\t}\n\t_, err := m.pgConn.ExecContext(ctx,\n\t\tfmt.Sprintf(\"BEGIN; DROP VIEW IF EXISTS %s.%s; CREATE VIEW %s.%s %s AS SELECT %s FROM %s; %s COMMIT\",\n\t\t\tpq.QuoteIdentifier(VersionedSchemaName(m.schema, version)),\n\t\t\tpq.QuoteIdentifier(name),\n\t\t\tpq.QuoteIdentifier(VersionedSchemaName(m.schema, version)),\n\t\t\tpq.QuoteIdentifier(name),\n\t\t\twithOptions,\n\t\t\tstrings.Join(columns, \",\"),\n\t\t\tpq.QuoteIdentifier(table.Name),\n\t\t\taddDefaultsToView))",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go#L345-L361"
+            },
+            {
+              "term": "explicit removal of old compatibility schema",
+              "start_line": 172,
+              "end_line": 193,
+              "excerpt": "// Complete will update the database schema to match the current version\nfunc (m *Roll) Complete(ctx context.Context) error {\n\t// get current ongoing migration\n\tmigration, err := m.state.GetActiveMigration(ctx, m.schema)\n\tif err != nil {\n\t\treturn fmt.Errorf(\"unable to get active migration: %w\", err)\n\t}\n\n\tm.logger.LogMigrationComplete(migration)\n\n\t// Drop the old version schema if there is one\n\tprevVersion, err := m.state.PreviousVersion(ctx, m.schema)\n\tif err != nil {\n\t\treturn fmt.Errorf(\"unable to get name of previous version: %w\", err)\n\t}\n\tif prevVersion != nil {\n\t\tversionSchema := VersionedSchemaName(m.schema, *prevVersion)\n\t\t_, err = m.pgConn.ExecContext(ctx, fmt.Sprintf(\"DROP SCHEMA IF EXISTS %s CASCADE\", pq.QuoteIdentifier(versionSchema)))\n\t\tif err != nil {\n\t\t\treturn fmt.Errorf(\"unable to drop previous version: %w\", err)\n\t\t}\n\t}",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go#L172-L193"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4f607812c499614bd14d60e4201508d6ccc0a3384990083464957007b55b8d82.txt",
+          "sha256": "365d6694326966810a7c74b42e0cc07f27a597fe9b43a76e2c8c6518ef14d394",
+          "hits": [
+            {
+              "term": "keep old and new representations synchronized",
+              "start_line": 48,
+              "end_line": 60,
+              "excerpt": "\t// Add a trigger to copy values from the old column to the new, rewriting values using the `up` SQL.\n\ttriggers := make([]backfill.OperationTrigger, 0, 2)\n\ttriggers = append(\n\t\ttriggers,\n\t\tbackfill.OperationTrigger{\n\t\t\tName:           backfill.TriggerName(o.Table, o.Column),\n\t\t\tDirection:      backfill.TriggerDirectionUp,\n\t\t\tTableName:      table.Name,\n\t\t\tColumns:        upColumns,\n\t\t\tPhysicalColumn: TemporaryName(o.Column),\n\t\t\tSQL:            o.upSQLForOperations(ops),\n\t\t},\n\t)",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L48-L60"
+            },
+            {
+              "term": "backward synchronization during coexistence",
+              "start_line": 76,
+              "end_line": 88,
+              "excerpt": "\t// Add a trigger to copy values from the new column to the old.\n\ttriggers = append(\n\t\ttriggers,\n\t\tbackfill.OperationTrigger{\n\t\t\tName:           backfill.TriggerName(o.Table, TemporaryName(o.Column)),\n\t\t\tDirection:      backfill.TriggerDirectionDown,\n\t\t\tTableName:      table.Name,\n\t\t\tColumns:        table.Columns,\n\t\t\tPhysicalColumn: oldPhysicalColumn,\n\t\t\tSQL:            o.downSQLForOperations(ops),\n\t\t},\n\t)\n\ttask := backfill.NewTask(table, triggers...)",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L76-L88"
+            },
+            {
+              "term": "remove obsolete physical representation and helpers",
+              "start_line": 127,
+              "end_line": 140,
+              "excerpt": "\ttable.Name = o.Table\n\n\t// Rename the new column to the old column name\n\treturn append(dbActions, []DBAction{\n\t\tNewAlterSequenceOwnerAction(conn, table.Name, column.Name, TemporaryName(column.Name)),\n\t\tNewDropColumnAction(conn, table.Name, o.Column),\n\t\tNewDropFunctionAction(\n\t\t\tconn,\n\t\t\tbackfill.TriggerFunctionName(o.Table, o.Column),\n\t\t\tbackfill.TriggerFunctionName(o.Table, TemporaryName(o.Column)),\n\t\t),\n\t\tNewDropColumnAction(conn, o.Table, backfill.CNeedsBackfillColumn),\n\t\tNewRenameDuplicatedColumnAction(conn, table, o.Column),\n\t}...), nil",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L127-L140"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cc4d6f7770a1f5950bafc8dc3b6aaafd267d33d1ce78b5df64dd013ff6a32c8c.txt",
+          "sha256": "9d8f87185c64fdda2c498a092b8b1c88dd1082d0f7086ff0c739eb6f847a2fed",
+          "hits": [
+            {
+              "term": "version-sensitive synchronization bridge",
+              "start_line": 17,
+              "end_line": 29,
+              "excerpt": "    BEGIN\n      SELECT current_setting\n        INTO search_path\n        FROM current_setting('search_path');\n\n      IF search_path {{- if eq .Direction \"up\" }} != {{- else }} = {{- end }} {{ .LatestSchema | ql }} THEN\n      {{- $physicalColumn := .PhysicalColumn | qi  }}{{ range $s := .SQL }}\n        NEW.{{ $physicalColumn  }} = {{ $s }};\n      {{- end }}\n        NEW.{{ .NeedsBackfillColumn | qi }} = false;\n      END IF;\n\n      RETURN NEW;",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go#L17-L29"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2b26e2bd43bba3e83144efd2b5247501642829c9b0b390e8c4931150a20c2cce.txt",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "hits": [
+            {
+              "term": "explicit transition phases and dual-execution exit",
+              "start_line": 163,
+              "end_line": 173,
+              "excerpt": "      # To transition between two Redis store, `primary_pool` should be the connection pool for the target store,\n      # and `secondary_pool` should be the connection pool for the current store.\n      #\n      # Transition is controlled with feature flags:\n      # - At the default state, all read and write operations are executed in the secondary instance.\n      # - Turning use_primary_and_secondary_stores_for_<instance_name> on: The store writes to both instances.\n      #   The read commands are executed in the default store with no fallbacks.\n      #   Other commands are executed in the the default instance (Secondary).\n      # - Turning use_primary_store_as_default_for_<instance_name> on: The behavior is the same as above,\n      #   but other commands are executed in the primary now.\n      # - Turning use_primary_and_secondary_stores_for_<instance_name> off: commands are executed in the primary store.",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L163-L173"
+            },
+            {
+              "term": "actual mode selection",
+              "start_line": 204,
+              "end_line": 222,
+              "excerpt": "      # rubocop:disable GitlabSecurity/PublicSend\n      (READ_COMMANDS + REDIS_CLIENT_COMMANDS + PUBSUB_SUBSCRIBE_COMMANDS).each do |name|\n        define_method(name) do |*args, **kwargs, &block|\n          if use_primary_and_secondary_stores?\n            read_command(name, *args, **kwargs, &block)\n          else\n            default_store.send(name, *args, **kwargs, &block)\n          end\n        end\n      end\n\n      WRITE_COMMANDS.each do |name|\n        define_method(name) do |*args, **kwargs, &block|\n          if use_primary_and_secondary_stores?\n            write_command(name, *args, **kwargs, &block)\n          else\n            default_store.send(name, *args, **kwargs, &block)\n          end\n        end",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L204-L222"
+            },
+            {
+              "term": "two flag decisions controlling bridge mode",
+              "start_line": 284,
+              "end_line": 303,
+              "excerpt": "      def use_primary_and_secondary_stores?\n        # We interpolate the feature flag name within `Feature.enabled?` instead of defining a variable to allow\n        # `RuboCop::Cop::Gitlab::MarkUsedFeatureFlags`'s optimistic matching to work.\n        feature_table_exists? &&\n          Feature.enabled?( # rubocop:disable Cop/FeatureFlagUsage -- The flags are dynamic\n            \"use_primary_and_secondary_stores_for_#{instance_name.underscore}\",\n            type: feature_flag_type(\"use_primary_and_secondary_stores_for_#{instance_name.underscore}\")\n          ) &&\n          !same_redis_store?\n      end\n\n      def use_primary_store_as_default?\n        # We interpolate the feature flag name within `Feature.enabled?` instead of defining a variable to allow\n        # `RuboCop::Cop::Gitlab::MarkUsedFeatureFlags`'s optimistic matching to work.\n        feature_table_exists? &&\n          Feature.enabled?( # rubocop:disable Cop/FeatureFlagUsage -- The flags are dynamic\n            \"use_primary_store_as_default_for_#{instance_name.underscore}\",\n            type: feature_flag_type(\"use_primary_store_as_default_for_#{instance_name.underscore}\")\n          ) &&\n          !same_redis_store?",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L284-L303"
+            },
+            {
+              "term": "actual response authority selection",
+              "start_line": 331,
+              "end_line": 336,
+              "excerpt": "      def default_store\n        use_primary_store_as_default? ? primary_store : secondary_store\n      end\n\n      def non_default_store\n        use_primary_store_as_default? ? secondary_store : primary_store",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L331-L336"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "PARALLEL_IMPLEMENTING_TRANSITION_BRIDGES; NO_HISTORICAL_OR_PRODUCTION_COMPLETION_CLAIM"
+    }
+  ],
+  "capture_inventory": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/captures.json",
+  "frozen_files_mutated": false,
+  "review_boundary": "Primary-source research only. New writes are confined to base-five/wave-three. No main matrix, gzip, shared source cache, MDX, global repository, Jira, runtime or implementation test was changed."
+}

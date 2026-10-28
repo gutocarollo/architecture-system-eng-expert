@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-10-15T19:05:21.325920+00:00",
+  "payload_sha256": "58637f80cdf45b1d5aaa42732127721917e57f0cdf126411b0dd38573c7bcc44",
+  "runs": [
+    {
+      "script": "/Users/augustocarollo/.agents/skills/jira-fbi/scripts/jira-fbi-gate.mjs",
+      "script_sha256": "243100a2c1627ea8488b8d67d4f631f86f40ebb05d024cccf2f77e998218be53",
+      "exit_code": 0,
+      "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"jira-fbi catalog-v4 gate passed\"}}\n",
+      "stderr": "",
+      "allowed": true
+    },
+    {
+      "script": "/Users/augustocarollo/.agents/skills/jira-fbi/scripts/claude-hook-wrapper.cjs",
+      "script_sha256": "9124b9ac1b9ef58ec7d1fa4d76b86338764e97371d2a273b72bab2a9058bc9b9",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "allowed": true
+    }
+  ],
+  "wrapper_empty_success_contract": "The physical wrapper allow() exits0 without stdout.",
+  "verdict": "PASS"
+}

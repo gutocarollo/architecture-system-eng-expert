@@ -1,0 +1,53 @@
+{
+  "observed_at_utc": "2026-10-17T03:26:36.801366+00:00",
+  "scope": "Static content inspection only; no labs, tests, external services or generators executed. Root owns build and browser verification.",
+  "results": [
+    {
+      "path": "content/referencia/prioritarios.mdx",
+      "removed_markdown_link_targets": [],
+      "external_link_targets_preserved": true,
+      "sha256": "3a7f14a648ea1fe2cc78778b069d553b58d680f96c749303c6cdae9c53661416"
+    },
+    {
+      "path": "content/referencia/curadoria/index.mdx",
+      "removed_markdown_link_targets": [],
+      "external_link_targets_preserved": true,
+      "sha256": "b5b22f6f7f2c4b5a8633b30447789fa9a68183bb0631c8a5cf8f2abc1b563642"
+    },
+    {
+      "path": "content/jornadas/matriz.mdx",
+      "removed_markdown_link_targets": [],
+      "external_link_targets_preserved": true,
+      "sha256": "70525d5c186c54bcf568df7f841ccd36a6bf85696dcf6604ced2e1f104dc3f5d"
+    },
+    {
+      "priority_rows": 40,
+      "priority_rows_six_columns": true,
+      "title_exact": true,
+      "h1_exact": true
+    },
+    {
+      "matrix_case_rows": 15,
+      "matrix_concept_sum": 310
+    },
+    {
+      "curation_family_rows": 17,
+      "curation_concept_sum": 310
+    },
+    {
+      "generator": "tasks/FBI-4991-arquitetura-nextra/execution/curation/reconcile_references.py",
+      "syntax_parse": "OK",
+      "executed": false
+    },
+    {
+      "generator": "tasks/FBI-4991-arquitetura-nextra/execution/curation/build_matrix.py",
+      "syntax_parse": "OK",
+      "executed": false
+    },
+    {
+      "generator": "labs/architecture/map_concepts.py",
+      "syntax_parse": "OK",
+      "executed": false
+    }
+  ]
+}

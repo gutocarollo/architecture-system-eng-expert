@@ -1,0 +1,12 @@
+{
+  "repo": "temporalio/temporal",
+  "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+  "path": "proto/internal/temporal/server/api/enums/v1/nexus.proto",
+  "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto",
+  "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--10791698--proto--internal--temporal--server--api--enums--v1--nexus.proto",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:12.484435+00:00",
+  "sha256": "c50acc450b6bd27fb60ad98fe1f5894b087950a252b345a582186fc889362c39",
+  "line_count": 27
+}

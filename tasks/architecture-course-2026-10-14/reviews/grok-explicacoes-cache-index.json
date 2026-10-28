@@ -1,0 +1,25 @@
+{
+  "document_id": "explicacoes/cache/index",
+  "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [
+    "insurance-api-service",
+    "insurance-service-repository"
+  ],
+  "evidence_ids": [
+    "s5",
+    "l5a",
+    "insurance-api",
+    "insurance-service",
+    "insurance-repository",
+    "cache-code",
+    "singleflight-code",
+    "nextbilling-code",
+    "s5-high-repair"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792006436-QbpJQoV4TCVABnjYu1y8",
+  "context_sha256": "cdbf14134f65102d37bcb6209e4abf2731e9066866903b3ca098cb7f320fd4f7"
+}

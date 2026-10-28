@@ -1,0 +1,72 @@
+---
+asIndexPage: true
+title: Curadoria dos 310 conceitos
+description: Matriz completa de skills, frameworks e aplicações OSS, com versões, licenças, tendência datada e lacunas explícitas.
+diataxis: reference
+---
+
+# Curadoria dos 310 conceitos
+
+Esta curadoria reúne **310 conceitos de arquitetura** para consulta. Cada conceito tem uma entrada com referências para estudar o mecanismo, comparar bibliotecas ou frameworks e observar seu uso em produtos de código aberto. Abra a família do assunto que você procura ou use a busca pelo nome do conceito.
+
+A página [Arquitetura na prática: Makershub](/referencia/prioritarios/) oferece uma seleção de 40 temas para começar. Alguns temas reúnem vários conceitos, como Retry, Exponential Backoff e Jitter. Já a [matriz de conceitos e casos](/jornadas/matriz/) distribui os 310 conceitos entre 15 casos principais de estudo. As 17 famílias abaixo organizam os conceitos por assunto; os 15 casos os organizam pelo problema que você pode investigar.
+
+Uma fonte de código mostra um recorte do mecanismo em uma biblioteca ou em um produto. Um exercício permite observar uma condição e comparar seus efeitos. Consulte os limites de cada entrada antes de aplicar a ideia: uma comparação local pode ensinar um requisito do padrão sem implementar o protocolo completo ou comprovar seu uso em produção.
+
+## Consulte por família
+
+| Família de assuntos | Conceitos distintos nesta família |
+| --- | ---: |
+| [Arquiteturas de aplicação](/referencia/curadoria/01-arquiteturas-de-aplicacao/) | 22 |
+| [Sistemas distribuídos e consistência](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/) | 38 |
+| [Event-driven / Messaging](/referencia/curadoria/03-event-driven-messaging/) | 25 |
+| [CQRS, Event Sourcing e modelos de leitura](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/) | 11 |
+| [Banco de dados e armazenamento](/referencia/curadoria/05-banco-de-dados-e-armazenamento/) | 27 |
+| [Cache](/referencia/curadoria/06-cache/) | 14 |
+| [Resiliência](/referencia/curadoria/07-resiliencia/) | 19 |
+| [Concorrência](/referencia/curadoria/08-concorrencia/) | 15 |
+| [APIs e integração](/referencia/curadoria/09-apis-e-integracao/) | 23 |
+| [DDD — Domain-Driven Design](/referencia/curadoria/10-ddd-domain-driven-design/) | 20 |
+| [Padrões para decompor sistemas](/referencia/curadoria/11-padroes-para-decompor-sistemas/) | 13 |
+| [Deploy e releases](/referencia/curadoria/12-deploy-e-releases/) | 10 |
+| [Alta disponibilidade](/referencia/curadoria/13-alta-disponibilidade/) | 12 |
+| [Segurança](/referencia/curadoria/14-seguranca/) | 17 |
+| [Observabilidade](/referencia/curadoria/15-observabilidade/) | 10 |
+| [Workflow e processamento](/referencia/curadoria/16-workflow-e-processamento/) | 14 |
+| [Padrões clássicos GoF](/referencia/curadoria/17-padroes-classicos-gof/) | 20 |
+
+Um conceito presente em várias famílias aparece uma vez nesta curadoria, na primeira família canônica. Sua entrada conserva todos os grupos e os vínculos com os quarenta prioritários. Use a busca do curso pelo nome ou pelo ID do conceito para chegar diretamente à referência.
+
+## Como comparamos skills
+
+O universo de popularidade reúne os nove packs abaixo, descobertos nas referências existentes e nas fontes públicas pertinentes. O ranking compara **estrelas totais dos repositórios**, medidas separadamente nos horários indicados. Ele não mede a qualidade de uma skill individual. Dentro de cada conceito, a primeira posição compara somente os SKILL.md candidatos daquele assunto, com seus escopos declarados. Um pack de método pode apoiar a decisão e ainda não ensinar o mecanismo específico.
+
+| Posição no universo de packs | Pack | Estrelas observadas | Consulta UTC | Diferença desde o snapshot anterior |
+| --- | --- | ---: | --- | --- |
+| 1 | [obra/superpowers](https://github.com/obra/superpowers) | 299189 | `2026-10-15T01:26:21.728053Z` | +147 desde 2026-10-14T17:12:52Z |
+| 2 | [mattpocock/skills](https://github.com/mattpocock/skills) | 291294 | `2026-10-15T01:26:21.770626Z` | +382 desde 2026-10-14T17:59:09Z |
+| 3 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | 106700 | `2026-10-15T01:26:21.755062Z` | +125 desde 2026-10-14T17:12:53Z |
+| 4 | [wshobson/agents](https://github.com/wshobson/agents) | 40776 | `2026-10-15T01:26:22.222353Z` | +44 desde 2026-10-14T17:12:52Z |
+| 5 | [wondelai/skills](https://github.com/wondelai/skills) | 2425 | `2026-10-15T01:26:22.247335Z` | +5 desde 2026-10-14T17:12:52Z |
+| 6 | [mblode/agent-skills](https://github.com/mblode/agent-skills) | 148 | `2026-10-15T01:26:21.792337Z` | +1 desde 2026-10-14T17:12:52Z |
+| 7 | [j4flmao/agent-skills](https://github.com/j4flmao/agent-skills) | 33 | `2026-10-15T01:26:21.770517Z` | +0 desde 2026-10-14T17:12:52Z |
+| 8 | [diagrid-labs/dapr-skills](https://github.com/diagrid-labs/dapr-skills) | 13 | `2026-10-15T01:26:21.807312Z` | +0 desde 2026-10-14T17:59:09Z |
+| 9 | [redpanda-data/skills](https://github.com/redpanda-data/skills) | 8 | `2026-10-15T01:26:21.835513Z` | +0 desde 2026-10-14T17:59:09Z |
+
+As diferenças acima pertencem ao intervalo real entre as duas consultas de 14 e 15 de outubro. Elas **não são crescimento de trinta dias**, não foram anualizadas e não substituem uma série histórica.
+
+Na [página mensal GitHub Trending](https://github.com/trending?since=monthly), a resposta HTTP 200 salva em `2026-10-15T01:10:58.519745Z` continha **22 cards de repositório**. `addyosmani/agent-skills` ocupava a **posição 15** e a página informava **12.981 estrelas neste mês**. Ele foi o único dos nove packs desta seleção que apareceu nesses 22 cards. Esse é o sinal mensal disponível para o universo observado; não significa que ele foi a skill mais adequada ou mais crescente de cada padrão de arquitetura. A ausência de um pack nesses cards não significa crescimento zero.
+
+Cada entrada da matriz liga uma skill pertinente ao assunto. O pack Addy Osmani fornece apoio adicional em API, interface, segurança, automação, observabilidade ou documentação conforme a família. Esse apoio aparece no JSON como `trend_support`, com o papel adjacente explicitado; ele não foi usado para declarar uma skill específica de PAC, 3PC ou outro mecanismo raro.
+
+## Como ler as versões e licenças
+
+Os links de código foram resolvidos para SHAs imutáveis antes da leitura. A licença aparece ligada ao arquivo lido na mesma revisão, quando a fonte é um arquivo. As versões históricas permanecem históricas: Medusa 1.20.10, Vault 1.14 e MediatR 12.4.1 não representam automaticamente as versões atuais ou suas condições atuais. Um identificador SPDX ausente ou indefinido continua visível; uma classificação da API não substitui o texto da licença. Esta matriz não é uma decisão de adoção ou de compatibilidade jurídica.
+
+A descoberta anterior incluía NCATS Blackboard sem licença comprovada. A referência atual compara BehaviorTree.CPP com Navigation2 e mantém o limite do controle por árvore de comportamento. O arquivo de descoberta preserva o candidato anterior para que a reconciliação seja auditável.
+
+## Artefatos para reproduzir a leitura
+
+A matriz completa é publicada em `tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json.gz`, junto com o manifesto de hashes e o helper `unpack_matrix.py`. A cópia integral `matrix.json` é um artefato local restaurável. `sources.json` conserva URL, HTTP, horário, SHA, caminho, hash e trechos. `revision-licenses.json` conserva a prova de licença por revisão. `github-metadata.json` e `trending-monthly.json` conservam as medições de popularidade e seu universo. Os scripts `harvest.py`, `license_revisions.py` e `build_matrix.py` ficam no mesmo diretório. Reexecutar a coleta produz uma nova medição; não transforma o snapshot antigo em estado atual.
+
+Para estudar o problema e repetir uma condição conhecida, siga as [jornadas aplicadas](/jornadas/). A [seleção Arquitetura na prática: Makershub](/referencia/prioritarios/) conserva a ordem do pedido e liga os padrões ao estudo.

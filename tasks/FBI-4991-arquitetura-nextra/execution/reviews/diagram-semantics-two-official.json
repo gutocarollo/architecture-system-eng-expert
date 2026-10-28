@@ -1,0 +1,34 @@
+{
+  "observed_at_utc": "2026-10-15T18:28:08.888924+00:00",
+  "context7": "resolve_library_id returned Monthly quota reached; primary vendor pages used",
+  "sources": {
+    "pg-wal": {
+      "url": "https://www.postgresql.org/docs/16/wal-intro.html",
+      "http_response_sha256": "50f186ebe754ba5c9a486342b0df31335f703d7b0ca81cfdf24e615c5ef6fa63",
+      "support": "PostgreSQL 16 WAL introduction, paragraphs 1-2: flush WAL before corresponding data pages; redo after a crash.",
+      "version": "16",
+      "inspection": "Read official page through web tool; HTTP body hashed separately without retention of full copyrighted text."
+    },
+    "pg-refresh": {
+      "url": "https://www.postgresql.org/docs/16/sql-refreshmaterializedview.html",
+      "http_response_sha256": "dab01cdc74e66143e809dc8cc561c9fdff97fca6f3fd4189857dffba585ec689",
+      "support": "PostgreSQL 16 REFRESH: full replacement; CONCURRENTLY permits SELECT, requires a qualifying UNIQUE index and a populated view.",
+      "version": "16",
+      "inspection": "Read official page through web tool; HTTP body hashed separately without retention of full copyrighted text."
+    },
+    "pg-standby": {
+      "url": "https://www.postgresql.org/docs/16/warm-standby.html",
+      "http_response_sha256": "68ff0ce12d5a65c9b1e35828c835eb3d0f29c44cb5aa9a7cc6b283db487833ba",
+      "support": "PostgreSQL 16 27.2.5: asynchronous streaming can make a committed change visible on standby later; sending WAL and applying it differ.",
+      "version": "16",
+      "inspection": "Read official page through web tool; HTTP body hashed separately without retention of full copyrighted text."
+    },
+    "entra-oidc": {
+      "url": "https://learn.microsoft.com/en-us/entra/architecture/auth-oidc",
+      "http_response_sha256": "fae63fb94f52b70dea87c7dd15bc442f57ef180125668c9bcbcb38048402dd77",
+      "support": "Microsoft Entra OIDC: authentication extends OAuth 2.0; a resource validates the intended access token; application authorization remains separate.",
+      "version": "Microsoft Entra public contract",
+      "inspection": "Read official page through web tool; HTTP body hashed separately without retention of full copyrighted text."
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "repo": "opendaylight/controller",
+  "path": "samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarEntryDataTreeCommitCohort.java",
+  "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+  "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarEntryDataTreeCommitCohort.java",
+  "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarEntryDataTreeCommitCohort.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:00.000001+00:00",
+  "sha256": "3afc4c196cb152a6c9a34dc008c1262274792fc6d3a5ac69785c8f00eb3f88f6",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--samples--clustering-test-app--provider--src--main--java--org--opendaylight--controller--clustering--it--provider--CarEntryDataTreeCommitCohort.java"
+}

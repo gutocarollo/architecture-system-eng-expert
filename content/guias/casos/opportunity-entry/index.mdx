@@ -1,0 +1,53 @@
+---
+asIndexPage: true
+title: "Verifique a proteção: a oportunidade existente conserva sua identidade"
+description: "Você aprenderá a separar a identidade do objeto da identidade da requisição e conservar essa identidade ao reutilizar uma operação."
+diataxis: how-to
+---
+
+# Verifique a proteção: a oportunidade existente conserva sua identidade
+
+Continue o mesmo caso: [volte ao caso](/jornadas/opportunity-entry/); [entenda o mecanismo](/explicacoes/casos/opportunity-entry/); [execute a experiência](/tutoriais/casos/opportunity-entry/); [consulte contratos e fontes](/referencia/casos/opportunity-entry/).
+
+Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+
+## Antes de começar
+
+Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Prepare o ambiente local com `python3 labs/architecture/setup_labs.py`, conforme o tutorial; ele instala apenas as dependências fixadas na virtualenv do laboratório. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+
+## 1. Fixe o contrato e a fronteira
+
+Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use: Uma OPP aberta fictícia, uma Conta fictícia, dois operadores com chaves diferentes e fixtures de estágio Contatado/Ganha/Perdida. Registre a versão anterior, a versão proposta e o localizador `execute_r1_from_opportunity_flow / _claim_opportunity_entry / opportunity_entry_refusal`.
+
+## 2. Confira quem executa a decisão
+
+A função posterior pula Opportunity.create quando há source_opp_id. _claim_opportunity_entry usa um scope, um ator fixo e opportunity_id para reclamar o objeto em disputa. Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
+
+## 3. Repita a mesma condição em isolamento
+
+```sh
+python3 labs/architecture/opportunity-entry/run.py
+```
+
+Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
+
+## 4. Avalie a garantia adquirida
+
+A criação muda de uma chamada para zero. O identificador continua 006SYNTHETICOPEN. O segundo claim recebe 409. As funções históricas também recusam oportunidades ganhas ou perdidas. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
+
+## 5. Feche a decisão com seu limite
+
+Os corpos das funções são históricos, mas Salesforce e o armazenamento de claims são doubles locais explícitos. Não se executaram agendamentos, leases PostgreSQL, heartbeat de rede ou liberação depois de writer threads. A regra aceita somente oportunidade aberta; oportunidade perdida segue pela Conta para abrir um ciclo novo. Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
+
+## Localizadores de consulta
+
+- `backend/app/services/super_r1_service.py` foi preservado em `labs/architecture/opportunity-entry/before.py`, na versão `3958ac9ee407f6dc2fe1a6905c475befa69cf9cf`, com SHA-256 `19d2e9051189fc83b10f922e57504fa5f006f67c8101fe4e27dc15dffd6c588a`.
+- `backend/app/services/super_r1_service.py` foi preservado em `labs/architecture/opportunity-entry/after.py`, na versão `8206752f9b1bc8650d0a4572f4a0d64566260b83`, com SHA-256 `81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365`.
+- `backend/app/integrations/salesforce_integration.py` foi preservado em `labs/architecture/opportunity-entry/before-integration.py`, na versão `3958ac9ee407f6dc2fe1a6905c475befa69cf9cf`, com SHA-256 `96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38`.
+- `backend/app/integrations/salesforce_integration.py` foi preservado em `labs/architecture/opportunity-entry/after-integration.py`, na versão `8206752f9b1bc8650d0a4572f4a0d64566260b83`, com SHA-256 `63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05`.
+- `backend/app/services/qualify_service.py` foi preservado em `labs/architecture/opportunity-entry/before-qualify.py`, na versão `3958ac9ee407f6dc2fe1a6905c475befa69cf9cf`, com SHA-256 `9b7942171f29c0aba293241ea52f04d787ef6a6c16e145a3a5186f387e9a7872`.
+- `backend/app/services/qualify_service.py` foi preservado em `labs/architecture/opportunity-entry/after-qualify.py`, na versão `8206752f9b1bc8650d0a4572f4a0d64566260b83`, com SHA-256 `ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0`.
+
+Continue o mesmo caso: [volte ao caso](/jornadas/opportunity-entry/); [entenda o mecanismo](/explicacoes/casos/opportunity-entry/); [execute a experiência](/tutoriais/casos/opportunity-entry/); [consulte contratos e fontes](/referencia/casos/opportunity-entry/).
+
+O [mapa de conceitos deste caso](/jornadas/opportunity-entry/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

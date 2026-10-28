@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-mapper-cli",
+  "path": "src/main/java/org/contextmapper/cli/ContextMapperCLI.java",
+  "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+  "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/src/main/java/org/contextmapper/cli/ContextMapperCLI.java",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-cli/b819362eed75e7dfb0332fa1acdda56f9029b91d/src/main/java/org/contextmapper/cli/ContextMapperCLI.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:23:22.475097+00:00",
+  "sha256": "ec80e85492c4debfd3ae11318ee5d5783cca7de8b390969a2ab5dbf7999c34ce",
+  "line_count": 31,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--src--main--java--org--contextmapper--cli--ContextMapperCLI.java"
+}

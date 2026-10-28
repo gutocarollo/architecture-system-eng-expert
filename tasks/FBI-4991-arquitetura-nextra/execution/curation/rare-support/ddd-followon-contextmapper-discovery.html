@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+
+    <link rel="shortcut icon" href="/favicon.ico?1">
+    <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Context Map Discovery | Context Mapper</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Context Map Discovery" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Our “context map discovery” or “reverse engineering” library allows you to derive a CML context map from existing source code. If you work in a project involving an existing monolith, you may want to generate a Bounded Context that represents and contains your domain model. Afterwards, you can analyze and decompose the architecture with our tools. This helps you to get started with our tool and avoids huge efforts to re-model the existing system. If your system already has a (micro-)service-oriented architecture, you may want to reverse engineer the CML context map illustrating all bounded contexts and their relationships." />
+<meta property="og:description" content="Our “context map discovery” or “reverse engineering” library allows you to derive a CML context map from existing source code. If you work in a project involving an existing monolith, you may want to generate a Bounded Context that represents and contains your domain model. Afterwards, you can analyze and decompose the architecture with our tools. This helps you to get started with our tool and avoids huge efforts to re-model the existing system. If your system already has a (micro-)service-oriented architecture, you may want to reverse engineer the CML context map illustrating all bounded contexts and their relationships." />
+<link rel="canonical" href="https://contextmapper.org/docs/reverse-engineering/" />
+<meta property="og:url" content="https://contextmapper.org/docs/reverse-engineering/" />
+<meta property="og:site_name" content="Context Mapper" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-10-17T15:26:25+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Context Map Discovery" />
+<meta name="twitter:site" content="@" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","dateModified":"2025-10-17T15:26:25+02:00","datePublished":"2025-10-17T15:26:25+02:00","description":"Our “context map discovery” or “reverse engineering” library allows you to derive a CML context map from existing source code. If you work in a project involving an existing monolith, you may want to generate a Bounded Context that represents and contains your domain model. Afterwards, you can analyze and decompose the architecture with our tools. This helps you to get started with our tool and avoids huge efforts to re-model the existing system. If your system already has a (micro-)service-oriented architecture, you may want to reverse engineer the CML context map illustrating all bounded contexts and their relationships.","headline":"Context Map Discovery","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://contextmapper.org/img/cm.png"}},"url":"https://contextmapper.org/docs/reverse-engineering/"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+    <link rel="canonical" href="https://contextmapper.org/docs/reverse-engineering/">
+    <link rel="alternate" type="application/rss+xml" title="Context Mapper" href="https://contextmapper.org/feed.xml" />
+</head>
+
+
+<body>
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container navbar-container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+            <a class="navbar-brand" href="/">
+                <span><img src="/img/logonav.png" alt="Logo"></span>
+            </a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li  class="active" ><a href="/docs/home/">Documentation</a></li>
+                <li ><a href="/background-and-publications/">Project Background</a></li>
+                <li ><a href="/getting-involved/">Getting Involved</a></li>
+                <li ><a href="/news/2024/08/30/v6.12.0-released/">News</a></li>
+            </ul>
+            <div class="navbar-right">
+                <form class="navbar-form navbar-left">
+                    <div class="form-group has-feedback">
+                        <input id="search-box" type="text" class="form-control" placeholder="Search...">
+                        <i class="fa fa-search form-control-feedback"></i>
+                    </div>
+                </form>
+                <ul class="nav navbar-nav">
+                    <li><a href="https://github.com/ContextMapper"><i class="fab fa-github" aria-hidden="true"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+    <div class="page-content">
+        <div class="wrapper">
+            <div class="container">
+    <div class="row">
+        <div class="col-md-3">
+          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-1" aria-expanded="false" aria-controls="collapse-1">
+          Introduction
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-1" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/home/">Welcome</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/getting-started/">Getting started</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/getting-started-create-project/">Create CML Project</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/examples/">Examples</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/library/">Usage as Library</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/faq/">Frequently Asked Questions</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-2" aria-expanded="false" aria-controls="collapse-2">
+          Language Reference (Core)
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-2" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/language-reference/">CML Reference - Introduction</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/language-model/">Language Semantics</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/context-map/">Context Map</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/bounded-context/">Bounded Context</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/subdomain/">Domain and Subdomain</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/domain-vision-statement/">Domain Vision Statement</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/partnership/">Partnership</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/shared-kernel/">Shared Kernel</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/customer-supplier/">Customer/Supplier</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/conformist/">Conformist</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/open-host-service/">Open Host Service</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/anticorruption-layer/">Anticorruption Layer</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/published-language/">Published Language</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/responsibility-layers/">Responsibility Layers</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/knowledge-level/">Knowledge Level</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/aggregate/">Aggregate</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/tactic-ddd/">Tactic DDD Syntax</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/application-and-process-layer/">Application and Process Layer</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/user-requirements/">User Requirements</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/stakeholders/">Stakeholders</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/value-registers/">Value Registers</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/imports/">Imports</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-3" aria-expanded="false" aria-controls="collapse-3">
+          Analysis and Design Transformations
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-3" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/rapid-ooad/">Rapid Object-oriented Analysis and Design</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/story-splitting/">Story Splitting (PoC)</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/stakeholder-and-value-modelling-transformations/">Stakeholder and Value Modelling Transformations</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-4" aria-expanded="false" aria-controls="collapse-4">
+          Architectural Refactorings (ARs)
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-4" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/architectural-refactorings/">Architectural Refactorings</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-split-aggregate-by-entities/">AR-1: Split Aggregate by Entities</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-split-bounded-context-by-features/">AR-2: Split Bounded Context by Features</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-split-bounded-context-by-owners/">AR-3: Split Bounded Context by Owner</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-extract-aggregates-by-volatility/">AR-4: Extract Aggregates by Volatility</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-extract-aggregates-by-cohesion/">AR-5: Extract Aggregates by Cohesion</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-merge-aggregates/">AR-6: Merge Aggregates</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-merge-bounded-contexts/">AR-7: Merge Bounded Contexts</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-extract-shared-kernel/">AR-8: Extract Shared Kernel</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-suspend-partnership/">AR-9: Suspend Partnership</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-change-shared-kernel-to-partnership/">AR-10: Change Shared Kernel to Partnership</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ar-change-partnership-to-shared-kernel/">AR-11: Change Partnership to Shared Kernel</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-5" aria-expanded="false" aria-controls="collapse-5">
+          Value-Driven Analysis and Design
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-5" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/vdad-support/">Value-Driven Analysis and Design (VDAD) Support</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-6" aria-expanded="false" aria-controls="collapse-6">
+          Service Cutter
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-6" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/service-cutter-context-map-suggestions/">Context Map Suggestions with Service Cutter</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/service-cutter-config-file/">Service Cutter Configuration File (.servicecutter.yml)</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-7" aria-expanded="false" aria-controls="collapse-7">
+          Reverse Engineering
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-7" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item active" href="/docs/reverse-engineering/">Context Map Discovery</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-8" aria-expanded="false" aria-controls="collapse-8">
+          Generators
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-8" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/generators/">Generators Overview</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/context-map-generator/">Context Map Generator</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/plant-uml/">PlantUML Generator</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/bpmn-sketch-miner/">BPMN Sketch Miner Generator</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/mdsl/">MDSL (Micro-)Service Contracts Generator</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/service-cutter/">Service Cutter Generators</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/generic-freemarker-generator/">Generic Generator (Templating)</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-9" aria-expanded="false" aria-controls="collapse-9">
+          Tutorials
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-9" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/event-storming/">Model Event Storming Results in Context Mapper</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/event-sourcing-and-cqrs-modeling/">Event Sourcing and CQRS Modeling in Context Mapper</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/jhipster-microservice-generation/">Generate Microservices From Context Map Using JHipster</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/systematic-service-decomposition/">Systematic Service Decomposition with Context Mapper and Service Cutter</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/architecture-validation-with-archunit/">Validating the Implementation against the Model (with ArchUnit)</a>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-10" aria-expanded="false" aria-controls="collapse-10">
+          IDE Plugins and Extensions
+        </a>
+      </h4>
+    </div>
+    <div id="collapse-10" class="panel-collapse collapse" role="tabpanel" aria-label="Side Navigation">
+      <div class="list-group">
+        
+          
+          
+          <a class="list-group-item " href="/docs/vs-code/">Visual Studio Code Extension</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/online-ide/">Online IDE (no longer supported)</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/eclipse/">Eclipse Plugin</a>
+        
+          
+          
+          <a class="list-group-item " href="/docs/ide/">Feature Support</a>
+        
+      </div>
+    </div>
+  </div>
+
+</div>
+
+        </div>
+
+        <div class="col-md-9">
+            <h1>Context Map Discovery</h1>
+            <div id="markdown-content-container"><p>Our “context map discovery” or “reverse engineering” library allows you to derive a CML context map from existing source code. If you work in a project involving an existing monolith, you may want to generate a Bounded Context that represents and contains your domain model. Afterwards, you can analyze and decompose the architecture with our tools. This helps you to get started with our tool and avoids huge efforts to re-model the existing system. If your system already has a (micro-)service-oriented architecture, you may want to reverse engineer the CML context map illustrating all bounded contexts and their relationships.</p>
+
+<p>The discovery library supports the reverse engineering of bounded contexts and context maps (including relationships between bounded contexts). It is extensible and designed to plug-in new discovery <a href="https://en.wikipedia.org/wiki/Strategy_pattern">strategies</a>. The current prototype supports bounded context discovery for <a href="https://spring.io/projects/spring-boot">Spring Boot </a> applications and relationship discovery on the basis of Docker compose.</p>
+
+<p>Contributions to the discovery library are very welcome! If you implement a new discovery strategy for another programming language or framework, please contribute it to our project and create a Pull Request (PR) in our <a href="https://github.com/ContextMapper/context-map-discovery">GitHub repository</a>.</p>
+
+<h2 id="usage">Usage</h2>
+<p>The latest version of the discovery library is available through Maven Central: <a href="https://search.maven.org/search?q=g:%22org.contextmapper%22%20AND%20a:%22context-map-discovery%22"><img src="https://img.shields.io/maven-central/v/org.contextmapper/context-map-discovery.svg?label=Maven%20Central" alt="Maven Central" /></a></p>
+
+<p>You can find all information about the library, how to use it, and how to extend it with new discovery strategies in our Github repository:</p>
+
+<p><a href="https://github.com/ContextMapper/context-map-discovery">https://github.com/ContextMapper/context-map-discovery</a></p>
+
+<p>Note that this is a prototype and limited in the discovery strategies already implemented. Additional strategies will have to be implemented in the future.</p>
+
+<h2 id="lakeside-mutual-case-study">Lakeside Mutual Case Study</h2>
+<p>The following example illustrates how the discovery library works. We applied it to the <a href="https://github.com/Microservice-API-Patterns/LakesideMutual">Lakeside Mutual</a> project, a fictitious insurance company. It is a sample application to demonstrate microservices. With our <a href="https://github.com/ContextMapper/context-map-discovery">context map discovery library</a> we derived a CML context map from the <a href="https://github.com/Microservice-API-Patterns/LakesideMutual">Lakeside Mutual source code</a>.</p>
+
+<p>The following diagram, courtesy of the Lakeside Mutual project itself, illustrates the architecture:</p>
+
+<p><img src="/img/lakeside-mutual-overview.png" alt="Lakeside Mutual Architecture Overview" /></p>
+
+<p>With the <a href="https://github.com/ContextMapper/context-map-discovery">strategies already available</a> we are able to discover the bounded contexts:</p>
+
+<ul>
+  <li>Customer Management</li>
+  <li>Customer Self-Service</li>
+  <li>Policy Management</li>
+  <li>Customer Core</li>
+</ul>
+
+<p>The <em>risk management context</em> is currently not detected, since a strategy on the basis of Node.js is not available yet.</p>
+
+<p>The following piece of code is all that is needed to generate the context map with our discovery library:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LakesideMutualContextMapDiscoverer</span> <span class="o">{</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+    <span class="c1">// configure the discoverer</span>
+    <span class="nc">ContextMapDiscoverer</span> <span class="n">discoverer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ContextMapDiscoverer</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">usingBoundedContextDiscoveryStrategies</span><span class="o">(</span>
+            <span class="k">new</span> <span class="nf">SpringBootBoundedContextDiscoveryStrategy</span><span class="o">(</span><span class="s">"com.lakesidemutual"</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">usingRelationshipDiscoveryStrategies</span><span class="o">(</span>
+            <span class="k">new</span> <span class="nf">DockerComposeRelationshipDiscoveryStrategy</span><span class="o">(</span>
+                <span class="k">new</span> <span class="nf">File</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"user.home"</span><span class="o">)</span> <span class="o">+</span> <span class="s">"/source/LakesideMutual/"</span><span class="o">)))</span>
+        <span class="o">.</span><span class="na">usingBoundedContextNameMappingStrategies</span><span class="o">(</span>
+            <span class="k">new</span> <span class="nf">SeparatorToCamelCaseBoundedContextNameMappingStrategy</span><span class="o">(</span><span class="s">"-"</span><span class="o">)</span> <span class="o">{</span>
+              <span class="nd">@Override</span>
+              <span class="kd">public</span> <span class="nc">String</span> <span class="nf">mapBoundedContextName</span><span class="o">(</span><span class="nc">String</span> <span class="n">s</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// remove the "Backend" part of the Docker service names to map correctly...</span>
+                <span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="kd">super</span><span class="o">.</span><span class="na">mapBoundedContextName</span><span class="o">(</span><span class="n">s</span><span class="o">);</span>
+                <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="na">endsWith</span><span class="o">(</span><span class="s">"Backend"</span><span class="o">)</span> <span class="o">?</span> <span class="n">name</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">name</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">7</span><span class="o">)</span> <span class="o">:</span> <span class="n">name</span><span class="o">;</span>
+              <span class="o">}</span>
+            <span class="o">});</span>
+
+    <span class="c1">// run the discovery process to get the Context Map</span>
+    <span class="nc">ContextMap</span> <span class="n">contextmap</span> <span class="o">=</span> <span class="n">discoverer</span><span class="o">.</span><span class="na">discoverContextMap</span><span class="o">();</span>
+
+    <span class="c1">// serialize the Context Map to CML</span>
+    <span class="k">new</span> <span class="nf">ContextMapSerializer</span><span class="o">().</span><span class="na">serializeContextMap</span><span class="o">(</span><span class="n">contextmap</span><span class="o">,</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"./src-gen/lakesidemutual.cml"</span><span class="o">));</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>The library is based on strategies implementing the three interfaces <code class="language-plaintext highlighter-rouge">BoundedContextDiscoveryStrategy</code>, <code class="language-plaintext highlighter-rouge">RelationshipDiscoveryStrategy</code>, and <code class="language-plaintext highlighter-rouge">BoundedContextNameMappingStrategy</code>. The <code class="language-plaintext highlighter-rouge">BoundedContextNameMappingStrategy</code> strategy can be used to map different bounded context names between the bounded context and relationship strategies.</p>
+
+<p>In this example we use the <code class="language-plaintext highlighter-rouge">SpringBootBoundedContextDiscoveryStrategy</code> to discover the bounded contexts via Spring annotations. It
+derives <a href="/docs/language-reference/bounded_context">Bounded Contexts</a> from applications, <a href="/docs/language-reference/aggregate">Aggregates</a> from REST endpoints, and Entities from the REST endpoint methods. The <code class="language-plaintext highlighter-rouge">DockerComposeRelationshipDiscoveryStrategy</code> strategy is used to derive the relationships between the bounded context from the <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> file. The extended <code class="language-plaintext highlighter-rouge">SeparatorToCamelCaseBoundedContextNameMappingStrategy</code> in the example above is used to map names such as ‘customer-management-backend’ (name according to relationship strategy) to ‘CustomerManagement’ (name according the discovered bounded context).</p>
+
+<p>The code above creates the following context map for the application:</p>
+
+<div class="highlight"><pre><span></span><span class="k">ContextMap</span> {
+  <span class="k">contains</span> PolicyManagement
+  <span class="k">contains</span> CustomerManagement
+  <span class="k">contains</span> CustomerSelfService
+  <span class="k">contains</span> CustomerCore
+
+  CustomerCore -&gt; PolicyManagement
+
+  CustomerCore -&gt; CustomerManagement
+
+  PolicyManagement -&gt; CustomerSelfService
+
+  CustomerCore -&gt; CustomerSelfService
+
+}
+
+<span class="k">BoundedContext</span> PolicyManagement {
+  <span class="k">implementationTechnology</span> <span class="s">&quot;Spring Boot&quot;</span>
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.policymanagement.interfaces.RiskComputationService.</span>
+  <span class="k">Aggregate</span> riskfactor
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.policymanagement.interfaces.InsuranceQuoteRequestInformationHolder.</span>
+  <span class="k">Aggregate</span> PolicyManagement_insurance_quote_requests {
+    <span class="c">/* removed to save space here */</span>
+  }
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.policymanagement.interfaces.PolicyInformationHolder.</span>
+  <span class="k">Aggregate</span> policies {
+    <span class="c">/* removed to save space here */</span>
+  }
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.policymanagement.interfaces.CustomerInformationHolder.</span>
+  <span class="k">Aggregate</span> PolicyManagement_customers {
+    <span class="c">/* removed to save space here */</span>
+  }
+}
+
+<span class="k">BoundedContext</span> CustomerManagement {
+  <span class="k">implementationTechnology</span> <span class="s">&quot;Spring Boot&quot;</span>
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customermanagement.interfaces.CustomerInformationHolder.</span>
+  <span class="k">Aggregate</span> CustomerManagement_customers {
+    <span class="c">/* removed to save space here */</span>
+  }
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customermanagement.interfaces.InteractionLogInformationHolder.</span>
+  <span class="k">Aggregate</span> interaction_logs {
+    <span class="c">/* removed to save space here */</span>
+  }
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customermanagement.interfaces.NotificationInformationHolder.</span>
+  <span class="k">Aggregate</span> notifications
+}
+
+<span class="k">BoundedContext</span> CustomerSelfService {
+  <span class="k">implementationTechnology</span> <span class="s">&quot;Spring Boot&quot;</span>
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.AuthenticationController.</span>
+  <span class="k">Aggregate</span> auth
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.CityStaticDataHolder.</span>
+  <span class="k">Aggregate</span> cities {
+    <span class="c">/* removed to save space here */</span>
+  }
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.InsuranceQuoteRequestInformationHolder.</span>
+  <span class="k">Aggregate</span> insurance_quote_requests {
+    <span class="c">/* removed to save space here */</span>
+  }
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.CustomerInformationHolder.</span>
+  <span class="k">Aggregate</span> customers {
+    <span class="c">/* removed to save space here */</span>
+  }
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customerselfservice.interfaces.UserInformationHolder.</span>
+  <span class="k">Aggregate</span> user {
+    <span class="c">/* removed to save space here */</span>
+  }
+}
+
+<span class="k">BoundedContext</span> CustomerCore {
+  <span class="k">implementationTechnology</span> <span class="s">&quot;Spring Boot&quot;</span>
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customercore.interfaces.CityStaticDataHolder.</span>
+  <span class="k">Aggregate</span> CustomerCore_cities {
+    <span class="c">/* removed to save space here */</span>
+  }
+  <span class="c">// This Aggregate has been created on the basis of the Spring REST controller com.lakesidemutual.customercore.interfaces.CustomerInformationHolder.</span>
+  <span class="k">Aggregate</span> CustomerCore_customers {
+    <span class="c">/* removed to save space here */</span>
+  }
+}
+</pre></div>
+
+<p>Note that we removed the entities in the CML model above in order to save space here. The full example and the project source code can be found 
+<a href="https://github.com/ContextMapper/context-map-discovery/tree/master/Examples/LakesideMutual">here</a>.</p>
+</div>
+            <div style="clear:both;">
+              <p class="text-center">
+                <br />
+                <a target="_blank" href="https://github.com/ContextMapper/contextmapper.github.io/blob/master/_docs/reverse-engineering/reverse-engineering.md" class="btn btn-default githubEditButton" role="button">
+                  <i class="fa fa-pencil fa-lg"></i> Improve this page
+                </a>
+              </p>
+            </div>
+            <hr>
+            
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+    <ul class="pager">
+      
+        
+        
+        <li class="previous">
+          <a href="/docs/service-cutter-config-file/">
+            <span aria-hidden="true">&larr;</span> Previous
+          </a>
+        </li>
+      
+
+      
+        
+        
+        <li class="next">
+          <a href="/docs/generators/">
+            Next <span aria-hidden="true">&rarr;</span>
+          </a>
+        </li>
+      
+      </ul>
+    <div class="clear"></div>
+    
+
+        </div>
+
+    </div>
+</div>
+
+        </div>
+    </div>
+
+    <footer class="footer">
+    <div class="container">
+
+        <p class="text-center">
+            &copy; Context Mapper 2025 |
+            Powered by <a href="https://github.com/aksakalli/jekyll-doc-theme">Jekyll Doc Theme</a>
+        </p>
+        <!-- <p class="text-muted">Place sticky footer content here.</p> -->
+    </div>
+</footer>
+
+    <script>
+  var baseurl = ''
+</script>
+<script src="/js/jquery-1.10.2.min.js "></script>
+<script src="/js/bootstrap.min.js "></script>
+<script src="/js/typeahead.bundle.min.js "></script>
+
+<script src="/js/main.js "></script>
+
+</body>
+
+</html>

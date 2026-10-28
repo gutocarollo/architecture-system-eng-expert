@@ -1,0 +1,8 @@
+section_ref,entity_id,section_id,heading,level,document_path,line
+doc:architecture/architecture-system-eng-expert#curso-de-arquitetura-aplicada-da-faz-capital,doc:architecture/architecture-system-eng-expert,curso-de-arquitetura-aplicada-da-faz-capital,Curso de arquitetura aplicada da Faz Capital,1,docs/canonical/operations/architecture-system-eng-expert.md,2
+doc:architecture/architecture-system-eng-expert#em-uma-frase,doc:architecture/architecture-system-eng-expert,em-uma-frase,Em uma frase,2,docs/canonical/operations/architecture-system-eng-expert.md,4
+doc:architecture/architecture-system-eng-expert#escopo,doc:architecture/architecture-system-eng-expert,escopo,Escopo,2,docs/canonical/operations/architecture-system-eng-expert.md,8
+doc:architecture/architecture-system-eng-expert#o-que-está-coberto,doc:architecture/architecture-system-eng-expert,o-que-está-coberto,O que está coberto,2,docs/canonical/operations/architecture-system-eng-expert.md,14
+doc:architecture/architecture-system-eng-expert#o-que-não-está-coberto-e-por-quê,doc:architecture/architecture-system-eng-expert,o-que-não-está-coberto-e-por-quê,O que não está coberto e por quê,2,docs/canonical/operations/architecture-system-eng-expert.md,18
+doc:architecture/architecture-system-eng-expert#evidências-e-incertezas,doc:architecture/architecture-system-eng-expert,evidências-e-incertezas,Evidências e incertezas,2,docs/canonical/operations/architecture-system-eng-expert.md,24
+doc:architecture/architecture-system-eng-expert#invariantes-e-regras-de-negócio,doc:architecture/architecture-system-eng-expert,invariantes-e-regras-de-negócio,Invariantes e Regras de Negócio,2,docs/canonical/operations/architecture-system-eng-expert.md,30

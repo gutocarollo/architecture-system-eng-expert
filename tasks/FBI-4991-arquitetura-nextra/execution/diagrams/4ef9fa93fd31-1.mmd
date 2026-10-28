@@ -1,0 +1,6 @@
+stateDiagram-v2
+    [*] --> IN_CONTACT
+    IN_CONTACT --> IN_CONTACT: tenta UNKNOWN / invalid-edge
+    IN_CONTACT --> IN_CONTACT: operador tenta PENDING / bloqueado
+    IN_CONTACT --> IN_CONTACT: especialista sem motivo / pedir motivo
+    IN_CONTACT --> PENDING: especialista informa motivo

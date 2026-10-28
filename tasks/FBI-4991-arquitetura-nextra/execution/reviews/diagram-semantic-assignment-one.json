@@ -1,0 +1,2100 @@
+{
+  "source_root_head": "623ae1d3d34143df53c571327a508de47ab58951",
+  "scope": "First semantic review of previously unadjudicated diagrams; previously approved three are excluded.",
+  "items": [
+    {
+      "diagram": {
+        "id": "diagram-1",
+        "document_id": "explicacoes/api-integration/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-1.png",
+          "artifact_sha256": "2ad7e2b1a6a29ce265d6cddc7c30e7325e6ebcc972cb184c864c15ef89d69c4c"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/api-integration/index.mdx",
+        "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-1.png",
+          "artifact_sha256": "2ad7e2b1a6a29ce265d6cddc7c30e7325e6ebcc972cb184c864c15ef89d69c4c"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-3",
+        "document_id": "explicacoes/api-integration/index",
+        "fence_index": 3,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-3.png",
+          "artifact_sha256": "8f6fba9c007ca8e4e24af3642821ece3a310a410e6ed4fd42e9f48f9c3bac673"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/api-integration/index.mdx",
+        "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+        "fence_index": 3,
+        "line_start": 94,
+        "source_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-3.png",
+          "artifact_sha256": "8f6fba9c007ca8e4e24af3642821ece3a310a410e6ed4fd42e9f48f9c3bac673"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-5",
+        "document_id": "explicacoes/availability/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-2.png",
+          "artifact_sha256": "1b9384a4160458d10146987dd9a5e50d7c9437bb90c167395f4d1020ab72deb9"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+        "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "fence_index": 2,
+        "line_start": 46,
+        "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-2.png",
+          "artifact_sha256": "1b9384a4160458d10146987dd9a5e50d7c9437bb90c167395f4d1020ab72deb9"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-7",
+        "document_id": "explicacoes/availability/index",
+        "fence_index": 4,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-4.png",
+          "artifact_sha256": "90b57d488bf44c8f3e670029af3ef2f532325cc367d083640a909239caf911a9"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+        "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "fence_index": 4,
+        "line_start": 85,
+        "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-4.png",
+          "artifact_sha256": "90b57d488bf44c8f3e670029af3ef2f532325cc367d083640a909239caf911a9"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-9",
+        "document_id": "explicacoes/availability/index",
+        "fence_index": 6,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-6.png",
+          "artifact_sha256": "69127724c28c612f685b5d48bd08060744d7dc96b25629fad125c0e65137c737"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx",
+        "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "fence_index": 6,
+        "line_start": 129,
+        "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-6.png",
+          "artifact_sha256": "69127724c28c612f685b5d48bd08060744d7dc96b25629fad125c0e65137c737"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-11",
+        "document_id": "explicacoes/business-rules/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-2.png",
+          "artifact_sha256": "b65facd05d85db92f72085306f1e2092772a0bed6fec98f536b04ce4a37f1058"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/business-rules/index.mdx",
+        "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+        "fence_index": 2,
+        "line_start": 48,
+        "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-2.png",
+          "artifact_sha256": "b65facd05d85db92f72085306f1e2092772a0bed6fec98f536b04ce4a37f1058"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-13",
+        "document_id": "explicacoes/business-rules/index",
+        "fence_index": 4,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-4.png",
+          "artifact_sha256": "6e7a4b7086145557be7ab15990916726bd9a8b6419da854e936123f1337922db"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/business-rules/index.mdx",
+        "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+        "fence_index": 4,
+        "line_start": 131,
+        "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-4.png",
+          "artifact_sha256": "6e7a4b7086145557be7ab15990916726bd9a8b6419da854e936123f1337922db"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-15",
+        "document_id": "explicacoes/cache/index",
+        "fence_index": 2,
+        "relation_ids": [
+          "insurance-api-service",
+          "insurance-service-repository"
+        ],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-2.png",
+          "artifact_sha256": "c453d07f377c7f992b074f0c178207650c5c317aa65980bad45d3b420e4a3658"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/cache/index.mdx",
+        "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+        "fence_index": 2,
+        "line_start": 58,
+        "source_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-2.png",
+          "artifact_sha256": "c453d07f377c7f992b074f0c178207650c5c317aa65980bad45d3b420e4a3658"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-17",
+        "document_id": "explicacoes/cache/index",
+        "fence_index": 4,
+        "relation_ids": [
+          "insurance-api-service",
+          "insurance-service-repository"
+        ],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-4.png",
+          "artifact_sha256": "b1bdced49098e0e3abb8d615bc0518e7b18b72814ee50fd44a2927c0792fe9c9"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/cache/index.mdx",
+        "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+        "fence_index": 4,
+        "line_start": 116,
+        "source_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-4.png",
+          "artifact_sha256": "b1bdced49098e0e3abb8d615bc0518e7b18b72814ee50fd44a2927c0792fe9c9"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-19",
+        "document_id": "explicacoes/capacity/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-2.png",
+          "artifact_sha256": "41fe1e6dd07dffa41bf4d6120dde3eaa473fc9459204844fd0af2eee65c632d0"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx",
+        "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+        "fence_index": 2,
+        "line_start": 49,
+        "source_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-2.png",
+          "artifact_sha256": "41fe1e6dd07dffa41bf4d6120dde3eaa473fc9459204844fd0af2eee65c632d0"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-21",
+        "document_id": "explicacoes/capacity/index",
+        "fence_index": 4,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-4.png",
+          "artifact_sha256": "71f5c782ec0f794a62afd286dc25759e49b886f5dd3b33f7a300629ad5983557"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx",
+        "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+        "fence_index": 4,
+        "line_start": 117,
+        "source_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-4.png",
+          "artifact_sha256": "71f5c782ec0f794a62afd286dc25759e49b886f5dd3b33f7a300629ad5983557"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-23",
+        "document_id": "explicacoes/casos/access-policy/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/5f5a126bb8fe-1.png",
+          "artifact_sha256": "761f3455ffefb64fe3bea110536cc41bdfcb97b120796973712eaeaeb897a9be"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/access-policy/index.mdx",
+        "document_sha256": "c38e421bcf2d5574ac22a1940230f687fb8dbbf9e26527d5ca32e12965bf89b8",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/5f5a126bb8fe-1.png",
+          "artifact_sha256": "761f3455ffefb64fe3bea110536cc41bdfcb97b120796973712eaeaeb897a9be"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-26",
+        "document_id": "explicacoes/casos/consensus/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/311f694a6fce-1.png",
+          "artifact_sha256": "dda2eba8ea900d0a6a0a87228d6118489bd260aa43675f9fcb73af07763a6905"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/consensus/index.mdx",
+        "document_sha256": "942512b4ae79d96f96b0e62c22226adef15ee45188b6191bd8e1806cc81ce750",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/311f694a6fce-1.png",
+          "artifact_sha256": "dda2eba8ea900d0a6a0a87228d6118489bd260aa43675f9fcb73af07763a6905"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-28",
+        "document_id": "explicacoes/casos/diagnostics/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/7bf82963c234-1.png",
+          "artifact_sha256": "b89e026e9d8adb6604dfe2e01416634ecafef3f1a1ed2e45e7e02f876675bccf"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/diagnostics/index.mdx",
+        "document_sha256": "c062c1456a037844f0e44e8027c5241e8ab7f00b5e9404c2868d0cdfee1fa4c4",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/7bf82963c234-1.png",
+          "artifact_sha256": "b89e026e9d8adb6604dfe2e01416634ecafef3f1a1ed2e45e7e02f876675bccf"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-30",
+        "document_id": "explicacoes/casos/ledger-projection/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9dbbbc5b65f-1.png",
+          "artifact_sha256": "3f6216c16c90bf79045b646d0a2789ca1a8f37486b076298cf8693a53e4edce2"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/ledger-projection/index.mdx",
+        "document_sha256": "25fd1903aa70d88669cae9cb54e8a2e0d25944c4f2dcb79d7cefa16beab13e74",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9dbbbc5b65f-1.png",
+          "artifact_sha256": "3f6216c16c90bf79045b646d0a2789ca1a8f37486b076298cf8693a53e4edce2"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-32",
+        "document_id": "explicacoes/casos/order-boundaries/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2388283f7393-1.png",
+          "artifact_sha256": "d9d799742e52df2700429605ac479fe65c89ed4f8d99f0e4bab22255e258e851"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/order-boundaries/index.mdx",
+        "document_sha256": "4d5dc484c87cb62673d6d0b62a1b434abed38ff9009e0b8844d963d2eea46232",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2388283f7393-1.png",
+          "artifact_sha256": "d9d799742e52df2700429605ac479fe65c89ed4f8d99f0e4bab22255e258e851"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-35",
+        "document_id": "explicacoes/casos/queue-workflow/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/35eea51b499e-1.png",
+          "artifact_sha256": "b00e14b89c7ca5875ccd696b61846c97f64798c67f7eb300a4e3b317baa82687"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/queue-workflow/index.mdx",
+        "document_sha256": "2a254250d96b29a1ec12a8afed3b29ab4472c98d0d1c3a3bf58a929f6fda1cb0",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/35eea51b499e-1.png",
+          "artifact_sha256": "b00e14b89c7ca5875ccd696b61846c97f64798c67f7eb300a4e3b317baa82687"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-38",
+        "document_id": "explicacoes/casos/safe-release/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/fdb7f5367ec0-1.png",
+          "artifact_sha256": "41288a449a0078cf05d2a2341872a5affb822b9a0ab32da3cbfcf0acbcca2a1e"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/safe-release/index.mdx",
+        "document_sha256": "b2a27050fe08d62a4707ee7922ea58610eb9464ce0d30ad47c2902ea2b7c86a4",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/fdb7f5367ec0-1.png",
+          "artifact_sha256": "41288a449a0078cf05d2a2341872a5affb822b9a0ab32da3cbfcf0acbcca2a1e"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-40",
+        "document_id": "explicacoes/casos/storage-partitions/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/78f1cc74a8d3-1.png",
+          "artifact_sha256": "4621ebec9434b77887a4bd0df58a8d254602f8ae394b32293648431a56023b64"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/storage-partitions/index.mdx",
+        "document_sha256": "84e5fd9b484a6d65153624ca84fdf367eab3c516093e50d56739f74667739398",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/78f1cc74a8d3-1.png",
+          "artifact_sha256": "4621ebec9434b77887a4bd0df58a8d254602f8ae394b32293648431a56023b64"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-42",
+        "document_id": "explicacoes/code-boundaries/index",
+        "fence_index": 2,
+        "relation_ids": [
+          "insurance-api-service",
+          "insurance-service-repository"
+        ],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-2.png",
+          "artifact_sha256": "4bb6178f7fdbeba233e55f04d417bcd0f878cbfb3fe22974e0e1f91ebbc6cca9"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+        "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "fence_index": 2,
+        "line_start": 65,
+        "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-2.png",
+          "artifact_sha256": "4bb6178f7fdbeba233e55f04d417bcd0f878cbfb3fe22974e0e1f91ebbc6cca9"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-44",
+        "document_id": "explicacoes/code-boundaries/index",
+        "fence_index": 4,
+        "relation_ids": [
+          "insurance-api-service",
+          "insurance-service-repository"
+        ],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-4.png",
+          "artifact_sha256": "242b9a98bdb2c30cd294a3eca62d3f6ae5d3395a66852bdf62b136e1ef1066ba"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+        "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "fence_index": 4,
+        "line_start": 120,
+        "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-4.png",
+          "artifact_sha256": "242b9a98bdb2c30cd294a3eca62d3f6ae5d3395a66852bdf62b136e1ef1066ba"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-46",
+        "document_id": "explicacoes/code-boundaries/index",
+        "fence_index": 6,
+        "relation_ids": [
+          "insurance-api-service",
+          "insurance-service-repository"
+        ],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-6.png",
+          "artifact_sha256": "8b4069821f37a118f0495f29a436a2b57847c39df9fe3991fdacea86329011a2"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx",
+        "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "fence_index": 6,
+        "line_start": 175,
+        "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-6.png",
+          "artifact_sha256": "8b4069821f37a118f0495f29a436a2b57847c39df9fe3991fdacea86329011a2"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-48",
+        "document_id": "explicacoes/code-patterns/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-1.png",
+          "artifact_sha256": "1d6d728cb88c6c0dea4bbe311c107f92f0fa337400a5d2f20f5251a6fcad867f"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-patterns/index.mdx",
+        "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+        "fence_index": 1,
+        "line_start": 77,
+        "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-1.png",
+          "artifact_sha256": "1d6d728cb88c6c0dea4bbe311c107f92f0fa337400a5d2f20f5251a6fcad867f"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-50",
+        "document_id": "explicacoes/code-patterns/index",
+        "fence_index": 3,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-3.png",
+          "artifact_sha256": "5be7d8a2ea456377219aa53b3b9e0473c2e10a4e59bbb8f6cddc5e2711f1fe0a"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-patterns/index.mdx",
+        "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+        "fence_index": 3,
+        "line_start": 149,
+        "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-3.png",
+          "artifact_sha256": "5be7d8a2ea456377219aa53b3b9e0473c2e10a4e59bbb8f6cddc5e2711f1fe0a"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-52",
+        "document_id": "explicacoes/concurrency/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/c795b74afd1d-2.png",
+          "artifact_sha256": "dae60e241abec505309740893cced92c4372f1b10a25538e8b37efe79ec7d071"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/concurrency/index.mdx",
+        "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+        "fence_index": 2,
+        "line_start": 63,
+        "source_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/c795b74afd1d-2.png",
+          "artifact_sha256": "dae60e241abec505309740893cced92c4372f1b10a25538e8b37efe79ec7d071"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-54",
+        "document_id": "explicacoes/data-distribution/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-2.png",
+          "artifact_sha256": "c0411ccdb68f84d9e7c5320bcc0b5d0aa6baa883369ae885959604306729a393"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-distribution/index.mdx",
+        "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+        "fence_index": 2,
+        "line_start": 37,
+        "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-2.png",
+          "artifact_sha256": "c0411ccdb68f84d9e7c5320bcc0b5d0aa6baa883369ae885959604306729a393"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-56",
+        "document_id": "explicacoes/data-distribution/index",
+        "fence_index": 4,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-4.png",
+          "artifact_sha256": "b8e78988093e4a4c202c73753929601e17365195b27df5b498614e822e4658f6"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-distribution/index.mdx",
+        "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+        "fence_index": 4,
+        "line_start": 94,
+        "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-4.png",
+          "artifact_sha256": "b8e78988093e4a4c202c73753929601e17365195b27df5b498614e822e4658f6"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-58",
+        "document_id": "explicacoes/data-durability/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-2.png",
+          "artifact_sha256": "ea10349abbc19b715da9b66861630dbc45e56eeedcba45225052336adf954aee"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-durability/index.mdx",
+        "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+        "fence_index": 2,
+        "line_start": 43,
+        "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-2.png",
+          "artifact_sha256": "ea10349abbc19b715da9b66861630dbc45e56eeedcba45225052336adf954aee"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-60",
+        "document_id": "explicacoes/data-durability/index",
+        "fence_index": 4,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-4.png",
+          "artifact_sha256": "5c2924a2626b3ae81cd685eb450ddd25b1397f20af183444ba5dc4b7c2b50527"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-durability/index.mdx",
+        "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+        "fence_index": 4,
+        "line_start": 89,
+        "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-4.png",
+          "artifact_sha256": "5c2924a2626b3ae81cd685eb450ddd25b1397f20af183444ba5dc4b7c2b50527"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-62",
+        "document_id": "explicacoes/distributed-work/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6958e8946c7a-2.png",
+          "artifact_sha256": "e9ae28765c74d2b1c981216396fe9c10fb7638d11001572ba50e7f263f8f4043"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/distributed-work/index.mdx",
+        "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+        "fence_index": 2,
+        "line_start": 70,
+        "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6958e8946c7a-2.png",
+          "artifact_sha256": "e9ae28765c74d2b1c981216396fe9c10fb7638d11001572ba50e7f263f8f4043"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-64",
+        "document_id": "explicacoes/messages/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-2.png",
+          "artifact_sha256": "0c571e32637d0b8d52bcc4fa36b206ad1fe8b94a570a36ace726e58cc05343ca"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx",
+        "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+        "fence_index": 2,
+        "line_start": 47,
+        "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-2.png",
+          "artifact_sha256": "0c571e32637d0b8d52bcc4fa36b206ad1fe8b94a570a36ace726e58cc05343ca"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-66",
+        "document_id": "explicacoes/messages/index",
+        "fence_index": 4,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-4.png",
+          "artifact_sha256": "d18e11cb997cca151951f7a56dfeaa8b6d3590dd9ebdcc8a048f535e28ef0205"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx",
+        "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+        "fence_index": 4,
+        "line_start": 109,
+        "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-4.png",
+          "artifact_sha256": "d18e11cb997cca151951f7a56dfeaa8b6d3590dd9ebdcc8a048f535e28ef0205"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-68",
+        "document_id": "explicacoes/observability/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9683aefc7b6-1.png",
+          "artifact_sha256": "1e36648133b7c2c4461248c1154441285475d8b005ce325d1643b8672a7f1bc9"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/observability/index.mdx",
+        "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+        "fence_index": 1,
+        "line_start": 30,
+        "source_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9683aefc7b6-1.png",
+          "artifact_sha256": "1e36648133b7c2c4461248c1154441285475d8b005ce325d1643b8672a7f1bc9"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-70",
+        "document_id": "explicacoes/read-models/index",
+        "fence_index": 1,
+        "relation_ids": [
+          "report-api-service",
+          "report-service-repository"
+        ],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-1.png",
+          "artifact_sha256": "c69598e467c3f0f7ef49eca1c21b2c02421c596c0ec6e757a5e3ae521367969c"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+        "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+        "fence_index": 1,
+        "line_start": 24,
+        "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-1.png",
+          "artifact_sha256": "c69598e467c3f0f7ef49eca1c21b2c02421c596c0ec6e757a5e3ae521367969c"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-72",
+        "document_id": "explicacoes/read-models/index",
+        "fence_index": 3,
+        "relation_ids": [
+          "report-api-service",
+          "report-service-repository"
+        ],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-3.png",
+          "artifact_sha256": "a4745dd794316e2a49767308bc96fea75726b20f062c5b80a89ecb9ac8e66a93"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+        "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+        "fence_index": 3,
+        "line_start": 82,
+        "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-3.png",
+          "artifact_sha256": "a4745dd794316e2a49767308bc96fea75726b20f062c5b80a89ecb9ac8e66a93"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-74",
+        "document_id": "explicacoes/reliable-integration/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-1.png",
+          "artifact_sha256": "4b08956a5f8981b5ef3db46306eeae2cba493a7704d9e705963c517ceeff2731"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/reliable-integration/index.mdx",
+        "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+        "fence_index": 1,
+        "line_start": 22,
+        "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-1.png",
+          "artifact_sha256": "4b08956a5f8981b5ef3db46306eeae2cba493a7704d9e705963c517ceeff2731"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-76",
+        "document_id": "explicacoes/reliable-integration/index",
+        "fence_index": 3,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-3.png",
+          "artifact_sha256": "8b6ced7932671cecc9b02d2333ff528d7c2a6978f70320a52cde0cb2ddb14b69"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/reliable-integration/index.mdx",
+        "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+        "fence_index": 3,
+        "line_start": 82,
+        "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-3.png",
+          "artifact_sha256": "8b6ced7932671cecc9b02d2333ff528d7c2a6978f70320a52cde0cb2ddb14b69"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-78",
+        "document_id": "explicacoes/safe-change/index",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-1.png",
+          "artifact_sha256": "f937a84b6044c0f54d4d4c72e1935437e3a0c1a32eac0336691e18900eca8a82"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx",
+        "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+        "fence_index": 1,
+        "line_start": 20,
+        "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-1.png",
+          "artifact_sha256": "f937a84b6044c0f54d4d4c72e1935437e3a0c1a32eac0336691e18900eca8a82"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-80",
+        "document_id": "explicacoes/safe-change/index",
+        "fence_index": 3,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-3.png",
+          "artifact_sha256": "036534e71488d9fc4d9a91ad965d9247299725a05c55d6b19ed8aad13ac0dd1b"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx",
+        "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+        "fence_index": 3,
+        "line_start": 66,
+        "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-3.png",
+          "artifact_sha256": "036534e71488d9fc4d9a91ad965d9247299725a05c55d6b19ed8aad13ac0dd1b"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-82",
+        "document_id": "explicacoes/safe-change/index",
+        "fence_index": 5,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-5.png",
+          "artifact_sha256": "d353e0cce01caf99c6b26e8f0ed7710d93255db4e26f796650ac249e41a264e9"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx",
+        "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+        "fence_index": 5,
+        "line_start": 107,
+        "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-5.png",
+          "artifact_sha256": "d353e0cce01caf99c6b26e8f0ed7710d93255db4e26f796650ac249e41a264e9"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-84",
+        "document_id": "explicacoes/security/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/718336970d50-2.png",
+          "artifact_sha256": "9394f0a2ecb33233c0af7545741b5fd7c232a2c82c1df2faa816a0c13f17b119"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/security/index.mdx",
+        "document_sha256": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+        "fence_index": 2,
+        "line_start": 61,
+        "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/718336970d50-2.png",
+          "artifact_sha256": "9394f0a2ecb33233c0af7545741b5fd7c232a2c82c1df2faa816a0c13f17b119"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-86",
+        "document_id": "explicacoes/workflow/index",
+        "fence_index": 2,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/36f1dacc4085-2.png",
+          "artifact_sha256": "e1978c8fabdbba0695bda28a72507c2ba09ef4eb0d413d0e395b92f583bed802"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/workflow/index.mdx",
+        "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+        "fence_index": 2,
+        "line_start": 56,
+        "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/36f1dacc4085-2.png",
+          "artifact_sha256": "e1978c8fabdbba0695bda28a72507c2ba09ef4eb0d413d0e395b92f583bed802"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-88",
+        "document_id": "guias/investigar-impacto",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cf75273cb9a3-1.png",
+          "artifact_sha256": "4326b2903052fadd1423e0ae41572b6e7b97d32b8c38f814b83726509cb1d46d"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/investigar-impacto.mdx",
+        "document_sha256": "6a936ddbbe4b3fe330ddc1654b3c8520f103d61bd18144b769e9507b8a70324c",
+        "fence_index": 1,
+        "line_start": 116,
+        "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cf75273cb9a3-1.png",
+          "artifact_sha256": "4326b2903052fadd1423e0ae41572b6e7b97d32b8c38f814b83726509cb1d46d"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-90",
+        "document_id": "tutoriais/optimistic-concurrency",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6c9437bb1665-1.png",
+          "artifact_sha256": "663fb037856279117eb12b83a86b2e24221e8c77d40fe9691adb404c68832902"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/optimistic-concurrency.mdx",
+        "document_sha256": "f8de20c0e3249b2bcf075f4cc4765581f810feff6e3a94f4430d1e5ae3f580ec",
+        "fence_index": 1,
+        "line_start": 79,
+        "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6c9437bb1665-1.png",
+          "artifact_sha256": "663fb037856279117eb12b83a86b2e24221e8c77d40fe9691adb404c68832902"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-92",
+        "document_id": "tutoriais/read-projection",
+        "fence_index": 1,
+        "relation_ids": [
+          "report-api-service",
+          "report-service-repository"
+        ],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/a4b36f784f89-1.png",
+          "artifact_sha256": "580533a500f5a365347d18e93a78fd63f218c0ee5214edc5a11ab7faee5a21e5"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/read-projection.mdx",
+        "document_sha256": "5821c113f9b8fa07790b34a8efa0748742d024b4e6ce5ec49bc4a194aea63fd7",
+        "fence_index": 1,
+        "line_start": 91,
+        "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/a4b36f784f89-1.png",
+          "artifact_sha256": "580533a500f5a365347d18e93a78fd63f218c0ee5214edc5a11ab7faee5a21e5"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    },
+    {
+      "diagram": {
+        "id": "diagram-94",
+        "document_id": "tutoriais/state-machine",
+        "fence_index": 1,
+        "relation_ids": [],
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/4ef9fa93fd31-1.png",
+          "artifact_sha256": "19c16b0f84eba15307ee9eaffe594c28ac346ac71d57f1f6d6bdc27a10c38167"
+        },
+        "semantic_review": "NOT_RUN"
+      },
+      "rendered_block": {
+        "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/state-machine.mdx",
+        "document_sha256": "2b174b3488d04994be136f1d4652dae9baff8c964c4bfc508bce6695a62db985",
+        "fence_index": 1,
+        "line_start": 86,
+        "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+        "syntax": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80"
+        },
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/4ef9fa93fd31-1.png",
+          "artifact_sha256": "19c16b0f84eba15307ee9eaffe594c28ac346ac71d57f1f6d6bdc27a10c38167"
+        },
+        "semantic_review": "NOT_RUN"
+      }
+    }
+  ]
+}

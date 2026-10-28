@@ -1,0 +1,8 @@
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Closed: chamada aceita e sucesso
+    Closed --> Open: falhas atingem o critério
+    Open --> Open: novas chamadas recusadas
+    Open --> HalfOpen: espera de recuperação terminou
+    HalfOpen --> Closed: teste aceito tem sucesso
+    HalfOpen --> Open: teste falha

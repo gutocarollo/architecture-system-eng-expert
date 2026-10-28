@@ -1,0 +1,15 @@
+{
+  "repo": "gravitational/teleport",
+  "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+  "path": "lib/services/role.go",
+  "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go",
+  "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--services--role.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.142296+00:00",
+  "sha256": "af0247b7c5f315a29402c8d65c26ff8cca60cd2a5e2b377e5fbc7606821c6f12",
+  "line_count": 4336,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/67ae78e41202a251db9ada0faae5663e461e2c06ba89504593cb3562ea5e0505.txt",
+  "upstream_observed_utc": "2026-10-15T03:49:30.227823+00:00"
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "quellabs/wakapac",
+  "path": "LICENSE",
+  "revision": "2f0746785c42b22f6fcd5d7f30ddc125ee281fe9",
+  "url": "https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/quellabs/wakapac/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:46:55.734532+00:00",
+  "sha256": "ddd09e69a864dca01a806605a13bb5b8cc043b35d3533d6fdd26b3aad2f7e3bd",
+  "line_count": 21,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/quellabs--wakapac--LICENSE"
+}

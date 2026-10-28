@@ -1,0 +1,53 @@
+{
+  "verdict": "PASS",
+  "receipts": [
+    {
+      "case_id": "single-flight-cancel",
+      "observed_at_utc": "2026-10-15T02:34:20.428925+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/run.py",
+        "--candidate",
+        "/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/single-flight-cancel-candidate-eg7posyv/candidate.py"
+      ],
+      "before_exit": 1,
+      "before_stdout": "candidate: readers=5 cancelled=5 survivors=0 producer_calls=1\n",
+      "before_stderr": "Traceback (most recent call last):\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/run.py\", line 50, in <module>\n    asyncio.run(main())\n    ~~~~~~~~~~~^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py\", line 205, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py\", line 128, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py\", line 720, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/run.py\", line 43, in main\n    await exercise('candidate', args.candidate)\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/run.py\", line 36, in exercise\n    assert (cancelled, survivors, calls) == ((5, 0, 1) if phase == 'before' else (1, 4, 1))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+      "patch_command": [
+        "patch",
+        "/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/single-flight-cancel-candidate-eg7posyv/candidate.py"
+      ],
+      "patch_source": "labs/architecture/single-flight-cancel/source.diff",
+      "patch_exit": 0,
+      "patch_stdout": "patching file '/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/single-flight-cancel-candidate-eg7posyv/candidate.py'\n",
+      "after_exit": 0,
+      "after_stdout": "candidate: readers=5 cancelled=1 survivors=4 producer_calls=1\ncandidate=PASS surviving_readers=4\n",
+      "after_stderr": "",
+      "candidate_cleanup": "TEMPORARY_DIRECTORY_REMOVED"
+    },
+    {
+      "case_id": "date-only",
+      "observed_at_utc": "2026-10-15T02:34:20.891646+00:00",
+      "command": [
+        "node",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/date-only/run.mjs",
+        "--candidate",
+        "/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/date-only-candidate-2xmuo5s7/candidate.ts"
+      ],
+      "before_exit": 1,
+      "before_stdout": "zone=America/Sao_Paulo input=2026-10-05 before=04/10/26 after=04/10/26\n",
+      "before_stderr": "file:///Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/date-only/run.mjs:22\nif (process.env.TZ !== 'America/Sao_Paulo' || observedBefore !== '04/10/26' || observedAfter !== '05/10/26') throw new Error('date-only comparison failed');\n                                                                                                                   ^\n\nError: date-only comparison failed\n    at file:///Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/date-only/run.mjs:22:116\n\nNode.js v26.8.1\n",
+      "patch_command": [
+        "patch",
+        "/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/date-only-candidate-2xmuo5s7/candidate.ts"
+      ],
+      "patch_source": "labs/architecture/date-only/candidate.patch",
+      "patch_exit": 0,
+      "patch_stdout": "patching file '/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/date-only-candidate-2xmuo5s7/candidate.ts'\n",
+      "after_exit": 0,
+      "after_stdout": "zone=America/Sao_Paulo input=2026-10-05 before=04/10/26 after=05/10/26\ntimestamp=2026-10-05T00:00:00Z after=04/10/26 preserves_instant=true\ncomparison=PASS date_only_and_instant_are_distinct=True\n",
+      "after_stderr": "",
+      "candidate_cleanup": "TEMPORARY_DIRECTORY_REMOVED"
+    }
+  ]
+}

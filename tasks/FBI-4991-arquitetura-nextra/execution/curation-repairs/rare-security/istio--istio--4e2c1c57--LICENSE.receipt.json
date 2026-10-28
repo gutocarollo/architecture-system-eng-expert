@@ -1,0 +1,15 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "LICENSE",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.142842+00:00",
+  "sha256": "9fa6e54dafda853bb3cdc01486b677a55102f0d488282a85ba6e426d9125f8c5",
+  "line_count": 202,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-4d9034e524b507e809b27da7868d111a42881ba4c90ba7109622e4cea90a49d2.txt",
+  "upstream_observed_utc": "2026-10-15T01:28:28.010994Z"
+}

@@ -1,0 +1,10 @@
+flowchart LR
+    HttpAdapter[Adaptador HTTP] --> InputPort[Porta de qualificação]
+    InputPort --> UseCase[Caso de uso e regras]
+    UseCase --> CrmPort[Porta de registros externos]
+    UseCase --> RoutingPort[Porta de persistência da intenção]
+    SalesforceAdapter[Adaptador Salesforce] -. implementa .-> CrmPort
+    PostgresAdapter[Adaptador PostgreSQL] -. implementa .-> RoutingPort
+    UseCase --> Valid{Regra permite avançar?}
+    Valid -->|Não| Rejected[Resultado de recusa]
+    Valid -->|Sim| Accepted[Resultado do caso de uso]

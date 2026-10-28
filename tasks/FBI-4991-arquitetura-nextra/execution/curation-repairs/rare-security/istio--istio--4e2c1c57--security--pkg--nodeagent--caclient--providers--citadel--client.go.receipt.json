@@ -1,0 +1,15 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "security/pkg/nodeagent/caclient/providers/citadel/client.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--nodeagent--caclient--providers--citadel--client.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.036570+00:00",
+  "sha256": "1d3d85d257cac2a9112858262fb05c3623cfaed011db3de7ec991fc056a5266b",
+  "line_count": 174,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/747e419c7877a8facf8d747ae148dd0d35c64119a2fa85c7ab47e19f5c0a3602.txt",
+  "upstream_observed_utc": "2026-10-15T01:22:35.127572Z"
+}

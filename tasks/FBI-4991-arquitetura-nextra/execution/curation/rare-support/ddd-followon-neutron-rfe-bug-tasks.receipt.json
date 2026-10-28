@@ -1,0 +1,7 @@
+{
+  "url": "https://api.launchpad.net/1.0/bugs/1580880/bug_tasks",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:00.156477+00:00",
+  "sha256": "7244d27cb36caa27df81b437a6bd16fc28d43caf67e518cfa629a28297eac781",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-neutron-rfe-bug-tasks.json"
+}

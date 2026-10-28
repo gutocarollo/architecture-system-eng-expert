@@ -1,0 +1,24 @@
+{
+  "observed_utc": "2026-10-15T04:28:31.605385+00:00",
+  "scope": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "canonical_concepts": 310,
+  "priority_entries": 40,
+  "active_source_locators": 753,
+  "source_artifacts_checked": 749,
+  "license_revisions_checked": 192,
+  "matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+  "structural_integrity": "PASS",
+  "requested_gate": "FAIL",
+  "semantic_pending": [],
+  "independent_pending_count": 51,
+  "errors_by_kind": {
+    "INDEPENDENT_COMPLETION": 1
+  },
+  "errors": [
+    {
+      "kind": "INDEPENDENT_COMPLETION",
+      "pending_count": 51
+    }
+  ],
+  "note": "Integrity, HTTP status and lexical locators do not establish semantic correctness or independent approval."
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "wundergraph/cosmo",
+  "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+  "path": "cli/src/commands/router/commands/compose.ts",
+  "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts",
+  "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--cli--src--commands--router--commands--compose.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:12.764202+00:00",
+  "sha256": "0a84ffe50c84c6f2a2fffe04e7cf9969619e2f12308e81f3f79dd12c89ae6ff9",
+  "line_count": 847
+}

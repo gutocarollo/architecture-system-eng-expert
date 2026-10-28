@@ -1,0 +1,414 @@
+{
+  "observed_utc": "2026-10-15T04:29:01.732400+00:00",
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "highs": [
+    {
+      "concept_id": "anti-corruption-layer",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Immich repository/service separation proves an adapter boundary; selected flow lacks semantic translation from external model. Limits explicitly say ACL not closed.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "at-least-once-delivery",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Pulsar selected file implements producer-side/broker deduplication, not consumer acknowledgement and redelivery. At-least-once delivery is not proved.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "circuit-breaker",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Catalog requires failure/recovery policy. Selected Envoy file constructs capacity budgets, not failure-triggered open/half-open recovery. Resilience4j base is correct but no selected real app consumes that failure-state mechanism. Captured Mastodon Stoplight path may be reused.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "compensating-transaction",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected create-order workflow invokes createOrdersStep but its actual mutation/compensation callback is not selected. SDK createStep accepts optional compensateFn and marks noCompensation when absent. Registration capability alone does not prove that order flow compensates its effects. Captured Medusa inventory reservation callback is reusable if scope/prose/links change.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "consistent-hashing",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Loki selected ring manager configures membership/tokens but shows no key-to-owner lookup, while xxhash base only hashes bytes. Own limits require lookup plus ring; selected evidence omits it.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "context-map",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "GitLab bounded_contexts.yml enumerates namespaces; cop enforces namespace membership. Neither records relationships/contract between contexts required by catalog definition.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "denormalization",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Druid selected application runs GroupByQueryEngine.process for current query and returns Sequence<ResultRow>; no persisted/precomputed representation or denormalized model is selected. PG matview base may be reused with explicit actual product role.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "distributed-cache",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected Superset query processor has a configurable cache abstraction; no selected source establishes a shared cross-process backend. Catalog itself says backend was not confirmed.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "domain-service",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected Fineract Loan is the entity/aggregate itself. Its instance methods do not supply a domain operation outside entities required by catalog Domain Service.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "materialized-view",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Druid selected application runs GroupByQueryEngine.process for current query and returns Sequence<ResultRow>; no persisted/precomputed representation or denormalized model is selected. PG matview base may be reused with explicit actual product role.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "mvc",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected Fineract source is a JAX-RS JSON API resource; no selected view, UI event/controller link or rendering path proves MVC required by catalog. Layered API alone is adjacent.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "orchestration-saga",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected create-order workflow invokes createOrdersStep but its actual mutation/compensation callback is not selected. SDK createStep accepts optional compensateFn and marks noCompensation when absent. Registration capability alone does not prove that order flow compensates its effects. Captured Medusa inventory reservation callback is reusable if scope/prose/links change.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "precomputation",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Druid selected application runs GroupByQueryEngine.process for current query and returns Sequence<ResultRow>; no persisted/precomputed representation or denormalized model is selected. PG matview base may be reused with explicit actual product role.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "range-sharding",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected Vitess Hash/Lookup files map hashes or directory rows to keyspace IDs. Empty DestinationKeyRange in writeOnly/null branches broadcasts full range; no bounded interval-to-shard resolver shows range sharding. Needs actual range routing source.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "refresh-ahead",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Superset periodic cache-warmup performs normal reads and has no before-expiry trigger or forced refresh condition. Cache warming does not establish refresh ahead. CoreDNS prefetch code already captured could be reused.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "saga",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected create-order workflow invokes createOrdersStep but its actual mutation/compensation callback is not selected. SDK createStep accepts optional compensateFn and marks noCompensation when absent. Registration capability alone does not prove that order flow compensates its effects. Captured Medusa inventory reservation callback is reusable if scope/prose/links change.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "scatter-gather",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Prometheus scrape pool shutdown waits for loops, not correlated responses to a distributed request. Selection explicitly says concept remains pending.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "single-flight",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "CoreDNS internal Group.Do implementation exists, but selected cache consumer never invokes it; doRefresh directly calls NextOrFailure. Per-item background prefetch CAS does not make duplicate cold-miss callers share one result.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "thread-pool",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected Airflow triggerer schedules asyncio tasks and tracks event-loop thread identity; no thread pool/executor dispatch appears. A thread identifier is not a pool.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "websocket",
+      "review_lane": "curation-independent.concepts.json",
+      "reason": "Selected Zulip handlers are HTTP/message and webhook; own limits explicitly state WebSocket remains pending. No WebSocket handshake/session/frames shown.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "aggregate",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Fineract Loan owns cascaded children (168–174) and domain operations, but the sole base JpaRepository is a generic persistence interface; the row itself admits JPA does not prove DDD. Missing: a framework/base implementing aggregate consistency/root access, or an explicitly bounded alternative whose mechanism is shown. Persistence alone cannot satisfy the requested pattern implementation source.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "aggregate-root",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Same bounded Fineract Loan ownership proof as aggregate (168–174, 294–301); sole base JpaRepository supplies persistence, not root-mediated aggregate consistency. Add a semantic framework/base source implementing aggregate-root behavior. Do not infer root-only access from a JPA entity annotation.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "branch-by-abstraction",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab MultiStore preserves the Redis call surface (method_missing 235–240), swaps selected stores by flags (284–290), and Wrapper exposes a stable pool API (26–29). Application proof is adequate, but sole base JpaRepository does not implement the migration abstraction or store selection. Replace that unrelated base with a semantic implementation source.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "cdc-migration",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "pg_chameleon implements initial copy (pg_lib 517–528) plus resumed binlog position/GTID consumption (mysql_lib 1273–1280), a real migration product. Sole framework/base JpaRepository is unrelated to CDC. Replace it with the actual BinLogStreamReader implementation or another CDC framework source; application evidence can be retained.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "centralized-logging",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Zap logger.go creates a local logger; Loki main.go 82–86 initializes its own process logger. Neither cited path proves centralized ingestion, storage, or query of logs from multiple producers. Add Loki distributor/ingester/query code (or other actual aggregation path); do not substitute structured local logging for centralized logging.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "chain-of-responsibility",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Airflow app.py installs FastAPI middleware and proves an application chain, but the selected base is Spring RestTemplate.java, not ASGI middleware/dispatch or the request interceptor chain. The row needs a base whose implementation demonstrates the delegation/short-circuit chain, with actual lines, rather than an unrelated client facade.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "choreography",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Jellyfin EventManager.cs 37–46 publishes one event to handlers. That proves local Pub/Sub dispatch, not a process of independently reacting participants. Add the already captured Mastodon Follow/Accept/Reject/Undo event exchange (or an equivalent actual choreography flow) with bounded process/transition evidence; do not approve a choreography process from an event bus alone.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "composite",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Both sources are visitor classes: GenericVisitorAdapter and Trino AstVisitor. Trino AstVisitor.visitNode simply returns null (30–32); no composite node stores children or exposes uniform leaf/composite operations in the cited app file. Add Node plus a concrete composite such as a query/binary expression, and a framework AST node implementation; visitor dispatch alone is not Composite.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "dark-launch",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab MultiStore.write_both 425–433 sends real work to the nondefault store while returning the primary result; default authority is explicit (331–336). The bounded hidden-storage launch is proved, but sole base JpaRepository has no dark launch/mirroring mechanism. Replace the unrelated base with a mechanism implementation.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "database-decomposition",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab Ci::ApplicationRecord 4–12 connects reads/writes to :ci, and multiple_databases.md documents domain splitting; actual application proof is sound. Base Rails/activerecord is only a repository/directory locator with no captured implementation. Add the versioned connection-routing source that implements connects_to, rather than treating a directory metadata record as source proof.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "distributed-tracing",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "OpenTelemetry API supplies SpanContext and Loki querier.go extracts/starts query spans, but selected application evidence does not show cross-process trace propagation/injection/extraction or a linked remote span. Local spans/context alone do not demonstrate distributed tracing. Add the actual Loki client/server propagation boundary or another real distributed trace path.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "domain-policy",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "The row repeats aggregate/entity prose and cites Loan.java plus JpaRepository. No named domain rule/predicate, policy invocation, or policy result is identified, while persistence is not a domain policy. Select an actual eligibility/approval rule with inputs and decision, its call site, and a relevant base; do not substitute the whole entity for policy.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "dual-write-migration",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab MultiStore.write_both 425–433 proves sequential double writes and partial failure; limits correctly expose divergence. JpaRepository, the sole base, implements neither dual write nor migration. Replace that base while retaining the concrete GitLab implementation and its failure limits.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "expand-contract",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab historical migrations prove initialize, bounded backfill (sub_batch_size 200), completion gate and column swap (files 10–17/23–29), so application proof is credible. Sole base is a Rails directory record without an implementation capture; add the migration/trigger helper source implementing expansion and compatibility, with exact lines. Check the cleanup source beyond the first four app captures too.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "factory",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Row repeats whole Loan entity/aggregate prose and uses JpaRepository as base. Neither locators nor explanation identify a domain factory creation contract, invariant-preserving construction method, or invocation. Add actual Loan factory/assembler construction and an implementing base; naming the entity does not establish Factory.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "feature-flags",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab Feature enabled? and MultiStore 284–295 prove flag-gated real paths, including actor checks (feature.rb 407–417). The sole base JpaRepository is unrelated to feature flag evaluation. Use the captured feature engine/Flipper implementation as base; retain GitLab consuming call sites.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "finite-state-machine",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "MutableState interface lists history events and workflow_rebuilder reconstructs stored workflow state, but selected sources do not expose a finite state set, transition guards or event-to-state transition implementation. Reconstruction alone is not an FSM proof. Add actual workflow status/event transition code or an HSM implementation and bound the machine.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "graphql-federation",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Apollo query planner is a plausible Federation base, but Grafbase engine.rs cited hits show generic operation planning/cache warming; the row itself says locators and mechanism still need verification. Add the actual supergraph/subgraph query planning and multi-subgraph execution source, including entity/key representation if used. A generic GraphQL engine entry file does not establish Federation.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "parallel-run",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab pipelined_both 439–447 executes both stores, compares results and reports PipelinedDiffError while retaining default authority. Idempotency limitation is explicit. Sole base JpaRepository does not implement parallel comparison; replace it with an actual comparative execution/migration base.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "pipeline",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Camel Pipeline implements processor chaining, but selected NiFi UpdateAttribute.onTrigger 472–478 proves only one input-processing stage. No actual multi-stage connection/transfer execution is identified in the application source. Add NiFi connection/processor scheduling or a real configured multi-stage flow with its execution path; one stage alone does not demonstrate Pipeline.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "recreate-deployment",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Airflow chart accepts arbitrary .Values.apiServer.strategy and defaults to rolling update (56–64); scheduler strategy is also only configurable. No captured application selection of type: Recreate or stop-old-before-start-new path is shown, and base sync.go is not the Recreate rollout implementation. Add a real Recreate configuration plus controller sequence; configurability alone is not implementation proof.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "rest",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "FastAPI generic request-body parsing and Zulip message/webhook handlers prove an HTTP JSON API, but no resource URI/method mapping or REST interaction contract is captured. The limits paragraph still refers to unrelated WebSocket pending work. Add the actual messages resource routes/HTTP method semantics and bound the REST claim; handler existence alone is insufficient.",
+      "owner": "curation_complete",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "service-extraction",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab Gitaly client proves the remote service boundary for repository operations (operation_service 25–32); limits correctly avoid inventing full historical extraction. Sole base JpaRepository is unrelated to service extraction/RPC migration. Replace with the Gitaly service/protocol implementation or another semantic extraction foundation.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "service-mesh",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Istio inject.go proves optional proxy injection and Envoy server.cc proves a proxy server/xDS machinery. Row claims generation of connection/traffic configuration, but no captured Istio control-plane service discovery or policy-to-Envoy configuration source is selected. Add that actual control-plane/data-plane path; sidecar injection alone cannot close Service Mesh.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "service-to-service-identity",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "SPIFFE base defines X509-SVID certificate callbacks, but Istio Citadel client.go 124–145 only passes generic key/cert/root/SAN options to a CA connection. No workload SPIFFE URI/CSR identity construction, issuance mapping or peer identity verification is shown. Add a concrete workload-identity path; generic TLS credentials alone are insufficient.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "state",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Temporal MutableState interface and workflow_rebuilder show mutable execution history and reconstruction, not GoF State delegation to interchangeable state objects/behaviors. The mechanism repeats FSM/event-sourcing prose. Add a concrete state-dependent behavior dispatch implementation (Temporal HSM or another real product) with its transition/context; mutable state alone is not the State pattern.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "state-machine",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Same gap as finite-state-machine: workflow_rebuilder reconstructs a snapshot/history and calls state-building code, but no transition table/guards/current-state change implementation is selected. Add actual accepted-event/state transition code and identify machine states, rather than treating rebuilding as the machine itself.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "template-method",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Jellyfin BasePluginOfT provides common initialization/configuration flow plus virtual hooks, a credible application candidate. Sole base Spring FactoryBean is a creation interface, not the template-method skeleton invoking overridable steps. Add an actual framework template implementation and cite the Jellyfin common method-to-hook call sequence.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "token-exchange",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Keycloak StandardTokenExchangeProvider implements subject-token/requested-token authorization and output checks. Selected base keycloak-js shows ordinary authorization-code to access-token exchange (1256–1259), not RFC token exchange of a subject token. Replace this semantic substitution with the token-exchange SPI/base implementation; retain the real Keycloak provider.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "transitional-architecture",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "GitLab MultiStore documents and implements old/both/new authority phases, providing a temporary bridge with explicit exit from double execution. Sole base JpaRepository has no transitional architecture or bridge-state mechanism. Replace that unrelated base with an implementing migration abstraction; retain bounded GitLab phase/exit evidence.",
+      "owner": "base_reference_repairs",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    },
+    {
+      "concept_id": "zero-trust",
+      "review_lane": "curation-second.concepts.json",
+      "reason": "Teleport sshserver and Go SSH handshake prove authenticated access/proxying, but the row itself concedes that Zero Trust needs policy and proxy-path evaluation. No selected identity-to-resource authorization policy or verification path beyond generic SSH authentication establishes the Zero Trust mechanism. Add explicit per-resource identity authorization/verification code and bound the guarantees; Bastion Host can retain these sources.",
+      "owner": "rare_oss_sources",
+      "status": "INTEGRATED_AUTHOR_CANDIDATE_PENDING_RECHECK",
+      "repaired_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0"
+    }
+  ]
+}

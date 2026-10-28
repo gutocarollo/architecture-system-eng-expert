@@ -1,0 +1,23 @@
+{
+  "round": "1-curation/3",
+  "mission_total": 100,
+  "mission_weight_affected": 20,
+  "mission_weight_source": [
+    "Curatorship:20"
+  ],
+  "unresolved_high": 0,
+  "decision_this_round_can_change": "repair-or-publish",
+  "decision_leverage": 5,
+  "material_risk_reduction": 4,
+  "evidence_gap_closure": 5,
+  "blast_radius_irreversibility": 3,
+  "downstream_reuse": 5,
+  "quality_factor_pct": 91,
+  "gross_gain_pct_of_whole": 18.2,
+  "opportunity_cost_pct_of_whole": 2,
+  "opportunity_cost_source": "Two mission points of terminal integration/review scheduling are displaced while primary-source semantic review runs.",
+  "net_gain_pct_of_whole": 16.2,
+  "expected_loss_if_skipped_pct_of_whole": 15,
+  "round_decision": "DISPATCH",
+  "stop_condition": "One independent pass over frozen curation; one high-only warm recheck if necessary; final terminal checks integration and unchanged hashes instead of repeating approved semantics."
+}

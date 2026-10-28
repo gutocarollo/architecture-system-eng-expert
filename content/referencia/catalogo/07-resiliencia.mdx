@@ -1,0 +1,200 @@
+---
+title: "7. Resiliência"
+description: "Definições, aplicações e limites dos dezenove mecanismos de resiliência do catálogo."
+diataxis: reference
+---
+
+# 7. Resiliência
+
+Os casos MakersHub descrevem código `main@e233fb046ec333982cd1547171b0f0bd8d8d92ee` lido em 14/10/2026 às 16:16 UTC. **REF** indica demonstração ou implementação OSS de comparação, sem implantação comprovada aqui. A [explicação de capacidade](/explicacoes/capacity/) desenvolve as decisões; a [curadoria](/referencia/skills-e-projetos/) localiza as skills.
+
+<span id="g07-e001" />
+
+## Retry
+
+Repete uma tentativa sob critérios e orçamento definidos. O cliente Airflow permite até três tentativas no código; repetir uma escrita sem conhecer seu efeito pode duplicá-lo. A skill é `python-resilience`; a base é [Tenacity](https://tenacity.readthedocs.io/en/latest/). O [teste Temporal com RetryPolicy](https://github.com/temporalio/temporal/blob/main/tests/activity_api_batch_unpause_test.go) é **REF didática**, sem atribuir Tenacity ao MakersHub. Veja [prioritário 17](/explicacoes/capacity/#pattern-17).
+
+{/* current-curation:retry */}
+
+A [curadoria de Retry](/referencia/curadoria/07-resiliencia/#retry) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e002" />
+
+## Exponential Backoff
+
+Aumenta a espera segundo uma progressão exponencial, normalmente com teto. O cliente Airflow e o worker possuem fórmulas próprias. O limite é o orçamento total: esperar mais não prova que uma falha se tornará recuperável. A skill é `python-resilience`; [Tenacity](https://tenacity.readthedocs.io/en/latest/) oferece a base e exemplos **REF** de waits. O teste Temporal citado em Retry fornece outra aplicação do controle de repetição, sem prova de implantação.
+
+{/* current-curation:exponential-backoff */}
+
+A [curadoria de Exponential Backoff](/referencia/curadoria/07-resiliencia/#exponential-backoff) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e003" />
+
+## Jitter
+
+Varia a espera para reduzir retorno simultâneo de clientes. O cliente Airflow soma aleatoriedade à base; o backoff do worker lido não a inclui. O limite é que aleatoriedade não impõe quota, idempotência ou prazo total. A skill é `python-resilience`; o [exemplo de espera aleatória exponencial Tenacity](https://tenacity.readthedocs.io/en/latest/) é **REF didática** da biblioteca OSS.
+
+{/* current-curation:jitter */}
+
+A [curadoria de Jitter](/referencia/curadoria/07-resiliencia/#jitter) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e004" />
+
+## Circuit Breaker
+
+Recusa novas chamadas conforme uma política de falha e recuperação. O worker consulta o breaker de estados local. O limite é o escopo e a operação protegida; recusar não autoriza ignorar uma regra de negócio. A skill é `backend-resilience-patterns`; a base [Resilience4j](https://resilience4j.readme.io/docs/circuitbreaker) tem [teste de decoração de chamada](https://github.com/resilience4j/resilience4j/blob/master/resilience4j-circuitbreaker/src/test/java/io/github/resilience4j/circuitbreaker/CircuitBreakerTest.java), **REF**. [Envoy](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking) fornece limites de recursos, com outro mecanismo. Veja [prioritário 16](/explicacoes/capacity/#pattern-16).
+
+{/* current-curation:circuit-breaker */}
+
+A [curadoria de Circuit Breaker](/referencia/curadoria/07-resiliencia/#circuit-breaker) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e005" />
+
+## Bulkhead
+
+Separa ou reserva recursos para conter a saturação de uma classe de trabalho. Um relatório proposto pode ter pool próprio. O semáforo do worker observado limita execução local, sem provar memória isolada. A skill é `backend-resilience-patterns`; a base [Resilience4j Bulkhead](https://resilience4j.readme.io/docs/bulkhead) tem [teste de supplier](https://github.com/resilience4j/resilience4j/blob/master/resilience4j-bulkhead/src/test/java/io/github/resilience4j/bulkhead/BulkheadTest.java), **REF didática**. Veja [prioritário 18](/explicacoes/capacity/#pattern-18).
+
+{/* current-curation:bulkhead */}
+
+A [curadoria de Bulkhead](/referencia/curadoria/07-resiliencia/#bulkhead) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e006" />
+
+## Timeout
+
+Limita uma espera definida. HTTPX separa connect, read, write e pool no cliente Airflow. O limite é que um timeout da resposta não demonstra rollback do serviço remoto. A skill é `python-resilience`; a base são [timeouts HTTPX](https://www.python-httpx.org/advanced/timeouts/). O cliente MakersHub fornece a aplicação local; os exemplos oficiais HTTPX são **REF**, não uma medida de produção.
+
+{/* current-curation:timeout */}
+
+A [curadoria de Timeout](/referencia/curadoria/07-resiliencia/#timeout) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e007" />
+
+## Deadline Propagation
+
+Transporta o prazo ou orçamento restante da operação entre etapas. Num agendamento proposto, gastar três de dez segundos deixa sete para o restante. O limite inclui trabalho que continua após cancelamento e relógios; timeouts por fase não comprovam esse contrato. A skill de apoio é `python-resilience`; [gRPC deadlines](https://grpc.io/docs/guides/deadlines/) fornece a base e exemplos **REF**. A propagação completa MakersHub não foi comprovada.
+
+{/* current-curation:deadline-propagation */}
+
+A [curadoria de Deadline Propagation](/referencia/curadoria/07-resiliencia/#deadline-propagation) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e008" />
+
+## Fallback
+
+Devolve uma alternativa permitida quando o caminho principal falha. O CacheManager pode escolher memória local, exceto para `shared_only`. O limite é a semântica: ausência, erro e valor antigo não são intercambiáveis. A skill é `backend-resilience-patterns`; a base é política explícita de erro. [Resilience4j e exemplos de composição](https://resilience4j.readme.io/docs/getting-started) oferecem **REF**, enquanto MakersHub fornece o fallback de cache delimitado.
+
+{/* current-curation:fallback */}
+
+A [curadoria de Fallback](/referencia/curadoria/07-resiliencia/#fallback) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e009" />
+
+## Fail Fast
+
+Recusa cedo uma execução que já não pode cumprir seu contrato. O breaker aberto evita aguardar toda nova chamada. O limite é identificar corretamente o que é impossível, sem tratar falha transitória como rejeição definitiva. A skill é `backend-resilience-patterns`; o [breaker e teste Resilience4j](https://github.com/resilience4j/resilience4j/blob/master/resilience4j-circuitbreaker/src/test/java/io/github/resilience4j/circuitbreaker/CircuitBreakerTest.java) são base e **REF didática** de recusa.
+
+{/* current-curation:fail-fast */}
+
+A [curadoria de Fail Fast](/referencia/curadoria/07-resiliencia/#fail-fast) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e010" />
+
+## Graceful Degradation
+
+Mantém parte útil do serviço e explicita o que está incompleto. Uma consulta proposta pode mostrar indicadores antigos sob política; uma reserva não ganha confirmação inventada. O limite é não ocultar falha essencial. A skill é `backend-resilience-patterns`; [Gateway Aggregation](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-aggregation) fornece a base de respostas parciais. O [exemplo Resilience4j com withFallback](https://resilience4j.readme.io/docs/getting-started) é **REF didática** de uma chamada que fornece alternativa após falha, sem certificar uma política de degradação do sistema inteiro.
+
+{/* current-curation:graceful-degradation */}
+
+A [curadoria de Graceful Degradation](/referencia/curadoria/07-resiliencia/#graceful-degradation) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e011" />
+
+## Load Shedding
+
+Recusa ou descarta carga para preservar recursos. O broker SSE descarta um evento quando a fila do assinante enche. O limite é a perda: descarte não fornece replay nem aceite durável. A skill de apoio é `backend-resilience-patterns`; a base [Envoy circuit breaking](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking) verifica recusa por recursos e fornece produto OSS de comparação. O caso local não demonstra Envoy implantado.
+
+{/* current-curation:load-shedding */}
+
+A [curadoria de Load Shedding](/referencia/curadoria/07-resiliencia/#load-shedding) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e012" />
+
+## Backpressure
+
+A capacidade do consumidor controla o fluxo recebido. Numa fila proposta, o produtor espera ou reduz ritmo quando não há vaga. O limite é que RPUSH com worker limitado não prova feedback até o produtor. A skill de apoio é `backend-concurrency-mechanics`; a base é [Reactive Streams](https://www.reactive-streams.org/). [Beam SolaceIO 2.77](https://beam.apache.org/releases/javadoc/2.77.0/org/apache/beam/sdk/io/solace/SolaceIO.html) é **REF** de modos com pressão de recursos, dependente do conector. Veja [prioritário 19](/explicacoes/capacity/#pattern-19).
+
+{/* current-curation:backpressure */}
+
+A [curadoria de Backpressure](/referencia/curadoria/07-resiliencia/#backpressure) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e013" />
+
+## Rate Limiting
+
+Restringe frequência por identidade e intervalo. SlowAPI e o limite por chave de API são caminhos lidos no MakersHub. O limite é que taxa não limita automaticamente concorrência ou memória. A skill é `rate-limiting`; a base [limits](https://limits.readthedocs.io/en/stable/strategies.html) compara estratégias. O [exemplo APISIX limit-count](https://github.com/apache/apisix/blob/master/docs/en/latest/plugins/limit-count.md) é **REF didática** com rota e HTTPBin. Veja [prioritário 20](/explicacoes/capacity/#pattern-20).
+
+{/* current-curation:rate-limiting */}
+
+A [curadoria de Rate Limiting](/referencia/curadoria/07-resiliencia/#rate-limiting) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e014" />
+
+## Throttling
+
+Reduz o ritmo de uma atividade, podendo atrasar execuções. Uma ingestão proposta pode espaçar pedidos para respeitar a API externa. O limite é informar prazo e aceite; atrasar indefinidamente não resolve saturação. A skill é `rate-limiting`; a base [Resilience4j RateLimiter](https://resilience4j.readme.io/docs/ratelimiter) e seu [teste](https://github.com/resilience4j/resilience4j/blob/master/resilience4j-ratelimiter/src/test/java/io/github/resilience4j/ratelimiter/RateLimiterTest.java) fornecem **REF** para estudar espera e permissão.
+
+{/* current-curation:throttling */}
+
+A [curadoria de Throttling](/referencia/curadoria/07-resiliencia/#throttling) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e015" />
+
+## Health Check
+
+Consulta uma condição de saúde definida. Uma probe proposta verifica se uma instância pode receber pedidos. O limite é a condição medida: responder não demonstra que Salesforce ou a tarefa de negócio concluíram. A skill de apoio é `observability-and-instrumentation`; a base e produto OSS de comparação são [probes Kubernetes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/), com exemplos **REF**. O runtime medido está em [disponibilidade](/explicacoes/availability/).
+
+{/* current-curation:health-check */}
+
+A [curadoria de Health Check](/referencia/curadoria/07-resiliencia/#health-check) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e016" />
+
+## Heartbeat
+
+Renova periodicamente um sinal de atividade. O listener SSE executa `SELECT 1` para observar a conexão; o worker possui atualização de chave de saúde. O limite é que silêncio pode significar lentidão ou falha de comunicação, e presença não demonstra progresso de negócio. A skill de apoio é `observability-and-instrumentation`; a base é temporizador e prazo, implementados no caso local. O [systemd service.c](https://github.com/systemd/systemd/blob/main/src/core/service.c) é produto OSS comparável para sinais e supervisão, sem adoção local inferida.
+
+{/* current-curation:heartbeat */}
+
+A [curadoria de Heartbeat](/referencia/curadoria/07-resiliencia/#heartbeat) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e017" />
+
+## Watchdog
+
+Um supervisor observa ausência de sinal ou progresso e aciona uma reação. No cenário proposto, detecta um worker que parou de renovar atividade. O limite é não confundir task longa com travamento e não perder trabalho ao reiniciar. A skill geral de apoio é `observability-and-instrumentation`; o produto OSS e base de comparação [systemd service.c](https://github.com/systemd/systemd/blob/main/src/core/service.c) contém supervisão por watchdog. Não foi verificado watchdog MakersHub nesta frente.
+
+{/* current-curation:watchdog */}
+
+A [curadoria de Watchdog](/referencia/curadoria/07-resiliencia/#watchdog) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e018" />
+
+## Self-Healing
+
+Tenta recuperar automaticamente um componente, por reconexão, reinício ou substituição segundo política. RedisService tenta reconectar no código lido. O limite é a causa e o estado: reinício não restaura automaticamente uma escrita externa nem corrige toda configuração. A skill adjacente é `observability-and-instrumentation`; a base e produto OSS [Kubernetes probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) fornecem **REF** de reação à saúde. Configuração e ensaios reais exigem recibos próprios.
+
+{/* current-curation:self-healing */}
+
+A [curadoria de Self-Healing](/referencia/curadoria/07-resiliencia/#self-healing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g07-e019" />
+
+## Chaos Engineering
+
+Aplica uma falha controlada para investigar uma hipótese sobre o sistema e observar recuperação. Um laboratório proposto cancela um leitor de uma task compartilhada. O limite é ter escopo, condição de parada e recuperação; um desenho não é experimento executado. A skill adjacente é `python-resilience`; o [experimento Chaos Toolkit](https://chaostoolkit.org/reference/api/experiment/) fornece base e **REF didática** com observações e rollbacks. Nenhuma injeção em produção foi feita para este capítulo.
+
+{/* current-curation:chaos-engineering */}
+
+A [curadoria de Chaos Engineering](/referencia/curadoria/07-resiliencia/#chaos-engineering) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

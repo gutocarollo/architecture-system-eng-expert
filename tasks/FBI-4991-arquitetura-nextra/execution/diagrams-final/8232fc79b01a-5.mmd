@@ -1,0 +1,9 @@
+flowchart TD
+    Request[Pedido identificado] --> Count[Consulta ou incrementa contador]
+    Count --> Available{Contador disponível?}
+    Available -->|sim| Limit{Dentro da política?}
+    Limit -->|sim| Handler[Executa handler autorizado]
+    Limit -->|não| Reject[Devolve 429 e informação de espera]
+    Reject --> Later[Cliente repete após a espera permitida]
+    Available -->|não| Policy[Aplica política de falha do limitador]
+    Policy --> Handler

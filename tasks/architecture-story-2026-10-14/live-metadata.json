@@ -1,0 +1,486 @@
+{
+  "observed_at": "2026-10-14 23:20:23 UTC",
+  "issueType": "Story",
+  "fields": [
+    {
+      "id": "assignee",
+      "name": "Assignee",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "attachment",
+      "name": "Attachment",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "components",
+      "name": "Components",
+      "required": false,
+      "allowedValues": [
+        {
+          "id": "10125",
+          "name": "airflow"
+        },
+        {
+          "id": "10055",
+          "name": "Automações"
+        },
+        {
+          "id": "10131",
+          "name": "bitbucket"
+        },
+        {
+          "id": "10017",
+          "name": "Carregamento"
+        },
+        {
+          "id": "10003",
+          "name": "DAG-001"
+        },
+        {
+          "id": "10056",
+          "name": "datalake"
+        },
+        {
+          "id": "10053",
+          "name": "Design UX/UI"
+        },
+        {
+          "id": "10091",
+          "name": "extract_crm_clients"
+        },
+        {
+          "id": "10128",
+          "name": "fazgraph"
+        },
+        {
+          "id": "10058",
+          "name": "Integrations"
+        },
+        {
+          "id": "10130",
+          "name": "jira"
+        },
+        {
+          "id": "10050",
+          "name": "makershub"
+        },
+        {
+          "id": "10054",
+          "name": "metabase"
+        },
+        {
+          "id": "10133",
+          "name": "n8n"
+        },
+        {
+          "id": "10051",
+          "name": "Pipelines/Airflow"
+        },
+        {
+          "id": "10129",
+          "name": "postgres-mcp"
+        },
+        {
+          "id": "10052",
+          "name": "postgresql"
+        },
+        {
+          "id": "10126",
+          "name": "salesforce"
+        },
+        {
+          "id": "10057",
+          "name": "Salesforce Integrations"
+        },
+        {
+          "id": "10132",
+          "name": "scraping"
+        },
+        {
+          "id": "10092",
+          "name": "web_scrapping"
+        }
+      ]
+    },
+    {
+      "id": "customfield_10020",
+      "name": "Sprint",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "customfield_10054",
+      "name": "Story Description",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "customfield_10056",
+      "name": "Category",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "customfield_10067",
+      "name": "Conclusão planejada",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "customfield_10514",
+      "name": "Technical Layers",
+      "required": false,
+      "allowedValues": [
+        {
+          "id": "10129",
+          "value": "frontend"
+        },
+        {
+          "id": "10130",
+          "value": "backend"
+        },
+        {
+          "id": "10131",
+          "value": "api"
+        },
+        {
+          "id": "10132",
+          "value": "database"
+        },
+        {
+          "id": "10133",
+          "value": "orchestration"
+        },
+        {
+          "id": "10134",
+          "value": "integration"
+        },
+        {
+          "id": "10135",
+          "value": "salesforce-metadata"
+        },
+        {
+          "id": "10136",
+          "value": "scraping"
+        },
+        {
+          "id": "10137",
+          "value": "security"
+        },
+        {
+          "id": "10138",
+          "value": "design-system"
+        },
+        {
+          "id": "10139",
+          "value": "documentation"
+        },
+        {
+          "id": "10140",
+          "value": "ci-cd"
+        },
+        {
+          "id": "10141",
+          "value": "observability"
+        },
+        {
+          "id": "10142",
+          "value": "infrastructure"
+        }
+      ]
+    },
+    {
+      "id": "customfield_10515",
+      "name": "Business Contexts",
+      "required": false,
+      "allowedValues": [
+        {
+          "id": "10185",
+          "value": "value-stream:lead-acquisition"
+        },
+        {
+          "id": "10186",
+          "value": "value-stream:lead-to-r1"
+        },
+        {
+          "id": "10187",
+          "value": "value-stream:capital-inflow"
+        },
+        {
+          "id": "10188",
+          "value": "value-stream:client-portfolio"
+        },
+        {
+          "id": "10189",
+          "value": "value-stream:customer-experience"
+        },
+        {
+          "id": "10190",
+          "value": "product:digital-advisory"
+        },
+        {
+          "id": "10191",
+          "value": "value-stream:people-operations"
+        },
+        {
+          "id": "10192",
+          "value": "product:financial-services"
+        },
+        {
+          "id": "10193",
+          "value": "product:insurance"
+        },
+        {
+          "id": "10194",
+          "value": "product:consortium"
+        },
+        {
+          "id": "10195",
+          "value": "product:investments"
+        },
+        {
+          "id": "10196",
+          "value": "product:offshore"
+        },
+        {
+          "id": "10197",
+          "value": "product:foreign-exchange"
+        },
+        {
+          "id": "10218",
+          "value": "value-stream:advisor-performance"
+        }
+      ]
+    },
+    {
+      "id": "customfield_10516",
+      "name": "Business Capabilities",
+      "required": false,
+      "allowedValues": [
+        {
+          "id": "10198",
+          "value": "capability:ingest-leads"
+        },
+        {
+          "id": "10199",
+          "value": "capability:score-leads"
+        },
+        {
+          "id": "10200",
+          "value": "capability:nurture-leads"
+        },
+        {
+          "id": "10201",
+          "value": "capability:deliver-conversion-events"
+        },
+        {
+          "id": "10202",
+          "value": "capability:route-leads"
+        },
+        {
+          "id": "10203",
+          "value": "capability:determine-advisor-eligibility"
+        },
+        {
+          "id": "10204",
+          "value": "capability:schedule-first-meetings"
+        },
+        {
+          "id": "10205",
+          "value": "capability:reassign-lead-ownership"
+        },
+        {
+          "id": "10206",
+          "value": "capability:consolidate-commissions"
+        },
+        {
+          "id": "10207",
+          "value": "capability:calculate-commissions"
+        },
+        {
+          "id": "10208",
+          "value": "capability:ingest-product-reports"
+        },
+        {
+          "id": "10209",
+          "value": "capability:collect-customer-feedback"
+        },
+        {
+          "id": "10210",
+          "value": "capability:analyze-customer-feedback"
+        },
+        {
+          "id": "10219",
+          "value": "capability:set-advisor-goals"
+        },
+        {
+          "id": "10220",
+          "value": "capability:rank-advisors"
+        }
+      ]
+    },
+    {
+      "id": "customfield_10517",
+      "name": "Affected Repositories",
+      "required": false,
+      "allowedValues": [
+        {
+          "id": "10183",
+          "value": "fazcapital/faz-database"
+        },
+        {
+          "id": "10184",
+          "value": "fazcapital/scraping"
+        },
+        {
+          "id": "10211",
+          "value": "fazcapital/makershub"
+        },
+        {
+          "id": "10212",
+          "value": "fazcapital/airflow-dags"
+        },
+        {
+          "id": "10213",
+          "value": "fazcapital/salesforce"
+        }
+      ]
+    },
+    {
+      "id": "customfield_10518",
+      "name": "Affected Assets",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "customfield_10519",
+      "name": "Catalog Version",
+      "required": false,
+      "defaultValue": "catalog-v2",
+      "allowedValues": []
+    },
+    {
+      "id": "customfield_10520",
+      "name": "Catalog Validation Status",
+      "required": false,
+      "allowedValues": [
+        {
+          "id": "10146",
+          "value": "verified"
+        },
+        {
+          "id": "10147",
+          "value": "inferred-high"
+        },
+        {
+          "id": "10149",
+          "value": "blocked"
+        },
+        {
+          "id": "10150",
+          "value": "contradicted"
+        }
+      ]
+    },
+    {
+      "id": "customfield_10521",
+      "name": "Catalog Validation Summary",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "customfield_10522",
+      "name": "Catalog Waiver",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "issuelinks",
+      "name": "Linked work items",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "issuetype",
+      "name": "Issue Type",
+      "required": true,
+      "allowedValues": [
+        {
+          "id": "10006",
+          "name": "Story"
+        }
+      ]
+    },
+    {
+      "id": "parent",
+      "name": "Parent",
+      "required": false,
+      "allowedValues": []
+    },
+    {
+      "id": "priority",
+      "name": "Priority",
+      "required": false,
+      "defaultValue": {
+        "self": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/3/priority/3",
+        "iconUrl": "https://fazcapital.atlassian.net/images/icons/priorities/medium_new.svg",
+        "name": "Medium",
+        "id": "3"
+      },
+      "allowedValues": [
+        {
+          "id": "1",
+          "name": "Highest"
+        },
+        {
+          "id": "2",
+          "name": "High"
+        },
+        {
+          "id": "3",
+          "name": "Medium"
+        },
+        {
+          "id": "4",
+          "name": "Low"
+        },
+        {
+          "id": "5",
+          "name": "Lowest"
+        }
+      ]
+    },
+    {
+      "id": "project",
+      "name": "Project",
+      "required": true,
+      "allowedValues": [
+        {
+          "id": "10003",
+          "name": "Faz Business Intelligence"
+        }
+      ]
+    },
+    {
+      "id": "reporter",
+      "name": "Reporter",
+      "required": true,
+      "allowedValues": []
+    },
+    {
+      "id": "summary",
+      "name": "Summary",
+      "required": true,
+      "allowedValues": []
+    },
+    {
+      "id": "timetracking",
+      "name": "Time tracking",
+      "required": false,
+      "allowedValues": []
+    }
+  ]
+}

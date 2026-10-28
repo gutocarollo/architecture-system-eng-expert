@@ -1,0 +1,23 @@
+{
+  "status": "FAIL",
+  "report": "tasks/architecture-course-2026-10-14/artifacts/course-preflight.json",
+  "counts": {
+    "mdx_pages": 46,
+    "markdown_pages": 0,
+    "concepts_expected": 310,
+    "concepts_checked": 310,
+    "concepts_with_explanatory_section_candidate": 245,
+    "priorities_expected": 40,
+    "priorities_checked": 40,
+    "priorities_with_structural_checks_passed": 0,
+    "links_checked": 980,
+    "invalid_links": 216,
+    "dynamic_links_unverifiable": 0,
+    "mermaid_fences": 73
+  },
+  "errors": [
+    "216 local links or anchors failed validation.",
+    "65 of 310 catalog concepts lack an explanatory section candidate.",
+    "40 of 40 priority entries have missing structural parts."
+  ]
+}

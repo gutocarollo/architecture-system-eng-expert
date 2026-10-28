@@ -1,0 +1,16 @@
+{
+  "document_id": "explicacoes/api-integration/index",
+  "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "s5",
+    "l5c",
+    "original-request"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "context_sha256": "983b865b2bcb82a688e221f6540a7249583b0fff2cb72e63f2689c3880ce940e"
+}

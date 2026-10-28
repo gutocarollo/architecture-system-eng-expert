@@ -1,0 +1,742 @@
+{
+  "measured_at_utc": "2026-10-15T01:45:17.746751+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "reviewed_base_sha": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "verdict": "REPAIR",
+  "scope": "First independent implementation teaching review; local source and local execution only",
+  "frozen_manifest_timestamp": "2026-10-15T01:37:27.447793+00:00",
+  "frozen_files_checked": 142,
+  "frozen_file_drift": [],
+  "case_count": 15,
+  "destination_count": 75,
+  "lab_cases_passed": 16,
+  "lab_cases_executed": 16,
+  "challenge_receipts": "teaching.challenges.json",
+  "mutation_receipt": "teaching.mutation.json",
+  "case_contract_receipt": "teaching.case-contracts.json",
+  "findings": [
+    {
+      "id": "T1",
+      "severity": "HIGH",
+      "class": "PLANO/ESCOPO",
+      "verdict": "REAL",
+      "title": "A matriz oferece probes de outro mecanismo como prática do conceito",
+      "evidence": [
+        {
+          "path": "labs/architecture/map_concepts.py",
+          "lines": [
+            20,
+            32,
+            40,
+            43,
+            45,
+            53,
+            57
+          ]
+        },
+        {
+          "path": "content/jornadas/cache-policy/conceitos.mdx",
+          "lines": [
+            15,
+            95
+          ]
+        },
+        {
+          "path": "content/jornadas/queue-workflow/conceitos.mdx",
+          "lines": [
+            527,
+            815
+          ]
+        },
+        {
+          "path": "content/jornadas/safe-release/conceitos.mdx",
+          "lines": [
+            15
+          ]
+        },
+        {
+          "path": "labs/architecture/financial.py",
+          "lines": [
+            121,
+            126,
+            175,
+            180,
+            248,
+            251
+          ]
+        }
+      ],
+      "proof": "Cache Aside e Message Filter/Splitter têm LOCAL_MECHANISM sem miss/load/store, filtro ou split. A/B usa execução shadow; Negative Caching usa isolamento de tenant; Gossip e Stateless Services contam maioria. Limitar o claim não cria a ligação que falta.",
+      "required_fix": "Adjudicar os vínculos por mecanismo; adicionar uma observação/contraste que ensine o conceito e seu resultado específico, ou manter a lacuna pendente. Não classificar 310 entradas como jornada cumprida apenas porque todas possuem um comando."
+    },
+    {
+      "id": "T2",
+      "severity": "HIGH",
+      "class": "TESTE/EVIDENCIA",
+      "verdict": "REAL",
+      "title": "comparison=PASS não verifica a garantia financeira declarada",
+      "evidence": [
+        {
+          "path": "labs/architecture/financial.py",
+          "lines": [
+            11,
+            13,
+            46,
+            294
+          ]
+        },
+        {
+          "path": "content/tutoriais/casos/safe-release/index.mdx",
+          "lines": [
+            34
+          ]
+        },
+        {
+          "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/teaching.mutation.json"
+        }
+      ],
+      "proof": "Mutação somente em memória troca a soma deduplicada pela soma das três entregas. Before e after ficam com debit=250, mas effects muda de 3 para 2 e o runner imprime comparison=PASS. O aluno é informado de que esse PASS prova a garantia, embora a cobrança duplicada permaneça.",
+      "required_fix": "Verificar invariantes observáveis próprios de cada probe e exigir que a condição protegida viole o contrato quando a proteção é removida. Para a deduplicação: três entregas, dois efeitos e débito 150. Validar o antes e o depois, não apenas que dois objetos diferem."
+    },
+    {
+      "id": "T3",
+      "severity": "HIGH",
+      "class": "CODIGO/LOGICA",
+      "verdict": "REAL",
+      "title": "O exercício de métricas conta spans como requests e usa o denominador errado",
+      "evidence": [
+        {
+          "path": "labs/architecture/financial.py",
+          "lines": [
+            271,
+            277
+          ]
+        },
+        {
+          "path": "content/explicacoes/casos/diagnostics/index.mdx",
+          "lines": [
+            11,
+            40
+          ]
+        }
+      ],
+      "proof": "A fixture tem REQUEST-1 e REQUEST-2 em três spans. measure-signals publica requests=3 e error_ratio=0.333. No grão de request relatado na história são duas tentativas e uma delas falha: 1/2 = 0.5.",
+      "required_fix": "Definir o grão da métrica e conservar a distinção entre span, request e operação; calcular requests e erro por request, ou rotular explicitamente uma métrica de spans sem apresentá-la como contagem de requests/RED. Atualizar as saídas dos destinos afetados."
+    }
+  ],
+  "files_read": [
+    {
+      "path": "content/_meta.js",
+      "sha256": "b9ebeb17bc0a049776f1b11fd6d1fe657142564a99b54e281702c7839245c8b9",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "content/explicacoes/casos/access-policy/index.mdx",
+      "sha256": "c38e421bcf2d5574ac22a1940230f687fb8dbbf9e26527d5ca32e12965bf89b8",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/cache-policy/index.mdx",
+      "sha256": "ff960e8095f0515230a8f2946f429030ea6659c52033b06dce763e3cd65fec25",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/consensus/index.mdx",
+      "sha256": "942512b4ae79d96f96b0e62c22226adef15ee45188b6191bd8e1806cc81ce750",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/date-only/index.mdx",
+      "sha256": "61482e552c25c5094b5aa6d0189b85eef7ad1f0b0a3826928a621916d9921454",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/diagnostics/index.mdx",
+      "sha256": "02aae4214633c378dae73ab8f13f35a427e3b32d8e8d7c2dbe19ed863aea48f4",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "content/explicacoes/casos/early-refresh/index.mdx",
+      "sha256": "f9ac95ec12625770cb5f3ec68cd9767664aec2ca5a7c6980ccbea56c3b56e4a4",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/ledger-projection/index.mdx",
+      "sha256": "25fd1903aa70d88669cae9cb54e8a2e0d25944c4f2dcb79d7cefa16beab13e74",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/opportunity-entry/index.mdx",
+      "sha256": "b613139a97f583a38306f5fee68a41dbad4de3c88a8f6ddc1e0b9696d926fe11",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/order-boundaries/index.mdx",
+      "sha256": "4d5dc484c87cb62673d6d0b62a1b434abed38ff9009e0b8844d963d2eea46232",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/order-delivery/index.mdx",
+      "sha256": "160e503736eb4cb31e4f65912f94bc574aef9d0c373a1fe95423ba6935ab5d78",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/queue-workflow/index.mdx",
+      "sha256": "2a254250d96b29a1ec12a8afed3b29ab4472c98d0d1c3a3bf58a929f6fda1cb0",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/reservation/index.mdx",
+      "sha256": "d54ae4b1433243cf3b6bb69571f163de36d56547c8e71f6f1e6b15198c63e4e9",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/safe-release/index.mdx",
+      "sha256": "b2a27050fe08d62a4707ee7922ea58610eb9464ce0d30ad47c2902ea2b7c86a4",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "sha256": "2235302b3237c994f2ff678b8807493bdfa57b01881cc2e6390a158f2302ca7a",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/explicacoes/casos/storage-partitions/index.mdx",
+      "sha256": "84e5fd9b484a6d65153624ca84fdf367eab3c516093e50d56739f74667739398",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/access-policy/index.mdx",
+      "sha256": "f1750a9311bf653618ed56841e1526bd0172a95197d968b871a8d30a4f95b9a7",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/cache-policy/index.mdx",
+      "sha256": "128854d41db42f8188a2fd6f6f3d4b82f734087b7b366187edcce3f3cbcba26a",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/consensus/index.mdx",
+      "sha256": "d536e316113e90cadb3848f2b7223919dbf724b4ef724a1c550a833569eb8f7b",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "content/guias/casos/date-only/index.mdx",
+      "sha256": "8dbe30eb17a776423a048e7d4eea170bc5599bab98add182255b905280c8a98b",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/diagnostics/index.mdx",
+      "sha256": "ebc0ddfd5a8b0c40d6ef440978537e365a81736501c14c14f6a1d7f3edb7eff2",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/early-refresh/index.mdx",
+      "sha256": "8370fd5528d08c7782b606b5386d9b00250378a27ac83119dbf60a0d84189c22",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/ledger-projection/index.mdx",
+      "sha256": "eafe9af361478d28a78cac289c39b440350e783a0d334cd5f81b165e6032cc1f",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/opportunity-entry/index.mdx",
+      "sha256": "05c7f768e464553233bb9f0c6b0342b4c40ec92dd14567f70d286e0b3b55bd0f",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/order-boundaries/index.mdx",
+      "sha256": "d775ef01ef1a122406f845980de3584a925c61a9286b307e8d207443476dfe2a",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/order-delivery/index.mdx",
+      "sha256": "8f7818086513ee63f617bed462f3537d4104dabd9519994831bc26923aced3d6",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/queue-workflow/index.mdx",
+      "sha256": "0ba0c5367f8615affc7d79d9f5f89ac36f9f22eac88dd2756c875d1dddc9437e",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/reservation/index.mdx",
+      "sha256": "32a3e11941c338d2920b4c83b46be15090c11b238b392fd00e399128be1e08d6",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/safe-release/index.mdx",
+      "sha256": "32930b61eb46e421a3fa4cf555d5cd9b9b98001c450e23f80763a7d81ffa8b43",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/single-flight-cancel/index.mdx",
+      "sha256": "119c81bcd3a06b6b6a46ea66ff6bfbe4f52fa34dd98106540fd6061fa5317d3d",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/guias/casos/storage-partitions/index.mdx",
+      "sha256": "0f8362eaae94bc25d21d41f65e59af3cd845734d239b37f43c8e92ae47f6a245",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/access-policy/conceitos.mdx",
+      "sha256": "5d24c8ab5fed5ee0c2f4a70f393e660c3e2fe0f91f5fe24820d8acfe3ac9f342",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/access-policy/index.mdx",
+      "sha256": "260e57983c4dd3584baf3890fc45ee4d2199f29cac37592b9d97dabd9b32bc94",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/cache-policy/conceitos.mdx",
+      "sha256": "2a874446fab6c122b73e6a906e1368fde1d52b2384263a2519c8655ccbb4a71a",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/cache-policy/index.mdx",
+      "sha256": "e7bea766e9e294c8bac46a3f6715f3bdfdb284b8fb5c2413b2fdfaee89a647a5",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/consensus/conceitos.mdx",
+      "sha256": "f90e6c395101dace866a0793ee4e3c81a3edf959c267760d63a73bd15acf7583",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/consensus/index.mdx",
+      "sha256": "6f6f642d3ef42f14ab42cf12d6a58770f6e9af929e598b1779dee720a6371e4e",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/date-only/conceitos.mdx",
+      "sha256": "4cc8f24a710286dad602f724cfa7d50e28ba5c96b72cef6b9bc775d0333c4578",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/date-only/index.mdx",
+      "sha256": "9db56aa33c8030892f67e9fc83d6eb020a9e37a3e22c1b20e3ccd9e6a723aac7",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/diagnostics/conceitos.mdx",
+      "sha256": "1aef9bd3595f2e7c112277aabb985e10c98a31a89bc1531b229a068b18893b5c",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/diagnostics/index.mdx",
+      "sha256": "b0153747418ff9aa8b8984f205bfd539bec1e6099576c2863c0ea84d41bc5684",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/early-refresh/conceitos.mdx",
+      "sha256": "de8902af1ba384fd96ab3b85c7cd5e03e6c345c26c92d1b3d0786ba775962fd1",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/early-refresh/index.mdx",
+      "sha256": "51d8568751980292b78de68a391e54475391511213cbfa3d4ca70a21d1dd32cb",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/index.mdx",
+      "sha256": "bbca38c5c7c46b5780541cb1ab347e28a971a3e29bdd178fe1cd2bfb76fc8084",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "content/jornadas/ledger-projection/conceitos.mdx",
+      "sha256": "42dc55c89212337795ec7ffb96dc8f06e8e51694a4cad85dfb0794007eb2b4fc",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/ledger-projection/index.mdx",
+      "sha256": "b276ca9d2244987b556d3797ffcb8094d0bb55ae2a78d75129916f6de84aa0ad",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/opportunity-entry/conceitos.mdx",
+      "sha256": "17df33e86db694524ddcdccab52eac344d7a24a9a610f667aafa27fa4d92457c",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/opportunity-entry/index.mdx",
+      "sha256": "a1cec2906fa64026b65c58f11c5685c42adc5226b35186ebd408e075503af3f9",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/order-boundaries/conceitos.mdx",
+      "sha256": "b09db69b676cda316daf68bb3966ff2befb9d1c93ea1fd62c6c915960537e8a8",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/order-boundaries/index.mdx",
+      "sha256": "04cd84d5eaaf49ac0443cf4dd411053a2ecc2c5c970b5b962d94197291b83568",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/order-delivery/conceitos.mdx",
+      "sha256": "f08f5634e7bd0b174af43ae6628a4c250a07cd0c73b0ae743351fd7e67a6ed61",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/order-delivery/index.mdx",
+      "sha256": "cd0bd69d1fedc901252c6908e5ad9be4c77f79b2721af86116d9f82d62011eb2",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/queue-workflow/conceitos.mdx",
+      "sha256": "7e45caa5f7d7c147c417cead05197bf95b71343ab0b343bf5e910c270882a537",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/queue-workflow/index.mdx",
+      "sha256": "d040ca5a7735eb4c66f0551dc32ed32ab5be9c72650cf777bd250e0f405deb06",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/reservation/conceitos.mdx",
+      "sha256": "261d428327e33aa7e6a8d14c5fa985188f4094fcbcfb07f9d36d9e675e93f06f",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/reservation/index.mdx",
+      "sha256": "b336fcaed58f6de67f3acf3b586e2e8e22444c53efab6443b406fcbff532ab23",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/safe-release/conceitos.mdx",
+      "sha256": "bcbc4d361333966182414dc96d316a9de082e0b8fa3204df87d63d89470804bc",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/safe-release/index.mdx",
+      "sha256": "0234cdc8dba9caea28ec9ad3a914a7496d34667c5e342759b8cd3a605faeaba1",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/single-flight-cancel/conceitos.mdx",
+      "sha256": "adae879885f3bba0371d204932e2c8cdbc1f5a38e796139e4efa1c35933149bb",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/single-flight-cancel/index.mdx",
+      "sha256": "78001bc50681cff1eb2e6b1efb13fc23d513ed016d7484c946ebc4496b7189cf",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/storage-partitions/conceitos.mdx",
+      "sha256": "41f90f5d5fc7e1f69e4c4943213ed69eac971081f7a3ad5a420753317b99229e",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/jornadas/storage-partitions/index.mdx",
+      "sha256": "91928f2b139a27b0ea8143544c608ace2f0956fa7681c333cd9185fb552a9943",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/access-policy/index.mdx",
+      "sha256": "a777aaa40ae8802ea9dde9056d160b0bfd7a44847f504e9034cb9f01fbb7af7d",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/cache-policy/index.mdx",
+      "sha256": "c5c0560fe4540041c7c66b0582ce7f03a9e2884a5b37751de19d5281d4155aaa",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/consensus/index.mdx",
+      "sha256": "6426867cec6d91c3b73bb44c776d4302f4d86fa2e9f9b562cd399df7f91719ea",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/date-only/index.mdx",
+      "sha256": "8708d571faff32e120ea78aba26f37e5bc532affce42eb50c77d569ec22a6d12",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/diagnostics/index.mdx",
+      "sha256": "391fdfc7c120b43f4b0a928a290d099a938d0cf94581f88315e475ad0b0372bb",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/early-refresh/index.mdx",
+      "sha256": "82cbb371e167bf1bbe8b745c0783dfccf4ecf148eface596fe9adec151652398",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/ledger-projection/index.mdx",
+      "sha256": "98b899faeb376e9b346d2472ac6852638cb213d338714dabe41c231cfe3e7c6d",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/opportunity-entry/index.mdx",
+      "sha256": "1fb15ae649c451138e5844f1a1f4c756539973bfe9d8942a060d52c9e3327d78",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/order-boundaries/index.mdx",
+      "sha256": "723c767b6b3dba8dd99efcdcc6e325ca6f3b6a9d74a01c6eae6af3f48d640fd5",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/order-delivery/index.mdx",
+      "sha256": "987e5d0c64534737fade67d81f5afc1a7262bd6293aa33c8eed45fec6a857d61",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/queue-workflow/index.mdx",
+      "sha256": "0fe2c9428d2f165edf11a72187141dd264314243bb4c5a2fe3a894ef3484c8e3",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/reservation/index.mdx",
+      "sha256": "62b1fa359bc2137545352443c02bb35df2481a67becc3695625102322a86598e",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/safe-release/index.mdx",
+      "sha256": "e1bcf3f7f895a5bd1c566b9bb1fcd9cf97aaee4ea42b0bc7d2241281aadb490d",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/single-flight-cancel/index.mdx",
+      "sha256": "496c9d8bcddc2471cb79218e01371b5d6c7df6e51e0f4fb974f2003a169832b7",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/referencia/casos/storage-partitions/index.mdx",
+      "sha256": "e9ffa350a6d663eca919eab9fc110c61735ce1cc7d5964056e52aab169993aa3",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/access-policy/index.mdx",
+      "sha256": "0fd24652f6bb3dd623292645c002acb01b6c151bfbc3e8c456b21d475e00539f",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/cache-policy/index.mdx",
+      "sha256": "a930c96c44f7daef039fd5ce4d7339ee11f9c3454f88e3eb2668a3e2bea73e8f",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/consensus/index.mdx",
+      "sha256": "999830d2195bd1ff1fb3522a78dc0d34fe340087f21a717578a5177013473b52",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/date-only/index.mdx",
+      "sha256": "6c2cad9996cb4e31449a4e94a64e4ee868aab20d33b6454ac7d28ef2630b1ed1",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/diagnostics/index.mdx",
+      "sha256": "8296363a952354c71b93a2a7528b18c0541861ec0b3da7f08d9439b7a4dec78c",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/early-refresh/index.mdx",
+      "sha256": "320315e1848257b9b0c9b2cc9057bbcd78baf774bdb51a8579356521d4e2a569",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/ledger-projection/index.mdx",
+      "sha256": "b7c6513fe82bde66ddcddc5ea29d470e87a16282a928f2a6d65bc3c72ea8ccd7",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/opportunity-entry/index.mdx",
+      "sha256": "3bccb18b840b622ffb2f1b691fda0ce6be6fb2a33475d9f23c19eea0b9814ef5",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/order-boundaries/index.mdx",
+      "sha256": "38df951d391b44a5900ee19aef8e4e83a42e4e9b4a7fd09f4f6cd02af69ee2f3",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/order-delivery/index.mdx",
+      "sha256": "6670c892adc6cb35c3cd12f7ea58df4084a3dc7c4a1e9ae163d6eb622e975327",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/queue-workflow/index.mdx",
+      "sha256": "e67944d875d14a8e174e6b8abe0eaaa5c36eac305a74ee66e74ddee1a0514deb",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/reservation/index.mdx",
+      "sha256": "51b6a8c465cf291150c941472c27df3a2cf6525228e7b72e0cfb11aa8aa5eccb",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/safe-release/index.mdx",
+      "sha256": "4d3670d697adcb1cf36eb7da86b8d703346c3b67eacce683019cb18318387cbc",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "content/tutoriais/casos/single-flight-cancel/index.mdx",
+      "sha256": "f7957f20ed82f4b0b3a324108b77753ae8fb7aad5d9806cd8628c0fb6f40c826",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "content/tutoriais/casos/storage-partitions/index.mdx",
+      "sha256": "c8bb057bca6efad13c5dba26a4d68bd111357b7f94bb15340cb9059a704b4527",
+      "inspection": "STATIC_LINK_IDENTITY_LIMIT_OR_MAPPING_PARSE"
+    },
+    {
+      "path": "labs/architecture/author_learning.py",
+      "sha256": "2617625894f29171e96a9de6d1a78c59a1a841695fbef9c08baaeb7a843f96b1",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/check_challenges.py",
+      "sha256": "c36057e1a6f106f472e4b0744382c112b6c9bd196d0a92a4fab62daf54eb2a89",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/date-only/manifest.json",
+      "sha256": "4a30abeb13f0d537c6be9e3ac34f52cf66579207ea9a1194d2fbdcd9138a2334",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/date-only/run.mjs",
+      "sha256": "deefda8305166e88f720e542436aa9b0f9b301b5c45d51b03d02cc0d6bdc24d3",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/date-only/source.diff",
+      "sha256": "5c4db66afdb6c9aa837a5215862d10299f17d123d3b9ed1045f924016ce7af59",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/early-refresh/manifest.json",
+      "sha256": "253a249254008a4bdc20a4a7f619e9d1624735fdbc31f7d191206788b84e1f4e",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/early-refresh/run.py",
+      "sha256": "c913b8a165ce85a1306133d83bf5770fd23245d5b7ee92db31510ed5fcab78d3",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/early-refresh/source.diff",
+      "sha256": "d84ce17866a9d7581e62effae42271cc214fbba567f19a5d23bd55a71250b5ab",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/financial.py",
+      "sha256": "f58b9018f22e31f536e7072055b038bfb7cbf0e056a086ebdb30713859641565",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/map_concepts.py",
+      "sha256": "f99aa328f603a1d0d124ce3c121782885d2471d3e5f48bdaa3d89a9e9f65cbd5",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/object_patterns.py",
+      "sha256": "9b2e005909b188f3ddf69f6c1da184550bc77e38066f7cc52883483bee2768e1",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/after-integration.py",
+      "sha256": "63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/after-qualify.py",
+      "sha256": "ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/after.py",
+      "sha256": "81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/before-integration.py",
+      "sha256": "96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/manifest.json",
+      "sha256": "23e8bb520f93959edf5ac886df89fac4428442087284a435b4b2b1a29ed6fa51",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/run.py",
+      "sha256": "3524d109a5fc7d6bd0728122eea40d78faf17756a8f0cf15c37799116594f7af",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/run_all.py",
+      "sha256": "3af507632dc274bd8be30fd501deb2f7825848f4b9db69e29f04a69e049f4d4d",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/single-flight-cancel/manifest.json",
+      "sha256": "27fdcfe9e6cc29cca20d99c44a6a5628ffbe02ccfff6278f3e481604292628bf",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/single-flight-cancel/run.py",
+      "sha256": "98fd3c8a312c8edf4b9686de9446168364a4afe8288de01da817283b4eae5595",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "labs/architecture/single-flight-cancel/source.diff",
+      "sha256": "a98325fe7dbe7cc7d0013d688f247a00386b36541f4e5562b3e852dc02582cd7",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/comparison/amendment.md",
+      "sha256": "b3317dd266f1b700d110a560ed91ef602883bc4dc03e367d677dbdf931eefa24",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-remote.json",
+      "sha256": "147b8d54c890f979d2c5d328ab10ed99c472b78ea9847c54d7ca74d72d45d436",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-source.json",
+      "sha256": "3e5d2c67053b495725bd4d786839bcfb438c5b36251654c20d67552e3cf8a7dc",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-visible-jira.json",
+      "sha256": "65ffbd8b6330b70aa271679523fad65d4e05e91e740c7116a4a000fadb20ccc7",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/learning/concept-matrix.json",
+      "sha256": "6b7999d8b5dd60e0ba839e68eb4b5c43f8880c4a0602030aa3b35cb675fd2999",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/learning/families.json",
+      "sha256": "a7e56bc9b1343881ebf7b57549a0cdbd9baf70b7b89f4523b6d3d05866a3247a",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/learning/owned-hashes.json",
+      "sha256": "c6d211ea4689e7e4dd4b1236b8227a76eb2106f5cac72dbff62841c4ec1b267b",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/plan.md",
+      "sha256": "c85d053eae7c7d9bad5f3ef909a49e4428ed123c1901267d0d6e1eaa663fccdf",
+      "inspection": "READ_CODE_OR_EXCERPTS"
+    }
+  ],
+  "limits": [
+    "No rendered-browser, publication or production verdict.",
+    "Curated external reference verification belongs to another active owner.",
+    "The 237 principle comparisons were not declared uniformly invalid; findings cite concrete mismatches.",
+    "Historical Git objects were read through git show; all 14 snapshots matched the Git bytes and all four before SHAs matched the corrected commit parent.",
+    "check_challenges.py has no output argument; its write was redirected in memory to teaching.challenges.json, preserving the author receipt."
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "started_at_utc": "2026-10-15T18:06:16.360312+00:00",
+  "archive_sha256": "229046fc241a89d206020a61714bd5cece173cbf2fc31301a053dff3790cbafe",
+  "scope": "Exact downloadable ZIP extracted without Git, dependencies installed from its locks, sixteen local synthetic runners.",
+  "commands": [
+    {
+      "command": [
+        "npm",
+        "ci",
+        "--prefix",
+        "labs/architecture"
+      ],
+      "cwd": "/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/terminal-fbi4991-download-vnmjf5mk/architecture-labs",
+      "started_at_utc": "2026-10-15T18:06:16.798774+00:00",
+      "exit_code": 0,
+      "log": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-download-node-setup.log",
+      "log_sha256": "573f2db825a83a5a9aabdd28a3f684b34445253f0b7990ad31548a69b3e03208"
+    },
+    {
+      "command": [
+        "python3",
+        "labs/architecture/setup_labs.py"
+      ],
+      "cwd": "/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/terminal-fbi4991-download-vnmjf5mk/architecture-labs",
+      "started_at_utc": "2026-10-15T18:06:26.470770+00:00",
+      "exit_code": 0,
+      "log": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-download-sdk-setup.log",
+      "log_sha256": "b5dfdfeae3b1270496e31cec67ae40e8b6733a3a9141309dce04a5a519ee8ee7"
+    },
+    {
+      "command": [
+        "python3",
+        "labs/architecture/run_all.py",
+        "--out",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-download-runs.json"
+      ],
+      "cwd": "/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/terminal-fbi4991-download-vnmjf5mk/architecture-labs",
+      "started_at_utc": "2026-10-15T18:06:40.733647+00:00",
+      "exit_code": 0,
+      "log": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-download-run.log",
+      "log_sha256": "bb9608cbcfabe5965c436643f9ca341922ff6810632649cf68c3797595592208"
+    }
+  ],
+  "files_verified": 98,
+  "members": 100,
+  "manifest_sha256": "8ca6e3cc3ec9ddbe459266503de69f58f2a14c687a154fefbd90f684c9e1a2a2",
+  "extracted_without_git": true,
+  "source_matches_current_checkout": true,
+  "verdict": "PASS",
+  "base_sha": null,
+  "source_revision_kind": "UNVERSIONED_SOURCE_SNAPSHOT",
+  "runners": 16,
+  "all_runner_exit_codes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "production_execution": false,
+  "finished_at_utc": "2026-10-15T18:06:43.306720+00:00"
+}

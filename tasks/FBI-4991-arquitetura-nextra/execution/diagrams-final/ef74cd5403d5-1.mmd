@@ -1,0 +1,11 @@
+flowchart LR
+    Repo["Bitbucket: main"] --> Sync["git-sync v4.4.2"]
+    Sync --> Tree["emptyDir: árvore SHA 8f06738d"]
+    Tree --> Scheduler["Scheduler: uma réplica, LocalExecutor"]
+    Person["Operadora consulta execuções"] --> Service["Service da API"]
+    Service --> API1["API: réplica 1"]
+    Service --> API2["API: réplica 2"]
+    API1 --> Metadata["Metadata PostgreSQL: primário CNPG"]
+    API2 --> Metadata
+    Scheduler --> Metadata
+    Scheduler -. "logs remotos configurados" .-> Logs["S3: airflow-task-logs/prod"]

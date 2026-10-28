@@ -1,0 +1,8 @@
+flowchart LR
+    Person["Requisições reais no blueprint"] --> Active["Service ativo"]
+    Active --> Blue["Versão azul atual"]
+    Preview["Service de preview"] --> Green["Versão verde candidata"]
+    Green --> Gate{"Compatível e saudável?"}
+    Gate -->|"não"| Hold["Preservar azul e corrigir verde"]
+    Gate -->|"sim"| Promote["Trocar Service ativo para verde"]
+    Promote --> Watch["Observar e retornar tráfego se necessário"]

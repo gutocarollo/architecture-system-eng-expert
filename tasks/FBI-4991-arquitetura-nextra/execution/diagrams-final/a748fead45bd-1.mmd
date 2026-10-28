@@ -1,0 +1,11 @@
+flowchart TD
+    I["Polling da lista: mesmo payload NextBilling"] --> T["backend/app/utils/single_flight.py::get"]
+    T --> V{"Valor dentro do TTL?"}
+    V -->|não| H["Expiração dura: aguarda produtor compartilhado"]
+    V -->|sim| E{"Atingiu early TTL?"}
+    E -->|antes: sem janela| B["Devolve valor; próximo vencimento inicia busca"]
+    E -->|depois: sim| F["_start_background_refresh usa o mesmo slot"]
+    F --> S["Devolve valor ainda válido sem esperar"]
+    F --> P["Produtor conclui e callback atualiza expiração"]
+    P --> R["Próxima leitura pode receber valor renovado"]
+    H --> Q["Se produtor está lento, leitura continua esperando"]

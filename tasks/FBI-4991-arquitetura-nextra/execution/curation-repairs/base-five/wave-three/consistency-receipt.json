@@ -1,0 +1,32 @@
+{
+  "observed_utc": "2026-10-15T04:17:02.844791+00:00",
+  "rows": 5,
+  "concept_ids": [
+    "database-decomposition",
+    "expand-contract",
+    "parallel-run",
+    "service-extraction",
+    "transitional-architecture"
+  ],
+  "unique_source_artifacts": 26,
+  "hash_or_excerpt_errors": [],
+  "main_base_http_statuses": [
+    200
+  ],
+  "main_base_license_statuses": [
+    "READ"
+  ],
+  "frozen_before": {
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json.gz": "b7aedc4ff85625ec0546ceded96bf5d734bf19318f12637dea964998e43c6e4d",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/sources.json": "51638c494e7cbbac9c6d7389ea4f3ab2b40239c6930501a791bafc6796ad3209"
+  },
+  "frozen_after": {
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json.gz": "b7aedc4ff85625ec0546ceded96bf5d734bf19318f12637dea964998e43c6e4d",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/sources.json": "51638c494e7cbbac9c6d7389ea4f3ab2b40239c6930501a791bafc6796ad3209"
+  },
+  "frozen_unchanged": true,
+  "recommendations_sha256": "d45dfab844f4398c667b8c82cfe19d7a4a71fc53b3618e1e66817245718e589c",
+  "scope": "Artifact consistency and transport crosscheck only. No independent semantic review or implementation test."
+}

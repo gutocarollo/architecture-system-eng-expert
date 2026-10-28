@@ -1,0 +1,119 @@
+[
+  {
+    "kind": "FILE",
+    "repo": "AxonFramework/AxonFramework",
+    "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+    "path": "modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java",
+    "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java",
+    "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "AxonFramework/AxonFramework",
+    "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+    "path": "modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java",
+    "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java",
+    "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "AxonFramework/AxonFramework",
+    "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+    "path": "modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java",
+    "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java",
+    "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "AxonFramework/AxonFramework",
+    "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+    "path": "modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java",
+    "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java",
+    "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "flippercloud/flipper",
+    "revision": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+    "path": "lib/flipper/gates/boolean.rb",
+    "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/boolean.rb",
+    "raw_url": "https://raw.githubusercontent.com/flippercloud/flipper/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/boolean.rb",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "flippercloud/flipper",
+    "revision": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+    "path": "lib/flipper/gates/percentage_of_actors.rb",
+    "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/percentage_of_actors.rb",
+    "raw_url": "https://raw.githubusercontent.com/flippercloud/flipper/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/percentage_of_actors.rb",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "Kludex/starlette",
+    "revision": "7b2948fe7b7fff28bb018607d54cd4dfa518910e",
+    "path": "starlette/applications.py",
+    "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/applications.py",
+    "raw_url": "https://raw.githubusercontent.com/Kludex/starlette/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/applications.py",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "Kludex/starlette",
+    "revision": "7b2948fe7b7fff28bb018607d54cd4dfa518910e",
+    "path": "starlette/middleware/base.py",
+    "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/base.py",
+    "raw_url": "https://raw.githubusercontent.com/Kludex/starlette/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/base.py",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "Kludex/starlette",
+    "revision": "7b2948fe7b7fff28bb018607d54cd4dfa518910e",
+    "path": "starlette/middleware/cors.py",
+    "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py",
+    "raw_url": "https://raw.githubusercontent.com/Kludex/starlette/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "Kludex/starlette",
+    "revision": "7b2948fe7b7fff28bb018607d54cd4dfa518910e",
+    "path": "LICENSE.md",
+    "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md",
+    "raw_url": "https://raw.githubusercontent.com/Kludex/starlette/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "apache/airflow",
+    "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+    "path": "airflow-core/src/airflow/api_fastapi/core_api/app.py",
+    "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py",
+    "raw_url": "https://raw.githubusercontent.com/apache/airflow/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "apache/airflow",
+    "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+    "path": "airflow-core/src/airflow/api_fastapi/common/http_access_log.py",
+    "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/common/http_access_log.py",
+    "raw_url": "https://raw.githubusercontent.com/apache/airflow/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/common/http_access_log.py",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  },
+  {
+    "kind": "FILE",
+    "repo": "spring-projects/spring-framework",
+    "revision": "4dea36c5872b3ad9ac9357a9cd8a077264f88a39",
+    "path": "spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java",
+    "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java",
+    "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-framework/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java",
+    "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation."
+  }
+]

@@ -1,0 +1,67 @@
+{
+  "observed_at_utc": "2026-10-17T03:34:07.485048+00:00",
+  "verdict": "PASS_BOUNDED",
+  "critical_findings": 0,
+  "scope": "Independent source and static UX/count review; browser/build/deploy remain orchestrator gates. No full semantic re-review of the 310 OSS mappings.",
+  "actual_role": "default",
+  "configured_model": "gpt-6.1-sol",
+  "configured_effort": "xhigh",
+  "fork_turns": "none",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "base_sha": "83150a31c0d27f655b1160570aedd6c3e32e5d63",
+  "audited_sha256": {
+    "app/layout.jsx": "8b494e263e622be6ce16f02fc373e64d2e958f3e761f1b98dee2aff1f88ca9d8",
+    "app/[[...mdxPath]]/page.jsx": "5300d7527b498e2703aa5532573bc88d8a0f7949b223d2f10c5f61ba907e5c09",
+    "app/course.css": "c1afdec9fdff5f2a3fb3a2b9d0d169ae5daba459e71ada557912f1432a8fcb34",
+    "scripts/prepare-course-navigation.mjs": "8af5dc39cf802cb2fba95b54009b74e1bd92bd1947a2ecfd91a4c0d8a3237cdc",
+    "content/referencia/prioritarios.mdx": "3a7f14a648ea1fe2cc78778b069d553b58d680f96c749303c6cdae9c53661416",
+    "content/referencia/curadoria/index.mdx": "ee8a93622c2daceb3b5d7c8c77c6daf48d47e359feeb88ca41ad0711c06db118",
+    "content/jornadas/matriz.mdx": "2717f03c639963b64c034b4a1c805438c5a77b02db4bcc8b3e8b9d14e6d348cf",
+    "content/jornadas/reservation/index.mdx": "2e3a1ea467ce3c9ebdce7d4cbc6e59a90297fd59084edac015bc59f1a039c9c4",
+    "content/jornadas/reservation/_meta.js": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a",
+    "labs/architecture/map_concepts.py": "d908d26b73da9ce821d05b0ea1766b73c2866aeb3b255a56a65019a7c12a9ef9",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/build_matrix.py": "1c68344acc274a2dec3a38cc04145c7ab8b6eb8ccfc7aa235b942b80c031131e",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/reconcile_references.py": "26ba979731be3ceb6b93502f56e39510f383d446c129c9124d48314bfbc87f3a"
+  },
+  "sources": {
+    "nextra": "4.6.1 installed normalize.js and sidebar.js, plus official documentation fetched with Context7",
+    "next": "16.4.0 installed; title.absolute contract checked against Next.js official documentation; Context7 resolve attempt hit monthly quota",
+    "makershub_css_source": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-5049/help-center/src/app/brand.css at c1cf3e760473d2932d319c4b395af1bb73f5a497",
+    "comparison_limit": "Local source parity; production parity not measured."
+  },
+  "gates": {
+    "navigation_metadata": "PASS; 119 internal index files, all marked asIndexPage; 116 metadata-only, 3 additional reviewed text diffs",
+    "meta_normalization": "PASS; 26 only expected edits, all remove string index key; referencia also exact requested title",
+    "reservation_navigation_contract": "PASS_SOURCE; index is promoted to group anchor to /jornadas/reservation; arrow toggles without navigating; runtime remains browser gate",
+    "count_sources": "PASS; all six source hashes match the count receipt; independent recomputation confirms 40 themes, 46 unique concept IDs, 310 unique concepts, 15 primary case IDs, 15+2+1 journey registry entries",
+    "content_claims": "PASS; public text bounds observations and does not assert full implementation or completed reviews",
+    "content_preservation": "PASS; previous links retained in all three main content edits; Nextra mdx-components unchanged",
+    "title": "PASS_SOURCE; public logo, priority title/H1, sidebar label match exact requested text; title.absolute prevents duplicate suffix",
+    "width_motion": "PASS_SOURCE; inherited source dimensions/durations, native table scroll retained, reduced-motion opt-out retained; render pending",
+    "build": "NOT_REVIEWED; in progress by orchestrator at dispatch",
+    "browser": "PENDING_ORCHESTRATOR; no rendered evidence consumed for this pass",
+    "deploy": "OUT_OF_SCOPE"
+  },
+  "low_backlog": [
+    {
+      "path": "content/explicacoes/index.mdx:39 and content/referencia/index.mdx:13",
+      "issue": "The rename left Portuguese grammar as Os [Arquitetura na prática: Makershub] ajudam and Consulte os [Arquitetura na prática: Makershub].",
+      "minimum_correction": "A seleção [Arquitetura na prática: Makershub] ajuda... and Consulte a seleção [...].",
+      "severity": "LOW",
+      "blocks_delivery": false
+    },
+    {
+      "path": "tasks/FBI-4991-nextra-ux/evidence/counts/README.md",
+      "issue": "The receipt says the Os quarenta prioritários section heading/anchor was preserved; current matriz uses Arquitetura na prática: Makershub. No incoming old-anchor references were found in the bounded content/scripts search.",
+      "minimum_correction": "Correct receipt prose when updating reports; no delivery block.",
+      "severity": "LOW",
+      "blocks_delivery": false
+    }
+  ],
+  "limitations": [
+    "No .codegraph, .harness/lib/scan_project.py, .harness/requests/CURRENT-TASK.md, docs/architecture, or docs/design-system exists in this course root; review uses orchestrator-supplied original request slice, task plan, installed framework source, and current code.",
+    "The reviewer did not run or add unit tests, exercises, generators, external infrastructure operations, or secret reads.",
+    "Three top-level _meta files (explicacoes, guias, tutoriais) formerly put casos before index. The native asIndexPage contract intentionally promotes their existing index; this report does not claim every group opens the first former _meta key."
+  ]
+}

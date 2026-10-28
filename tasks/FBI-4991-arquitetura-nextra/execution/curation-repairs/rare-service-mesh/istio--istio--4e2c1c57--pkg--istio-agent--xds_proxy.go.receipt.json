@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "pkg/istio-agent/xds_proxy.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--istio-agent--xds_proxy.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T04:12:37.855423+00:00",
+  "sha256": "53c9812cbd6f09d2b685c24e88733d7643a0338da142b6f3ad0ac0f08e3b72d5",
+  "line_count": 691,
+  "source": "raw_primary"
+}

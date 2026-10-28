@@ -1,0 +1,9 @@
+flowchart LR
+    Person["Pessoa pede qualificação"] --> Route["Roteador proposto"]
+    Route -->|"resposta e única escrita"| Current["Versão atual"]
+    Route -. "entrada sintética ou cópia autorizada" .-> Candidate["Novo cálculo sem efeitos"]
+    Current --> Response["Pessoa recebe resultado atual"]
+    Current --> Compare["Comparar escolhas e erros"]
+    Candidate --> Compare
+    Compare -->|"divergência"| Hold["Corrigir candidato e manter rota atual"]
+    Compare -->|"critério aceito"| Switch["Transferir a operação para um escritor"]

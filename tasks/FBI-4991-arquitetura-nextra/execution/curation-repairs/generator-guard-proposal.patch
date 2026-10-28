@@ -1,0 +1,137 @@
+--- a/tasks/FBI-4991-arquitetura-nextra/execution/curation/build_matrix.py
++++ b/tasks/FBI-4991-arquitetura-nextra/execution/curation/build_matrix.py
+@@ -2,6 +2,7 @@
+ """Create a complete, evidence-bound author matrix without laundering partial matches."""
+ import collections,datetime,gzip,hashlib,json,re
+ from pathlib import Path
++from adjudication_gate import adjudication_issues
+ BASE=Path(__file__).resolve().parent
+ ROOT=BASE.parents[3]
+ load=lambda name:json.loads((BASE/name).read_text())
+@@ -10,6 +11,8 @@
+ learning=json.loads((ROOT/'tasks/FBI-4991-arquitetura-nextra/execution/learning/concept-matrix.json').read_text())
+ learning_by_id={x['concept_id']:x for x in learning['concepts']}
+ heading_slugs=load('heading-slugs.json')
++adjudication_path=BASE/'author-adjudications.json'
++adjudications=json.loads(adjudication_path.read_text()) if adjudication_path.exists() else {}
+ assert {x['concept_id'] for x in coverage['concepts']}==set(selections)
+ 
+ # These are explicit semantic findings, not exceptions to the requirement.
+@@ -129,7 +132,8 @@
+  found={hit['term']for file in body_evidence for hit in file['hits']}
+  missing=[term for term in sel.get('verification_terms',[])if term not in found]
+  if sel.get('verification_terms') and not found:issues.append({'kind':'MECHANISM_NOT_LOCATED','reason':'Nenhum localizador textual do mecanismo foi encontrado nos arquivos selecionados.'})
+- # Textual hits are receipts for navigation, never a substitute for the semantic finding above.
++ # Textual hits are navigation receipts. A current positive author adjudication is required.
++ issues.extend(adjudication_issues(key,sel,sources,adjudications.get(key),ROOT))
+  status='PENDING' if issues else 'AUTHOR_SOURCE_MATCH'
+  entries.append({'concept_id':key,'canonical_name':concept['canonical_name'],'groups':concept['groups'],'primary_group':group,'priority_entries':concept['priority_entries'],'status':status,'independent_review':'PENDING','base':bases,'application':apps,'application_kind':sel.get('application_kind'),'mechanism':sel['mechanism'],'limits':sel['limits'],'decision_evidence':sel.get('decision_evidence',[]),'research_packet':sel.get('research_packet'),'classification_basis':sel.get('classification_basis'),'source_evidence':body_evidence,'source_locator_terms_not_found':missing,'skill':primary_skill,'skill_candidates':candidates,'skill_candidate_universe':'Only the explicitly selected public SKILL.md candidates in this row; stars compare their parent repositories, not individual skill quality.','trend_support':trend,'issues':issues,'learning':learning_by_id.get(key),'original_reference_paths':concept['reference_paths'],'not_applicable':False})
+ summary={'canonical_concepts':len(entries),'author_source_matches':sum(e['status']=='AUTHOR_SOURCE_MATCH'for e in entries),'pending_concepts':sum(e['status']=='PENDING'for e in entries),'independently_reviewed_concepts':0,'not_applicable_exemptions':0,'issues_by_kind':dict(collections.Counter(i['kind']for e in entries for i in e['issues']))}
+--- /dev/null
++++ b/tasks/FBI-4991-arquitetura-nextra/execution/curation/adjudication_gate.py
+@@ -0,0 +1,105 @@
++"""Proposed author gate; not installed in the frozen generator.
++
++An explicit author judgment is necessary in addition to structural receipts. This
++gate binds that judgment to the selected code and prose. It cannot decide whether
++an excerpt actually implements a concept; independent semantic review remains a
++separate requirement.
++"""
++import hashlib
++import json
++import re
++from pathlib import Path
++
++
++def digest(contents):
++    return hashlib.sha256(contents).hexdigest()
++
++
++def canonical_url(url):
++    return url.split('#', 1)[0]
++
++
++def source_lookup(sources):
++    output = {}
++    for original, source in sources.items():
++        output[canonical_url(original)] = source
++        output[canonical_url(source.get('url', original))] = source
++    return output
++
++
++def selection_fingerprint(concept_id, selection, sources):
++    lookup = source_lookup(sources)
++    bindings = []
++    for role in ['base', 'application']:
++        for url in selection[role + '_urls']:
++            source = lookup.get(canonical_url(url), {})
++            bindings.append({'role': role, 'url': source.get('url', url),
++                             'revision': source.get('revision'), 'sha256': source.get('sha256')})
++    payload = {'concept_id': concept_id, 'application_kind': selection.get('application_kind'),
++               'mechanism': selection.get('mechanism'), 'limits': selection.get('limits'),
++               'decision_evidence': selection.get('decision_evidence', []),
++               'sources': sorted(bindings, key=lambda row: (row['role'], row['url']))}
++    return digest(json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(',', ':')).encode())
++
++
++def adjudication_issues(concept_id, selection, sources, adjudication, root):
++    issues = []
++
++    def fail(kind, reason):
++        issues.append({'kind': kind, 'reason': reason})
++
++    if not adjudication:
++        fail('AUTHOR_ADJUDICATION_MISSING', 'An explicit current author judgment is required.')
++        return issues
++    if adjudication.get('concept_id') != concept_id:
++        fail('AUTHOR_ADJUDICATION_CONCEPT', 'The judgment names another concept.')
++    if adjudication.get('decision') != 'AUTHOR_SOURCE_MATCH':
++        fail('AUTHOR_ADJUDICATION_PENDING', 'The author has not positively adjudicated this concept.')
++    if adjudication.get('remaining_gates') != []:
++        fail('AUTHOR_ADJUDICATION_OPEN_GATE', 'An unresolved author gate prevents a positive status.')
++    if not adjudication.get('basis', '').strip():
++        fail('AUTHOR_ADJUDICATION_BASIS', 'The mechanism judgment must state its reasoning.')
++    if not adjudication.get('checked_at_utc') or not adjudication.get('checked_by'):
++        fail('AUTHOR_ADJUDICATION_PROVENANCE', 'The author and time of the judgment are required.')
++    expected = selection_fingerprint(concept_id, selection, sources)
++    if adjudication.get('selection_fingerprint') != expected:
++        fail('AUTHOR_ADJUDICATION_STALE', 'Sources or mechanism/limits changed after the judgment.')
++    lookup = source_lookup(sources)
++    selected = {role: {canonical_url(lookup.get(canonical_url(url), {}).get('url', url))
++                       for url in selection[role + '_urls']}
++                for role in ['base', 'application']}
++    supported_roles = set()
++    for evidence in adjudication.get('primary_evidence', []):
++        role = evidence.get('role')
++        url = canonical_url(evidence.get('source_url', ''))
++        if role not in selected or url not in selected[role]:
++            fail('AUTHOR_EVIDENCE_NOT_SELECTED', 'An excerpt does not belong to the selected role/source.')
++            continue
++        source = lookup.get(url, {})
++        if not re.fullmatch(r'[0-9a-f]{40}', source.get('revision') or ''):
++            fail('AUTHOR_EVIDENCE_UNPINNED', 'The excerpt must bind an immutable repository revision.')
++            continue
++        if evidence.get('source_sha256') != source.get('sha256'):
++            fail('AUTHOR_EVIDENCE_SOURCE_HASH', 'The excerpt refers to different source bytes.')
++            continue
++        artifact = Path(root) / source.get('artifact', '__missing__')
++        if not artifact.is_file() or digest(artifact.read_bytes()) != source.get('sha256'):
++            fail('AUTHOR_EVIDENCE_ARTIFACT', 'The selected source artifact is missing or changed.')
++            continue
++        lines = artifact.read_text().splitlines()
++        start, end = evidence.get('start_line', 0), evidence.get('end_line', 0)
++        if not isinstance(start, int) or not isinstance(end, int) or not 1 <= start <= end <= len(lines):
++            fail('AUTHOR_EVIDENCE_LINES', 'The selected source span is invalid.')
++            continue
++        excerpt = '\n'.join(lines[start - 1:end])
++        if not excerpt.strip() or digest(excerpt.encode()) != evidence.get('excerpt_sha256'):
++            fail('AUTHOR_EVIDENCE_EXCERPT', 'The recorded excerpt differs from the selected source span.')
++            continue
++        if not evidence.get('claim', '').strip():
++            fail('AUTHOR_EVIDENCE_CLAIM', 'The excerpt must state which mechanism step it supports.')
++            continue
++        supported_roles.add(role)
++    for role in ['base', 'application']:
++        if role not in supported_roles:
++            fail('AUTHOR_EVIDENCE_ROLE_MISSING', 'There is no bound primary excerpt for ' + role + '.')
++    return issues

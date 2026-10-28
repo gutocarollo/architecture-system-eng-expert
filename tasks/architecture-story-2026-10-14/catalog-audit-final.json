@@ -1,0 +1,110 @@
+{
+  "schema_version": 4,
+  "issue_key": "CREATE",
+  "registry_sha256": "770e1b4e13bad6c9eaf0aba6496976c7a95e1043deba55c76620cd85cb4ab6fb",
+  "proposal_sha256": "c76f179a5059bb8cb2eba6d4420665e5dfd5de76c4c6e2b63d39b06a7456345f",
+  "decisions": {
+    "system": {
+      "state": "not_applicable",
+      "values": [],
+      "reason": "O curso e sua busca pertencem ao repositório de documentação. MakersHub, Airflow, PostgreSQL e FazGraph fornecem exemplos consultados; nenhum sistema operacional do catálogo é alterado.",
+      "source": "direct-task-scope-and-current-source",
+      "evidence_families": [
+        "jira-self",
+        "code"
+      ]
+    },
+    "businessContexts": {
+      "state": "not_applicable",
+      "values": [],
+      "reason": "O trabalho ensina conceitos de arquitetura; citar produtos e jornadas em exemplos não altera esses produtos ou jornadas.",
+      "source": "direct-task-scope-and-current-source",
+      "evidence_families": [
+        "jira-self",
+        "code"
+      ]
+    },
+    "businessCapabilities": {
+      "state": "not_applicable",
+      "values": [],
+      "reason": "O trabalho explica ações de negócio em exemplos, sem modificar nenhuma ação sobre leads, assessores, comissões ou feedback.",
+      "source": "direct-task-scope-and-current-source",
+      "evidence_families": [
+        "jira-self",
+        "code"
+      ]
+    },
+    "repositories": {
+      "state": "unresolved",
+      "values": [],
+      "reason": "O alvo material gutocarollo/architecture-system-eng-expert foi confirmado no remote origin, mas não consta nos cinco valores permitidos. Nenhum repositório de exemplo pode substituir esse alvo.",
+      "source": "direct-task-scope-and-current-source",
+      "evidence_families": [
+        "development",
+        "code"
+      ]
+    },
+    "technicalLayers": {
+      "state": "resolved",
+      "values": [
+        "documentation",
+        "frontend"
+      ],
+      "reason": "O conteúdo MDX é documentação e a busca padrão Nextra/Pagefind acrescentada ao escopo é comportamento renderizado no frontend do curso.",
+      "source": "direct-task-scope-and-current-source",
+      "evidence_families": [
+        "jira-self",
+        "code"
+      ]
+    },
+    "affectedAssets": {
+      "state": "unresolved",
+      "values": [],
+      "reason": "Não há objeto canônico confirmado para o curso ou sua busca. A busca FazGraph architecture-system-eng-expert retornou zero hits; isso não prova ausência em todas as classes de entidade. Os assets dos exemplos são somente fontes.",
+      "source": "direct-task-scope-and-current-source",
+      "evidence_families": [
+        "jira-self",
+        "fazgraph"
+      ]
+    },
+    "page": {
+      "state": "not_applicable",
+      "values": [],
+      "reason": "Nenhuma página MakersHub é alterada. As rotas e páginas do curso não recebem a projeção page:makershub.",
+      "source": "direct-task-scope-and-current-source",
+      "evidence_families": [
+        "jira-self",
+        "code"
+      ]
+    },
+    "labels": {
+      "state": "not_applicable",
+      "values": [],
+      "reason": "A política de labels projeta páginas MakersHub afetadas; não há uma página MakersHub materialmente alterada.",
+      "source": "direct-task-scope-and-current-source",
+      "evidence_families": [
+        "jira-self",
+        "code"
+      ]
+    }
+  },
+  "parent_prior": {
+    "key": null,
+    "used_for_discovery": false,
+    "copied": false
+  },
+  "page_slugs": [],
+  "page_projections": [],
+  "page_sources": [],
+  "page_evidence_families": [],
+  "material_catalog_gaps": [
+    "repositories",
+    "affectedAssets"
+  ],
+  "measured_at_utc": "2026-10-14 23:18 UTC",
+  "source_checkout": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "source_sha": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "source_origin": "https://github.com/gutocarollo/architecture-system-eng-expert.git",
+  "proposal_hash_basis": "SHA256 of stable compact JSON of base_fields before customfield_10521 insertion. Recompute for final preview.",
+  "proposal_prepared_at_utc": "2026-10-14 23:28:39 UTC"
+}

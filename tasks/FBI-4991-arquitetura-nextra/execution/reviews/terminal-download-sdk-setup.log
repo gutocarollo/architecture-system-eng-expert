@@ -1,0 +1,16 @@
+Collecting opentelemetry-api==1.45.1 (from -r /private/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/terminal-fbi4991-download-vnmjf5mk/architecture-labs/labs/architecture/requirements-lock.txt (line 1))
+  Downloading opentelemetry_api-1.45.1-py3-none-any.whl.metadata (1.4 kB)
+Collecting opentelemetry-sdk==1.45.1 (from -r /private/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/terminal-fbi4991-download-vnmjf5mk/architecture-labs/labs/architecture/requirements-lock.txt (line 2))
+  Downloading opentelemetry_sdk-1.45.1-py3-none-any.whl.metadata (1.6 kB)
+Collecting opentelemetry-semantic-conventions==0.66b1 (from -r /private/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/terminal-fbi4991-download-vnmjf5mk/architecture-labs/labs/architecture/requirements-lock.txt (line 3))
+  Downloading opentelemetry_semantic_conventions-0.66b1-py3-none-any.whl.metadata (2.4 kB)
+Collecting typing_extensions==4.16.0 (from -r /private/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/terminal-fbi4991-download-vnmjf5mk/architecture-labs/labs/architecture/requirements-lock.txt (line 4))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Downloading opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
+Downloading opentelemetry_sdk-1.45.1-py3-none-any.whl (140 kB)
+Downloading opentelemetry_semantic_conventions-0.66b1-py3-none-any.whl (206 kB)
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Installing collected packages: typing_extensions, opentelemetry-api, opentelemetry-semantic-conventions, opentelemetry-sdk
+
+Successfully installed opentelemetry-api-1.45.1 opentelemetry-sdk-1.45.1 opentelemetry-semantic-conventions-0.66b1 typing_extensions-4.16.0
+setup=PASS environment=labs/architecture/.venv network_exporters=disabled

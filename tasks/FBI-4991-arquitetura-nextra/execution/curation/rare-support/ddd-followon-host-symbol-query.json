@@ -1,0 +1,57 @@
+{
+  "observed_utc": "2026-10-15T02:24:28.133076+00:00",
+  "scope": "Somente os arquivos de registro e build explicitamente listados; não é uma afirmação sobre todo o ecossistema.",
+  "terms": [
+    "ContextMapDiscoverer",
+    "ContextMapSerializer",
+    "context-map-discovery"
+  ],
+  "sources": [
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--org.contextmapper.dsl.ui--plugin.xml",
+      "sha256": "3f44c978fb0f6c12b6ba917e81ccc06562a6e92708765234054b66c4ad8a4b7d",
+      "hits": []
+    },
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--org.contextmapper.dsl.ui--META-INF--MANIFEST.MF",
+      "sha256": "271c022cbaea0ede859584f3f472a2b60101651e19586b78d30b8d9c75ddeaaa",
+      "hits": []
+    },
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--build.gradle",
+      "sha256": "81b80507a785dc429570a1043970f48f25d5c558db8104297355dc01515d71f9",
+      "hits": []
+    },
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--src--extension.ts",
+      "sha256": "a1aea68c7c55debf3e832fb522a4d54b187f7dfe67c74e6835c78877a0414d0f",
+      "hits": []
+    },
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--package.json",
+      "sha256": "810185776ac0c3647f619423a2a45fdce238fb2f7f9b039ab7668768a3ae7471",
+      "hits": []
+    },
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--build.gradle",
+      "sha256": "949ab9f83604f478721c414db6f3dff97c31b60dacd06c3fdff28f70c5e356fd",
+      "hits": []
+    },
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--src--main--java--org--contextmapper--cli--ContextMapperCLI.java",
+      "sha256": "ec80e85492c4debfd3ae11318ee5d5783cca7de8b390969a2ab5dbf7999c34ce",
+      "hits": []
+    },
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--build.gradle",
+      "sha256": "fb579f7ecaa7d622a0277db6dde24c9e1345aef2e926a40d6c7a12c4c9a22536",
+      "hits": []
+    },
+    {
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--README.md",
+      "sha256": "af517e18278dfa742424a67bd7a1d1b1e612238c54b83f7dbdc7680014b2c328",
+      "hits": []
+    }
+  ],
+  "total_hits": 0
+}

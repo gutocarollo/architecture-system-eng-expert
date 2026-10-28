@@ -1,0 +1,13 @@
+{
+  "repository": "apache/geode",
+  "default_branch": "develop",
+  "sha": "7190f09450b091a5892761bfcf8018c6918d13b7",
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "observed_utc": "2026-10-15T01:54:41.843139+00:00"
+}

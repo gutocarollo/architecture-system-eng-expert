@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Use Neutron’s new port binding API &#8212; Nova Specs  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fe63c2af" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=29da98fa" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Nova Certificate Validation" href="nova-validate-certificates.html" />
+    <link rel="prev" title="Nested Resource Providers" href="nested-resource-providers.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Bootstrap CSS -->
+<link href="../../../_static/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Fonts -->
+<link href="../../../_static/css/font-awesome.min.css" rel="stylesheet">
+
+<!-- Custom CSS -->
+<link href="../../../_static/css/combined.css" rel="stylesheet">
+
+<!-- Search CSS -->
+<link href="../../../_static/css/search.css" rel="stylesheet">
+
+<!-- Pygments CSS -->
+<link href="../../../_static/pygments.css" rel="stylesheet">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD299CMF7V">
+</script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);} gtag('js', new Date());
+gtag('config', 'G-DD299CMF7V');
+</script>
+
+
+  </head><body>
+
+<!-- SOURCE_FILE: https://opendev.org/openstack/nova-specs/src/doc/source/specs/queens/approved/neutron-new-port-binding-api.rst -->
+
+<script>
+    (function (window, document) {
+        var loader = function () {
+            var script = document.createElement("script"), tag = document.getElementsByTagName("script")[0];
+            script.src = "https://search.openstack.org/widget/embed.min.js?t="+Date.now();
+            tag.parentNode.insertBefore(script, tag);
+        };
+        window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
+    })(window, document);
+</script>
+
+<nav class="navbar navbar-default navbar-expand-md" role="navigation">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="brand-wrapper">
+        <a class="navbar-brand" href="https://www.openstack.org/">
+        <img src="../../../_static/images/logo-full.svg" width="135px" height="35px"/>
+        </a>
+      </div>
+      <button class="navbar-toggler" data-bs-target="#navbar-main-1" aria-controls="navbar-main-1" data-bs-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+      <div class="search-icon show"><i class="fa fa-search"></i> Global Search</div>
+      <div class="collapse navbar-collapse" id="navbar-main-1">
+<div class="search-container tiny">
+    <div class="openstack-search-bar" data-baseUrl="search.openstack.org" data-context="docs-openstack"></div>
+</div>
+      <ul class="nav navbar-nav navbar-main ms-auto mb-2 mb-lg-0 justify-content-end show" role="navigation">
+<li class="search-container-mobile">
+    <div class="openstack-search-bar" data-baseUrl="search.openstack.org" data-context="docs-openstack"></div>
+</li>
+        <li class="nav-item dropdown"> <!--Software -->
+          <a href="https://www.openstack.org/software/" class="nav-link dropdown-toggle" aria-expanded="false">Software</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/">Overview</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/project-navigator/openstack-components">OpenStack Components</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/project-navigator/sdks">SDKs</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/project-navigator/deployment-tools">Deployment Tools</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/assets/software/projectmap/openstack-map.pdf" target="_blank">OpenStack Map</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/sample-configs/">Sample Configs</a></li>
+          </ul>
+        </li>
+        <li class="nav-item drop-down"> <!-- Use Cases -->
+          <a href="https://www.openstack.org/use-cases/" class="nav-link dropdown-toggle" role="button">Use Cases</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/">Users in Production</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/bare-metal/">Ironic Bare Metal</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/edge-computing/">Edge Computing</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/telecoms-and-nfv/">Telecom &amp; NFV</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/science/">Science and HPC</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/containers/">Containers</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/enterprise/">Enterprise</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/surveys/landing">User Survey</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown"> <!-- Events -->
+          <a href="https://openinfra.dev/summit" class="nav-link dropdown-toggle" role="button" id="dropdownMenuEvents">Events</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="https://openinfra.dev/summit">OpenInfra Summit</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/ptg/">Project Teams Gathering</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/events/opendev-2020/">OpenDev</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/events/community-events/">Community Events</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/events/openstackdays">OpenStack &amp; OpenInfra Days</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/videos/">Summit Videos</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown"><!-- Community -->
+          <a href="https://www.openstack.org/community/" class="nav-link dropdown-toggle" role="button">Community</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/">Welcome! Start Here</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/tech-committee">OpenStack Technical Committee</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/speakers/">Speakers Bureau</a></li>
+            <li><a class="dropdown-item" href="https://wiki.openstack.org">OpenStack Wiki</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/coa/">Get Certified (COA)</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/jobs/">Jobs</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketing/">Marketing Resources</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/news/">Community News</a></li>
+            <li><a class="dropdown-item" href="https://superuser.openstack.org">Superuser Magazine</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/supporting-organizations/">OpenInfra Foundation Supporting Organizations</a></li>
+            <li><a class="dropdown-item" href="https://openinfra.dev">OpenInfra Foundation</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown"><!-- Marketplace -->
+          <a href="https://www.openstack.org/marketplace/" class="nav-link dropdown-toggle" role="button">Marketplace</a>
+          <ul class="dropdown-menu dropdown-hover">
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/training/">Training</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/distros/">Distros &amp; Appliances</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/public-clouds/">Public Clouds</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/hosted-private-clouds/">Hosted Private Clouds</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/remotely-managed-private-clouds/">Remotely Managed Private Clouds</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/consulting/">Consulting &amp; Integrators</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/drivers/">Drivers</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><!-- Blog -->
+          <a class="nav-link" href="https://www.openstack.org/blog/">Blog</a>
+        </li>
+        <li class="nav-item"><!-- Docs -->
+          <a class="nav-link" href="https://docs.openstack.org/">Docs</a>
+        </li>
+        <li class="nav-item dropdown join-nav-section"> <!-- Join -->
+          <a href="https://openinfra.dev/join/" class="nav-link dropdown-toggle" role="button">Join</a>
+          <ul class="dropdown-menu" style="display: none;">
+            <li><a class="dropdown-item" href="https://openinfra.dev/join/">Sign up for Foundation Membership</a></li>
+            <li><a class="dropdown-item" href="https://openinfra.dev/join/">Sponsor the Foundation</a></li>
+            <li><a class="dropdown-item" href="https://openinfra.dev">More about the Foundation</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"> <!-- Login -->
+          <a href="https://www.openstack.org/Security/login/?BackURL=/home/" class="sign-in-btn">Log In</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <!-- /.container -->
+</nav>
+
+    <div class="container docs-book-wrapper">
+      <div class="row">
+        <div class="col-lg-9 col-md-8 col-sm-8 col-lg-push-3 col-md-push-4 col-sm-push-4 order-4">
+<div class="row docs-title">
+  <div class="col-lg-8">
+      <h1>Use Neutron’s new port binding API</h1>
+    
+  </div>
+  <div class="docs-actions">
+    
+    <a href="nested-resource-providers.html"><i class="fa fa-angle-double-left" data-toggle="tooltip" data-placement="top" title="Previous: Nested Resource Providers"></i></a>
+    
+    
+    <a href="nova-validate-certificates.html"><i class="fa fa-angle-double-right" data-toggle="tooltip" data-placement="top" title="Next: Nova Certificate Validation"></i></a>
+    
+    <a id="logABugLink1" href="" target="_blank" title="Found an error? Report a bug against this page"><i class="fa fa-bug" data-toggle="tooltip" data-placement="top" title="Report a Bug"></i></a>
+    
+  </div>
+</div>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="docs-body" role="main">
+
+  <section id="use-neutron-s-new-port-binding-api">
+<h1>Use Neutron’s new port binding API<a class="headerlink" href="#use-neutron-s-new-port-binding-api" title="Link to this heading">¶</a></h1>
+<p>Make use of Neutron’s new port binding API in all cases where port binding
+occurs. In the special case of move operations, the new API will allow us to
+model both source and destination hosts having a port binding
+which is not accounted for during live migration today.</p>
+<p><a class="reference external" href="https://blueprints.launchpad.net/nova/+spec/neutron-new-port-binding-api">https://blueprints.launchpad.net/nova/+spec/neutron-new-port-binding-api</a></p>
+<section id="problem-description">
+<h2>Problem description<a class="headerlink" href="#problem-description" title="Link to this heading">¶</a></h2>
+<p>The main motivation for the change is a selection of problems around
+live-migration, in particular:</p>
+<ul class="simple">
+<li><p>If port binding would fail at destination, we would know that before
+starting the live-migration.</p></li>
+<li><p>In many cases the two hosts need a very different binding on source host
+vs destination host, but that’s not possible today. In particular, macvtap
+live migration often needs different libvirt XML on source vs destination.</p></li>
+<li><p>In Mitaka, Neutron introduced a connection tracker based security group
+driver for ovs based backends. Live migrating between a host with a
+different security group driver is another motivating special case of
+the more general act of live migrating between different ml2 drivers which
+both require different libvirt XML definitions on the source and
+destination hosts.</p></li>
+<li><p>To make the switch between source and destination host as quickly as
+possible, it’s good to get most things ready before the migration is started.
+We have added a short-term hack <a class="reference external" href="https://review.openstack.org/#/c/275073/">https://review.openstack.org/#/c/275073/</a>
+for DVR, but let’s do it properly.</p></li>
+</ul>
+<p>More details can be found in the neutron spec:
+<a class="reference external" href="https://specs.openstack.org/openstack/neutron-specs/specs/pike/portbinding_information_for_nova.html">https://specs.openstack.org/openstack/neutron-specs/specs/pike/portbinding_information_for_nova.html</a></p>
+<p>When thinking about this spec, we should be clear on the difference between:</p>
+<ul class="simple">
+<li><p>port binding, the DB record in Neutron of what host and instance a port is
+associated with, and its current state.</p></li>
+<li><p>plug/unplug VIFs, where information from Neutron is passed to OS-VIF (or
+a legacy driver) to get the port ready on the host</p></li>
+<li><p>attaching the instances to the above preparations (via a tap device or
+PCI passthrough, etc)</p></li>
+<li><p>an active binding, the host where the traffic for associated port should
+go to, because that’s where the VM is actually running</p></li>
+</ul>
+<p>To address this problem statement we need to consider all the places where
+we deal with port bindings, to use the new API flow.
+We generally update the port bindings when a VM is moved.
+The main API actions to consider are:</p>
+<ul class="simple">
+<li><p>Attach a port to an instance, including during spawning an instance</p></li>
+<li><p>Detach a port from an instance</p></li>
+<li><p>Live-migrate an instance, involves setting up the VIF on the destination
+host, before kicking off the live-migrate, then removing VIFs on source
+host once the live-migrate has completed.</p></li>
+<li><p>Migrate and resize are very similar to live-migrate</p></li>
+<li><p>Evacuate, we know the old host is dead, we want to kill any record of that
+old connection, and attach the port on the new host.</p></li>
+<li><p>Shelve, we want the port to stay logically attached to the instance, but
+we need to unbind the port for the host when the instance is offloaded.</p></li>
+</ul>
+<p>In the move operations above neutron should be notified when the traffic needs
+to be switched to the destination by activating the new port binding.</p>
+<section id="use-cases">
+<h3>Use Cases<a class="headerlink" href="#use-cases" title="Link to this heading">¶</a></h3>
+<p>As an admin, I want live migration to fail early during pre_live_migration
+if it can be detected that network setup on the destination host
+will not work.</p>
+<p>As a user, I want minimal network downtime while my instance is
+being live migrated.</p>
+<p>As an operator, I want to start using new ML2 backends but need
+to live migrate existing instances off of a different backend
+with minimal network downtime.</p>
+<p>As an operator, I want to leverage new security group implementations
+and need to be able to live migrate existing instances from my
+legacy hosts.</p>
+</section>
+</section>
+<section id="proposed-change">
+<h2>Proposed change<a class="headerlink" href="#proposed-change" title="Link to this heading">¶</a></h2>
+<p>There is no additional configuration for deployers.
+The use of multiple bindings will be enabled automatically.
+We decide whether to use the new or old API flow, if both compute nodes
+support this feature and based on the available Neutron API extensions.
+We cache extensions support in the usual way utilizing the existing
+neutron_extensions_cache.</p>
+<p>Note: The new neutron API extension will be implemented in the ml2 plugin
+layer, above the ml2 driver layer so if the extension is exposed it will be
+supported for all ml2 drivers. Monolithic plugins will have to implement
+the extension separately and will continue to use the old workflow until
+their maintainers support the new neutron extension.</p>
+<p>The old interaction model should be removed when sufficient time has elapsed
+for all neutron backends to support this model with an aim of completing this
+in two cycles. We should keep this in mind in how the code is structured.
+Given we are also looking at removing nova-network, we should see if this can
+be added as a new set of network API calls, that are only for neutron, making
+the existing calls needed for nova-network be no-ops for Neutron.</p>
+<section id="migration-across-mixed-software-versions">
+<h3>Migration across mixed software versions<a class="headerlink" href="#migration-across-mixed-software-versions" title="Link to this heading">¶</a></h3>
+<p>If an old neutron is present then the existing workflow will be followed
+regardless of the compute node version. Where a new neutron is deployed
+that supports this feature the following behaviour will be implemented.</p>
+<ul class="simple">
+<li><p>If both compute nodes are queens or newer. In this case the new workflow
+will be used as described below.</p></li>
+<li><p>In all other cases the old workflow is used</p></li>
+</ul>
+<p>Let’s consider live-migration and what the calls to neutron will look like.</p>
+<p>Today the workflow is documented here:
+<a class="reference external" href="https://docs.openstack.org/nova/latest/reference/live-migration.html">https://docs.openstack.org/nova/latest/reference/live-migration.html</a></p>
+<p>Going forward the workflow will be altered as follows:</p>
+<ul>
+<li><p>Conductor does its pre-checks on the dest and source which
+creates the migrate_data object.</p></li>
+<li><p>Conductor checks the source and dest version to see if
+they support the new flow.</p>
+<ul>
+<li><p>If new enough, conductor calls a new method on the dest
+compute to bind the port on the destination host.
+The new method will POST to /v2.0/ports/{port_id}/bindings passing
+just the destination host_id:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;binding&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;host_id&quot;</span><span class="p">:</span> <span class="s2">&quot;target-host_id&quot;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>If this fails, the live migrate task can ignore that host and
+reschedule / retry another host because it’s before we’ve cast
+to the source to start the live migration on the hypervisor.</p></li>
+<li><p>If this succeeds, the port binding results are put into the
+migrate_data object which is sent to the source live_migration
+method, and after that all code that cares checks the new
+attribute in the migrate_data object.</p></li>
+<li><p>The new attribute will consist of the minimal subset of the port
+binding response and will be encoded in a new nova object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fields</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;port_id&#39;</span><span class="p">:</span> <span class="n">fields</span><span class="o">.</span><span class="n">StringField</span><span class="p">(),</span>
+    <span class="s1">&#39;host_id&#39;</span><span class="p">:</span> <span class="n">fields</span><span class="o">.</span><span class="n">StringField</span><span class="p">(),</span>
+    <span class="s1">&#39;vnic_type&#39;</span><span class="p">:</span> <span class="n">fields</span><span class="o">.</span><span class="n">StringField</span><span class="p">(),</span>  <span class="c1"># could be enum</span>
+    <span class="s1">&#39;vif_type&#39;</span><span class="p">:</span> <span class="n">fields</span><span class="o">.</span><span class="n">StringField</span><span class="p">(),</span>
+    <span class="s1">&#39;vif_details&#39;</span><span class="p">:</span> <span class="n">fields</span><span class="o">.</span><span class="n">DictOfStringsField</span><span class="p">(),</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>During implementation we will try to restrict the <code class="docutils literal notranslate"><span class="pre">vif_details</span></code>
+field to the subset of vif_details required by nova to generate
+the updated domain xml and plug the vif. This is to avoid random
+ML2 backend-specific data from changing behavior in our versioned
+object. In the future this object will be replaced by one defined
+by os-vif.</p>
+</li>
+</ul>
+</li>
+<li><p>In pre_live_migration on destination:</p>
+<ul>
+<li><p>Prior to the RPC call from live_migration on the source host to
+pre_live_migration on the dest host, start a wait thread for the
+vif-plugged event from Neutron, similar to during initial spawn.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This vif-plugged wait change can be made irrespective of this
+blueprint - it could be done as a bug fix or hardening opportunity.</p>
+</div>
+</li>
+<li><p>Check if migrate_data contains new VIFs attribute, if so,
+plug vif on destination host using the new port bindings,
+else fall back to old workflow and plug vif with old vif bindings.</p></li>
+</ul>
+</li>
+<li><p>At this point it is safe to start live migrating the instance.</p>
+<ul class="simple">
+<li><p>This involves calling the virt driver to live migrate
+the instance and then activating the port binding. If migrate_data
+contains the new dest host port binding VIFs attribute, it will
+be used to configure the dest guest prior to starting the actual
+live migration in the hypervisor. This is in case the VIF type on
+the dest host is different from the source host.</p></li>
+<li><p>In the example of the libvirt virt driver, we will wait for a qemu event
+on the source host called VIR_DOMAIN_EVENT_SUSPENDED_POSTCOPY,
+so we know the VM has just been paused by libvirt and mark the new
+port binding as active. This is described in more detail here:
+<a class="reference external" href="https://review.openstack.org/#/c/434870/">https://review.openstack.org/#/c/434870/</a></p></li>
+<li><p>For other virt drivers the decision of when to activate the port
+binding is left to them. They may serialise the calls by activating
+the port binding immediately before or after migrating the instance
+or they may concurrently wait for an event if the hypervisor allows
+them to reduce the network downtime, or just activate the dest host
+port binding in post_live_migration.</p></li>
+</ul>
+</li>
+<li><p>We should only hit an error here if the migration times out.
+If we hit any other error, there is no rollback and we just
+put the instance into the ERROR state. If we timeout we abort
+as described below.</p></li>
+<li><p>During post_live_migration:</p>
+<p>After cleaning up VIFs on the source host, we remove the old port binding
+associated with the source host. Should the operation get interrupted,
+there is enough information in the binding to ensure manual
+cleanup is feasible.</p>
+</li>
+</ul>
+</section>
+<section id="aborts">
+<h3>Aborts<a class="headerlink" href="#aborts" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>If the admin aborts an in-progress live migration, the rollback actions vary
+depending on what phase of the migration we are currently in.</p></li>
+<li><p>If we are in the pre_live_migration phase and have not started the migration
+we simply delete the destination port binding.</p></li>
+<li><p>If we have started the VM on the remote node and plugged the interface but
+not unpaused the instance, we unplug the instance, activate the source
+binding if required and delete the destination binding.</p></li>
+</ul>
+</section>
+<section id="other">
+<h3>Other<a class="headerlink" href="#other" title="Link to this heading">¶</a></h3>
+<p>We can follow this pattern wherever there are VIFs present on two hosts, such
+as during resize and migrate.</p>
+<p>Evacuate is a special case, where we delete the port binding on the old host,
+without knowing if it has had VIFs deleted, as we assume the host is dead and
+will never be coming back to life.</p>
+<p>With this change, live migration between hosts with different
+neutron backends and/or security group drivers should be possible.
+While not explicitly described in this spec the implementation of this
+feature should not block that effort or the efforts to adopt oslo versioned
+objects for nova / neutron portbinding negotiation, however, it is also not
+dependent on either activity to be completed.</p>
+</section>
+<section id="alternatives">
+<h3>Alternatives<a class="headerlink" href="#alternatives" title="Link to this heading">¶</a></h3>
+<p>We could leave live-migration broken for some Neutron drivers.</p>
+<p>Note: there are additional plans to allow live-migrate to be used to switch
+between different Neutron plugins, and allowing live-migrate for macvtap
+attached SR-IOV, but this is not in scope for this change.</p>
+<p>We could support live migration between mixed compute nodes.
+In this case assuming neutron supported the new flow, the
+following behaviour would be introduced.</p>
+<ul class="simple">
+<li><p>old source compute node and a new destination. Taking libvirt as an example,
+as the migration XML generation is done by the source node if the new
+destination compute node detects that an XML change would be required it
+should fail the migration. This changes existing behaviour where
+live migration may complete successfully but result in no network
+connectivity.</p></li>
+<li><p>new source compute node and an old destination.
+In this case, the source node can create the port binding and update
+the xml. There are 2 options with regard to activating the binding for
+the destination host. The source node can activate the binding before
+starting the live migration or after it succeeds. Pre-activating the
+binding will lead to more work should the migration fail, whereas
+activating the binding after migration success could increase network
+downtime. The option chosen is left to the review of the
+implementation to define and would be documented as a update to the
+existing live migration devref.</p></li>
+</ul>
+<p>This has not been supported due to complexity of code and testing required.</p>
+</section>
+<section id="data-model-impact">
+<h3>Data model impact<a class="headerlink" href="#data-model-impact" title="Link to this heading">¶</a></h3>
+<p>None</p>
+</section>
+<section id="rest-api-impact">
+<h3>REST API impact<a class="headerlink" href="#rest-api-impact" title="Link to this heading">¶</a></h3>
+<p>None</p>
+</section>
+<section id="security-impact">
+<h3>Security impact<a class="headerlink" href="#security-impact" title="Link to this heading">¶</a></h3>
+<p>None</p>
+</section>
+<section id="notifications-impact">
+<h3>Notifications impact<a class="headerlink" href="#notifications-impact" title="Link to this heading">¶</a></h3>
+<p>None</p>
+</section>
+<section id="other-end-user-impact">
+<h3>Other end user impact<a class="headerlink" href="#other-end-user-impact" title="Link to this heading">¶</a></h3>
+<p>None</p>
+</section>
+<section id="performance-impact">
+<h3>Performance Impact<a class="headerlink" href="#performance-impact" title="Link to this heading">¶</a></h3>
+<p>There are extra API calls, but it should have little impact on performance.</p>
+</section>
+<section id="other-deployer-impact">
+<h3>Other deployer impact<a class="headerlink" href="#other-deployer-impact" title="Link to this heading">¶</a></h3>
+<p>None</p>
+</section>
+<section id="developer-impact">
+<h3>Developer impact<a class="headerlink" href="#developer-impact" title="Link to this heading">¶</a></h3>
+<p>None</p>
+</section>
+</section>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
+<section id="assignee-s">
+<h3>Assignee(s)<a class="headerlink" href="#assignee-s" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>Primary assignee:</dt><dd><p>Sean Mooney (sean-k-mooney)</p>
+</dd>
+</dl>
+</section>
+<section id="work-items">
+<h3>Work Items<a class="headerlink" href="#work-items" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Add the source/dest host version checks in conductor and the new
+compute RPC API method for creating the port binding on the destination
+host prior to initiating the live migration on the source host.</p></li>
+<li><p>Check for the new migrate_data attribute in the various compute methods
+related to live migration to determine if we are old or new flow.</p></li>
+</ul>
+</section>
+</section>
+<section id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Neutron API changes, see spec: <a class="reference external" href="https://specs.openstack.org/openstack/neutron-specs/specs/pike/portbinding_information_for_nova.html">https://specs.openstack.org/openstack/neutron-specs/specs/pike/portbinding_information_for_nova.html</a></p></li>
+</ul>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<p>Need functional tests for the new path.</p>
+</section>
+<section id="documentation-impact">
+<h2>Documentation Impact<a class="headerlink" href="#documentation-impact" title="Link to this heading">¶</a></h2>
+<p>Need to update the developer docs to include details on
+how Nova now interacts with Neutron during live migration.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Neutron spec: <a class="reference external" href="https://specs.openstack.org/openstack/neutron-specs/specs/pike/portbinding_information_for_nova.html">https://specs.openstack.org/openstack/neutron-specs/specs/pike/portbinding_information_for_nova.html</a></p></li>
+</ul>
+</section>
+<section id="history">
+<h2>History<a class="headerlink" href="#history" title="Link to this heading">¶</a></h2>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Revisions</span><a class="headerlink" href="#id1" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Release Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Queens</p></td>
+<td><p>Introduced</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+              </div>
+            </div>
+          </div>
+          <div class="docs-actions">
+          
+            <a href="nested-resource-providers.html"><i class="fa fa-angle-double-left" data-toggle="tooltip" data-placement="top" title="Previous: Nested Resource Providers"></i></a>
+          
+          
+            <a href="nova-validate-certificates.html"><i class="fa fa-angle-double-right" data-toggle="tooltip" data-placement="top" title="Next: Nova Certificate Validation"></i></a>
+          
+            <a id="logABugLink3" href="" target="_blank" title="Found an error? Report a bug against this page"><i class="fa fa-bug" data-toggle="tooltip" data-placement="top" title="Report a Bug"></i></a>
+          
+          </div>
+          <div class="row docs-byline bottom">
+            <div class="docs-updated">this page last updated: 2016-09-23 16:43:42</div>
+          </div>
+          <div class="row">
+            <div class="col-lg-8 col-md-8 col-sm-8 docs-license">
+<a href="https://creativecommons.org/licenses/by/3.0/">
+ <img src="../../../_static/images/docs/license.png" alt="Creative Commons Attribution 3.0 License"/>
+</a>
+<p>
+ Except where otherwise noted, this document is licensed under
+ <a href="https://creativecommons.org/licenses/by/3.0/">Creative Commons
+ Attribution 3.0 License</a>. See all <a href="https://www.openstack.org/legal">
+ OpenStack Legal Documents</a>.
+</p>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 docs-actions-wrapper">
+            <!-- ID buglinkbottom added so that pre-filled doc bugs
+                 are sent to Launchpad projects related to the
+                 document -->
+              <a href="#" id="logABugLink2" class="docs-footer-actions"><i class="fa fa-bug"></i> found an error? report a bug</a>
+            </div>
+          </div>
+        </div>
+<div class="col-lg-3 col-md-4 col-sm-4 col-lg-pull-9 col-md-pull-8 col-sm-pull-8 order-1 docs-sidebar">
+  <div class="btn-group docs-sidebar-releases">
+    <button onclick="location.href='/'" class="btn docs-sidebar-home" data-toggle="tooltip" data-placement="top" title="OpenStack Docs Home"><i class="fa fa-arrow-circle-o-left"></i></button>
+<button type="button" data-bs-toggle="dropdown" class="btn dropdown-toggle docs-sidebar-release-select">OpenStack Documentation</button>
+<ul class="dropdown-menu docs-sidebar-dropdown" role="menu">
+  <li class="dropdown-header">Guides</li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#install-guides">Install Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#user-guides">User Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#configuration-guides">Configuration Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#ops-and-admin-guides">Operations and Administration Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#api-guides">API Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#contributor-guides">Contributor Guides</a></li>
+  <li class="dropdown-header">Languages</li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/de/">Deutsch (German)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/fr/">Français (French)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/id/">Bahasa Indonesia (Indonesian)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/it/">Italiano (Italian)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/ja/">日本語 (Japanese)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/ko_KR/">한국어 (Korean)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/pt_BR/">Português (Portuguese)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/tr_TR/">Türkçe (Türkiye)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/zh_CN/">简体中文 (Simplified Chinese)</a></li>
+</ul>
+  </div>
+  <div class="docs-sidebar-toc">
+    <div class="docs-sidebar-section" id="table-of-contents">
+      <a href="../../../index.html" class="docs-sidebar-section-title"><h4>Nova Specs </h4></a>
+      <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/train-priorities.html">Train Cycle Themes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/stein-priorities.html">Stein Project Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/rocky-priorities.html">Rocky Project Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/queens-priorities.html">Queens Project Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/pike-priorities.html">Pike Project Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/ocata-priorities.html">Ocata Project Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/newton-priorities.html">Newton Project Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/mitaka-priorities.html">Mitaka Project Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/liberty-priorities.html">Liberty Project Priorities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../priorities/kilo-priorities.html">Kilo Project Priorities</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../2027.1/index.html">Nova 2027.1 Indri Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2026.2/index.html">Nova 2026.2 Hibiscus Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2026.1/index.html">Nova 2026.1 Gazpacho Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2025.2/index.html">Nova 2025.2 Flamingo Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2025.1/index.html">Nova 2025.1 Epoxy Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2024.2/index.html">Nova 2024.2 Dalmatian Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2024.1/index.html">Nova 2024.1 Caracal Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2023.2/index.html">Nova 2023.2 Bobcat Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2023.1/index.html">Nova 2023.1 Antelope Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../zed/index.html">Nova Zed Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yoga/index.html">Nova Yoga Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../xena/index.html">Nova Xena Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wallaby/index.html">Nova Wallaby Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../victoria/index.html">Nova Victoria Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ussuri/index.html">Nova Ussuri Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../train/index.html">Nova Train Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stein/index.html">Nova Stein Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rocky/index.html">Nova Rocky Specifications</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Nova Queens Specifications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../implemented/add-pagination-and-change-since-for-migration-list.html">Add pagination and changes-since filter support for os-migrations API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/add-support-for-vgpu.html">Support virtual GPU resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/add-trait-support-in-allocation-candidates.html">Support Traits in Allocation Candidates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/allocation-candidates-limit.html">Limiting Allocation Candidates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/api-extensions-policy-removal.html">API Extensions Policy Removal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/cinder-new-attach-apis.html">Use Cinder’s new Attach/Detach APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/cold-migration-with-target-queens.html">Enable cold migration with target host - Queens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/deprecate-file-injection.html">Deprecate file injection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/flavor-description.html">Flavor description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/improve-filter-instances-by-ip-performance.html">Improve filter instances by IP performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/ironic-driver-traits.html">Support traits in the Ironic driver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/libvirt-qemu-native-luks.html">Libvirt: Native LUKS file and host device decryption by QEMU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/migration-allocations.html">Migration Allocations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/multi-attach-volume.html">Support Cinder Volume Multi-attach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/pagination-add-changes-since-for-instance-action-list.html">Add pagination and changes-since filter support for os-instance-actions API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/placement-cache-headers.html">Placement Minimum HTTP Cache Headers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/post-allocations.html">POST Multiple Allocations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/powervm-nova-it-compute-driver.html">PowerVM Driver Integration - Queens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/rebuild-keypair-reset.html">Reset the instance keypair while rebuilding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/remove-configurable-hide-server-address-feature.html">Remove the configurable Hide Server Address Feature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/request-traits-in-nova.html">Request traits in Nova</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/return-alternate-hosts.html">Return Alternate Hosts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/return-selection-objects.html">Return Selection Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/service-create-destroy-notification.html">Service create and destroy versioned notification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/share-pci-between-numa-nodes.html">PCI NUMA Policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/symmetric-allocations.html">Symmetric GET and PUT of allocations in Placement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/use-ksa-adapter-for-endpoints.html">Use keystoneauth1 Adapter for endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../implemented/websocket-proxy-to-host-security.html">Support Proxying of Encryption and Authentication in WebSocketProxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add-zvm-driver-queens.html">Add z/VM Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert-consoles-to-objects.html">Convert Consoles To Use Objects Framework</a></li>
+<li class="toctree-l2"><a class="reference internal" href="enable-sriov-nic-features.html">Enable SR-IOV NIC offload feature discovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="granular-resource-requests.html">Granular Resource Request Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="list-show-all-server-migration-types.html">List/show all server migration types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="local-disk-serial-numbers.html">Expose persistent serial numbers for local disks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nested-resource-providers.html">Nested Resource Providers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Use Neutron’s new port binding API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nova-validate-certificates.html">Nova Certificate Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scaleio-ephemeral-storage-backend.html">Dell EMC ScaleIO as ephemeral storage backend</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pike/index.html">Nova Pike Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ocata/index.html">Nova Ocata Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../newton/index.html">Nova Newton Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mitaka/index.html">Nova Mitaka Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../liberty/index.html">Nova Liberty Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kilo/index.html">Nova Kilo Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../juno/index.html">Nova Juno Specifications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../backlog/index.html">Nova Backlog Specifications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../abandoned/index.html">Abandoned Specifications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">How to submit a spec</a></li>
+</ul>
+
+    </div>
+
+  <div class="docs-sidebar-toc">
+    <div class="docs-sidebar-section" id="local-table-of-contents">
+      <h4 class="docs-sidebar-section-title">Page Contents</h4>
+      <ul>
+<li><a class="reference internal" href="#">Use Neutron’s new port binding API</a><ul>
+<li><a class="reference internal" href="#problem-description">Problem description</a><ul>
+<li><a class="reference internal" href="#use-cases">Use Cases</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#proposed-change">Proposed change</a><ul>
+<li><a class="reference internal" href="#migration-across-mixed-software-versions">Migration across mixed software versions</a></li>
+<li><a class="reference internal" href="#aborts">Aborts</a></li>
+<li><a class="reference internal" href="#other">Other</a></li>
+<li><a class="reference internal" href="#alternatives">Alternatives</a></li>
+<li><a class="reference internal" href="#data-model-impact">Data model impact</a></li>
+<li><a class="reference internal" href="#rest-api-impact">REST API impact</a></li>
+<li><a class="reference internal" href="#security-impact">Security impact</a></li>
+<li><a class="reference internal" href="#notifications-impact">Notifications impact</a></li>
+<li><a class="reference internal" href="#other-end-user-impact">Other end user impact</a></li>
+<li><a class="reference internal" href="#performance-impact">Performance Impact</a></li>
+<li><a class="reference internal" href="#other-deployer-impact">Other deployer impact</a></li>
+<li><a class="reference internal" href="#developer-impact">Developer impact</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implementation">Implementation</a><ul>
+<li><a class="reference internal" href="#assignee-s">Assignee(s)</a></li>
+<li><a class="reference internal" href="#work-items">Work Items</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#documentation-impact">Documentation Impact</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#history">History</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+  </div>
+</div>
+      </div>
+    </div>
+<footer>
+  <div class="container">
+    <div class="row footer-links">
+      <div class="col-lg-2 col-sm-2">
+        <h3>OpenStack</h3>
+        <ul>
+          <li><a href="https://www.openstack.org/software/project-navigator/">Projects</a></li>
+          <li><a href="https://security.openstack.org/">OpenStack Security</a></li>
+          <li><a href="https://openstack.org/blog/">Blog</a></li>
+          <li><a href="https://openstack.org/news/">News</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-sm-2">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="https://www.meetup.com/pro/openinfradev/">User Groups</a></li>
+          <li><a href="https://openstack.org/community/events/">Events</a></li>
+          <li><a href="https://openstack.org/community/jobs/">Jobs</a></li>
+          <li><a href="https://openinfra.dev/members/">Companies</a></li>
+          <li><a href="https://docs.openstack.org/contributors">Contribute</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-sm-2">
+        <h3>Documentation</h3>
+        <ul>
+          <li><a href="https://docs.openstack.org">OpenStack Manuals</a></li>
+          <li><a href="https://openstack.org/software/start/">Getting Started</a></li>
+          <li><a href="https://developer.openstack.org">API Documentation</a></li>
+          <li><a href="https://wiki.openstack.org">Wiki</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-sm-2">
+        <h3>Branding &amp; Legal</h3>
+        <ul>
+          <li><a href="https://openinfra.dev/legal">Legal Docs</a></li>
+          <li><a href="https://openstack.org/brand/">Logos &amp; Guidelines</a></li>
+          <li><a href="https://openinfra.dev/legal/trademark-policy">Trademark Policy</a></li>
+          <li><a href="https://openinfra.dev/privacy-policy">Privacy Policy</a></li>
+          <li><a href="https://docs.openstack.org/contributors/common/setup-gerrit.html#individual-contributor-license-agreement">OpenInfra CLA</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4 col-sm-4">
+        <h3>Stay In Touch</h3>
+        <a href="https://twitter.com/OpenStack" target="_blank" class="social-icons footer-twitter"></a>
+        <a href="https://www.facebook.com/openinfradev" target="_blank" class="social-icons footer-facebook"></a>
+        <a href="https://www.linkedin.com/company/open-infrastructure-foundation" target="_blank" class="social-icons footer-linkedin"></a>
+        <a href="https://www.youtube.com/user/OpenStackFoundation" target="_blank" class="social-icons footer-youtube"></a>
+        <p class="fine-print">
+          The OpenStack project is provided under the
+          <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>. Docs.openstack.org is powered by
+          <a href="https://rackspace.com" target="_blank">Rackspace Cloud Computing</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- jQuery -->
+<script src="../../../_static/js/jquery-3.2.1.min.js"></script>
+
+<!-- Bootstrap JavaScript -->
+<script src="../../../_static/js/bootstrap.bundle.min.js"></script>
+
+<!-- The rest of the JS -->
+<script src="../../../_static/js/navigation.js"></script>
+
+<!-- Docs JS -->
+<script src="../../../_static/js/docs.js"></script>
+
+<!-- Javascript for page -->
+<script>
+  /* Build a description of this page including SHA, source location on git
+   * repo, build time and the project's launchpad bug tag. Set the HREF of the
+   * bug buttons
+   */
+    var lineFeed = "%0A";
+    var gitURL = "Source: Can't derive source file URL";
+
+    /* there have been cases where "pagename" wasn't set; better check for it */
+    /* "giturl" is the URL of the source file on Git and is auto-generated by
+     * openstackdocstheme.
+     *
+     * "pagename" is a standard sphinx parameter containing the name of
+     * the source file, without extension.
+     */
+
+    var sourceFile = "specs/queens/approved/neutron-new-port-binding-api" + ".rst";
+    gitURL = "Source: https://opendev.org/openstack/nova-specs/src/doc/source" + "/" + sourceFile;
+
+    /* gitsha, project and bug_tag rely on variables in conf.py */
+    var gitSha = "SHA: c4e4a56535d69ab626c3a995707f17fab07d6d75";
+    var repositoryName = "openstack/nova-specs";
+    var bugProject = "nova";
+    var bugTitle = "Use Neutron’s new port binding API in Nova Specs";
+    var fieldTags = "specs";
+    var useStoryboard = "";
+
+    /* "last_updated" is the build date and time. It relies on the
+       conf.py variable "html_last_updated_fmt", which should include
+       year/month/day as well as hours and minutes                   */
+    var buildstring = "Release:  on 2016-09-23 16:43:42";
+
+    var fieldComment = encodeURI(buildstring) +
+                       lineFeed + encodeURI(gitSha) +
+                       lineFeed + encodeURI(gitURL) ;
+
+    logABug(bugTitle, bugProject, fieldComment, fieldTags, repositoryName, useStoryboard);
+</script>
+
+
+  </body>
+</html>

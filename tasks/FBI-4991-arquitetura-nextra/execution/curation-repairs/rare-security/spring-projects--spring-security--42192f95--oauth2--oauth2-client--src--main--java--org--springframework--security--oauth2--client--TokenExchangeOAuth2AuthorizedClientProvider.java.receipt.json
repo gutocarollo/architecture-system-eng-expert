@@ -1,0 +1,13 @@
+{
+  "repo": "spring-projects/spring-security",
+  "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+  "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java",
+  "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java",
+  "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--TokenExchangeOAuth2AuthorizedClientProvider.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.779829+00:00",
+  "sha256": "1f33f6970215826778f9147663d14cbf3fa729806d2b393524c1e7ac77ed2189",
+  "line_count": 178,
+  "source": "raw_primary"
+}

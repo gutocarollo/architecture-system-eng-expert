@@ -1,0 +1,886 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-15T01:51:36.390210+00:00",
+  "agent": "/root/rare_oss_sources",
+  "actual_role": "default; read-only DEEP_EXPLORE contract; gpt-6.1-sol/xhigh; fork none",
+  "scope": "A/B Deployment, PAC, Space-Based Architecture e 3PC; Blackboard já estava resolvido pelo curador e foi preservado.",
+  "proof_level": "Leitura de código e licença em revisões fixadas. Nenhum build, teste de execução ou uso em produção foi verificado.",
+  "matrix_writes": false,
+  "recommendations": [
+    {
+      "concept_id": "a-b-deployment",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH",
+      "application_kind": "PRODUCT_OSS",
+      "independent_review": "PENDING",
+      "mechanism": "O Flagger usa condições de cabeçalhos ou cookies para selecionar uma população. O roteador produz uma regra Istio para esse grupo e uma regra de fallback para a versão primária. O controller executa runAB, encaminha o grupo à versão em avaliação, conta as iterações e promove a versão após o gate de promoção.",
+      "limits": "O trecho prova distribuição e promoção por grupo de requisições. Ele não prova aleatorização de experimento, cálculo de significância estatística ou um teste em produção. Istio é a base de roteamento; Flagger é o operador real que a consome.",
+      "base": [
+        {
+          "repo": "istio/api",
+          "path": "networking/v1alpha3/virtual_service.proto",
+          "revision": "15dd444282ea453178d13f72a6485dcc6da932de",
+          "url": "https://github.com/istio/api/blob/15dd444282ea453178d13f72a6485dcc6da932de/networking/v1alpha3/virtual_service.proto",
+          "raw_url": "https://raw.githubusercontent.com/istio/api/15dd444282ea453178d13f72a6485dcc6da932de/networking/v1alpha3/virtual_service.proto",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:43:04.349982+00:00",
+          "sha256": "35fa524ca87ad7156946ba46c26dd2627c35523bfb096fee6dbb6345737f3501",
+          "line_count": 1612,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/istio--api--networking--v1alpha3--virtual_service.proto",
+          "claim": "HTTPMatchRequest define condições e o mapa de cabeçalhos com StringMatch.",
+          "evidence": [
+            {
+              "start_line": 735,
+              "end_line": 744,
+              "url": "https://github.com/istio/api/blob/15dd444282ea453178d13f72a6485dcc6da932de/networking/v1alpha3/virtual_service.proto#L735-L744",
+              "excerpt": "735: message HTTPMatchRequest {\n736:   // The name assigned to a match. The match's name will be\n737:   // concatenated with the parent route's name and will be logged in\n738:   // the access logs for requests matching this route.\n739:   string name = 11;\n740: \n741:   // URI to match\n742:   // values are case-sensitive and formatted as follows:\n743:   //\n744:   // - `exact: \"value\"` for exact string match"
+            },
+            {
+              "start_line": 787,
+              "end_line": 807,
+              "url": "https://github.com/istio/api/blob/15dd444282ea453178d13f72a6485dcc6da932de/networking/v1alpha3/virtual_service.proto#L787-L807",
+              "excerpt": "787:   // The header keys must be lowercase and use hyphen as the separator,\n788:   // e.g. _x-request-id_.\n789:   //\n790:   // Header values are case-sensitive and formatted as follows:\n791:   //\n792:   // - `exact: \"value\"` for exact string match\n793:   //\n794:   // - `prefix: \"value\"` for prefix-based match\n795:   //\n796:   // - `regex: \"value\"` for [RE2 style regex-based match](https://github.com/google/re2/wiki/Syntax).\n797:   //\n798:   // If the value is empty and only the name of header is specified, presence of the header is checked.\n799:   // To provide an empty value, use `{}`, for example:\n800:   //\n801:   // ```\n802:   //  - match:\n803:   //    - headers:\n804:   //        myheader: {}\n805:   // ```\n806:   // **Note:** The keys `uri`, `scheme`, `method`, and `authority` will be ignored.\n807:   map<string, StringMatch> headers = 5;"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "repo": "istio/api",
+            "path": "LICENSE",
+            "revision": "15dd444282ea453178d13f72a6485dcc6da932de",
+            "url": "https://github.com/istio/api/blob/15dd444282ea453178d13f72a6485dcc6da932de/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/istio/api/15dd444282ea453178d13f72a6485dcc6da932de/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:43:04.380669+00:00",
+            "sha256": "9fa6e54dafda853bb3cdc01486b677a55102f0d488282a85ba6e426d9125f8c5",
+            "line_count": 202,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/istio--api--LICENSE",
+            "excerpt": "\n                                Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n"
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "fluxcd/flagger",
+          "path": "pkg/router/istio.go",
+          "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+          "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go",
+          "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:43:04.374977+00:00",
+          "sha256": "3478c93b9140e23a7cbffc996092ed4b67b83213c2583953841d70bec67202fd",
+          "line_count": 814,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--pkg--router--istio.go",
+          "claim": "O operador compõe analysis.Match e service.Match e escreve rotas distintas no VirtualService.",
+          "evidence": [
+            {
+              "start_line": 237,
+              "end_line": 261,
+              "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go#L237-L261",
+              "excerpt": "237: \tif !isTcp(canary) && len(canary.GetAnalysis().Match) > 0 {\n238: \t\tcanaryMatch := mergeMatchConditions(canary.GetAnalysis().Match, canary.Spec.Service.Match)\n239: \t\tnewSpec.Http = []istiov1beta1.HTTPRoute{\n240: \t\t\t{\n241: \t\t\t\tMatch:      canaryMatch,\n242: \t\t\t\tRewrite:    canary.Spec.Service.GetIstioRewrite(),\n243: \t\t\t\tTimeout:    canary.Spec.Service.Timeout,\n244: \t\t\t\tRetries:    canary.Spec.Service.Retries,\n245: \t\t\t\tCorsPolicy: canary.Spec.Service.CorsPolicy,\n246: \t\t\t\tHeaders:    canary.Spec.Service.Headers,\n247: \t\t\t\tRoute:      canaryRoute,\n248: \t\t\t},\n249: \t\t\t{\n250: \t\t\t\tMatch:      canary.Spec.Service.Match,\n251: \t\t\t\tRewrite:    canary.Spec.Service.GetIstioRewrite(),\n252: \t\t\t\tTimeout:    canary.Spec.Service.Timeout,\n253: \t\t\t\tRetries:    canary.Spec.Service.Retries,\n254: \t\t\t\tCorsPolicy: canary.Spec.Service.CorsPolicy,\n255: \t\t\t\tHeaders:    canary.Spec.Service.Headers,\n256: \t\t\t\tRoute: []istiov1beta1.HTTPRouteDestination{\n257: \t\t\t\t\tir.makeDestination(canary, primaryName, 100),\n258: \t\t\t\t},\n259: \t\t\t},\n260: \t\t}\n261: \t}"
+            },
+            {
+              "start_line": 540,
+              "end_line": 574,
+              "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go#L540-L574",
+              "excerpt": "540: \tif len(canary.GetAnalysis().Match) > 0 {\n541: \t\t// merge the common routes with the canary ones\n542: \t\tcanaryMatch := mergeMatchConditions(canary.GetAnalysis().Match, canary.Spec.Service.Match)\n543: \t\tvsCopy.Spec.Http = []istiov1beta1.HTTPRoute{\n544: \t\t\t{\n545: \t\t\t\tMatch:      canaryMatch,\n546: \t\t\t\tRewrite:    canary.Spec.Service.GetIstioRewrite(),\n547: \t\t\t\tTimeout:    canary.Spec.Service.Timeout,\n548: \t\t\t\tRetries:    canary.Spec.Service.Retries,\n549: \t\t\t\tCorsPolicy: canary.Spec.Service.CorsPolicy,\n550: \t\t\t\tHeaders:    canary.Spec.Service.Headers,\n551: \t\t\t\tRoute: []istiov1beta1.HTTPRouteDestination{\n552: \t\t\t\t\tir.makeDestination(canary, primaryName, primaryWeight),\n553: \t\t\t\t\tir.makeDestination(canary, canaryName, canaryWeight),\n554: \t\t\t\t},\n555: \t\t\t},\n556: \t\t\t{\n557: \t\t\t\tMatch:      canary.Spec.Service.Match,\n558: \t\t\t\tRewrite:    canary.Spec.Service.GetIstioRewrite(),\n559: \t\t\t\tTimeout:    canary.Spec.Service.Timeout,\n560: \t\t\t\tRetries:    canary.Spec.Service.Retries,\n561: \t\t\t\tCorsPolicy: canary.Spec.Service.CorsPolicy,\n562: \t\t\t\tHeaders:    canary.Spec.Service.Headers,\n563: \t\t\t\tRoute: []istiov1beta1.HTTPRouteDestination{\n564: \t\t\t\t\tir.makeDestination(canary, primaryName, primaryWeight),\n565: \t\t\t\t},\n566: \t\t\t},\n567: \t\t}\n568: \t}\n569: \n570: \tvs, err = ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Update(context.TODO(), vsCopy, metav1.UpdateOptions{})\n571: \tif err != nil {\n572: \t\treturn fmt.Errorf(\"VirtualService %s.%s update failed: %w\", apexName, canary.Namespace, err)\n573: \t}\n574: \treturn nil"
+            },
+            {
+              "start_line": 614,
+              "end_line": 634,
+              "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go#L614-L634",
+              "excerpt": "614: // mergeMatchConditions appends the URI match rules to canary conditions\n615: func mergeMatchConditions(canary, defaults []istiov1beta1.HTTPMatchRequest) []istiov1beta1.HTTPMatchRequest {\n616: \tif len(defaults) == 0 {\n617: \t\treturn canary\n618: \t}\n619: \n620: \tmerged := make([]istiov1beta1.HTTPMatchRequest, len(canary)*len(defaults))\n621: \tnum := 0\n622: \tfor _, c := range canary {\n623: \t\tfor _, d := range defaults {\n624: \t\t\tmerged[num] = *d.DeepCopy()\n625: \t\t\tif c.Headers != nil {\n626: \t\t\t\tmerged[num].Headers = c.Headers\n627: \t\t\t}\n628: \t\t\tif c.SourceLabels != nil {\n629: \t\t\t\tmerged[num].SourceLabels = c.SourceLabels\n630: \t\t\t}\n631: \t\t\tnum++\n632: \t\t}\n633: \t}\n634: "
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "repo": "fluxcd/flagger",
+            "path": "LICENSE",
+            "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+            "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:43:04.345238+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--LICENSE",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,"
+          }
+        },
+        {
+          "repo": "fluxcd/flagger",
+          "path": "pkg/controller/scheduler.go",
+          "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+          "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/controller/scheduler.go",
+          "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/controller/scheduler.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:43:04.357645+00:00",
+          "sha256": "a1787b39090b4e02f614028e43558290f515495078a471e620e72a4713bfd99b",
+          "line_count": 1088,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--pkg--controller--scheduler.go",
+          "claim": "O dispatcher seleciona runAB, que aplica as rotas, conta iterações e promove.",
+          "evidence": [
+            {
+              "start_line": 480,
+              "end_line": 487,
+              "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/controller/scheduler.go#L480-L487",
+              "excerpt": "480: \t}\n481: \n482: \tstrategy := cd.DeploymentStrategy()\n483: \tswitch strategy {\n484: \tcase flaggerv1.DeploymentStrategyABTesting:\n485: \t\tc.runAB(cd, canaryController, meshRouter)\n486: \t\treturn\n487: \tcase flaggerv1.DeploymentStrategyBlueGreen:"
+            },
+            {
+              "start_line": 639,
+              "end_line": 677,
+              "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/controller/scheduler.go#L639-L677",
+              "excerpt": "639: func (c *Controller) runAB(canary *flaggerv1.Canary, canaryController canary.Controller,\n640: \tmeshRouter router.Interface) {\n641: \tprimaryName := fmt.Sprintf(\"%s-primary\", canary.Spec.TargetRef.Name)\n642: \n643: \t// route traffic to canary and increment iterations\n644: \tif canary.GetAnalysis().Iterations > canary.Status.Iterations {\n645: \t\tif err := meshRouter.SetRoutes(canary, 0, c.totalWeight(canary), false); err != nil {\n646: \t\t\tc.recordEventWarningf(canary, \"%v\", err)\n647: \t\t\treturn\n648: \t\t}\n649: \t\tc.recorder.SetWeight(canary, 0, c.totalWeight(canary))\n650: \n651: \t\tif err := canaryController.SetStatusIterations(canary, canary.Status.Iterations+1); err != nil {\n652: \t\t\tc.recordEventWarningf(canary, \"%v\", err)\n653: \t\t\treturn\n654: \t\t}\n655: \t\tc.recordEventInfof(canary, \"Advance %s.%s canary iteration %v/%v\",\n656: \t\t\tcanary.Name, canary.Namespace, canary.Status.Iterations+1, canary.GetAnalysis().Iterations)\n657: \t\treturn\n658: \t}\n659: \n660: \t// check promotion gate\n661: \tif promote := c.runConfirmPromotionHooks(canary, canaryController); !promote {\n662: \t\treturn\n663: \t}\n664: \n665: \t// promote canary - max iterations reached\n666: \tif canary.GetAnalysis().Iterations == canary.Status.Iterations {\n667: \t\tc.recordEventInfof(canary, \"Copying %s.%s template spec to %s.%s\",\n668: \t\t\tcanary.Spec.TargetRef.Name, canary.Namespace, primaryName, canary.Namespace)\n669: \t\tif err := canaryController.Promote(canary); err != nil {\n670: \t\t\tc.recordEventWarningf(canary, \"%v\", err)\n671: \t\t\treturn\n672: \t\t}\n673: \n674: \t\t// update status phase\n675: \t\tif err := canaryController.SetStatusPhase(canary, flaggerv1.CanaryPhasePromoting); err != nil {\n676: \t\t\tc.recordEventWarningf(canary, \"%v\", err)\n677: \t\t\treturn"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "repo": "fluxcd/flagger",
+            "path": "LICENSE",
+            "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+            "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:43:04.345238+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--LICENSE",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,"
+          }
+        },
+        {
+          "repo": "fluxcd/flagger",
+          "path": "docs/gitbook/usage/deployment-strategies.md",
+          "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+          "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/docs/gitbook/usage/deployment-strategies.md",
+          "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/docs/gitbook/usage/deployment-strategies.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:44:35.588794+00:00",
+          "sha256": "b0dad5a62a2f21b6ec83d58092e272b00ba296c29b937b8f8cd7d205b009fb37",
+          "line_count": 531,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--docs--gitbook--usage--deployment-strategies.md",
+          "claim": "A documentação primária distingue grupo definido por condição de avanço percentual.",
+          "evidence": [
+            {
+              "start_line": 166,
+              "end_line": 175,
+              "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/docs/gitbook/usage/deployment-strategies.md#L166-L175",
+              "excerpt": "166: ## A/B Testing\n167: \n168: For frontend applications that require session affinity you should use\n169: HTTP headers or cookies match conditions to ensure a set of users\n170: will stay on the same version for the whole duration of the canary analysis.\n171: \n172: ![Flagger A/B Testing Stages](https://raw.githubusercontent.com/fluxcd/flagger/main/docs/diagrams/flagger-abtest-steps.png)\n173: \n174: You can enable A/B testing by specifying the HTTP match conditions and the number of iterations.\n175: If Flagger finds a HTTP match condition, it will ignore the `maxWeight` and `stepWeight` settings."
+            },
+            {
+              "start_line": 186,
+              "end_line": 196,
+              "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/docs/gitbook/usage/deployment-strategies.md#L186-L196",
+              "excerpt": "186:     threshold: 2\n187:     # canary match condition\n188:     match:\n189:       - headers:\n190:           x-canary:\n191:             regex: \".*insider.*\"\n192:       - headers:\n193:           cookie:\n194:             regex: \"^(.*?;)?(canary=always)(;.*)?$\"\n195: ```\n196: "
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "Apache-2.0",
+            "repo": "fluxcd/flagger",
+            "path": "LICENSE",
+            "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+            "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:43:04.345238+00:00",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "line_count": 201,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--LICENSE",
+            "excerpt": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,"
+          }
+        }
+      ]
+    },
+    {
+      "concept_id": "pac",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_WITH_HISTORICAL_LIMIT",
+      "application_kind": "PRODUCT_OSS",
+      "independent_review": "PENDING",
+      "mechanism": "O WengoPhone é um cliente de telefonia e mensagens. O controle raiz cria o controle de perfis; este cria o controle de um perfil; o perfil contém o controle da lista de contatos. Cada controle liga seu modelo à sua apresentação. Ao criar um contato, o modelo emite um evento, CContactList recebe o evento e encaminha a atualização à apresentação Qt. Quando a tela pede uma alteração, ela chama o controle, que altera o modelo.",
+      "limits": "É um caso histórico de produto OSS, preservado no repositório do autor Tanguy Krotoff, e não uma recomendação de adoção atual. O WengoPhone usa sua própria infraestrutura PAC e não depende do WakaPAC. Existe um atalho de composição visual: QtContactList.cpp L137-138 obtém a apresentação raiz e registra a lista; portanto não se afirma isolamento formal de toda comunicação entre apresentações. O caminho de dados e a hierarquia de controles citados estão em código.",
+      "base": [
+        {
+          "repo": "quellabs/wakapac",
+          "path": "wakapac.js",
+          "revision": "2f0746785c42b22f6fcd5d7f30ddc125ee281fe9",
+          "url": "https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/wakapac.js",
+          "raw_url": "https://raw.githubusercontent.com/quellabs/wakapac/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/wakapac.js",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:46:55.916149+00:00",
+          "sha256": "d4ab5945275a56e1efe97ef0845b9b6241c97551f07b860769a889ac81507484",
+          "line_count": 12766,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/quellabs--wakapac--wakapac.js",
+          "claim": "O runtime independente mantém abstração, container, mediação de eventos e relações de pai e filhos.",
+          "evidence": [
+            {
+              "start_line": 5807,
+              "end_line": 5825,
+              "url": "https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/wakapac.js#L5807-L5825",
+              "excerpt": "5807:     function Runtime(container, abstraction, config) {\n5808:         this.originalAbstraction = abstraction;\n5809:         this.parent = null;\n5810:         this.children = new Set();\n5811:         this.container = container;\n5812:         this.config = config;\n5813:         this.interpolationMap = new Map();\n5814:         this.textInterpolationMap = new Map();\n5815:         this.commentBindingMap = new Map();\n5816:         this.arrayRootCache = new Map();\n5817:         this.readyCalled = false;\n5818:         this.abstraction = this.createReactiveAbstraction();\n5819:         this.domUpdater = new DomUpdater(this);\n5820:         this.dependencies = this.getDependencies();\n5821: \n5822:         this.initializeImportedUnits();\n5823:         this.setupContainerScrollTracking();\n5824:         this.initializeUpdateQueue();\n5825:         this.initializeChangeBatch();"
+            },
+            {
+              "start_line": 6987,
+              "end_line": 7010,
+              "url": "https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/wakapac.js#L6987-L7010",
+              "excerpt": "6987:     Runtime.prototype.handlePacEvent = function(event) {\n6988:         // Call user's message handler (msgProc) before framework processes the event\n6989:         // This allows user code to intercept and handle messages first, Win32-style\n6990:         let preventDefault = false;\n6991: \n6992:         if (this.originalAbstraction.msgProc && typeof this.originalAbstraction.msgProc === 'function') {\n6993:             const msgProcResult = this.originalAbstraction.msgProc.call(this.abstraction, event);\n6994: \n6995:             // Certain message types can prevent framework's default behavior by returning\n6996:             // false — similar to Win32: returning 0 from WndProc means \"I handled this,\n6997:             // skip default processing.\" See CANCELLABLE_MESSAGES for which ones and why.\n6998:             if (CANCELLABLE_MESSAGES.has(event.message) && msgProcResult === false) {\n6999:                 preventDefault = true;\n7000:             }\n7001:         }\n7002: \n7003:         // Stop processing if msgProc handled the event\n7004:         if (preventDefault) {\n7005:             event.preventDefault();\n7006:             return;\n7007:         }\n7008: \n7009:         // Call built in event handlers\n7010:         switch (event.message) {"
+            },
+            {
+              "start_line": 9742,
+              "end_line": 9760,
+              "url": "https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/wakapac.js#L9742-L9760",
+              "excerpt": "9742:     Runtime.prototype.updateParentRelationship = function(newParent) {\n9743:         // Do nothing when parent did not change\n9744:         if (this.parent === newParent) {\n9745:             return;\n9746:         }\n9747: \n9748:         // Remove from old parent's children set\n9749:         if (this.parent) {\n9750:             this.parent.children.delete(this);\n9751:         }\n9752: \n9753:         // Set new parent\n9754:         this.parent = newParent;\n9755: \n9756:         // Add to new parent's children set\n9757:         if (newParent) {\n9758:             newParent.children.add(this);\n9759:         }\n9760:     };"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "MIT",
+            "repo": "quellabs/wakapac",
+            "path": "LICENSE",
+            "revision": "2f0746785c42b22f6fcd5d7f30ddc125ee281fe9",
+            "url": "https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/quellabs/wakapac/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:46:55.734532+00:00",
+            "sha256": "ddd09e69a864dca01a806605a13bb5b8cc043b35d3533d6fdd26b3aad2f7e3bd",
+            "line_count": 21,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/quellabs--wakapac--LICENSE",
+            "excerpt": "MIT License\n\nCopyright (c) 2025 Floris van den Berg\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is"
+          }
+        },
+        {
+          "repo": "tkrotoff/WengoPhone",
+          "path": "wengophone/src/control/Control.h",
+          "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+          "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/Control.h",
+          "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/Control.h",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:44:35.311168+00:00",
+          "sha256": "7970c63b63d7cb68d1d6094fbe8da7d76c7b736d9be4b91f4432775bd128578b",
+          "line_count": 89,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--control--Control.h",
+          "claim": "A infraestrutura interna documenta a mediação modelo/apresentação e a existência do controle raiz.",
+          "evidence": [
+            {
+              "start_line": 31,
+              "end_line": 49,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/Control.h#L31-L49",
+              "excerpt": "31:  * @defgroup control Control Component\n32:  *\n33:  * Like the model component, the control is part of the heart of WengoPhone.\n34:  * It is developped in pure C++ using libraries like LibUtil, Boost, TinyXML and Curl.\n35:  * This component has a very limited 'intelligence', everything is in fact done\n36:  * inside the model component.\n37:  *\n38:  * The control component goal is to make the jonction between the model component\n39:  * and the presentation component.\n40:  *\n41:  * The control component receives informations from the model component via the design\n42:  * pattern observer. On the other hand it sends informations to the model component directly.\n43:  * The control component dialogs with the presentation component via interfaces thus allowing\n44:  * different graphical interfaces to be implemented (Qt, GTK+...).\n45:  *\n46:  * Control component deal with the switch between the thread from the model and the thread\n47:  * from the presentation component.\n48:  *\n49:  * All classes inside the control component are named using a leading 'C' letter and"
+            },
+            {
+              "start_line": 59,
+              "end_line": 86,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/Control.h#L59-L86",
+              "excerpt": "59: class Control : Interface, public Trackable {\n60: public:\n61: \n62: \tvirtual ~Control() {\n63: \t}\n64: \n65: \t/**\n66: \t * Gets the Presentation associated with this Control.\n67: \t *\n68: \t * @return Presentation layer associated with this Control\n69: \t */\n70: \tvirtual Presentation * getPresentation() const = 0;\n71: \n72: \t/**\n73: \t * Gets the root Control object.\n74: \t *\n75: \t * The root Control object is the one that creates all the Control objects.\n76: \t *\n77: \t * @return root Control object\n78: \t */\n79: \tvirtual CWengoPhone & getCWengoPhone() const = 0;\n80: \n81: protected:\n82: \n83: \t/**\n84: \t * Creates the presentation component in a thread safe way (via a postEvent()).\n85: \t */\n86: \tvirtual void initPresentationThreadSafe() = 0;"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "GPL-2.0-or-later",
+            "repo": "tkrotoff/WengoPhone",
+            "path": "wengophone/COPYING",
+            "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+            "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.290096+00:00",
+            "sha256": "a36da178f62caacc2709176634c31bccb5d30a1f2f4e44941e0b69a69f052505",
+            "line_count": 340,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--COPYING",
+            "excerpt": "        GNU GENERAL PUBLIC LICENSE  \n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n\t\t\t    Preamble"
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "tkrotoff/WengoPhone",
+          "path": "wengophone/src/control/CWengoPhone.cpp",
+          "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+          "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/CWengoPhone.cpp",
+          "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/CWengoPhone.cpp",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:44:35.306720+00:00",
+          "sha256": "4cb22f1c1a7fba1f64772073609738b676e3b85bd798e08da4e78c58d3180e4e",
+          "line_count": 122,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--control--CWengoPhone.cpp",
+          "claim": "O controle raiz cria sua apresentação e o controle de perfis.",
+          "evidence": [
+            {
+              "start_line": 51,
+              "end_line": 56,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/CWengoPhone.cpp#L51-L56",
+              "excerpt": "51: void CWengoPhone::initPresentationThreadSafe() {\n52: \n53: \t_pWengoPhone = PFactory::getFactory().createPresentationWengoPhone(*this);\n54: \n55: \t_cUserProfileHandler = new CUserProfileHandler(_wengoPhone.getUserProfileHandler(), *this);\n56: "
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "GPL-2.0-or-later",
+            "repo": "tkrotoff/WengoPhone",
+            "path": "wengophone/COPYING",
+            "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+            "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.290096+00:00",
+            "sha256": "a36da178f62caacc2709176634c31bccb5d30a1f2f4e44941e0b69a69f052505",
+            "line_count": 340,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--COPYING",
+            "excerpt": "        GNU GENERAL PUBLIC LICENSE  \n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n\t\t\t    Preamble"
+          }
+        },
+        {
+          "repo": "tkrotoff/WengoPhone",
+          "path": "wengophone/src/control/profile/CUserProfileHandler.cpp",
+          "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+          "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/profile/CUserProfileHandler.cpp",
+          "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/profile/CUserProfileHandler.cpp",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:45:36.358018+00:00",
+          "sha256": "f64919cbcfa22d04178a4ce5102551b65fa28cf889fa6db3f59ed3fcf94fc1ad",
+          "line_count": 149,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--control--profile--CUserProfileHandler.cpp",
+          "claim": "O controle de perfis cria o controle do perfil selecionado.",
+          "evidence": [
+            {
+              "start_line": 133,
+              "end_line": 137,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/profile/CUserProfileHandler.cpp#L133-L137",
+              "excerpt": "133: void CUserProfileHandler::userProfileInitializedEventHandler(UserProfileHandler & sender, UserProfile & userProfile) {\n134: \tMutex::ScopedLock scopedLock(_mutex);\n135: \t_cUserProfile = new CUserProfile(userProfile, _cWengoPhone);\n136: \t_pUserProfileHandler->userProfileInitializedEventHandler();\n137: }"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "GPL-2.0-or-later",
+            "repo": "tkrotoff/WengoPhone",
+            "path": "wengophone/COPYING",
+            "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+            "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.290096+00:00",
+            "sha256": "a36da178f62caacc2709176634c31bccb5d30a1f2f4e44941e0b69a69f052505",
+            "line_count": 340,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--COPYING",
+            "excerpt": "        GNU GENERAL PUBLIC LICENSE  \n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n\t\t\t    Preamble"
+          }
+        },
+        {
+          "repo": "tkrotoff/WengoPhone",
+          "path": "wengophone/src/control/profile/CUserProfile.cpp",
+          "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+          "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/profile/CUserProfile.cpp",
+          "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/profile/CUserProfile.cpp",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:45:36.424129+00:00",
+          "sha256": "ac3b4f4658c03f5493deadb2a6016232b4d13023c64f9814a81a9101e4cd9a4b",
+          "line_count": 285,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--control--profile--CUserProfile.cpp",
+          "claim": "O controle do perfil contém controles de contatos, telefonia e chat e cria sua apresentação.",
+          "evidence": [
+            {
+              "start_line": 55,
+              "end_line": 70,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/profile/CUserProfile.cpp#L55-L70",
+              "excerpt": "55: CUserProfile::CUserProfile(UserProfile & userProfile, CWengoPhone & cWengoPhone)\n56: \t: _userProfile(userProfile),\n57: \t_cWengoPhone(cWengoPhone),\n58: \t_cContactList(userProfile.getContactList(), cWengoPhone),\n59: \t_cWenboxPlugin(*userProfile.getWenboxPlugin(), cWengoPhone),\n60: \t_cChatHandler(userProfile.getChatHandler(), *this) {\n61: \n62: \t_cHistory = NULL;\n63: \t_cPhoneLine = NULL;\n64: \t_cSms = NULL;\n65: \t_cSoftUpdate = NULL;\n66: \t_cWsCallForward = NULL;\n67: \t_cWsDirectory = NULL;\n68: \n69: \t_pUserProfile = PFactory::getFactory().createPresentationUserProfile(*this);\n70: "
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "GPL-2.0-or-later",
+            "repo": "tkrotoff/WengoPhone",
+            "path": "wengophone/COPYING",
+            "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+            "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.290096+00:00",
+            "sha256": "a36da178f62caacc2709176634c31bccb5d30a1f2f4e44941e0b69a69f052505",
+            "line_count": 340,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--COPYING",
+            "excerpt": "        GNU GENERAL PUBLIC LICENSE  \n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n\t\t\t    Preamble"
+          }
+        },
+        {
+          "repo": "tkrotoff/WengoPhone",
+          "path": "wengophone/src/control/contactlist/CContactList.cpp",
+          "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+          "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/contactlist/CContactList.cpp",
+          "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/contactlist/CContactList.cpp",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:44:35.315041+00:00",
+          "sha256": "38813366c52f7ec073d9b8f85f6ea67dd2a7cf73c7a78ee957ac5b4ecd5b8027",
+          "line_count": 309,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--control--contactlist--CContactList.cpp",
+          "claim": "O controle liga eventos do modelo à apresentação e recebe comandos que mudam o modelo.",
+          "evidence": [
+            {
+              "start_line": 51,
+              "end_line": 59,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/contactlist/CContactList.cpp#L51-L59",
+              "excerpt": "51: void CContactList::initPresentationThreadSafe() {\n52: \t_pContactList = PFactory::getFactory().createPresentationContactList(*this);\n53: \n54: \t_contactList.contactGroupAddedEvent += boost::bind(&CContactList::contactGroupAddedEventHandler, this, _1, _2);\n55: \t_contactList.contactGroupRemovedEvent += boost::bind(&CContactList::contactGroupRemovedEventHandler, this, _1, _2);\n56: \t_contactList.contactAddedEvent += boost::bind(&CContactList::contactAddedEventHandler, this, _1, _2);\n57: \t_contactList.contactRemovedEvent += boost::bind(&CContactList::contactRemovedEventHandler, this, _1, _2);\n58: \t_contactList.contactMovedEvent += boost::bind(&CContactList::contactMovedEventHandler, this, _1, _2, _3, _4);\n59: \t_contactList.contactChangedEvent += boost::bind(&CContactList::contactChangedEventHandler, this, _1, _2);"
+            },
+            {
+              "start_line": 70,
+              "end_line": 91,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/contactlist/CContactList.cpp#L70-L91",
+              "excerpt": "70: void CContactList::contactAddedEventHandler(ContactList & sender, Contact & contact) {\n71: \t//We do not emit the event if the Contact has no group because the GUI\n72: \t//does not support a Contact with no group\n73: \tif (!contact.getGroupId().empty()) {\n74: \t\ttypedef ThreadEvent1<void (std::string), std::string> MyThreadEvent;\n75: \t\tMyThreadEvent * event = new MyThreadEvent(boost::bind(&CContactList::contactAddedEventHandlerThreadSafe, this, _1), contact.getUUID());\n76: \t\tPFactory::postEvent(event);\n77: \t}\n78: }\n79: \n80: void CContactList::contactAddedEventHandlerThreadSafe(std::string contactId) {\n81: \t_pContactList->contactAddedEvent(contactId);\n82: }\n83: \n84: void CContactList::contactRemovedEventHandler(ContactList & sender, Contact & contact) {\n85: \ttypedef ThreadEvent1<void (std::string), std::string> MyThreadEvent;\n86: \tMyThreadEvent * event = new MyThreadEvent(boost::bind(&CContactList::contactRemovedEventHandlerThreadSafe, this, _1), contact.getUUID());\n87: \tPFactory::postEvent(event);\n88: }\n89: \n90: void CContactList::contactRemovedEventHandlerThreadSafe(std::string contactId) {\n91: \t_pContactList->contactRemovedEvent(contactId);"
+            },
+            {
+              "start_line": 211,
+              "end_line": 233,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/contactlist/CContactList.cpp#L211-L233",
+              "excerpt": "211: void CContactList::addContact(const ContactProfile & contactProfile) {\n212: \ttypedef ThreadEvent1<void (ContactProfile contactProfile), ContactProfile> MyThreadEvent;\n213: \tMyThreadEvent * event = new MyThreadEvent(boost::bind(&CContactList::addContactThreadSafe, this, _1), contactProfile);\n214: \tWengoPhone::getInstance().postEvent(event);\n215: }\n216: \n217: void CContactList::addContactThreadSafe(ContactProfile contactProfile) {\n218: \tContact & contact = _contactList.createContact();\n219: \tcontact = contactProfile;\n220: \n221: \tLOG_DEBUG(\"adding new contact=\" + contact.getFirstName() + \" in group=\" + contact.getGroupId());\n222: }\n223: \n224: void CContactList::removeContact(const std::string & contactId) {\n225: \ttypedef ThreadEvent1<void (std::string contactId), std::string> MyThreadEvent;\n226: \tMyThreadEvent * event = new MyThreadEvent(boost::bind(&CContactList::removeContactThreadSafe, this, _1), contactId);\n227: \tWengoPhone::getInstance().postEvent(event);\n228: }\n229: \n230: void CContactList::removeContactThreadSafe(std::string contactId) {\n231: \tContact * contact = getContact(contactId);\n232: \tif (contact) {\n233: \t\t_contactList.removeContact(*contact);"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "GPL-2.0-or-later",
+            "repo": "tkrotoff/WengoPhone",
+            "path": "wengophone/COPYING",
+            "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+            "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.290096+00:00",
+            "sha256": "a36da178f62caacc2709176634c31bccb5d30a1f2f4e44941e0b69a69f052505",
+            "line_count": 340,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--COPYING",
+            "excerpt": "        GNU GENERAL PUBLIC LICENSE  \n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n\t\t\t    Preamble"
+          }
+        },
+        {
+          "repo": "tkrotoff/WengoPhone",
+          "path": "wengophone/src/presentation/qt/contactlist/QtContactList.cpp",
+          "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+          "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/presentation/qt/contactlist/QtContactList.cpp",
+          "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/presentation/qt/contactlist/QtContactList.cpp",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:44:35.301343+00:00",
+          "sha256": "a33392e2ba0f5ddaf9fa327435b2a9f1d35b5ce42d7071407077c87afbea13aa",
+          "line_count": 288,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--presentation--qt--contactlist--QtContactList.cpp",
+          "claim": "A apresentação consulta e altera contatos por meio de CContactList; o atalho visual citado permanece documentado.",
+          "evidence": [
+            {
+              "start_line": 137,
+              "end_line": 138,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/presentation/qt/contactlist/QtContactList.cpp#L137-L138",
+              "excerpt": "137: \tQtWengoPhone * qtWengoPhone = (QtWengoPhone *) _cWengoPhone.getPresentation();\n138: \tqtWengoPhone->setQtContactList(this);"
+            },
+            {
+              "start_line": 150,
+              "end_line": 155,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/presentation/qt/contactlist/QtContactList.cpp#L150-L155",
+              "excerpt": "150: void QtContactList::initContent() {\n151: \tStringList contacts = _cContactList.getContactIds();\n152: \tStringList::const_iterator it;\n153: \n154: \tfor (it = contacts.begin(); it != contacts.end(); ++it) {\n155: \t\tcontactAddedEvent(*it);"
+            },
+            {
+              "start_line": 183,
+              "end_line": 190,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/presentation/qt/contactlist/QtContactList.cpp#L183-L190",
+              "excerpt": "183: void QtContactList::contactAddedEvent(const std::string & contactId) {\n184: \tQString id(QString::fromStdString(contactId));\n185: \tQtContactListManager * ul = QtContactListManager::getInstance();\n186: \n187: \t//If the contact is not already in QtContactList\n188: \tif (!ul->contains(id)) {\n189: \t\tQString groupId;\n190: \t\tContactProfile contactProfile = _cContactList.getContactProfile(id.toStdString());"
+            },
+            {
+              "start_line": 270,
+              "end_line": 285,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/presentation/qt/contactlist/QtContactList.cpp#L270-L285",
+              "excerpt": "270: void QtContactList::mergeContactsSlot(QString dstContact, QString srcContact) {\n271: \tif (!_waitingForModel) {\n272: \t\t_waitingForModel = true;\n273: \n274: \t\tContactProfile dstContactProfile = _cContactList.getContactProfile(dstContact.toStdString());\n275: \t\tContactProfile srcContactProfile = _cContactList.getContactProfile(srcContact.toStdString());\n276: \t\tif (QMessageBox::question(_contactListWidget,\n277: \t\t\ttr(\"WengoPhone - Merge Contacts\"),\n278: \t\t\ttr(\"Merge %1 with %2?\")\n279: \t\t\t.arg(QString::fromStdString(dstContactProfile.getDisplayName()))\n280: \t\t\t.arg(QString::fromStdString(srcContactProfile.getDisplayName())),\n281: \t\t\ttr(\"&Yes\"), tr(\"&No\"),\n282: \t\t\tQString(), 0, 1) == 0) {\n283: \t\t\t_cContactList.merge(dstContact.toStdString(), srcContact.toStdString());\n284: \t\t} else {\n285: \t\t\t_waitingForModel = false;"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "GPL-2.0-or-later",
+            "repo": "tkrotoff/WengoPhone",
+            "path": "wengophone/COPYING",
+            "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+            "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.290096+00:00",
+            "sha256": "a36da178f62caacc2709176634c31bccb5d30a1f2f4e44941e0b69a69f052505",
+            "line_count": 340,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--COPYING",
+            "excerpt": "        GNU GENERAL PUBLIC LICENSE  \n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n\t\t\t    Preamble"
+          }
+        },
+        {
+          "repo": "tkrotoff/WengoPhone",
+          "path": "wengophone/src/model/contactlist/ContactList.cpp",
+          "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+          "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/model/contactlist/ContactList.cpp",
+          "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/model/contactlist/ContactList.cpp",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:44:35.586106+00:00",
+          "sha256": "336b84ac3097c19f194bbe22603174712024c088f7b10e682f999c5d18ea9d6e",
+          "line_count": 527,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--model--contactlist--ContactList.cpp",
+          "claim": "A abstração cria o contato e publica contactAddedEvent.",
+          "evidence": [
+            {
+              "start_line": 95,
+              "end_line": 110,
+              "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/model/contactlist/ContactList.cpp#L95-L110",
+              "excerpt": "95: Contact & ContactList::createContact() {\n96: \tRecursiveMutex::ScopedLock lock(_mutex);\n97: \n98: \tContact contact(_userProfile);\n99: \tContacts::const_iterator it;\n100: \n101: \t_contacts.push_back(contact);\n102: \t//Look for the added Contact\n103: \tfor (it = _contacts.begin();\n104: \t\tit != _contacts.end(); ++it) {\n105: \t\tif (contact == (*it)) {\n106: \t\t\t((Contact &) *it).contactChangedEvent +=\n107: \t\t\t\tboost::bind(&ContactList::contactChangedEventHandler, this, _1);\n108: \t\t\tcontactAddedEvent(*this, (Contact &) *it);\n109: \t\t\tbreak;\n110: \t\t}"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "GPL-2.0-or-later",
+            "repo": "tkrotoff/WengoPhone",
+            "path": "wengophone/COPYING",
+            "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+            "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.290096+00:00",
+            "sha256": "a36da178f62caacc2709176634c31bccb5d30a1f2f4e44941e0b69a69f052505",
+            "line_count": 340,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--COPYING",
+            "excerpt": "        GNU GENERAL PUBLIC LICENSE  \n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n\t\t\t    Preamble"
+          }
+        }
+      ]
+    },
+    {
+      "concept_id": "three-phase-commit-3pc",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_WITH_PROTOCOL_LIMIT",
+      "application_kind": "PRODUCT_OSS",
+      "independent_review": "PENDING",
+      "mechanism": "O OpenDaylight usa um protocolo de três fases para transações do seu armazenamento distribuído. O contrato MD-SAL separa a votação, o pré-commit e o commit. A coordenação executa as fases nessa ordem e tenta abortar quando uma fase falha. Quando uma transação envolve vários participantes, ClientTransaction.ready cria ClientTransactionCommitCohort, que reúne os votos de todos os proxies e envia pedidos reais de votação, pré-commit e commit aos participantes.",
+      "limits": "O caso é o armazenamento do controlador de redes OpenDaylight, e não uma demo de carteira. A implementação chama sua coordenação de blocking three-phase commit; as fontes verificadas não provam todas as garantias teóricas do 3PC clássico nem tolerância irrestrita a partições. O código registra que, após pré-commit, o estado foi replicado no backend e será consolidado após timeout. A licença EPL-1.0 dos arquivos MD-SAL foi lida em seus cabeçalhos, pois não havia arquivo raiz de licença na árvore consultada.",
+      "base": [
+        {
+          "repo": "opendaylight/mdsal",
+          "path": "dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java",
+          "revision": "c732ddd893d5305b0b1b21ccd62af0a211c4cfe2",
+          "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java",
+          "raw_url": "https://raw.githubusercontent.com/opendaylight/mdsal/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:44:35.588284+00:00",
+          "sha256": "d766892d9aaeffaaa17ac0a8e0fce1ccbd12970282b6a4b00edb15fd9ee829c3",
+          "line_count": 64,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--mdsal--dom--mdsal-dom-spi--src--main--java--org--opendaylight--mdsal--dom--spi--store--DOMStoreThreePhaseCommitCohort.java",
+          "claim": "A interface declara explicitamente 3PC e define as três fases e o abort.",
+          "evidence": [
+            {
+              "start_line": 14,
+              "end_line": 20,
+              "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java#L14-L20",
+              "excerpt": "14: /**\n15:  * Interface implemented by the {@link DOMStore} and exposed for each\n16:  * {@link DOMStoreWriteTransaction} upon its transition to Ready state. The frontend (DOMStore user)\n17:  * uses this interface to drive the commit procedure across potentially multiple DOMStores using the\n18:  * Three-Phase-Commit (3PC) Protocol, as described in <a\n19:  * href=\"https://en.wikipedia.org/wiki/Three-phase_commit\">Three phase Commit</a>.\n20:  */"
+            },
+            {
+              "start_line": 22,
+              "end_line": 63,
+              "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java#L22-L63",
+              "excerpt": "22: \n23:     /**\n24:      * Sends transaction associated with this three phase commit instance to the participant,\n25:      * participant votes on the transaction, if the transaction should be committed or aborted.\n26:      *\n27:      * @return ListenableFuture with vote of the participant. Vote {@link ListenableFuture#get()} is\n28:      *         following:\n29:      *         <ul>\n30:      *         <li>\n31:      *         true if transaction is approved by data store.\n32:      *         <li>false if the transaction is not approved by data store and should be aborted.\n33:      *         </ul>\n34:      */\n35:     ListenableFuture<Boolean> canCommit();\n36: \n37:     /**\n38:      * Initiates a pre-commit phase of associated transaction on datastore.\n39:      *\n40:      * <p>This message is valid only and only if the participant responded on {@link #canCommit()} call with positive\n41:      * response.\n42:      *\n43:      * @return ListenableFuture representing acknowledgment for participant that pre-commit message was received and\n44:      *         processed.\n45:      */\n46:     ListenableFuture<Empty> preCommit();\n47: \n48:     /**\n49:      * Initiates a abort phase of associated transaction on data store.\n50:      *\n51:      * @return ListenableFuture representing acknowledgment for participant\n52:      *        that abort message was received.\n53:      */\n54:     ListenableFuture<Empty> abort();\n55: \n56:     /**\n57:      * Initiates a commit phase on of associated transaction on data store.\n58:      *\n59:      * @return ListenableFuture representing acknowledgment for participant\n60:      *        that commit message was received and commit of transaction was\n61:      *        processed.\n62:      */\n63:     ListenableFuture<? extends CommitInfo> commit();"
+            }
+          ],
+          "license": {
+            "status": "READ_FILE_HEADER",
+            "spdx": "EPL-1.0",
+            "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java#L1-L7",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--mdsal--dom--mdsal-dom-spi--src--main--java--org--opendaylight--mdsal--dom--spi--store--DOMStoreThreePhaseCommitCohort.java",
+            "revision": "c732ddd893d5305b0b1b21ccd62af0a211c4cfe2",
+            "excerpt": "/*\n * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v1.0 which accompanies this distribution,\n * and is available at http://www.eclipse.org/legal/epl-v10.html\n */",
+            "scope": "A licença foi lida no cabeçalho deste arquivo; a API do GitHub não identificou uma licença do repositório inteiro."
+          }
+        },
+        {
+          "repo": "opendaylight/mdsal",
+          "path": "dom/mdsal-dom-broker/src/main/java/org/opendaylight/mdsal/dom/broker/CommitCoordinationTask.java",
+          "revision": "c732ddd893d5305b0b1b21ccd62af0a211c4cfe2",
+          "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-broker/src/main/java/org/opendaylight/mdsal/dom/broker/CommitCoordinationTask.java",
+          "raw_url": "https://raw.githubusercontent.com/opendaylight/mdsal/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-broker/src/main/java/org/opendaylight/mdsal/dom/broker/CommitCoordinationTask.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:45:36.379816+00:00",
+          "sha256": "9545ae8cb305ea1e925e9c5ba5e72a8197dd8f7098616b8d64c2836b77ced530",
+          "line_count": 167,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--mdsal--dom--mdsal-dom-broker--src--main--java--org--opendaylight--mdsal--dom--broker--CommitCoordinationTask.java",
+          "claim": "A coordenação chama canCommitBlocking, preCommitBlocking e commitBlocking; falhas chamam abortBlocking.",
+          "evidence": [
+            {
+              "start_line": 24,
+              "end_line": 26,
+              "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-broker/src/main/java/org/opendaylight/mdsal/dom/broker/CommitCoordinationTask.java#L24-L26",
+              "excerpt": "24: /**\n25:  * Implementation of blocking three-phase commit-coordination tasks without support of cancellation.\n26:  */"
+            },
+            {
+              "start_line": 64,
+              "end_line": 85,
+              "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-broker/src/main/java/org/opendaylight/mdsal/dom/broker/CommitCoordinationTask.java#L64-L85",
+              "excerpt": "64: \n65:     @Override\n66:     public CommitInfo call() throws TransactionCommitFailedException {\n67:         var phase = Phase.CAN_COMMIT;\n68:         try {\n69:             LOG.debug(\"Transaction {}: canCommit Started\", tx.getIdentifier());\n70:             canCommitBlocking();\n71: \n72:             phase = Phase.PRE_COMMIT;\n73:             LOG.debug(\"Transaction {}: preCommit Started\", tx.getIdentifier());\n74:             preCommitBlocking();\n75: \n76:             phase = Phase.DO_COMMIT;\n77:             LOG.debug(\"Transaction {}: doCommit Started\", tx.getIdentifier());\n78:             commitBlocking();\n79: \n80:             LOG.debug(\"Transaction {}: doCommit completed\", tx.getIdentifier());\n81:             return CommitInfo.empty();\n82:         } catch (final TransactionCommitFailedException e) {\n83:             LOG.warn(\"Tx: {} Error during phase {}, starting Abort\", tx.getIdentifier(), phase, e);\n84:             abortBlocking(e);\n85:             throw e;"
+            }
+          ],
+          "license": {
+            "status": "READ_FILE_HEADER",
+            "spdx": "EPL-1.0",
+            "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-broker/src/main/java/org/opendaylight/mdsal/dom/broker/CommitCoordinationTask.java#L1-L7",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--mdsal--dom--mdsal-dom-broker--src--main--java--org--opendaylight--mdsal--dom--broker--CommitCoordinationTask.java",
+            "revision": "c732ddd893d5305b0b1b21ccd62af0a211c4cfe2",
+            "excerpt": "/*\n * Copyright (c) 2014 Cisco Systems, Inc. and others. All rights reserved.\n *\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v1.0 which accompanies this distribution,\n * and is available at http://www.eclipse.org/legal/epl-v10.html\n */",
+            "scope": "A licença foi lida no cabeçalho deste arquivo; a API do GitHub não identificou uma licença do repositório inteiro."
+          }
+        }
+      ],
+      "application": [
+        {
+          "repo": "opendaylight/controller",
+          "path": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+          "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+          "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+          "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:45:36.358488+00:00",
+          "sha256": "998ecbb2baefc55736aac9196f217de6cba98985bc3a96ca3864c15c4e0d0f4f",
+          "line_count": 127,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--opendaylight--md-sal--sal-distributed-datastore--src--main--java--org--opendaylight--controller--cluster--databroker--actors--dds--ClientTransaction.java",
+          "claim": "A transação escolhe o cohort multi-participante quando há vários proxies.",
+          "evidence": [
+            {
+              "start_line": 104,
+              "end_line": 121,
+              "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java#L104-L121",
+              "excerpt": "104:     public DOMStoreThreePhaseCommitCohort ready() {\n105:         final var participants = ensureClosed();\n106:         if (participants == null) {\n107:             throw new IllegalStateException(\"Attempted to submit a closed transaction \" + this);\n108:         }\n109: \n110:         final var toReady = participants.values();\n111:         toReady.forEach(AbstractProxyTransaction::seal);\n112: \n113:         final var txId = getIdentifier();\n114:         final var parent = parent();\n115:         parent.onTransactionShardsBound(txId, participants.keySet());\n116:         return parent.onTransactionReady(this, switch (toReady.size()) {\n117:             case 0 -> new EmptyTransactionCommitCohort(parent, txId);\n118:             case 1 -> new DirectTransactionCommitCohort(parent, txId, toReady.iterator().next());\n119:             default -> new ClientTransactionCommitCohort(parent, txId, toReady);\n120:         });\n121:     }"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "EPL-1.0",
+            "repo": "opendaylight/controller",
+            "path": "LICENSE",
+            "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+            "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.588490+00:00",
+            "sha256": "44277b2bec6093e4ac313afec251a4de599d24c4e768f8574d95b13a9d2d97b5",
+            "line_count": 70,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--LICENSE",
+            "excerpt": "Eclipse Public License - v 1.0\n\nTHE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE (\"AGREEMENT\"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.\n\n1. DEFINITIONS\n\n\"Contribution\" means:\n\na) in the case of the initial Contributor, the initial code and documentation distributed under this Agreement, and"
+          }
+        },
+        {
+          "repo": "opendaylight/controller",
+          "path": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java",
+          "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+          "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java",
+          "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:43:58.815517+00:00",
+          "sha256": "d714f376834c42432c2da5a68bef8345fb98015bb4e0e4a03cc6bc5788daffa4",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--opendaylight--md-sal--sal-distributed-datastore--src--main--java--org--opendaylight--controller--cluster--databroker--actors--dds--ClientTransactionCommitCohort.java",
+          "claim": "As três fases percorrem todos os participantes e agregam seus votos em VotingFuture.",
+          "evidence": [
+            {
+              "start_line": 28,
+              "end_line": 73,
+              "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java#L28-L73",
+              "excerpt": "28:     public ListenableFuture<Boolean> canCommit() {\n29:         /*\n30:          * Issue the request to commit for all participants. We will track the results and report them.\n31:          */\n32:         final var ret = new VotingFuture<>(Boolean.TRUE, proxies.size());\n33:         for (var proxy : proxies) {\n34:             proxy.canCommit(ret);\n35:         }\n36: \n37:         return ret;\n38:     }\n39: \n40:     private <T> ListenableFuture<T> addComplete(final ListenableFuture<T> future) {\n41:         future.addListener(this::complete, MoreExecutors.directExecutor());\n42:         return future;\n43:     }\n44: \n45:     @Override\n46:     public ListenableFuture<Empty> preCommit() {\n47:         final var ret = new VotingFuture<>(Empty.value(), proxies.size());\n48:         for (var proxy : proxies) {\n49:             proxy.preCommit(ret);\n50:         }\n51: \n52:         return ret;\n53:     }\n54: \n55:     @Override\n56:     public ListenableFuture<CommitInfo> commit() {\n57:         final var ret = new VotingFuture<>(CommitInfo.empty(), proxies.size());\n58:         for (var proxy : proxies) {\n59:             proxy.doCommit(ret);\n60:         }\n61: \n62:         return addComplete(ret);\n63:     }\n64: \n65:     @Override\n66:     public ListenableFuture<Empty> abort() {\n67:         final var ret = new VotingFuture<>(Empty.value(), proxies.size());\n68:         for (var proxy : proxies) {\n69:             proxy.abort(ret);\n70:         }\n71: \n72:         return addComplete(ret);\n73:     }"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "EPL-1.0",
+            "repo": "opendaylight/controller",
+            "path": "LICENSE",
+            "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+            "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.588490+00:00",
+            "sha256": "44277b2bec6093e4ac313afec251a4de599d24c4e768f8574d95b13a9d2d97b5",
+            "line_count": 70,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--LICENSE",
+            "excerpt": "Eclipse Public License - v 1.0\n\nTHE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE (\"AGREEMENT\"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.\n\n1. DEFINITIONS\n\n\"Contribution\" means:\n\na) in the case of the initial Contributor, the initial code and documentation distributed under this Agreement, and"
+          }
+        },
+        {
+          "repo": "opendaylight/controller",
+          "path": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+          "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+          "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+          "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:44:35.619549+00:00",
+          "sha256": "6fa797d99d3fd072726a589d19f5a1a71a1020b6be0011473b29069bd94a4ebe",
+          "line_count": 853,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--opendaylight--md-sal--sal-distributed-datastore--src--main--java--org--opendaylight--controller--cluster--databroker--actors--dds--AbstractProxyTransaction.java",
+          "claim": "Os proxies emitem pedidos de rede, verificam respostas e preservam o estado necessário à recuperação.",
+          "evidence": [
+            {
+              "start_line": 526,
+              "end_line": 550,
+              "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java#L526-L550",
+              "excerpt": "526:     final void canCommit(final VotingFuture<?> ret) {\n527:         checkReadWrite();\n528:         checkSealed();\n529: \n530:         // Precludes startReconnect() from interfering with the fast path\n531:         synchronized (this) {\n532:             if (STATE_UPDATER.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED)) {\n533:                 final var req = verifyNotNull(commitRequest(true));\n534: \n535:                 sendRequest(req, resp -> {\n536:                     switch (resp) {\n537:                         case TransactionCanCommitSuccess unused -> ret.voteYes();\n538:                         case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());\n539:                         default -> ret.voteNo(unhandledResponseException(resp));\n540:                     }\n541:                     recordSuccessfulRequest(req);\n542:                     LOG.debug(\"Transaction {} canCommit completed\", this);\n543:                 });\n544: \n545:                 return;\n546:             }\n547:         }\n548: \n549:         // We have had some interference with successor injection, wait for it to complete and defer to the successor.\n550:         awaitSuccessor().canCommit(ret);"
+            },
+            {
+              "start_line": 557,
+              "end_line": 600,
+              "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java#L557-L600",
+              "excerpt": "557:     final void preCommit(final VotingFuture<?> ret) {\n558:         checkReadWrite();\n559:         checkSealed();\n560: \n561:         final var req = new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor());\n562:         sendRequest(req, resp -> {\n563:             switch (resp) {\n564:                 case TransactionPreCommitSuccess unused -> ret.voteYes();\n565:                 case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());\n566:                 default -> ret.voteNo(unhandledResponseException(resp));\n567:             }\n568:             onPreCommitComplete(req);\n569:         });\n570:     }\n571: \n572:     private void onPreCommitComplete(final TransactionRequest<?> req) {\n573:         /*\n574:          * The backend has agreed that the transaction has entered PRE_COMMIT phase, meaning it will be committed\n575:          * to storage after the timeout completes.\n576:          *\n577:          * All state has been replicated to the backend, hence we do not need to keep it around. Retain only\n578:          * the precommit request, so we know which request to use for resync.\n579:          */\n580:         LOG.debug(\"Transaction {} preCommit completed, clearing successfulRequests\", this);\n581:         successfulRequests.clear();\n582: \n583:         // TODO: this works, but can contain some useless state (like batched operations). Create an empty\n584:         //       equivalent of this request and store that.\n585:         recordSuccessfulRequest(req);\n586:     }\n587: \n588:     final void doCommit(final VotingFuture<?> ret) {\n589:         checkReadWrite();\n590:         checkSealed();\n591: \n592:         sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), resp -> {\n593:             switch (resp) {\n594:                 case TransactionCommitSuccess unused -> ret.voteYes();\n595:                 case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());\n596:                 default -> ret.voteNo(unhandledResponseException(resp));\n597:             }\n598:             onCommitCompleted(\"doCommit\");\n599:         });\n600:     }"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "spdx": "EPL-1.0",
+            "repo": "opendaylight/controller",
+            "path": "LICENSE",
+            "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+            "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T01:44:35.588490+00:00",
+            "sha256": "44277b2bec6093e4ac313afec251a4de599d24c4e768f8574d95b13a9d2d97b5",
+            "line_count": 70,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--LICENSE",
+            "excerpt": "Eclipse Public License - v 1.0\n\nTHE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE (\"AGREEMENT\"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.\n\n1. DEFINITIONS\n\n\"Contribution\" means:\n\na) in the case of the initial Contributor, the initial code and documentation distributed under this Agreement, and"
+          }
+        }
+      ]
+    },
+    {
+      "concept_id": "space-based-architecture",
+      "decision": "KEEP_PENDING",
+      "independent_review": "PENDING",
+      "reason": "A busca delimitada não encontrou uma aplicação OSS real e licenciada que demonstre a composição inteira exigida. Não se afirma que ela não exista.",
+      "rejected_candidates": [
+        {
+          "repository": "vracks/RealTimePositionEngine",
+          "sources": [
+            {
+              "repo": "vracks/RealTimePositionEngine",
+              "path": "README.md",
+              "revision": "f300c9472382d021e9427a85ca283039ac565627",
+              "url": "https://github.com/vracks/RealTimePositionEngine/blob/f300c9472382d021e9427a85ca283039ac565627/README.md",
+              "raw_url": "https://raw.githubusercontent.com/vracks/RealTimePositionEngine/f300c9472382d021e9427a85ca283039ac565627/README.md",
+              "http_status": 200,
+              "observed_utc": "2026-10-15T01:44:35.588585+00:00",
+              "sha256": "7772f0dbc9de556fe5d9b7357cea54601efbe803c5b8f29f301ad55249d21268",
+              "line_count": 450,
+              "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/vracks--RealTimePositionEngine--README.md",
+              "claim": "O próprio autor apresenta uma demo sem persistência e a declara sem licença.",
+              "evidence": [
+                {
+                  "start_line": 19,
+                  "end_line": 19,
+                  "url": "https://github.com/vracks/RealTimePositionEngine/blob/f300c9472382d021e9427a85ca283039ac565627/README.md#L19-L19",
+                  "excerpt": "19: It is built as a runnable demo with production-shaped architecture: the Ignite patterns that matter for this workload — affinity colocation, `EntryProcessor`-based atomic updates, and continuous queries — are used for real against a genuine two-node cluster, without the auth, persistence, and HA that would obscure them."
+                },
+                {
+                  "start_line": 434,
+                  "end_line": 434,
+                  "url": "https://github.com/vracks/RealTimePositionEngine/blob/f300c9472382d021e9427a85ca283039ac565627/README.md#L434-L434",
+                  "excerpt": "434: - **No persistence.** Ignite runs in pure in-memory mode; positions are lost on full cluster restart. Enabling native persistence would be a `DataRegionConfiguration` change."
+                },
+                {
+                  "start_line": 448,
+                  "end_line": 450,
+                  "url": "https://github.com/vracks/RealTimePositionEngine/blob/f300c9472382d021e9427a85ca283039ac565627/README.md#L448-L450",
+                  "excerpt": "448: ## License\n449: \n450: Unlicensed demo project."
+                }
+              ]
+            }
+          ],
+          "reason": "A demo financeira tem colocalização, EntryProcessor e consultas contínuas, mas o próprio README a identifica como demo, informa ausência de persistência e termina com Unlicensed demo project. Não resolve REAL_APPLICATION_MISSING."
+        },
+        {
+          "source_url": "https://docs.gigaspaces.com/ie-resources/solution-hub/xap-order-management-tutorial.html",
+          "reason": "A documentação do fornecedor declara expressamente que o tutorial de ordens não é uma aplicação real. Serve como referência didática, não como produto OSS."
+        },
+        {
+          "repository": "esl/MongooseIM",
+          "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+          "reason": "É um produto real com sessões em RAM via Mnesia e arquivo de mensagens assíncrono. A leitura feita não mostrou que o estado persistido seja a mesma entidade do espaço de sessões. Juntar esses dois mecanismos para declarar a arquitetura completa ampliaria o que o código prova.",
+          "license_note": "COPYING contém GPL versão 2 e uma exceção de ligação com OpenSSL. Não foi adjudicado um identificador SPDX composto; NOASSERTION preserva esse limite.",
+          "sources": [
+            {
+              "repo": "esl/MongooseIM",
+              "path": "src/ejabberd_sm_mnesia.erl",
+              "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+              "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/ejabberd_sm_mnesia.erl",
+              "raw_url": "https://raw.githubusercontent.com/esl/MongooseIM/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/ejabberd_sm_mnesia.erl",
+              "http_status": 200,
+              "observed_utc": "2026-10-15T01:46:55.782808+00:00",
+              "sha256": "a4982a8675f7d9f9748ec293292c17d67595e410fa228c5389f5efccd86d5649",
+              "line_count": 109,
+              "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/esl--MongooseIM--src--ejabberd_sm_mnesia.erl",
+              "claim": "A tabela de sessões é configurada com ram_copies e recebe gravações em Mnesia.",
+              "evidence": [
+                {
+                  "start_line": 27,
+                  "end_line": 33,
+                  "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/ejabberd_sm_mnesia.erl#L27-L33",
+                  "excerpt": "27: -spec init(map()) -> any().\n28: init(_Opts) ->\n29:     mongoose_mnesia:create_table(session,\n30:         [{ram_copies, [node()]},\n31:          {attributes, record_info(fields, session)}]),\n32:     mnesia:add_table_index(session, usr),\n33:     mnesia:add_table_index(session, us)."
+                },
+                {
+                  "start_line": 62,
+                  "end_line": 65,
+                  "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/ejabberd_sm_mnesia.erl#L62-L65",
+                  "excerpt": "62:                   _Resource :: jid:lresource(),\n63:                   Session :: ejabberd_sm:session()) -> ok | {error, term()}.\n64: set_session(_User, _Server, _Resource, Session) ->\n65:     mnesia:sync_dirty(fun() -> mnesia:write(Session) end)."
+                }
+              ],
+              "license": {
+                "status": "READ",
+                "spdx": "NOASSERTION",
+                "repo": "esl/MongooseIM",
+                "path": "COPYING",
+                "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+                "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/COPYING",
+                "raw_url": "https://raw.githubusercontent.com/esl/MongooseIM/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/COPYING",
+                "http_status": 200,
+                "observed_utc": "2026-10-15T01:46:55.779009+00:00",
+                "sha256": "9d4531bf6c03f6e630c016960fb00ad37435025d5f45391228b7ef8db16274cb",
+                "line_count": 343,
+                "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/esl--MongooseIM--COPYING",
+                "excerpt": "As a special exception, the authors give permission to link this program\nwith the OpenSSL library and distribute the resulting binary.\n\n\t\t    GNU GENERAL PUBLIC LICENSE\n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA\n Everyone is permitted to copy and distribute verbatim copies"
+              }
+            },
+            {
+              "repo": "esl/MongooseIM",
+              "path": "src/mam/mod_mam_rdbms_arch_async.erl",
+              "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+              "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/mam/mod_mam_rdbms_arch_async.erl",
+              "raw_url": "https://raw.githubusercontent.com/esl/MongooseIM/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/mam/mod_mam_rdbms_arch_async.erl",
+              "http_status": 200,
+              "observed_utc": "2026-10-15T01:46:55.759283+00:00",
+              "sha256": "ef1e8a86b57ad54242f6a39e6266efe7353b94c14383ce4c8cdf6bea8a9053c2",
+              "line_count": 134,
+              "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/esl--MongooseIM--src--mam--mod_mam_rdbms_arch_async.erl",
+              "claim": "O arquivo de mensagens usa uma fila e um flush assíncrono distinto da tabela de sessões.",
+              "evidence": [
+                {
+                  "start_line": 15,
+                  "end_line": 20,
+                  "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/mam/mod_mam_rdbms_arch_async.erl#L15-L20",
+                  "excerpt": "15: -spec archive_pm_message(Acc, Params, Extra) -> {ok, Acc} when\n16:     Acc :: ok,\n17:     Params :: mod_mam:archive_message_params(),\n18:     Extra :: gen_hook:extra().\n19: archive_pm_message(_Result, #{archive_id := ArcID} = Params, #{host_type := HostType}) ->\n20:     {ok, mongoose_async_pools:put_task(HostType, pm_mam, ArcID, Params)}."
+                },
+                {
+                  "start_line": 89,
+                  "end_line": 115,
+                  "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/mam/mod_mam_rdbms_arch_async.erl#L89-L115",
+                  "excerpt": "89: flush(Acc, Extra = #{host_type := HostType, queue_length := MessageCount}) ->\n90:     mongoose_instrument:span(mod_mam_pm_flushed, #{host_type => HostType},\n91:                              fun do_flush_pm/2, [Acc, Extra],\n92:                              fun(Time, _Result) ->\n93:                                      #{time => Time,\n94:                                        time_per_message => round(Time / MessageCount),\n95:                                        count => MessageCount}\n96:                              end).\n97: \n98: %% mam workers callbacks\n99: do_flush_pm(Acc, #{host_type := HostType, queue_length := MessageCount,\n100:                    batch_size := MaxSize, batch_name := BatchName}) ->\n101:     Rows = [mod_mam_rdbms_arch:prepare_message(HostType, Params) || Params <- Acc],\n102:     IsFullBuffer = MessageCount =:= MaxSize,\n103:     case IsFullBuffer of\n104:         true ->\n105:             Result = mongoose_rdbms:execute(HostType, BatchName, lists:append(Rows)),\n106:             process_batch_result(Result, Acc, HostType, MessageCount);\n107:         false ->\n108:             Results = [mongoose_rdbms:execute(HostType, insert_mam_message, Row) || Row <- Rows],\n109:             Process = lists:zip(Results, Acc),\n110:             process_list_results(Process, HostType)\n111:     end,\n112:     [mod_mam_rdbms_arch:retract_message(HostType, Params) || Params <- Acc],\n113:     ok.\n114: \n115: process_batch_result({updated, _Count}, _, _, _) ->"
+                }
+              ],
+              "license": {
+                "status": "READ",
+                "spdx": "NOASSERTION",
+                "repo": "esl/MongooseIM",
+                "path": "COPYING",
+                "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+                "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/COPYING",
+                "raw_url": "https://raw.githubusercontent.com/esl/MongooseIM/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/COPYING",
+                "http_status": 200,
+                "observed_utc": "2026-10-15T01:46:55.779009+00:00",
+                "sha256": "9d4531bf6c03f6e630c016960fb00ad37435025d5f45391228b7ef8db16274cb",
+                "line_count": 343,
+                "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/esl--MongooseIM--COPYING",
+                "excerpt": "As a special exception, the authors give permission to link this program\nwith the OpenSSL library and distribute the resulting binary.\n\n\t\t    GNU GENERAL PUBLIC LICENSE\n\t\t       Version 2, June 1991\n\n Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA\n Everyone is permitted to copy and distribute verbatim copies"
+              }
+            }
+          ]
+        }
+      ],
+      "next_required_evidence": "Um repositório de produto com licença explícita e uma cadeia verificável que una processamento junto aos dados, grade em memória, distribuição/replicação e persistência assíncrona do mesmo estado de negócio."
+    }
+  ]
+}

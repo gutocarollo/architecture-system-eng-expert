@@ -1,0 +1,92 @@
+{
+  "profile_version": 2,
+  "project_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "mode": "REVIEW",
+  "context": {
+    "adapter": "generic",
+    "workspace": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+    "bounded_anchor": "Comparar a jornada Diátaxis do curso de arquitetura com o Nextra do MakersHub em casos delimitados e acrescentar à FBI-4991 critérios verificáveis de ligação entre conceito, caso real, prática antes/depois, Jira, PR, commits e fallback financeiro identificado; preservar os conteúdos auditados.",
+    "protocol_root": null,
+    "method_skill": null,
+    "provided_packet": null,
+    "preparation": {
+      "kind": "metadata",
+      "receipt_path": null
+    },
+    "review_contract": null
+  },
+  "sources": [
+    {
+      "id": "project",
+      "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+      "required": true
+    },
+    {
+      "id": "makershub-help",
+      "root": "/Users/augustocarollo/.superset/worktrees/makershub/paint-bistro",
+      "required": true
+    },
+    {
+      "id": "workflow-evidence",
+      "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/evidence",
+      "required": true
+    }
+  ],
+  "output": {
+    "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/FBI-4991-arquitetura-nextra/comparison",
+    "glossary": "glossary",
+    "adr_directory": "adrs",
+    "allow_domain_writes": false
+  },
+  "council": {
+    "planners": [
+      "/root",
+      "/root/makershub_nextra_compare",
+      "/root/jira_story_catalog"
+    ],
+    "reviewers": [
+      "/root/story_requirements_review"
+    ],
+    "max_rechecks": 1
+  },
+  "skills": [
+    {
+      "id": "mapping",
+      "path": "skills/mapping-blast-radius-autoagents/SKILL.md",
+      "base": "package",
+      "role": "mapper",
+      "enabled": true,
+      "depends_on": []
+    },
+    {
+      "id": "orchestrator",
+      "path": "skills/orchestrating-docs-autoagents/SKILL.md",
+      "base": "package",
+      "role": "orchestrator",
+      "enabled": true,
+      "depends_on": [
+        "mapping"
+      ]
+    },
+    {
+      "id": "diataxis",
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/SKILL.md",
+      "base": "absolute",
+      "role": "documentation-method",
+      "enabled": true,
+      "depends_on": [],
+      "resources": [
+        "/Users/augustocarollo/.agents/skills/diataxis/references/explanation.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/tutorials.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/how-to-guides.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/reference.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/complex-hierarchies.md"
+      ]
+    }
+  ],
+  "mermaid": {
+    "require_syntax": true,
+    "require_render": true
+  },
+  "max_evidence_age_hours": 24
+}

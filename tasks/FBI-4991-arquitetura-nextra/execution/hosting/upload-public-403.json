@@ -1,0 +1,9 @@
+{
+  "observed_at": "2026-10-15T18:44 UTC",
+  "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+  "scope": "Authenticated administration PUT using COURSE_UPLOAD_SECRET, without native editor service credential. No customer data or secret values are stored.",
+  "http_status": 403,
+  "response_body": "error code: 1010\n",
+  "server": "cloudflare",
+  "cause": "Not established. The successful retry additionally uses the native editor service credential. Public learner QA must still run without that credential."
+}

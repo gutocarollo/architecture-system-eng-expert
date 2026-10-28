@@ -1,0 +1,1562 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-10-15T04:04:15.564362+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "checkout_sha": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "purpose": "Wave two: primary-source recommendations for exactly aggregate, aggregate-root, chain-of-responsibility, feature-flags and template-method. Curator owns incorporation; independent reviewer owns verdict.",
+  "rows": [
+    {
+      "concept_id": "aggregate",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.585284+00:00",
+          "http_status": 200,
+          "sha256": "f4862c63f12e04865f1279f0fe106105f44af5bd74922ac33d8af8aba04c34f6",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/e65943b48cf73c600e4362e7a717262a5f837dfcbe134895af4343d237c8647a.txt",
+          "line_count": 609,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.067003+00:00",
+          "http_status": 200,
+          "sha256": "9f4b61a7b60bbda39dc2468dd20cc802177a78807f4e8d807a67fb5c4bcbc605",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/ae25332d5ccaff6804287758f3936e5982dbe9fe40d4c6dd31b12c232aaee4ac.txt",
+          "line_count": 331,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.067351+00:00",
+          "http_status": 200,
+          "sha256": "12c4c0558dee77cdf50cce67f8c3812ce1403850f4bf631b55d0e75ee2acaa3e",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/a8a6c6b3a5f05a0be83a1c0d5d55e5df0c44405051ca71278454674de5b0addf.txt",
+          "line_count": 674,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "apache/fineract",
+          "path": "fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+          "original_url": "https://github.com/apache/fineract/blob/HEAD/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:19:05.055108Z",
+          "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+          "line_count": 1860,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /**\n2:  * Licensed to the Apache Software Foundation (ASF) under one\n3:  * or more contributor license agreements. See the NOTICE file\n4:  * distributed with this work for additional information\n5:  * regarding copyright ownership. The ASF licenses this file\n6:  * to you under the Apache License, Version 2.0 (the\n7:  * \"License\"); you may not use this file except in compliance\n8:  * with the License. You may obtain a copy of the License at\n9:  *\n10:  * http://www.apache.org/licenses/LICENSE-2.0\n11:  *\n12:  * Unless required by applicable law or agreed to in writing,\n13:  * software distributed under the License is distributed on an\n14:  * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n15:  * KIND, either express or implied. See the License for the\n16:  * specific language governing permissions and limitations\n17:  * under the License.\n18:  */\n19: package org.apache.fineract.portfolio.loanaccount.domain;\n20: \n21: import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.CUMULATIVE;\n22: import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;\n23: \n24: import jakarta.persistence.CascadeType;\n25: import jakarta.persistence.Column;\n26: import jakarta.persistence.Convert;\n27: import jakarta.persistence.Embedded;\n28: import jakarta.persistence.Entity;\n29: import jakarta.persistence.Enumerated;\n30: import jakarta.persistence.FetchType;\n31: import jakarta.persistence.JoinColumn;\n32: import jakarta.persistence.JoinTable;\n33: import jakarta.persistence.ManyToOne;\n34: import jakarta.persistence.OneToMany;\n35: import jakarta.persistence.OneToOne;\n36: import jakarta.persistence.OrderBy;\n37: import jakarta.persistence.Table;\n38: import jakarta.persistence.UniqueConstraint;\n39: import jakarta.persistence.Version;\n40: import jakarta.validation.constraints.NotNull;",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "path": "LICENSE_RELEASE"
+          },
+          "repository_metadata": {
+            "stars": 2550,
+            "observed_utc": "2026-10-15T01:18:55.658481Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T16:42:29Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "apache/fineract",
+          "path": "fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+          "original_url": "https://github.com/apache/fineract/blob/HEAD/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:57:59.374873Z",
+          "sha256": "53ba2fb0b2202b8d05f54ae381920664af1f023112f91d8ae641e7c74bd78fe1",
+          "line_count": 897,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b731dbeb13fd3fe2614e9d1c68ecab75785b0f1b4a55ef626bce8c4ff4cc0f48.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /**\n2:  * Licensed to the Apache Software Foundation (ASF) under one\n3:  * or more contributor license agreements. See the NOTICE file\n4:  * distributed with this work for additional information\n5:  * regarding copyright ownership. The ASF licenses this file\n6:  * to you under the Apache License, Version 2.0 (the\n7:  * \"License\"); you may not use this file except in compliance\n8:  * with the License. You may obtain a copy of the License at\n9:  *\n10:  * http://www.apache.org/licenses/LICENSE-2.0\n11:  *\n12:  * Unless required by applicable law or agreed to in writing,\n13:  * software distributed under the License is distributed on an\n14:  * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n15:  * KIND, either express or implied. See the License for the\n16:  * specific language governing permissions and limitations\n17:  * under the License.\n18:  */\n19: package org.apache.fineract.portfolio.loanaccount.service;\n20: \n21: import static org.apache.fineract.portfolio.loanaccount.domain.Loan.APPROVED_ON_DATE;\n22: import static org.apache.fineract.portfolio.loanaccount.domain.Loan.PARAM_STATUS;\n23: import static org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD;\n24: \n25: import com.google.gson.JsonArray;\n26: import com.google.gson.JsonElement;\n27: import com.google.gson.JsonObject;\n28: import jakarta.persistence.PersistenceException;\n29: import java.math.BigDecimal;\n30: import java.time.LocalDate;\n31: import java.time.temporal.ChronoField;\n32: import java.util.ArrayList;\n33: import java.util.HashMap;\n34: import java.util.LinkedHashMap;\n35: import java.util.List;\n36: import java.util.Map;\n37: import java.util.Optional;\n38: import java.util.Set;\n39: import lombok.RequiredArgsConstructor;\n40: import lombok.extern.slf4j.Slf4j;",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "path": "LICENSE_RELEASE"
+          },
+          "repository_metadata": {
+            "stars": 2550,
+            "observed_utc": "2026-10-15T01:18:55.658481Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T16:42:29Z"
+          }
+        }
+      ],
+      "mechanism": "Um agregado reúne uma raiz e os objetos que ela coordena dentro de uma fronteira de consistência. O Axon mantém a instância do agregado na unidade de trabalho, carrega o agregado com um lock configurado e verifica esse lock antes de salvar. Seu modelo executa o tratamento do evento no objeto principal e o propaga aos filhos registrados. No Fineract, Loan reúne encargos, garantias e parcelas. Ao adicionar uma parcela, o próprio Loan associa a parcela ao empréstimo e a inclui em sua coleção; o serviço valida e persiste o Loan na operação de submissão.",
+      "limits": "Axon e Fineract são exemplos independentes; não se afirma que o Fineract usa Axon. A fronteira de lock demonstrada pertence ao repositório configurado do Axon e à sua unidade de trabalho, não a uma transação distribuída entre serviços. No Fineract, o recorte demonstra composição e operações coordenadas pelo Loan, mas não prova que toda regra do produto ou todo acesso aos filhos passe exclusivamente pela raiz. As anotações JPA descrevem persistência das relações; os métodos e seus chamadores fornecem a prova de comportamento.",
+      "base_scope": "Axon manages one root instance per UnitOfWork, obtains and checks a configured aggregate lock, and publishes aggregate events to the root model and registered children.",
+      "application_scope": "Fineract Loan owns related components, associates a repayment installment with itself before adding it, and is validated/persisted by the submission service.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/e65943b48cf73c600e4362e7a717262a5f837dfcbe134895af4343d237c8647a.txt",
+          "sha256": "f4862c63f12e04865f1279f0fe106105f44af5bd74922ac33d8af8aba04c34f6",
+          "hits": [
+            {
+              "term": "managed aggregate type and uniqueness within UnitOfWork",
+              "start_line": 93,
+              "end_line": 124,
+              "excerpt": "    public A newInstance(@Nonnull Callable<T> factoryMethod,\n                         @Nonnull Consumer<Aggregate<T>> initMethod) throws Exception {\n        UnitOfWork<?> uow = currentUnitOfWork();\n        AtomicReference<A> aggregateReference = new AtomicReference<>();\n        // a constructor may apply events, and the persistence of an aggregate must take precedence over publishing its events.\n        uow.onPrepareCommit(x -> {\n            A aggregate = aggregateReference.get();\n            // Aggregate construction may have failed with an exception (aggregate == null)\n            //  or the handler decided not to create the aggregate (identifier == null).\n            // In that case, no action is required on commit.\n            if (aggregate != null && aggregate.identifier() != null) {\n                prepareForCommit(aggregate);\n            }\n        });\n\n        A aggregate;\n        try {\n            aggregate = doCreateNew(factoryMethod);\n        } catch (Exception e) {\n            logger.warn(\"Exception occurred while trying to create an aggregate.\", e);\n            throw e;\n        }\n\n        initMethod.accept(aggregate);\n        aggregateReference.set(aggregate);\n        Assert.isTrue(aggregateModel.entityClass().isAssignableFrom(aggregate.rootType()),\n                      () -> \"Unsuitable aggregate for this repository: wrong type\");\n        Map<String, A> aggregates = managedAggregates(uow);\n        Assert.isTrue(aggregates.putIfAbsent(aggregate.identifierAsString(), aggregate) == null,\n                      () -> \"The Unit of Work already has an Aggregate with the same identifier\");\n        uow.onRollback(u -> aggregates.remove(aggregate.identifierAsString()));\n",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java#L93-L124"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/ae25332d5ccaff6804287758f3936e5982dbe9fe40d4c6dd31b12c232aaee4ac.txt",
+          "sha256": "9f4b61a7b60bbda39dc2468dd20cc802177a78807f4e8d807a67fb5c4bcbc605",
+          "hits": [
+            {
+              "term": "load with aggregate lock through UnitOfWork cleanup",
+              "start_line": 133,
+              "end_line": 143,
+              "excerpt": "    protected LockAwareAggregate<T, A> doLoad(String aggregateIdentifier, Long expectedVersion) {\n        Lock lock = spanFactory.createObtainLockSpan(aggregateIdentifier)\n                               .runSupplier(() -> lockFactory.obtainLock(aggregateIdentifier));\n        try {\n            final A aggregate = doLoadWithLock(aggregateIdentifier, expectedVersion);\n            CurrentUnitOfWork.get().onCleanup(u -> lock.release());\n            return new LockAwareAggregate<>(aggregate, lock);\n        } catch (Throwable ex) {\n            logger.debug(\"Exception occurred while trying to load an aggregate. Releasing lock.\", ex);\n            lock.release();\n            throw ex;",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java#L133-L143"
+            },
+            {
+              "term": "save rejects lost aggregate lock",
+              "start_line": 194,
+              "end_line": 208,
+              "excerpt": "     * Verifies whether all locks are valid and delegates to {@link #doSaveWithLock(Aggregate)} to perform actual\n     * storage.\n     *\n     * @param aggregate the aggregate to store\n     */\n    @Override\n    protected void doSave(LockAwareAggregate<T, A> aggregate) {\n        if (aggregate.version() != null && !aggregate.isLockHeld()) {\n            throw new ConcurrencyException(String.format(\n                    \"The aggregate of type [%s] with identifier [%s] could not be \" +\n                            \"saved, as a valid lock is not held. Either another thread has saved an aggregate, or \" +\n                            \"the current thread had released its lock earlier on.\",\n                    aggregate.getClass().getSimpleName(), aggregate.identifierAsString()));\n        }\n        doSaveWithLock(aggregate.getWrappedAggregate());",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java#L194-L208"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/a8a6c6b3a5f05a0be83a1c0d5d55e5df0c44405051ca71278454674de5b0addf.txt",
+          "sha256": "12c4c0558dee77cdf50cce67f8c3812ce1403850f4bf631b55d0e75ee2acaa3e",
+          "hits": [
+            {
+              "term": "root handler and registered child propagation",
+              "start_line": 563,
+              "end_line": 581,
+              "excerpt": "        public void publish(EventMessage<?> message, T target) {\n            if (target != null) {\n                runtimeModelOf(target).doPublish(message, target);\n            }\n        }\n\n        private void doPublish(EventMessage<?> message, T target) {\n            getHandler(message, target.getClass()).ifPresent(h -> {\n                try {\n                    handlerInspector.chainedInterceptor(target.getClass())\n                                    .handle(message, target, h);\n                } catch (Exception e) {\n                    throw new MessageHandlerInvocationException(\n                            format(\"Error handling event of type [%s] in aggregate\", message.getPayloadType()), e);\n                }\n            });\n            children.values().stream()\n                    .flatMap(Collection::stream)\n                    .forEach(childEntity -> childEntity.publish(message, target));",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java#L563-L581"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt",
+          "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+          "hits": [
+            {
+              "term": "related components within Loan",
+              "start_line": 293,
+              "end_line": 310,
+              "excerpt": "    @Setter\n    @OneToMany(cascade = CascadeType.ALL, mappedBy = \"loan\", orphanRemoval = true, fetch = FetchType.LAZY)\n    private Set<LoanCharge> charges = new HashSet<>();\n\n    @OneToMany(cascade = CascadeType.ALL, mappedBy = \"loan\", orphanRemoval = true, fetch = FetchType.LAZY)\n    private Set<LoanTrancheCharge> trancheCharges = new HashSet<>();\n\n    @OneToMany(cascade = CascadeType.ALL, mappedBy = \"loan\", orphanRemoval = true, fetch = FetchType.LAZY)\n    private Set<LoanCollateral> collateral = null;\n\n    @OneToMany(cascade = CascadeType.ALL, mappedBy = \"loan\", orphanRemoval = true, fetch = FetchType.LAZY)\n    private Set<LoanCollateralManagement> loanCollateralManagements = new HashSet<>();\n\n    @OneToMany(cascade = CascadeType.ALL, mappedBy = \"loan\", orphanRemoval = true, fetch = FetchType.LAZY)\n    private Set<LoanOfficerAssignmentHistory> loanOfficerHistory;\n\n    @OrderBy(value = \"installmentNumber\")\n    @OneToMany(cascade = CascadeType.ALL, mappedBy = \"loan\", orphanRemoval = true, fetch = FetchType.LAZY)",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L293-L310"
+            },
+            {
+              "term": "root associates and adds child installment",
+              "start_line": 1410,
+              "end_line": 1417,
+              "excerpt": "    public Integer getLoanRepaymentScheduleInstallmentsSize() {\n        return this.repaymentScheduleInstallments.size();\n    }\n\n    public void addLoanRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment installment) {\n        installment.updateLoan(this);\n        this.repaymentScheduleInstallments.add(installment);\n    }",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L1410-L1417"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b731dbeb13fd3fe2614e9d1c68ecab75785b0f1b4a55ef626bce8c4ff4cc0f48.txt",
+          "sha256": "53ba2fb0b2202b8d05f54ae381920664af1f023112f91d8ae641e7c74bd78fe1",
+          "hits": [
+            {
+              "term": "real transactional caller validates and persists aggregate",
+              "start_line": 134,
+              "end_line": 145,
+              "excerpt": "    @Transactional\n    @Override\n    public CommandProcessingResult submitApplication(final JsonCommand command) {\n        try {\n            // Validations (prior assembling)\n            this.loanApplicationValidator.validateForCreate(command);\n            // Assembling loan\n            final Loan loan = this.loanAssembler.assembleFrom(command);\n            // Validations (further validations which requires the assembling first)\n            this.loanApplicationValidator.validateForCreate(loan);\n            // Need to flush to gather loan id\n            this.loanRepositoryWrapper.saveAndFlush(loan);",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java#L134-L145"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "PARALLEL_PRIMARY_DDD_MECHANISM_REFERENCES_NOT_A_DEPENDENCY_CLAIM"
+    },
+    {
+      "concept_id": "aggregate-root",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.067253+00:00",
+          "http_status": 200,
+          "sha256": "ab0066a38af5255a05ff712edcf88e4c81230c61853a3bf30980446d7c925d30",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e9f81ba1da63875acbfb6c6c8b9043fd206e8a896b4ef0b52bdb33435669e4a5.txt",
+          "line_count": 121,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.585128+00:00",
+          "http_status": 200,
+          "sha256": "238211b202afe288a4f67f19e1b1ec542c3de05c521d73ee48869dec5182a846",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/0f81fd8df835215f84dfaf52de67f3a5158c3c9c4450c79b19dd4bb8ec892062.txt",
+          "line_count": 101,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+          "query": "Pinned primary caller connecting aggregate construction or dual-write migration phases.",
+          "observed_utc": "2026-10-15T03:51:43.429420+00:00",
+          "http_status": 200,
+          "sha256": "88f5d518de25415840148d4345c134f8a544d0224ef23881e044fdb6efdd9d63",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/70b805389c60ce4d67fd624b60651909444736669a189c9d79a837396782cf12.txt",
+          "line_count": 587,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.067414+00:00",
+          "http_status": 200,
+          "sha256": "7014a617383de097e5c384ae9abb661c48105e140c63d244dbc1b607c9d4f036",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/67a44645a81530282a1c9187127312cee15c5a4a61f0e9811ffd9f60057ed144.txt",
+          "line_count": 158,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "apache/fineract",
+          "path": "fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+          "original_url": "https://github.com/apache/fineract/blob/HEAD/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:19:05.055108Z",
+          "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+          "line_count": 1860,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /**\n2:  * Licensed to the Apache Software Foundation (ASF) under one\n3:  * or more contributor license agreements. See the NOTICE file\n4:  * distributed with this work for additional information\n5:  * regarding copyright ownership. The ASF licenses this file\n6:  * to you under the Apache License, Version 2.0 (the\n7:  * \"License\"); you may not use this file except in compliance\n8:  * with the License. You may obtain a copy of the License at\n9:  *\n10:  * http://www.apache.org/licenses/LICENSE-2.0\n11:  *\n12:  * Unless required by applicable law or agreed to in writing,\n13:  * software distributed under the License is distributed on an\n14:  * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n15:  * KIND, either express or implied. See the License for the\n16:  * specific language governing permissions and limitations\n17:  * under the License.\n18:  */\n19: package org.apache.fineract.portfolio.loanaccount.domain;\n20: \n21: import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.CUMULATIVE;\n22: import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;\n23: \n24: import jakarta.persistence.CascadeType;\n25: import jakarta.persistence.Column;\n26: import jakarta.persistence.Convert;\n27: import jakarta.persistence.Embedded;\n28: import jakarta.persistence.Entity;\n29: import jakarta.persistence.Enumerated;\n30: import jakarta.persistence.FetchType;\n31: import jakarta.persistence.JoinColumn;\n32: import jakarta.persistence.JoinTable;\n33: import jakarta.persistence.ManyToOne;\n34: import jakarta.persistence.OneToMany;\n35: import jakarta.persistence.OneToOne;\n36: import jakarta.persistence.OrderBy;\n37: import jakarta.persistence.Table;\n38: import jakarta.persistence.UniqueConstraint;\n39: import jakarta.persistence.Version;\n40: import jakarta.validation.constraints.NotNull;",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "path": "LICENSE_RELEASE"
+          },
+          "repository_metadata": {
+            "stars": 2550,
+            "observed_utc": "2026-10-15T01:18:55.658481Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T16:42:29Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "apache/fineract",
+          "path": "fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+          "original_url": "https://github.com/apache/fineract/blob/HEAD/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:57:59.374873Z",
+          "sha256": "53ba2fb0b2202b8d05f54ae381920664af1f023112f91d8ae641e7c74bd78fe1",
+          "line_count": 897,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b731dbeb13fd3fe2614e9d1c68ecab75785b0f1b4a55ef626bce8c4ff4cc0f48.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /**\n2:  * Licensed to the Apache Software Foundation (ASF) under one\n3:  * or more contributor license agreements. See the NOTICE file\n4:  * distributed with this work for additional information\n5:  * regarding copyright ownership. The ASF licenses this file\n6:  * to you under the Apache License, Version 2.0 (the\n7:  * \"License\"); you may not use this file except in compliance\n8:  * with the License. You may obtain a copy of the License at\n9:  *\n10:  * http://www.apache.org/licenses/LICENSE-2.0\n11:  *\n12:  * Unless required by applicable law or agreed to in writing,\n13:  * software distributed under the License is distributed on an\n14:  * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n15:  * KIND, either express or implied. See the License for the\n16:  * specific language governing permissions and limitations\n17:  * under the License.\n18:  */\n19: package org.apache.fineract.portfolio.loanaccount.service;\n20: \n21: import static org.apache.fineract.portfolio.loanaccount.domain.Loan.APPROVED_ON_DATE;\n22: import static org.apache.fineract.portfolio.loanaccount.domain.Loan.PARAM_STATUS;\n23: import static org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD;\n24: \n25: import com.google.gson.JsonArray;\n26: import com.google.gson.JsonElement;\n27: import com.google.gson.JsonObject;\n28: import jakarta.persistence.PersistenceException;\n29: import java.math.BigDecimal;\n30: import java.time.LocalDate;\n31: import java.time.temporal.ChronoField;\n32: import java.util.ArrayList;\n33: import java.util.HashMap;\n34: import java.util.LinkedHashMap;\n35: import java.util.List;\n36: import java.util.Map;\n37: import java.util.Optional;\n38: import java.util.Set;\n39: import lombok.RequiredArgsConstructor;\n40: import lombok.extern.slf4j.Slf4j;",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "path": "LICENSE_RELEASE"
+          },
+          "repository_metadata": {
+            "stars": 2550,
+            "observed_utc": "2026-10-15T01:18:55.658481Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T16:42:29Z"
+          }
+        }
+      ],
+      "mechanism": "A raiz do agregado é o objeto que identifica o conjunto e recebe a operação que será aplicada nele. O Axon expõe identidade e tratamento de mensagens pelo wrapper Aggregate. A implementação seleciona um handler a partir da raiz e encaminha um comando destinado a um filho somente quando encontra esse filho dentro do agregado; a ausência produz erro. No Fineract, Loan atua como raiz no recorte: seu método de inclusão de parcela ajusta a associação do filho e o incorpora à coleção, e o serviço grava o empréstimo como objeto principal.",
+      "limits": "A API e a implementação do Axon demonstram uma entrada de mensagens mediada pela raiz e a resolução de filhos dentro dela. Isso não afirma que a linguagem Java impeça todo acesso direto a objetos internos. No Fineract, os métodos citados mostram o papel do Loan nessas operações; eles não provam uma disciplina universal de acesso exclusivo à raiz em todo o produto. Axon é uma referência de framework independente e não uma dependência atribuída ao Fineract. A raiz não é inferida de uma anotação JPA.",
+      "base_scope": "Aggregate exposes identity and message handling; AnnotatedAggregate executes handlers against aggregateRoot; child command forwarding resolves the child from that root and rejects missing children.",
+      "application_scope": "Loan mediates association of repayment installments and is the submitted object validated and saved by the application service.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e9f81ba1da63875acbfb6c6c8b9043fd206e8a896b4ef0b52bdb33435669e4a5.txt",
+          "sha256": "ab0066a38af5255a05ff712edcf88e4c81230c61853a3bf30980446d7c925d30",
+          "hits": [
+            {
+              "term": "aggregate identity",
+              "start_line": 49,
+              "end_line": 62,
+              "excerpt": "     * Get the unique identifier of this aggregate, represented as a String.\n     *\n     * @return The aggregate's identifier as a String\n     */\n    default String identifierAsString() {\n        return Objects.toString(identifier(), null);\n    }\n\n    /**\n     * Get the unique identifier of this aggregate\n     *\n     * @return The aggregate's identifier\n     */\n    Object identifier();",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java#L49-L62"
+            },
+            {
+              "term": "aggregate message handling boundary",
+              "start_line": 69,
+              "end_line": 81,
+              "excerpt": "     */\n    Long version();\n\n    /**\n     * Handle the given {@code message} on the aggregate root or one of its child entities.\n     *\n     * @param message The message to be handled by the aggregate\n     * @return The result of message handling. Might returns {@code null} if for example handling a\n     * {@link CommandMessage} yields no results\n     *\n     * @throws Exception in case one is triggered during message processing\n     */\n    Object handle(Message<?> message) throws Exception;",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java#L69-L81"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/0f81fd8df835215f84dfaf52de67f3a5158c3c9c4450c79b19dd4bb8ec892062.txt",
+          "sha256": "238211b202afe288a4f67f19e1b1ec542c3de05c521d73ee48869dec5182a846",
+          "hits": [
+            {
+              "term": "repository loads aggregate by aggregate identifier",
+              "start_line": 35,
+              "end_line": 59,
+              "excerpt": " * @author Allard Buijze\n * @since 0.1\n */\npublic interface Repository<T> extends ScopeAware {\n\n    /**\n     * Load the aggregate with the given unique identifier. No version checks are done when loading an aggregate,\n     * meaning that concurrent access will not be checked for.\n     *\n     * @param aggregateIdentifier The identifier of the aggregate to load\n     * @return The aggregate root with the given identifier.\n     * @throws AggregateNotFoundException if aggregate with given id cannot be found\n     */\n    Aggregate<T> load(@Nonnull String aggregateIdentifier);\n\n    /**\n     * Load the aggregate with the given unique identifier.\n     *\n     * @param aggregateIdentifier The identifier of the aggregate to load\n     * @param expectedVersion     The expected version of the loaded aggregate\n     * @return The aggregate root with the given identifier.\n     *\n     * @throws AggregateNotFoundException if aggregate with given id cannot be found\n     */\n    Aggregate<T> load(@Nonnull String aggregateIdentifier, @Nullable Long expectedVersion);",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java#L35-L59"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/70b805389c60ce4d67fd624b60651909444736669a189c9d79a837396782cf12.txt",
+          "sha256": "88f5d518de25415840148d4345c134f8a544d0224ef23881e044fdb6efdd9d63",
+          "hits": [
+            {
+              "term": "message handling executes within aggregate lifecycle",
+              "start_line": 394,
+              "end_line": 405,
+              "excerpt": "    public Object handle(Message<?> message) throws Exception {\n        Callable<Object> messageHandling;\n\n        if (message instanceof CommandMessage) {\n            messageHandling = () -> handle((CommandMessage<?>) message);\n        } else if (message instanceof EventMessage) {\n            messageHandling = () -> handle((EventMessage<?>) message);\n        } else {\n            throw new IllegalArgumentException(\"Unsupported message type: \" + message.getClass());\n        }\n\n        return executeWithResult(messageHandling);",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java#L394-L405"
+            },
+            {
+              "term": "handler receives aggregate root",
+              "start_line": 438,
+              "end_line": 454,
+              "excerpt": "    private Object findHandlerAndHandleCommand(List<MessageHandlingMember<? super T>> handlers,\n                                               CommandMessage<?> command) throws Exception {\n        //noinspection unchecked\n        return handlers.stream()\n                       .filter(mh -> mh.unwrap(ForwardingCommandMessageHandlingMember.class)\n                                       .map(c -> c.canForward(command, aggregateRoot))\n                                       .orElse(true))\n                       .findFirst()\n                       .orElseThrow(() -> new AggregateEntityNotFoundException(\n                               \"Aggregate cannot handle command [\" + command.getCommandName()\n                                       + \"], as there is no entity instance within the aggregate to forward it to.\"\n                       ))\n                       .handle(command, aggregateRoot);\n    }\n\n    private Object handle(EventMessage<?> eventMessage) {\n        inspector.publish(eventMessage, aggregateRoot);",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java#L438-L454"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/67a44645a81530282a1c9187127312cee15c5a4a61f0e9811ffd9f60057ed144.txt",
+          "sha256": "7014a617383de097e5c384ae9abb661c48105e140c63d244dbc1b607c9d4f036",
+          "hits": [
+            {
+              "term": "child must resolve within current aggregate",
+              "start_line": 115,
+              "end_line": 126,
+              "excerpt": "    @Override\n    public Object handle(@Nonnull Message<?> message, @Nullable P target) throws Exception {\n        C childEntity = childEntityResolver.apply((CommandMessage<?>) message, target);\n        if (childEntity == null) {\n            throw new AggregateEntityNotFoundException(\n                    \"Aggregate cannot handle command [\" + ((CommandMessage<?>) message).getCommandName()\n                            + \"], as there is no entity instance within the aggregate to forward it to.\"\n            );\n        }\n\n        return interceptorChain(childEntity.getClass())\n                .handle(message, childEntity, childHandler);",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java#L115-L126"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt",
+          "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+          "hits": [
+            {
+              "term": "root association operation",
+              "start_line": 1410,
+              "end_line": 1417,
+              "excerpt": "    public Integer getLoanRepaymentScheduleInstallmentsSize() {\n        return this.repaymentScheduleInstallments.size();\n    }\n\n    public void addLoanRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment installment) {\n        installment.updateLoan(this);\n        this.repaymentScheduleInstallments.add(installment);\n    }",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L1410-L1417"
+            },
+            {
+              "term": "derived state belongs to Loan",
+              "start_line": 602,
+              "end_line": 612,
+              "excerpt": "    public void updateLoanSummaryForUndoWaiveCharge(final BigDecimal amountWaived, final boolean isPenalty) {\n        if (isPenalty) {\n            this.summary.updatePenaltyChargesWaived(this.summary.getTotalPenaltyChargesWaived().subtract(amountWaived));\n            this.summary.updatePenaltyChargeOutstanding(this.summary.getTotalPenaltyChargesOutstanding().add(amountWaived));\n        } else {\n            this.summary.updateFeeChargesWaived(this.summary.getTotalFeeChargesWaived().subtract(amountWaived));\n            this.summary.updateFeeChargeOutstanding(this.summary.getTotalFeeChargesOutstanding().add(amountWaived));\n        }\n        this.summary.updateTotalOutstanding(this.summary.getTotalOutstanding().add(amountWaived));\n        this.summary.updateTotalWaived(this.summary.getTotalWaived().subtract(amountWaived));\n    }",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L602-L612"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b731dbeb13fd3fe2614e9d1c68ecab75785b0f1b4a55ef626bce8c4ff4cc0f48.txt",
+          "sha256": "53ba2fb0b2202b8d05f54ae381920664af1f023112f91d8ae641e7c74bd78fe1",
+          "hits": [
+            {
+              "term": "application persists root Loan",
+              "start_line": 134,
+              "end_line": 145,
+              "excerpt": "    @Transactional\n    @Override\n    public CommandProcessingResult submitApplication(final JsonCommand command) {\n        try {\n            // Validations (prior assembling)\n            this.loanApplicationValidator.validateForCreate(command);\n            // Assembling loan\n            final Loan loan = this.loanAssembler.assembleFrom(command);\n            // Validations (further validations which requires the assembling first)\n            this.loanApplicationValidator.validateForCreate(loan);\n            // Need to flush to gather loan id\n            this.loanRepositoryWrapper.saveAndFlush(loan);",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java#L134-L145"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "PARALLEL_PRIMARY_DDD_MECHANISM_REFERENCES_NOT_A_DEPENDENCY_CLAIM"
+    },
+    {
+      "concept_id": "chain-of-responsibility",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "fastapi/fastapi",
+          "revision": "49a09a0d4e876b4e7d6d87fc049710263aaeaa7e",
+          "path": "fastapi/applications.py",
+          "url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/applications.py",
+          "raw_url": "https://raw.githubusercontent.com/fastapi/fastapi/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/applications.py",
+          "query": "Airflow consumes FastAPI; confirm actual chain builder and CORSMiddleware re-export.",
+          "observed_utc": "2026-10-15T04:01:50.030125+00:00",
+          "http_status": 200,
+          "sha256": "e16035df3fbc35d8f2e457c8e4e8a90f058c2e620fd4cee5ee6aa96288b4bab1",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/0e237358a34e960a559f196aaf53fcad4e82fdfca1129730e256113397f666a1.txt",
+          "line_count": 4838,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "fastapi/fastapi",
+            "revision": "49a09a0d4e876b4e7d6d87fc049710263aaeaa7e",
+            "path": "LICENSE",
+            "url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/fastapi/fastapi/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/LICENSE",
+            "query": "Full primary license text for wave-two source references.",
+            "observed_utc": "2026-10-15T04:02:16.766941+00:00",
+            "http_status": 200,
+            "sha256": "4ec89ffc81485b97fec584b2d4a961032eeffe834453894fd9c1274906cc744e",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/5ace5a48b70951e60ae6d9c8c9a80350303f5a85d81f31de92f06d12a89d1cf4.txt",
+            "line_count": 21,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 103098,
+            "observed_utc": "2026-10-15T01:18:56.165068Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T20:38:38Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "fastapi/fastapi",
+          "revision": "49a09a0d4e876b4e7d6d87fc049710263aaeaa7e",
+          "path": "fastapi/middleware/cors.py",
+          "url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/middleware/cors.py",
+          "raw_url": "https://raw.githubusercontent.com/fastapi/fastapi/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/middleware/cors.py",
+          "query": "Airflow consumes FastAPI; confirm actual chain builder and CORSMiddleware re-export.",
+          "observed_utc": "2026-10-15T04:01:50.030391+00:00",
+          "http_status": 200,
+          "sha256": "ca7c2359066873fbdb873677fd95dc7a8692aec9471473dda0ce76ad7af45945",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/9c39c652f7b8307fe48a04d5537f4a81aeebc84e660af94244e6ed840a9e3f3e.txt",
+          "line_count": 1,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "fastapi/fastapi",
+            "revision": "49a09a0d4e876b4e7d6d87fc049710263aaeaa7e",
+            "path": "LICENSE",
+            "url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/fastapi/fastapi/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/LICENSE",
+            "query": "Full primary license text for wave-two source references.",
+            "observed_utc": "2026-10-15T04:02:16.766941+00:00",
+            "http_status": 200,
+            "sha256": "4ec89ffc81485b97fec584b2d4a961032eeffe834453894fd9c1274906cc744e",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/5ace5a48b70951e60ae6d9c8c9a80350303f5a85d81f31de92f06d12a89d1cf4.txt",
+            "line_count": 21,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 103098,
+            "observed_utc": "2026-10-15T01:18:56.165068Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T20:38:38Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "Kludex/starlette",
+          "revision": "7b2948fe7b7fff28bb018607d54cd4dfa518910e",
+          "path": "starlette/applications.py",
+          "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/applications.py",
+          "raw_url": "https://raw.githubusercontent.com/Kludex/starlette/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/applications.py",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.352995+00:00",
+          "http_status": 200,
+          "sha256": "81887e0baf7dda5811ba4b7a67e49cbbab7ae97b321ba72e475c797f989690e9",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/ae65ee5b083477ab4c9e6b34733d3d01c3377796ee73b385f55b8968d99d8316.txt",
+          "line_count": 124,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "Kludex/starlette",
+            "revision": "7b2948fe7b7fff28bb018607d54cd4dfa518910e",
+            "path": "LICENSE.md",
+            "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md",
+            "raw_url": "https://raw.githubusercontent.com/Kludex/starlette/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md",
+            "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+            "observed_utc": "2026-10-15T04:00:40.367465+00:00",
+            "http_status": 200,
+            "sha256": "dcb95677a02240243187e964f941847d19b17821cf99e5afae684fab328c19bf",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/b6be64053c84c82cb1f5dcdd0a7870e104db6d4c62bab02ed8274bfd3247dea0.txt",
+            "line_count": 27,
+            "status": "READ",
+            "license_spdx": "BSD-3-Clause",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 12664,
+            "observed_utc": "2026-10-15T04:01:50.689394+00:00",
+            "archived": false,
+            "pushed_at": "2026-10-13T07:53:59Z",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/starlette-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "Kludex/starlette",
+          "revision": "7b2948fe7b7fff28bb018607d54cd4dfa518910e",
+          "path": "starlette/middleware/cors.py",
+          "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py",
+          "raw_url": "https://raw.githubusercontent.com/Kludex/starlette/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.357677+00:00",
+          "http_status": 200,
+          "sha256": "fce9d679b52dd9670f38216daacdcab159c6995cdb5256ee5162dc58d25a5c4f",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/cafa32b8e67fba7de6e4a24d350cae8d58a0fd5885f547c96acaad4850ee5023.txt",
+          "line_count": 177,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "Kludex/starlette",
+            "revision": "7b2948fe7b7fff28bb018607d54cd4dfa518910e",
+            "path": "LICENSE.md",
+            "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md",
+            "raw_url": "https://raw.githubusercontent.com/Kludex/starlette/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md",
+            "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+            "observed_utc": "2026-10-15T04:00:40.367465+00:00",
+            "http_status": 200,
+            "sha256": "dcb95677a02240243187e964f941847d19b17821cf99e5afae684fab328c19bf",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/b6be64053c84c82cb1f5dcdd0a7870e104db6d4c62bab02ed8274bfd3247dea0.txt",
+            "line_count": 27,
+            "status": "READ",
+            "license_spdx": "BSD-3-Clause",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 12664,
+            "observed_utc": "2026-10-15T04:01:50.689394+00:00",
+            "archived": false,
+            "pushed_at": "2026-10-13T07:53:59Z",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/starlette-metadata.json"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "apache/airflow",
+          "path": "airflow-core/src/airflow/api_fastapi/app.py",
+          "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+          "original_url": "https://github.com/apache/airflow/blob/main/airflow-core/src/airflow/api_fastapi/app.py",
+          "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/app.py",
+          "raw_url": "https://raw.githubusercontent.com/apache/airflow/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/app.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:22:34.093299Z",
+          "sha256": "887871671bae1d84d69f505e82b6af6fc89e3f66c419f4ae9bc9d5a0f6474435",
+          "line_count": 316,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fbfeaffd58e52fb6457a795440746ac11ee284e542e69ca4c84e4871ca7fdceb.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # Licensed to the Apache Software Foundation (ASF) under one\n2: # or more contributor license agreements.  See the NOTICE file\n3: # distributed with this work for additional information\n4: # regarding copyright ownership.  The ASF licenses this file\n5: # to you under the Apache License, Version 2.0 (the\n6: # \"License\"); you may not use this file except in compliance\n7: # with the License.  You may obtain a copy of the License at\n8: #\n9: #   http://www.apache.org/licenses/LICENSE-2.0\n10: #\n11: # Unless required by applicable law or agreed to in writing,\n12: # software distributed under the License is distributed on an\n13: # \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n14: # KIND, either express or implied.  See the License for the\n15: # specific language governing permissions and limitations\n16: # under the License.\n17: from __future__ import annotations\n18: \n19: import logging\n20: import threading\n21: from contextlib import AsyncExitStack, asynccontextmanager\n22: from functools import cache\n23: from typing import TYPE_CHECKING\n24: from urllib.parse import urlsplit\n25: \n26: from fastapi import FastAPI\n27: from fastapi.routing import Mount\n28: from starlette.middleware import Middleware\n29: \n30: from airflow import settings\n31: from airflow.api_fastapi.common.dagbag import create_dag_bag\n32: from airflow.api_fastapi.common.exceptions import init_error_handlers\n33: from airflow.api_fastapi.common.http_access_log import HttpAccessLogMiddleware\n34: from airflow.api_fastapi.common.http_metrics import HttpMetricsMiddleware\n35: from airflow.api_fastapi.core_api.app import (\n36:     init_config,\n37:     init_flask_plugins,\n38:     init_middlewares,\n39:     init_views,\n40: )",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "repo": "apache/airflow",
+            "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T01:28:23.637317Z",
+            "http_status": 200,
+            "sha256": "cb0d37346e7916e782a2904dc5b8c8cdb8424eac5effb91ac409329c883619d4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-e407ecd8e696471c452b9f8a65e0e430dcb1c77634383ae778ad501de0d16fee.txt",
+            "excerpt": "                              Apache License\n                        Version 2.0, January 2004\n                     http://www.apache.org/licenses/\n\nTERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n1. Definitions.\n\n   \"License\" shall mean the terms and conditions for use, reproduction,\n   and distribution as defined by Sections 1 through 9 of this document.\n\n   \"Licensor\" shall mean the copyright owner or entity authorized by\n   the copyright owner that is granting the License.\n\n   ",
+            "kind": "LICENSE",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e407ecd8e696471c452b9f8a65e0e430dcb1c77634383ae778ad501de0d16fee.txt",
+            "local_verified_utc": "2026-10-15T03:46:45.601980+00:00",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 47178,
+            "observed_utc": "2026-10-15T01:13:41.893102Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T22:43:42Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "apache/airflow",
+          "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+          "path": "airflow-core/src/airflow/api_fastapi/core_api/app.py",
+          "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py",
+          "raw_url": "https://raw.githubusercontent.com/apache/airflow/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.371657+00:00",
+          "http_status": 200,
+          "sha256": "679130974d13ddfea0815203e064e13bfa234e94fd0bdd609b1e1f145ddc8f1b",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e40a6908b98785cac2ac606be6bcc353bad8196086210743c47bb29891d5a328.txt",
+          "line_count": 294,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "repo": "apache/airflow",
+            "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T01:28:23.637317Z",
+            "http_status": 200,
+            "sha256": "cb0d37346e7916e782a2904dc5b8c8cdb8424eac5effb91ac409329c883619d4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-e407ecd8e696471c452b9f8a65e0e430dcb1c77634383ae778ad501de0d16fee.txt",
+            "excerpt": "                              Apache License\n                        Version 2.0, January 2004\n                     http://www.apache.org/licenses/\n\nTERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n1. Definitions.\n\n   \"License\" shall mean the terms and conditions for use, reproduction,\n   and distribution as defined by Sections 1 through 9 of this document.\n\n   \"Licensor\" shall mean the copyright owner or entity authorized by\n   the copyright owner that is granting the License.\n\n   ",
+            "kind": "LICENSE",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e407ecd8e696471c452b9f8a65e0e430dcb1c77634383ae778ad501de0d16fee.txt",
+            "local_verified_utc": "2026-10-15T03:46:45.601980+00:00",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 47178,
+            "observed_utc": "2026-10-15T01:13:41.893102Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T22:43:42Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "apache/airflow",
+          "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+          "path": "airflow-core/src/airflow/api_fastapi/common/http_access_log.py",
+          "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/common/http_access_log.py",
+          "raw_url": "https://raw.githubusercontent.com/apache/airflow/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/common/http_access_log.py",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.379660+00:00",
+          "http_status": 200,
+          "sha256": "e9aa3810923091c4eb1285d6b4bc11b2f8f46d8a859b141105af888e1c5bbebe",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e5ad68ee48923c82abcf67c3cc0632cfff4ff33507b3372f523876d379ac77a3.txt",
+          "line_count": 138,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "repo": "apache/airflow",
+            "revision": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+            "path": "LICENSE",
+            "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T01:28:23.637317Z",
+            "http_status": 200,
+            "sha256": "cb0d37346e7916e782a2904dc5b8c8cdb8424eac5effb91ac409329c883619d4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-e407ecd8e696471c452b9f8a65e0e430dcb1c77634383ae778ad501de0d16fee.txt",
+            "excerpt": "                              Apache License\n                        Version 2.0, January 2004\n                     http://www.apache.org/licenses/\n\nTERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n1. Definitions.\n\n   \"License\" shall mean the terms and conditions for use, reproduction,\n   and distribution as defined by Sections 1 through 9 of this document.\n\n   \"Licensor\" shall mean the copyright owner or entity authorized by\n   the copyright owner that is granting the License.\n\n   ",
+            "kind": "LICENSE",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-e407ecd8e696471c452b9f8a65e0e430dcb1c77634383ae778ad501de0d16fee.txt",
+            "local_verified_utc": "2026-10-15T03:46:45.601980+00:00",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 47178,
+            "observed_utc": "2026-10-15T01:13:41.893102Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T22:43:42Z"
+          }
+        }
+      ],
+      "mechanism": "A cadeia distribui responsabilidades entre componentes que podem encaminhar o pedido ou responder sem continuar. O FastAPI constrói essa cadeia envolvendo o próximo aplicativo em cada middleware. O middleware CORS do Starlette delega os pedidos comuns, mas responde ao preflight de OPTIONS e retorna antes de chamar o próximo componente. A API real do Airflow registra esses middlewares; seu middleware de log captura o envio da resposta e chama o próximo aplicativo ASGI para continuar o processamento.",
+      "limits": "O FastAPI possui seu próprio build_middleware_stack, por isso a prova usa sua implementação concreta e não presume que ele execute a implementação homônima do Starlette. O módulo CORS do FastAPI reexporta a classe do Starlette. O Airflow registra CORS quando há configuração correspondente; o recorte não demonstra uma configuração ativa, uma requisição de produção ou uma execução de DAG. Os commits das bibliotecas são referências fixas de implementação e não uma medição das versões instaladas em algum ambiente Airflow.",
+      "base_scope": "FastAPI builds nested middleware around its router. Starlette add_middleware registers handlers; CORSMiddleware either sends a preflight response and returns or forwards ordinary requests to the next ASGI app.",
+      "application_scope": "Airflow API initializes middleware, conditionally installs CORS and uses HttpAccessLogMiddleware whose __call__ delegates to the next application while observing its response.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/applications.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/0e237358a34e960a559f196aaf53fcad4e82fdfca1129730e256113397f666a1.txt",
+          "sha256": "e16035df3fbc35d8f2e457c8e4e8a90f058c2e620fd4cee5ee6aa96288b4bab1",
+          "hits": [
+            {
+              "term": "actual FastAPI middleware chain ordering",
+              "start_line": 1067,
+              "end_line": 1078,
+              "excerpt": "        middleware = (\n            [\n                Middleware(ServerErrorMiddleware, handler=error_handler, debug=debug),\n                Middleware(ExceptionTelemetryMiddleware),\n            ]\n            + self.user_middleware\n            + [\n                Middleware(\n                    ExceptionMiddleware,\n                    handlers=exception_handlers,\n                    debug=debug,\n                ),",
+              "url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/applications.py#L1067-L1078"
+            },
+            {
+              "term": "each middleware wraps the next app",
+              "start_line": 1102,
+              "end_line": 1105,
+              "excerpt": "        app = self.router\n        for cls, args, kwargs in reversed(middleware):\n            app = cls(app, *args, **kwargs)\n        return app",
+              "url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/applications.py#L1102-L1105"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/middleware/cors.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/9c39c652f7b8307fe48a04d5537f4a81aeebc84e660af94244e6ed840a9e3f3e.txt",
+          "sha256": "ca7c2359066873fbdb873677fd95dc7a8692aec9471473dda0ce76ad7af45945",
+          "hits": [
+            {
+              "term": "FastAPI uses Starlette CORS implementation",
+              "start_line": 1,
+              "end_line": 1,
+              "excerpt": "from starlette.middleware.cors import CORSMiddleware as CORSMiddleware  # noqa",
+              "url": "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/middleware/cors.py#L1-L1"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/applications.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/ae65ee5b083477ab4c9e6b34733d3d01c3377796ee73b385f55b8968d99d8316.txt",
+          "sha256": "81887e0baf7dda5811ba4b7a67e49cbbab7ae97b321ba72e475c797f989690e9",
+          "hits": [
+            {
+              "term": "middleware registration order",
+              "start_line": 104,
+              "end_line": 107,
+              "excerpt": "    def add_middleware(self, middleware_class: _MiddlewareFactory[P], *args: P.args, **kwargs: P.kwargs) -> None:\n        if self.middleware_stack is not None:  # pragma: no cover\n            raise RuntimeError(\"Cannot add middleware after an application has started\")\n        self.user_middleware.insert(0, Middleware(middleware_class, *args, **kwargs))",
+              "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/applications.py#L104-L107"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/cafa32b8e67fba7de6e4a24d350cae8d58a0fd5885f547c96acaad4850ee5023.txt",
+          "sha256": "fce9d679b52dd9670f38216daacdcab159c6995cdb5256ee5162dc58d25a5c4f",
+          "hits": [
+            {
+              "term": "delegate or short circuit preflight",
+              "start_line": 77,
+              "end_line": 91,
+              "excerpt": "    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:\n        if scope[\"type\"] != \"http\":  # pragma: no cover\n            await self.app(scope, receive, send)\n            return\n\n        method = scope[\"method\"]\n        headers = Headers(scope=scope)\n        origin = headers.get(\"origin\")\n\n        if origin is not None and method == \"OPTIONS\" and \"access-control-request-method\" in headers:\n            response = self.preflight_response(request_headers=headers)\n            await response(scope, receive, send)\n            return\n\n        await self.simple_response(scope, receive, send, request_headers=headers)",
+              "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py#L77-L91"
+            },
+            {
+              "term": "ordinary response delegates to next app",
+              "start_line": 145,
+              "end_line": 151,
+              "excerpt": "        return PlainTextResponse(\"OK\", status_code=200, headers=headers)\n\n    async def simple_response(self, scope: Scope, receive: Receive, send: Send, request_headers: Headers) -> None:\n        send = functools.partial(self.send, send=send, request_headers=request_headers)\n        await self.app(scope, receive, send)\n\n    async def send(self, message: Message, send: Send, request_headers: Headers) -> None:",
+              "url": "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py#L145-L151"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/app.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/fbfeaffd58e52fb6457a795440746ac11ee284e542e69ca4c84e4871ca7fdceb.txt",
+          "sha256": "887871671bae1d84d69f505e82b6af6fc89e3f66c419f4ae9bc9d5a0f6474435",
+          "hits": [
+            {
+              "term": "actual application imports FastAPI middleware initializer",
+              "start_line": 26,
+              "end_line": 40,
+              "excerpt": "from fastapi import FastAPI\nfrom fastapi.routing import Mount\nfrom starlette.middleware import Middleware\n\nfrom airflow import settings\nfrom airflow.api_fastapi.common.dagbag import create_dag_bag\nfrom airflow.api_fastapi.common.exceptions import init_error_handlers\nfrom airflow.api_fastapi.common.http_access_log import HttpAccessLogMiddleware\nfrom airflow.api_fastapi.common.http_metrics import HttpMetricsMiddleware\nfrom airflow.api_fastapi.core_api.app import (\n    init_config,\n    init_flask_plugins,\n    init_middlewares,\n    init_views,\n)",
+              "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/app.py#L26-L40"
+            },
+            {
+              "term": "application invokes initializer",
+              "start_line": 148,
+              "end_line": 160,
+              "excerpt": "        app.mount(\"/execution\", task_exec_api_app)\n\n    if \"all\" in apps_list or \"core\" in apps_list:\n        app.state.dag_bag = dag_bag\n        init_plugins(app)\n        init_auth_manager(app)\n        init_flask_plugins(app)\n        init_views(app)  # Core views need to be the last routes added - it has a catch all route\n        init_error_handlers(app)\n        init_middlewares(app)\n\n    init_api_metrics(app)\n    init_access_logging(app)",
+              "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/app.py#L148-L160"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e40a6908b98785cac2ac606be6bcc353bad8196086210743c47bb29891d5a328.txt",
+          "sha256": "679130974d13ddfea0815203e064e13bfa234e94fd0bdd609b1e1f145ddc8f1b",
+          "hits": [
+            {
+              "term": "actual conditional CORS registration",
+              "start_line": 268,
+              "end_line": 276,
+              "excerpt": "    if allow_origins or allow_methods or allow_headers or allow_origin_regex:\n        app.add_middleware(\n            CORSMiddleware,\n            allow_origins=allow_origins,\n            allow_origin_regex=allow_origin_regex,\n            allow_credentials=True,\n            allow_methods=allow_methods,\n            allow_headers=allow_headers,\n        )",
+              "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py#L268-L276"
+            },
+            {
+              "term": "actual middleware registration",
+              "start_line": 281,
+              "end_line": 294,
+              "excerpt": "def init_middlewares(app: FastAPI) -> None:\n    from airflow.api_fastapi.app import get_auth_manager\n    from airflow.api_fastapi.auth.middlewares.refresh_token import JWTRefreshMiddleware\n\n    app.add_middleware(JWTRefreshMiddleware)\n\n    for middleware_cls, middleware_kwargs in get_auth_manager().get_fastapi_middlewares():\n        app.add_middleware(middleware_cls, **middleware_kwargs)\n\n    # GZipMiddleware must be inside HttpMetricsMiddleware and HttpAccessLogMiddleware so that both\n    # capture the full end-to-end duration including compression time. Both are installed by\n    # ``create_app`` after this function returns — do not reorder those calls.\n    # See https://github.com/apache/airflow/issues/60165\n    app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)",
+              "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py#L281-L294"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/common/http_access_log.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e5ad68ee48923c82abcf67c3cc0632cfff4ff33507b3372f523876d379ac77a3.txt",
+          "sha256": "e9aa3810923091c4eb1285d6b4bc11b2f8f46d8a859b141105af888e1c5bbebe",
+          "hits": [
+            {
+              "term": "real next-app delegation and response observation",
+              "start_line": 81,
+              "end_line": 109,
+              "excerpt": "    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:\n        if scope[\"type\"] != \"http\":\n            await self.app(scope, receive, send)\n            return\n\n        start = time.monotonic_ns()\n        response: Message | None = None\n\n        async def capture_send(message: Message) -> None:\n            nonlocal response\n            if message[\"type\"] == \"http.response.start\":\n                response = message\n            await send(message)\n\n        request_id: str | None = None\n        for name, value in scope[\"headers\"]:\n            if name == self.request_id_header:\n                request_id = value.decode(\"ascii\", errors=\"replace\")\n                break\n\n        ctx = (\n            structlog.contextvars.bound_contextvars(request_id=request_id)\n            if request_id is not None\n            else contextlib.nullcontext()\n        )\n\n        with ctx:\n            try:\n                await self.app(scope, receive, capture_send)",
+              "url": "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/common/http_access_log.py#L81-L109"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "AIRFLOW_IMPORTS_FASTAPI_AND_STARLETTE_APIS; FIXED_SOURCE_COMMITS_DO_NOT_ASSERT_INSTALLED_LIBRARY_VERSIONS"
+    },
+    {
+      "concept_id": "feature-flags",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "repo": "flippercloud/flipper",
+          "revision": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+          "path": "lib/flipper/feature.rb",
+          "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/feature.rb",
+          "raw_url": "https://raw.githubusercontent.com/flippercloud/flipper/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/feature.rb",
+          "observed_utc": "2026-10-15T03:46:49.845417+00:00",
+          "http_status": 200,
+          "sha256": "9a308a5bb8a119e530ae6bfb55b7c328e43a73df9f2815a13ece9a1efa28f251",
+          "line_count": 513,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/4dbea3e94c56e53a7bdb72bdf70c6086c8e8a81e2131ff9e213e0301067205db.txt",
+          "kind": "FILE",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "repo": "flippercloud/flipper",
+            "revision": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+            "path": "LICENSE",
+            "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/flippercloud/flipper/1d49644a2ea8696c7eb9b995f6eab020ad597deb/LICENSE",
+            "observed_utc": "2026-10-15T03:46:50.106984+00:00",
+            "http_status": 200,
+            "sha256": "557a991ac1ba95dee0b8b654ff1d4194e410c8ffad5ffd0986e04a379f4fe882",
+            "line_count": 22,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/5039ee4ec28005c45aee852b5cf678315ad9d343ed2f565a5312e3d21d6a150e.txt",
+            "kind": "LICENSE",
+            "license_spdx": "MIT",
+            "status": "READ",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 3971,
+            "observed_utc": "2026-10-15T01:13:45.150390Z",
+            "archived": false,
+            "pushed_at": "2026-10-03T22:19:07Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "flippercloud/flipper",
+          "revision": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+          "path": "lib/flipper/gates/boolean.rb",
+          "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/boolean.rb",
+          "raw_url": "https://raw.githubusercontent.com/flippercloud/flipper/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/boolean.rb",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.067469+00:00",
+          "http_status": 200,
+          "sha256": "c1767af523bbb3e05362668d83df5a210caa56d6d4dcf6f2e0d2664744200ae7",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e520327ed411e05dcfea4ee437aa9ed0baf91b3bacfdef37ccc60b655c1f2f60.txt",
+          "line_count": 44,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "repo": "flippercloud/flipper",
+            "revision": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+            "path": "LICENSE",
+            "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/flippercloud/flipper/1d49644a2ea8696c7eb9b995f6eab020ad597deb/LICENSE",
+            "observed_utc": "2026-10-15T03:46:50.106984+00:00",
+            "http_status": 200,
+            "sha256": "557a991ac1ba95dee0b8b654ff1d4194e410c8ffad5ffd0986e04a379f4fe882",
+            "line_count": 22,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/5039ee4ec28005c45aee852b5cf678315ad9d343ed2f565a5312e3d21d6a150e.txt",
+            "kind": "LICENSE",
+            "license_spdx": "MIT",
+            "status": "READ",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 3971,
+            "observed_utc": "2026-10-15T01:13:45.150390Z",
+            "archived": false,
+            "pushed_at": "2026-10-03T22:19:07Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "flippercloud/flipper",
+          "revision": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+          "path": "lib/flipper/gates/percentage_of_actors.rb",
+          "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/percentage_of_actors.rb",
+          "raw_url": "https://raw.githubusercontent.com/flippercloud/flipper/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/percentage_of_actors.rb",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.067514+00:00",
+          "http_status": 200,
+          "sha256": "bfaede2804b573cf40bf8c2b516e89cceab1833015df0c67a7826c953e2c6876",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/3f6c261841a8cf7e64821939da711abd3503fa0d6e1999cca3183129df6a8176.txt",
+          "line_count": 60,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "repo": "flippercloud/flipper",
+            "revision": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+            "path": "LICENSE",
+            "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/flippercloud/flipper/1d49644a2ea8696c7eb9b995f6eab020ad597deb/LICENSE",
+            "observed_utc": "2026-10-15T03:46:50.106984+00:00",
+            "http_status": 200,
+            "sha256": "557a991ac1ba95dee0b8b654ff1d4194e410c8ffad5ffd0986e04a379f4fe882",
+            "line_count": 22,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/5039ee4ec28005c45aee852b5cf678315ad9d343ed2f565a5312e3d21d6a150e.txt",
+            "kind": "LICENSE",
+            "license_spdx": "MIT",
+            "status": "READ",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 3971,
+            "observed_utc": "2026-10-15T01:13:45.150390Z",
+            "archived": false,
+            "pushed_at": "2026-10-03T22:19:07Z"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/feature.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.017029Z",
+          "sha256": "2708bb26af5fd26c6a0652027af7702167d0d4e6eedd7256d10320d38e3df313",
+          "line_count": 722,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/64a5b1adcdddd4ff4f451d06ed65532cdca738a25464c3126a9d8b2cd8d44d81.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: require 'flipper/adapters/active_record'\n4: require 'flipper/adapters/active_support_cache_store'\n5: \n6: module Feature\n7:   SUPPORTED_MODELS = %w[\n8:     User\n9:     Project\n10:     Namespace\n11:     Ci::Runner\n12:     Organizations::Organization\n13:     Authn::OauthApplication\n14:   ].freeze\n15: \n16:   OPERATION_ENABLED_GLOBALLY = 'enabled_globally'\n17:   OPERATION_DISABLED_GLOBALLY = 'disabled_globally'\n18:   OPERATION_ENABLED_ACTOR = 'enabled_actor'\n19:   OPERATION_DISABLED_ACTOR = 'disabled_actor'\n20: \n21:   class FlipperRecord < ActiveRecord::Base # rubocop:disable Rails/ApplicationRecord -- This class perfectly replaces\n22:     extend SkipLoadBalancer\n23: \n24:     # Flipper::Adapters::ActiveRecord::Model, which inherits ActiveRecord::Base\n25:     include DatabaseReflection\n26: \n27:     self.abstract_class = true\n28:   end\n29: \n30:   class FlipperFeature < FlipperRecord\n31:     self.table_name = 'features'\n32:   end\n33: \n34:   class FlipperGate < FlipperRecord\n35:     self.table_name = 'feature_gates'\n36:   end\n37: \n38:   class OptOut\n39:     def initialize(inner)\n40:       @inner = inner",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "license_spdx": "MIT",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "path": "LICENSE"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/redis/multi_store.rb",
+          "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/master/lib/gitlab/redis/multi_store.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:26:25.582062Z",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "line_count": 519,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: module Gitlab\n4:   module Redis\n5:     class MultiStore\n6:       include Gitlab::Utils::StrongMemoize\n7: \n8:       class PipelinedDiffError < StandardError\n9:         def initialize(non_default_store_result, default_store_result)\n10:           @non_default_store_result = non_default_store_result\n11:           @default_store_result = default_store_result\n12:         end\n13: \n14:         def message\n15:           \"Pipelined command executed on both stores successfully but results differ between them. \" \\\n16:             \"Result from the non-default store: #{@non_default_store_result.inspect}. \" \\\n17:             \"Result from the default store: #{@default_store_result.inspect}.\"\n18:         end\n19:       end\n20: \n21:       class MethodMissingError < StandardError\n22:         def initialize(cmd)\n23:           @cmd = cmd\n24:         end\n25: \n26:         def message\n27:           \"Method missing #{@cmd}. Falling back to execute method on the redis default store in Rails.env.production.\"\n28:         end\n29:       end\n30: \n31:       class NestedReadonlyPipelineError < StandardError\n32:         def message\n33:           'Nested use of with_readonly_pipeline is detected.'\n34:         end\n35:       end\n36: \n37:       attr_reader :primary_pool, :secondary_pool, :instance_name, :primary_store, :secondary_store\n38: \n39:       FAILED_TO_READ_ERROR_MESSAGE = 'Failed to read from the redis default_store.'\n40:       FAILED_TO_WRITE_ERROR_MESSAGE = 'Failed to write to the redis non_default_store.'",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "license_spdx": "MIT",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "path": "LICENSE"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "mechanism": "Uma flag decide se um caminho de execução está habilitado para um contexto. O Flipper monta o contexto com os valores da flag e seus atores, consulta os gates e devolve verdadeiro quando um deles abre. Os gates citados implementam a habilitação booleana e a seleção determinística de uma porcentagem de atores. O GitLab constrói uma instância Flipper, obtém a flag e consulta enabled?; no MultiStore, duas flags controlam o uso dos dois armazenamentos e a escolha do armazenamento padrão.",
+      "limits": "O código do GitLab demonstra o uso real do Flipper, mas os commits fixados não identificam a versão de gem instalada em produção. A flag controla um ramo do programa; ela não concede por si só autorização de negócio, não reverte uma escrita Redis já concluída e não garante que os dois armazenamentos tenham o mesmo estado. A regra do GitLab ainda aplica seus defaults e exclusões de atores depois da avaliação do motor.",
+      "base_scope": "Flipper::Feature.enabled? constructs FeatureCheckContext and evaluates gate.open?. Boolean and percentage-of-actors gates implement actual decisions rather than marker metadata.",
+      "application_scope": "GitLab creates Flipper with application adapters, obtains feature objects, evaluates them and applies the result to real Redis storage selection paths.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/feature.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/4dbea3e94c56e53a7bdb72bdf70c6086c8e8a81e2131ff9e213e0301067205db.txt",
+          "sha256": "9a308a5bb8a119e530ae6bfb55b7c328e43a73df9f2815a13ece9a1efa28f251",
+          "hits": [
+            {
+              "term": "actual feature evaluation engine",
+              "start_line": 90,
+              "end_line": 111,
+              "excerpt": "    # Public: Check if a feature is enabled for zero or more actors.\n    #\n    # Returns true if enabled, false if not.\n    def enabled?(*actors)\n      actors = wrap_actors(actors)\n\n      # thing is left for backwards compatibility\n      instrument(:enabled?, thing: actors&.first, actors: actors) do |payload|\n        context = FeatureCheckContext.new(\n          feature_name: @name,\n          values: gate_values,\n          actors: actors\n        )\n\n        if open_gate = gates.detect { |gate| gate.open?(context) }\n          payload[:gate_name] = open_gate.name\n          true\n        else\n          false\n        end\n      end\n    end",
+              "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/feature.rb#L90-L111"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/boolean.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e520327ed411e05dcfea4ee437aa9ed0baf91b3bacfdef37ccc60b655c1f2f60.txt",
+          "sha256": "c1767af523bbb3e05362668d83df5a210caa56d6d4dcf6f2e0d2664744200ae7",
+          "hits": [
+            {
+              "term": "concrete boolean gate decision",
+              "start_line": 18,
+              "end_line": 28,
+              "excerpt": "      def enabled?(value)\n        !!value\n      end\n\n      # Internal: Checks if the gate is open for a thing.\n      #\n      # Returns true if explicitly set to true, false if explicitly set to false\n      # or nil if not explicitly set.\n      def open?(context)\n        context.values.boolean\n      end",
+              "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/boolean.rb#L18-L28"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/percentage_of_actors.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/3f6c261841a8cf7e64821939da711abd3503fa0d6e1999cca3183129df6a8176.txt",
+          "sha256": "bfaede2804b573cf40bf8c2b516e89cceab1833015df0c67a7826c953e2c6876",
+          "hits": [
+            {
+              "term": "concrete actor-percentage gate and stable bucket decision",
+              "start_line": 32,
+              "end_line": 52,
+              "excerpt": "      def open?(context)\n        return false unless context.actors?\n\n        percentage = context.values.percentage_of_actors\n        return false if percentage <= 0\n        return true if percentage >= 100\n\n        actors = context.actors\n        id = if actors.size == 1\n          \"#{context.feature_name}#{actors.first.value}\"\n        else\n          \"#{context.feature_name}#{actors.map(&:value).sort.join}\"\n        end\n        # NOTE: `crc32 % 100_000` has a tiny modulo bias (2**32 is not a\n        # multiple of 100_000, so buckets 0..67_295 are ~0.0023% over-\n        # represented). This is intentionally left as-is: the bias is\n        # negligible, and any \"fix\" changes the hash-to-bucket mapping,\n        # which would re-bucket essentially every actor on upgrade and\n        # silently flip who is enabled. Stable, deterministic bucketing\n        # matters far more here than perfect uniformity. Do not change.\n        Zlib.crc32(id) % (100 * SCALING_FACTOR) < percentage * SCALING_FACTOR",
+              "url": "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/percentage_of_actors.rb#L32-L52"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/64a5b1adcdddd4ff4f451d06ed65532cdca738a25464c3126a9d8b2cd8d44d81.txt",
+          "sha256": "2708bb26af5fd26c6a0652027af7702167d0d4e6eedd7256d10320d38e3df313",
+          "hits": [
+            {
+              "term": "application calls feature engine and applies actor exclusion",
+              "start_line": 406,
+              "end_line": 420,
+              "excerpt": "    def current_feature_value(key, thing, default_enabled:)\n      with_feature(key) do |feature|\n        if default_enabled && !Feature.persisted_name?(feature.name)\n          true\n        else\n          enabled = feature.enabled?(thing)\n\n          if enabled && !thing.nil?\n            opt_out = OptOut.new(thing)\n            feature.actors_value.exclude?(opt_out.flipper_id)\n          else\n            enabled\n          end\n        end\n      end",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb#L406-L420"
+            },
+            {
+              "term": "feature comes from Flipper instance",
+              "start_line": 431,
+              "end_line": 452,
+              "excerpt": "    def unsafe_get(key)\n      # During setup the database does not exist yet. So we haven't stored a value\n      # for the feature yet and return the default.\n\n      return unless database_exists?\n\n      flag_stack = recursion_stack\n      Thread.current[:feature_flag_recursion_check] = flag_stack\n\n      # Prevent more than 10 levels of recursion. This limit was chosen as a fairly\n      # low limit while allowing some nesting of flag evaluation. We have not seen\n      # this limit hit in production.\n      if flag_stack.size > 10\n        Gitlab::ErrorTracking.track_exception(RecursionError.new('deep recursion'), stack: flag_stack)\n        return\n      elsif flag_stack.include?(key)\n        Gitlab::ErrorTracking.track_exception(RecursionError.new('self recursion'), stack: flag_stack)\n        return\n      end\n\n      flag_stack.push(key)\n      flipper.feature(key)",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb#L431-L452"
+            },
+            {
+              "term": "application creates concrete Flipper engine",
+              "start_line": 472,
+              "end_line": 486,
+              "excerpt": "    def build_flipper_instance(memoize: false)\n      active_record_adapter = Flipper::Adapters::ActiveRecord.new(\n        feature_class: FlipperFeature,\n        gate_class: FlipperGate)\n      # Redis L2 cache\n      redis_cache_adapter =\n        ActiveSupportCacheStoreAdapter.new(active_record_adapter, l2_cache_backend, 1.hour, write_through: true)\n\n      # Thread-local L1 cache: use a short timeout since we don't have a\n      # way to expire this cache all at once\n      flipper_adapter =\n        Flipper::Adapters::ActiveSupportCacheStore.new(redis_cache_adapter, l1_cache_backend, 1.minute)\n\n      Flipper.new(flipper_adapter).tap do |flip|\n        flip.memoize = memoize",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb#L472-L486"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "hits": [
+            {
+              "term": "real execution paths are gated",
+              "start_line": 284,
+              "end_line": 303,
+              "excerpt": "      def use_primary_and_secondary_stores?\n        # We interpolate the feature flag name within `Feature.enabled?` instead of defining a variable to allow\n        # `RuboCop::Cop::Gitlab::MarkUsedFeatureFlags`'s optimistic matching to work.\n        feature_table_exists? &&\n          Feature.enabled?( # rubocop:disable Cop/FeatureFlagUsage -- The flags are dynamic\n            \"use_primary_and_secondary_stores_for_#{instance_name.underscore}\",\n            type: feature_flag_type(\"use_primary_and_secondary_stores_for_#{instance_name.underscore}\")\n          ) &&\n          !same_redis_store?\n      end\n\n      def use_primary_store_as_default?\n        # We interpolate the feature flag name within `Feature.enabled?` instead of defining a variable to allow\n        # `RuboCop::Cop::Gitlab::MarkUsedFeatureFlags`'s optimistic matching to work.\n        feature_table_exists? &&\n          Feature.enabled?( # rubocop:disable Cop/FeatureFlagUsage -- The flags are dynamic\n            \"use_primary_store_as_default_for_#{instance_name.underscore}\",\n            type: feature_flag_type(\"use_primary_store_as_default_for_#{instance_name.underscore}\")\n          ) &&\n          !same_redis_store?",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L284-L303"
+            },
+            {
+              "term": "gate selects the default and nondefault stores",
+              "start_line": 331,
+              "end_line": 336,
+              "excerpt": "      def default_store\n        use_primary_store_as_default? ? primary_store : secondary_store\n      end\n\n      def non_default_store\n        use_primary_store_as_default? ? secondary_store : primary_store",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L331-L336"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "GITLAB_DIRECTLY_USES_FLIPPER_API; SOURCE_COMMITS_DO_NOT_ASSERT_INSTALLED_GEM_VERSION"
+    },
+    {
+      "concept_id": "template-method",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "repo": "spring-projects/spring-framework",
+          "revision": "4dea36c5872b3ad9ac9357a9cd8a077264f88a39",
+          "path": "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java",
+          "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java",
+          "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-framework/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java",
+          "observed_utc": "2026-10-15T03:46:49.836350+00:00",
+          "http_status": 200,
+          "sha256": "23ddb70e1278c6cf23f920e64d8e2593ce82aa51f47e4fe401b14d34ee19bfd7",
+          "line_count": 1673,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/a4b0324630fad6d7e97ef2bcb406168e15e9f440ec1c725c6aa62de8acc6c120.txt",
+          "kind": "FILE",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "repo": "spring-projects/spring-framework",
+            "revision": "4dea36c5872b3ad9ac9357a9cd8a077264f88a39",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/LICENSE.txt",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T01:28:31.166916Z",
+            "http_status": 200,
+            "sha256": "56dfc19e0dc836e30177332f73e8e6fbc297941acf3d906eec6eaaa46c2c452a",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-a23cd67f167d16b495666f9dd1d47ee2d65a00b6668442e7d980fe292c221e46.txt",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        https://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that ",
+            "kind": "LICENSE",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-a23cd67f167d16b495666f9dd1d47ee2d65a00b6668442e7d980fe292c221e46.txt",
+            "local_verified_utc": "2026-10-15T03:46:49.272829+00:00",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 60287,
+            "observed_utc": "2026-10-15T01:18:57.199455Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T12:38:51Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "spring-projects/spring-framework",
+          "revision": "4dea36c5872b3ad9ac9357a9cd8a077264f88a39",
+          "path": "spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java",
+          "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java",
+          "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-framework/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java",
+          "query": "Wave two: actual aggregate/root boundary, feature gate, middleware chain and template hook implementation.",
+          "observed_utc": "2026-10-15T04:00:40.610371+00:00",
+          "http_status": 200,
+          "sha256": "678864cef93bb5e36beab390509e93689da3b2a85746761cd724b879cb6c650b",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e33dc28664e5705ce19a4324171fc7db8a57bb3e9e9eee8156eae1b05a667966.txt",
+          "line_count": 190,
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "status": "READ",
+            "repo": "spring-projects/spring-framework",
+            "revision": "4dea36c5872b3ad9ac9357a9cd8a077264f88a39",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/LICENSE.txt",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T01:28:31.166916Z",
+            "http_status": 200,
+            "sha256": "56dfc19e0dc836e30177332f73e8e6fbc297941acf3d906eec6eaaa46c2c452a",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-a23cd67f167d16b495666f9dd1d47ee2d65a00b6668442e7d980fe292c221e46.txt",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        https://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that ",
+            "kind": "LICENSE",
+            "reused_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-a23cd67f167d16b495666f9dd1d47ee2d65a00b6668442e7d980fe292c221e46.txt",
+            "local_verified_utc": "2026-10-15T03:46:49.272829+00:00",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 60287,
+            "observed_utc": "2026-10-15T01:18:57.199455Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T12:38:51Z"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "jellyfin/jellyfin",
+          "path": "MediaBrowser.Common/Plugins/BasePluginOfT.cs",
+          "revision": "aec42b345e1a7da25ee5492183f12209338df688",
+          "original_url": "https://github.com/jellyfin/jellyfin/blob/master/MediaBrowser.Common/Plugins/BasePluginOfT.cs",
+          "url": "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs",
+          "raw_url": "https://raw.githubusercontent.com/jellyfin/jellyfin/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:22:35.177126Z",
+          "sha256": "8bd1fea680efe74b1533c7135f51fcbd13e7bf68b37ed4468ce0a25ca819f11f",
+          "line_count": 200,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/599165c3ed3742b84a19f0c1960fad30919eab5470ccb5e73178b6350c714802.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: #nullable disable\n2: #pragma warning disable SA1649 // File name should match first type name\n3: \n4: using System;\n5: using System.IO;\n6: using System.Runtime.InteropServices;\n7: using System.Threading;\n8: using MediaBrowser.Common.Configuration;\n9: using MediaBrowser.Model.Plugins;\n10: using MediaBrowser.Model.Serialization;\n11: \n12: namespace MediaBrowser.Common.Plugins\n13: {\n14:     /// <summary>\n15:     /// Provides a common base class for all plugins.\n16:     /// </summary>\n17:     /// <typeparam name=\"TConfigurationType\">The type of the T configuration type.</typeparam>\n18:     public abstract class BasePlugin<TConfigurationType> : BasePlugin, IHasPluginConfiguration\n19:         where TConfigurationType : BasePluginConfiguration\n20:     {\n21:         /// <summary>\n22:         /// The configuration sync lock.\n23:         /// </summary>\n24:         private readonly Lock _configurationSyncLock = new();\n25: \n26:         /// <summary>\n27:         /// The configuration save lock.\n28:         /// </summary>\n29:         private readonly Lock _configurationSaveLock = new();\n30: \n31:         /// <summary>\n32:         /// The configuration.\n33:         /// </summary>\n34:         private TConfigurationType _configuration;\n35: \n36:         /// <summary>\n37:         /// Initializes a new instance of the <see cref=\"BasePlugin{TConfigurationType}\" /> class.\n38:         /// </summary>\n39:         /// <param name=\"applicationPaths\">The application paths.</param>\n40:         /// <param name=\"xmlSerializer\">The XML serializer.</param>",
+          "hash_valid": true,
+          "cache_inspected_utc": "2026-10-15T04:04:15.564362+00:00",
+          "license": {
+            "kind": "FILE",
+            "repo": "jellyfin/jellyfin",
+            "revision": "aec42b345e1a7da25ee5492183f12209338df688",
+            "path": "LICENSE",
+            "url": "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/jellyfin/jellyfin/aec42b345e1a7da25ee5492183f12209338df688/LICENSE",
+            "query": "Full primary license text for wave-two source references.",
+            "observed_utc": "2026-10-15T04:02:16.767201+00:00",
+            "http_status": 200,
+            "sha256": "f371b80469fb235bc500ec29e0e85b682d4a6157a158567d828ff0be544d4f1d",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/236d703a3c683ec3ccb81c726387471127c55376a934d5e7c28d0538e6c79b4b.txt",
+            "line_count": 339,
+            "status": "READ",
+            "license_spdx": "GPL-2.0",
+            "license_text_inspected_utc": "2026-10-15T04:04:15.564362+00:00"
+          },
+          "repository_metadata": {
+            "stars": 58100,
+            "observed_utc": "2026-10-15T01:18:56.675605Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T18:15:09Z"
+          }
+        }
+      ],
+      "mechanism": "Um método de template organiza uma sequência comum e chama etapas que uma subclasse pode especializar. No Spring, refresh prepara o contexto e o bean factory, chama o hook postProcessBeanFactory e continua com os processadores, os listeners e a inicialização dos objetos. A subclasse web implementa esse hook para registrar recursos do ambiente servlet. No Jellyfin, o fluxo comum de configuração chama a propriedade virtual ConfigurationFileName ao montar o caminho e chama SaveConfiguration durante a atualização ou a criação da configuração padrão.",
+      "limits": "Spring e Jellyfin são exemplos independentes; não há afirmação de que o Jellyfin use Spring. A prova do padrão está na sequência comum chamando hooks efetivos, e não no nome da classe ou na presença isolada de um método virtual. O recorte do Jellyfin demonstra os pontos de extensão e suas chamadas, sem atribuir a um plugin específico uma implementação que não foi citada. Ele não demonstra Factory Method nem Abstract Factory.",
+      "base_scope": "AbstractApplicationContext.refresh invokes overridable postProcessBeanFactory in a fixed initialization sequence. AbstractRefreshableWebApplicationContext actually overrides the hook and registers servlet processors/scopes.",
+      "application_scope": "Jellyfin BasePlugin<T> lazy-loads configuration; the common load/update/save paths call virtual filename and save hooks.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/a4b0324630fad6d7e97ef2bcb406168e15e9f440ec1c725c6aa62de8acc6c120.txt",
+          "sha256": "23ddb70e1278c6cf23f920e64d8e2593ce82aa51f47e4fe401b14d34ee19bfd7",
+          "hits": [
+            {
+              "term": "common refresh sequence invokes overridable hook",
+              "start_line": 589,
+              "end_line": 606,
+              "excerpt": "\t\t\t// Prepare this context for refreshing.\n\t\t\tprepareRefresh();\n\n\t\t\t// Tell the subclass to refresh the internal bean factory.\n\t\t\tConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();\n\n\t\t\t// Prepare the bean factory for use in this context.\n\t\t\tprepareBeanFactory(beanFactory);\n\n\t\t\ttry {\n\t\t\t\t// Allows post-processing of the bean factory in context subclasses.\n\t\t\t\tpostProcessBeanFactory(beanFactory);\n\n\t\t\t\tStartupStep beanPostProcess = this.applicationStartup.start(\"spring.context.beans.post-process\");\n\t\t\t\t// Invoke factory processors registered as beans in the context.\n\t\t\t\tinvokeBeanFactoryPostProcessors(beanFactory);\n\t\t\t\t// Register bean processors that intercept bean creation.\n\t\t\t\tregisterBeanPostProcessors(beanFactory);",
+              "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java#L589-L606"
+            },
+            {
+              "term": "common sequence continues after hooks",
+              "start_line": 609,
+              "end_line": 625,
+              "excerpt": "\t\t\t\t// Initialize message source for this context.\n\t\t\t\tinitMessageSource();\n\n\t\t\t\t// Initialize event multicaster for this context.\n\t\t\t\tinitApplicationEventMulticaster();\n\n\t\t\t\t// Initialize other special beans in specific context subclasses.\n\t\t\t\tonRefresh();\n\n\t\t\t\t// Check for listener beans and register them.\n\t\t\t\tregisterListeners();\n\n\t\t\t\t// Instantiate all remaining (non-lazy-init) singletons.\n\t\t\t\tfinishBeanFactoryInitialization(beanFactory);\n\n\t\t\t\t// Last step: publish corresponding event.\n\t\t\t\tfinishRefresh();",
+              "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java#L609-L625"
+            },
+            {
+              "term": "hook contract and default implementation",
+              "start_line": 778,
+              "end_line": 788,
+              "excerpt": "\t/**\n\t * Modify the application context's internal bean factory after its standard\n\t * initialization. The initial definition resources will have been loaded but no\n\t * post-processors will have run and no derived bean definitions will have been\n\t * registered, and most importantly, no beans will have been instantiated yet.\n\t * <p>This template method allows for registering special BeanPostProcessors\n\t * etc in certain AbstractApplicationContext subclasses.\n\t * @param beanFactory the bean factory used by the application context\n\t */\n\tprotected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {\n\t}",
+              "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java#L778-L788"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/raw/e33dc28664e5705ce19a4324171fc7db8a57bb3e9e9eee8156eae1b05a667966.txt",
+          "sha256": "678864cef93bb5e36beab390509e93689da3b2a85746761cd724b879cb6c650b",
+          "hits": [
+            {
+              "term": "actual subclass specializes invoked hook",
+              "start_line": 146,
+              "end_line": 157,
+              "excerpt": "\t/**\n\t * Register request/session scopes, a {@link ServletContextAwareProcessor}, etc.\n\t */\n\t@Override\n\tprotected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {\n\t\tbeanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));\n\t\tbeanFactory.ignoreDependencyInterface(ServletContextAware.class);\n\t\tbeanFactory.ignoreDependencyInterface(ServletConfigAware.class);\n\n\t\tWebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);\n\t\tWebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext, this.servletConfig);\n\t}",
+              "url": "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java#L146-L157"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/599165c3ed3742b84a19f0c1960fad30919eab5470ccb5e73178b6350c714802.txt",
+          "sha256": "8bd1fea680efe74b1533c7135f51fcbd13e7bf68b37ed4468ce0a25ca819f11f",
+          "hits": [
+            {
+              "term": "common configuration getter invokes loader",
+              "start_line": 102,
+              "end_line": 118,
+              "excerpt": "        public TConfigurationType Configuration\n        {\n            get\n            {\n                // Lazy load\n                if (_configuration is null)\n                {\n                    lock (_configurationSyncLock)\n                    {\n                        _configuration ??= LoadConfiguration();\n                    }\n                }\n\n                return _configuration;\n            }\n\n            protected set => _configuration = value;",
+              "url": "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs#L102-L118"
+            },
+            {
+              "term": "path invokes virtual filename hook",
+              "start_line": 121,
+              "end_line": 131,
+              "excerpt": "        /// <summary>\n        /// Gets the name of the configuration file. Subclasses should override.\n        /// </summary>\n        /// <value>The name of the configuration file.</value>\n        public virtual string ConfigurationFileName => Path.ChangeExtension(AssemblyFileName, \".xml\");\n\n        /// <summary>\n        /// Gets the full path to the configuration file.\n        /// </summary>\n        /// <value>The configuration file path.</value>\n        public string ConfigurationFilePath => Path.Combine(ApplicationPaths.PluginConfigurationsPath, ConfigurationFileName);",
+              "url": "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs#L121-L131"
+            },
+            {
+              "term": "common update invokes virtual save hook",
+              "start_line": 157,
+              "end_line": 171,
+              "excerpt": "        public virtual void SaveConfiguration()\n        {\n            SaveConfiguration(Configuration);\n        }\n\n        /// <inheritdoc />\n        public virtual void UpdateConfiguration(BasePluginConfiguration configuration)\n        {\n            ArgumentNullException.ThrowIfNull(configuration);\n\n            Configuration = (TConfigurationType)configuration;\n\n            SaveConfiguration(Configuration);\n\n            ConfigurationChanged?.Invoke(this, configuration);",
+              "url": "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs#L157-L171"
+            },
+            {
+              "term": "common loader calls save hook for default configuration",
+              "start_line": 184,
+              "end_line": 198,
+              "excerpt": "        private TConfigurationType LoadConfiguration()\n        {\n            var path = ConfigurationFilePath;\n\n            try\n            {\n                return (TConfigurationType)XmlSerializer.DeserializeFromFile(typeof(TConfigurationType), path);\n            }\n            catch\n            {\n                var config = Activator.CreateInstance<TConfigurationType>();\n                SaveConfiguration(config);\n                return config;\n            }\n        }",
+              "url": "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs#L184-L198"
+            }
+          ]
+        }
+      ],
+      "pairing_relationship": "PARALLEL_PRIMARY_TEMPLATE_IMPLEMENTATIONS_NOT_A_DEPENDENCY_CLAIM"
+    }
+  ],
+  "capture_inventory": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/captures.json",
+  "frozen_files_mutated": false,
+  "review_boundary": "Research/source recommendations only. New writes are confined to base-five/wave-two. No source matrix, shared cache, MDX, gzip, global repository, Jira, runtime or implementation test was changed."
+}

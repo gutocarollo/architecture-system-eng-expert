@@ -1,0 +1,22 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/11-padroes-para-decompor-sistemas",
+  "document_sha256": "60245767c4ea6659deb33e1ecb8be25dca48bfc70aec3a15546b2e345db1b7cf",
+  "context_sha256": "e677356b9b9b27e52e244f44da6902199f83d02736b7483bb2016765cdae0a76",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "l6c",
+    "original-catalog",
+    "original-request",
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s6-reference-repair"
+  ]
+}

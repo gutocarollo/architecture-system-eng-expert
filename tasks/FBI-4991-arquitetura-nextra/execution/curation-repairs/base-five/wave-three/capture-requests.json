@@ -1,0 +1,74 @@
+[
+  {
+    "kind": "FILE",
+    "repo": "github/scientist",
+    "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+    "path": "lib/scientist/result.rb",
+    "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/result.rb",
+    "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/result.rb",
+    "query": "Wave three: actual comparative execution and expand-contract migration helpers."
+  },
+  {
+    "kind": "FILE",
+    "repo": "gitlabhq/gitlabhq",
+    "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+    "path": "lib/gitlab/database/migration_helpers/convert_to_bigint.rb",
+    "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration_helpers/convert_to_bigint.rb",
+    "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration_helpers/convert_to_bigint.rb",
+    "query": "Wave three: actual comparative execution and expand-contract migration helpers."
+  },
+  {
+    "kind": "FILE",
+    "repo": "gitlabhq/gitlabhq",
+    "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+    "path": "lib/gitlab/database/unidirectional_copy_trigger.rb",
+    "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/unidirectional_copy_trigger.rb",
+    "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/unidirectional_copy_trigger.rb",
+    "query": "Wave three: actual comparative execution and expand-contract migration helpers."
+  },
+  {
+    "kind": "FILE",
+    "repo": "gitlab-org/gitaly",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "path": "proto/operations.proto",
+    "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/operations.proto",
+    "raw_url": "https://gitlab.com/gitlab-org/gitaly/-/raw/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/operations.proto",
+    "query": "Pinned primary Gitaly server/protocol for actual remote service boundary; no migration-history claim."
+  },
+  {
+    "kind": "FILE",
+    "repo": "gitlab-org/gitaly",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "path": "internal/gitaly/service/operations/user_create_tag.go",
+    "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/user_create_tag.go",
+    "raw_url": "https://gitlab.com/gitlab-org/gitaly/-/raw/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/user_create_tag.go",
+    "query": "Pinned primary Gitaly server/protocol for actual remote service boundary; no migration-history claim."
+  },
+  {
+    "kind": "FILE",
+    "repo": "gitlab-org/gitaly",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "path": "internal/gitaly/service/operations/server.go",
+    "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/server.go",
+    "raw_url": "https://gitlab.com/gitlab-org/gitaly/-/raw/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/server.go",
+    "query": "Pinned primary Gitaly server/protocol for actual remote service boundary; no migration-history claim."
+  },
+  {
+    "kind": "FILE",
+    "repo": "gitlab-org/gitaly",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "path": "LICENSE",
+    "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/LICENSE",
+    "raw_url": "https://gitlab.com/gitlab-org/gitaly/-/raw/987854bc5e60a1b9c799eaf7220cb36964cc2356/LICENSE",
+    "query": "Pinned primary Gitaly server/protocol for actual remote service boundary; no migration-history claim."
+  },
+  {
+    "kind": "FILE",
+    "repo": "gitlab-org/gitaly",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "path": "go.mod",
+    "url": "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/go.mod",
+    "raw_url": "https://gitlab.com/gitlab-org/gitaly/-/raw/987854bc5e60a1b9c799eaf7220cb36964cc2356/go.mod",
+    "query": "Pinned primary Gitaly server/protocol for actual remote service boundary; no migration-history claim."
+  }
+]

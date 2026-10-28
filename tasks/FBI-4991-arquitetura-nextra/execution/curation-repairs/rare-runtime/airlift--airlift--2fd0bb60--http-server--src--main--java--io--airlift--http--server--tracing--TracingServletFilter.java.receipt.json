@@ -1,0 +1,12 @@
+{
+  "repo": "airlift/airlift",
+  "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+  "path": "http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java",
+  "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java",
+  "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--http-server--src--main--java--io--airlift--http--server--tracing--TracingServletFilter.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:12.490675+00:00",
+  "sha256": "4817cb689dd96ceb6e4006b555cbbd8e3c15bc32b82ddfc0149a95ef40d27a30",
+  "line_count": 278
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-map-discovery",
+  "path": "gradle.properties",
+  "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+  "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/gradle.properties",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/gradle.properties",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:08:59.772037+00:00",
+  "sha256": "053306c2d7d0bfb081107efa4d63d12fc579cc8767d5e9cd607d744172381e07",
+  "line_count": 15,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--gradle.properties"
+}

@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-15T17:32:27.895197+00:00",
+  "reviewed_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+  "scope": "Two authorized license classifications; no source bytes, code revisions, mechanisms, limits or skills changed.",
+  "concepts_with_license_delta": 12,
+  "source_content_changes": 0,
+  "mechanism_fingerprints_preserved": 310,
+  "primary_identifier_references": [
+    "https://spdx.org/licenses/Python-2.0.html",
+    "https://spdx.org/licenses/PSF-2.0.html"
+  ],
+  "changes": [
+    {
+      "concept_id": "async-await",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/concurrent/futures/thread.py",
+      "path": "Lib/concurrent/futures/thread.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "7f95079dda8064cd372c9c0ea60c7e172b34c8f2aa0c3d9213e85b8584aa033c",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "cache-aside",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/functools.py",
+      "path": "Lib/functools.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "c7828cdbb87b506cbeb054e3667e4fc6a83916b1e3426e743b684b9b82f45dba",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "cache-invalidation",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/functools.py",
+      "path": "Lib/functools.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "c7828cdbb87b506cbeb054e3667e4fc6a83916b1e3426e743b684b9b82f45dba",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "database-decomposition",
+      "role": "application",
+      "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md",
+      "path": "doc/development/database/multiple_databases.md",
+      "source_revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+      "source_sha256": "bbc45c034488ad948285ee9f6a74be854ce8d1b33ecd7c20a78901ad0b4c05af",
+      "before": {
+        "status": "READ",
+        "license_spdx": "MIT",
+        "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+        "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "CC-BY-SA-4.0",
+        "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE",
+        "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/raw/b768c629a9dd70e33a229dcdd325bf8d63089ebfddf1bc0bd408233f6b798dc4.txt",
+      "license_artifact_sha256": "62dfe4bdd76e08992c09cf335b2374b3e6acd4f2b959b4971760727d9b785ab4",
+      "basis": "The exact LICENSE line 5 assigns CC BY-SA 4.0 to doc/. This override is scoped to the selected documentation path and does not change the MIT grant for code."
+    },
+    {
+      "concept_id": "decorator",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/functools.py",
+      "path": "Lib/functools.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "c7828cdbb87b506cbeb054e3667e4fc6a83916b1e3426e743b684b9b82f45dba",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "futures-promises",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/concurrent/futures/thread.py",
+      "path": "Lib/concurrent/futures/thread.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "7f95079dda8064cd372c9c0ea60c7e172b34c8f2aa0c3d9213e85b8584aa033c",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "observer",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/logging/__init__.py",
+      "path": "Lib/logging/__init__.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "b004f5e5d3a5dcc38b8f1408c6349acfeaf9b0cc7c9c11caa72b7ef154d29eb5",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "priority-queue",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/queue.py",
+      "path": "Lib/queue.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "5a368568f849096d4b619503389e3832a1a0b9a8c053f87e29da7f47db753a23",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "prototype",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/copy.py",
+      "path": "Lib/copy.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "120238f795fdb0364d7a29450ce5494b3e32dc7f6367e0076138f77663ecf086",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "semaphore",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/asyncio/locks.py",
+      "path": "Lib/asyncio/locks.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "a5c7f779f7e52dd8dd88a87fe3f534a4c9ea973ae4aaacfde51cc3d6ccf70ed0",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "singleton",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/logging/__init__.py",
+      "path": "Lib/logging/__init__.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "b004f5e5d3a5dcc38b8f1408c6349acfeaf9b0cc7c9c11caa72b7ef154d29eb5",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    },
+    {
+      "concept_id": "thread-pool",
+      "role": "base",
+      "source_url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/concurrent/futures/thread.py",
+      "path": "Lib/concurrent/futures/thread.py",
+      "source_revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "source_sha256": "7f95079dda8064cd372c9c0ea60c7e172b34c8f2aa0c3d9213e85b8584aa033c",
+      "before": {
+        "status": "READ",
+        "license_spdx": "PostgreSQL",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "after": {
+        "status": "READ",
+        "license_spdx": "Python-2.0",
+        "url": "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE",
+        "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+        "path": "LICENSE"
+      },
+      "license_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-092ef94858a111a7b96b60528e2005762d775757aab23159ba5362894f7d44d9.txt",
+      "license_artifact_sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "basis": "The captured LICENSE contains the overall Python license: the PSF version 2 grant and the BeOpen, CNRI and CWI historical grants. SPDX Python-2.0 identifies that compound license; PSF-2.0 identifies only its PSF component. The selected Lib/ sources are not documentation examples covered by the separate 0BSD option."
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "brief_version": 2,
+  "project_root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "mode": "REFACTOR",
+  "adapter": "generic",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "bounded_anchor": "Executar e revisar as pendências da FBI-4991: conectar a totalidade dos conceitos em jornadas Diátaxis, executar antes/depois históricos e práticas financeiras, fechar curadoria por conceito, investigar histórico com evidência causal, registrar catálogo, versionar e publicar com revisão independente e read-back.",
+  "PROTOCOL_ROOT": null,
+  "method_skill": null,
+  "provided_packet": null,
+  "preparation": {
+    "kind": "metadata",
+    "classification": "METADATA_ONLY",
+    "receipt_path": null,
+    "receipt_sha256": null
+  },
+  "review_contract": null,
+  "sources": [
+    {
+      "id": "project",
+      "root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+      "required": true
+    },
+    {
+      "id": "makershub",
+      "root": "/Users/augustocarollo/Developer/makershub",
+      "required": true
+    },
+    {
+      "id": "workflow-evidence",
+      "root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/architecture-course-2026-10-14/evidence",
+      "required": true
+    }
+  ],
+  "output_root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "selected_skills": [
+    "diataxis",
+    "mapping",
+    "orchestrator"
+  ],
+  "context_skill_ids": [],
+  "dispatch_owner": "principal",
+  "permissions": {
+    "read_roots": [
+      "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+      "/Users/augustocarollo/Developer.noindex/makershub",
+      "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/architecture-course-2026-10-14/evidence"
+    ],
+    "artifact_write_root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/prepared",
+    "source_writes": false,
+    "domain_writes": false,
+    "dispatch_children": false
+  },
+  "limitations": [
+    "Preparation does not execute source commands or dispatch agents.",
+    "Runtime evidence must be supplied as a versioned snapshot.",
+    "selected_skills is run-level inventory, not permission to load author or orchestration roles in a context lane.",
+    "The principal applies project protocols and owns all dispatch; delegated context lanes return evidence only."
+  ]
+}

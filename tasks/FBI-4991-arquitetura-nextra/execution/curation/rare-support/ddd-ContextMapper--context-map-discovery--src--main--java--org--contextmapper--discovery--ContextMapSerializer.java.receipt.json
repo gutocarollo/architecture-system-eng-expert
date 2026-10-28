@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-map-discovery",
+  "path": "src/main/java/org/contextmapper/discovery/ContextMapSerializer.java",
+  "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+  "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/ContextMapSerializer.java",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/src/main/java/org/contextmapper/discovery/ContextMapSerializer.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:06:44.843322+00:00",
+  "sha256": "e5098229fcd5032fa8d1b038f0c6ad1b1610e02d8fc80b796834b5ce397355a1",
+  "line_count": 51,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--src--main--java--org--contextmapper--discovery--ContextMapSerializer.java"
+}

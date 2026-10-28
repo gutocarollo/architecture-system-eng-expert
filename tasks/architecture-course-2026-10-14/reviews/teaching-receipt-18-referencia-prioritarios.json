@@ -1,0 +1,18 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "referencia/prioritarios",
+  "document_sha256": "6d9e8d01bfb49c84a0f1302caed196d60200fe7abffd8a182d23090366a70220",
+  "context_sha256": "55f89f57df2074d205284b27d3950e5e006292c4e2c0751af24de4d4a4b4f949",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "original-catalog",
+    "l6b",
+    "s2-reference-repair",
+    "s6-reference-repair"
+  ]
+}

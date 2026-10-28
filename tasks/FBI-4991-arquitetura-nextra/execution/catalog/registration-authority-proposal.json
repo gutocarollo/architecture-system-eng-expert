@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "measured_at_utc": "2026-10-15 02:50 UTC",
+  "mode": "read-only-proposal",
+  "supersedes_interpretation_of": "registration-proposal.json",
+  "repository_identity": {
+    "provider": "github",
+    "full_name": "gutocarollo/architecture-system-eng-expert",
+    "provider_repository_id": 1417536174,
+    "provider_node_id": "R_kgDOVH3irg",
+    "private": true,
+    "default_branch": "main"
+  },
+  "composition": {
+    "reuse": [
+      "existing Document entity type",
+      "document template and kind=document question contract",
+      "canonical markdown loader",
+      "existing index renderer",
+      "existing search canonical_doc resolution",
+      "existing publication guard",
+      "Jira Affected Assets accepts canonical IDs of any registered entity type"
+    ],
+    "rejected_shortcut": [
+      "asset URI grammar without registered entity",
+      "adding a Jira repository option before semantic registration",
+      "adding allowedValues without a source authority",
+      "treating checkout discovery or historical source refs as repository registry"
+    ]
+  },
+  "asset_registration": {
+    "state": "concrete-draft-not-applied",
+    "canonical_id": "doc:architecture/architecture-system-eng-expert",
+    "existing_type": "Document",
+    "source_path": "docs/canonical/operations/architecture-system-eng-expert.md",
+    "patch": "asset-document-registration.patch",
+    "generated_paths": [
+      "docs/canonical/INDEX.md",
+      "docs/canonical/_index/entity-document-map.csv",
+      "docs/canonical/_index/section-map.csv"
+    ],
+    "collision": "All three generated paths are already modified in the live FazGraph checkout. Preserve WIP; never copy candidate-only preview indexes over full indexes.",
+    "dry_run_files": [
+      "asset-document-dry-run.json",
+      "asset-index-dry-run.json",
+      "registration-dry-run-results.json",
+      "asset-resolve-dry-run.json"
+    ],
+    "acceptance": [
+      "source diff applied only after explicit scope authorization",
+      "index entries generated against preserved complete corpus",
+      "exact canonical ID resolved by served FazGraph API after guarded graph publication",
+      "affectedAssets decision references live resolve receipt before Jira write"
+    ]
+  },
+  "repository_registration": {
+    "state": "blocked-authority-not-located",
+    "declared_authority": "FazGraph Repository registry in jira-fbi/reference/catalog-contract.json",
+    "actual_authority_file": null,
+    "evidence": [
+      "ontology entity_types has no Repository; registry properties exist only for BusinessContext and BusinessCapability",
+      "models.py has no Repository or Asset model and Graph has no repositories/assets fields",
+      "parser/config.py discovers checkout directories structurally; parser/builder.py persists [directory,kind,default_schema] without Git provider-qualified identity",
+      "source-refs.yaml is historical provenance, not a registry contract consumed by the examined parser/app/scripts",
+      "business-catalog.v4.json is solely contexts, capabilities and supports relations"
+    ],
+    "actual_enforced_projection": "/Users/augustocarollo/.agents/skills/jira-fbi/reference/catalog-contract.json:dimensions.repositories.allowedValues",
+    "apply_ready_projection_patch": null,
+    "safe_next_decision": "Establish the Repository source authority and reader/projection contract in a separately authorized FazGraph/global-skill change. Do not invent a registry file or silently redefine historical source refs in this Story."
+  },
+  "permissions": {
+    "jira_admin": "Previously measured in permissions.json; not remeasured here. Admin capability does not establish semantic authority.",
+    "needed_scope_for_concrete_asset_patch": "FazGraph canonical repo: one source document and regeneration of three existing indexes, with preservation of current WIP. Graph publication needs its own existing build/cache/publish gates.",
+    "needed_scope_for_repository": "Owner decision defining source authority, followed by a reviewable implementation/projection diff. No exact source-registration mutation is currently established."
+  },
+  "performed_mutations": {
+    "jira": false,
+    "global_skill": false,
+    "fazgraph_source": false,
+    "graph_build_publish": false,
+    "local_proposal_artifacts_only": true
+  }
+}

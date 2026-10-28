@@ -1,0 +1,468 @@
+---
+title: "Grupo 2 — Sistemas distribuídos e consistência"
+description: "As 38 ocorrências do catálogo, com fronteiras de garantia, casos, custos e referências verificadas ou lacunas explícitas."
+diataxis: reference
+---
+
+# Grupo 2 — Sistemas distribuídos e consistência
+
+Esta referência preserva as 38 ocorrências do grupo 2. **PROD** identifica um produto OSS; **REF** identifica uma aplicação ou sample de estudo. Nenhum rótulo comprova implantação na Faz. **Lacuna** indica que uma implementação ou aplicação específica não foi verificada no recorte.
+
+Os casos MakersHub vêm do checkout `e233fb046ec333982cd1547171b0f0bd8d8d92ee`, lido em 14/10/2026. Os demais casos são propostas ou exemplos hipotéticos. As skills são localizadores de instruções do ambiente: o prefixo de caminho é `~/.codex/skills/`, seguido do nome e de `/SKILL.md`; sua presença não comprova execução. Os [recibos](/referencia/evidencias/) delimitam os dados. As explicações desenvolvidas estão em [integração](/explicacoes/reliable-integration/), [mensagens](/explicacoes/messages/), [distribuição](/explicacoes/data-distribution/) e [concorrência](/explicacoes/concurrency/).
+
+<span id="g02-e001" />
+
+## Dual Write
+
+Uma operação grava em sistemas que não compartilham a mesma decisão transacional. No exemplo **REF** [Wild Workouts](https://github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/blob/master/internal/trainings/app/command/schedule_training.go), `scheduleTrainingHandler.Handle` chama `AddTraining`, depois `UpdateTrainingBalance` e `ScheduleTraining`. O [adaptador Firestore](https://github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/blob/master/internal/trainings/adapters/trainings_firestore_repository.go) confirma que a primeira etapa tem sua própria transação.
+
+O custo é reconciliar sucesso parcial: retornar erro numa chamada posterior não faz o handler desfazer automaticamente a etapa anterior. A base do exemplo é Go com adaptadores Firestore e gRPC; o código da aplicação é OSS, embora Firestore seja um serviço externo. Esse é um caso concreto da fronteira de dual write, não uma recomendação de atomicidade. A skill adjacente é `backend-transactional-outbox`.
+
+{/* current-curation:dual-write */}
+
+A [curadoria de Dual Write](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#dual-write) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e002" />
+
+## Transactional Outbox
+
+Estado e intenção de integração são registrados na mesma transação local; um executor entrega o trabalho posteriormente. O `_apply` lido grava o novo responsável e `sf_owner_sync_pending=TRUE` no mesmo UPDATE.
+
+O custo inclui tentativas e atraso; a entrega pode repetir após uma falha entre aceite remoto e conclusão local. A flag não conserva necessariamente cada evento histórico. A base é [Eventuate Tram](https://github.com/eventuate-tram/eventuate-tram-core), com [Customers and Orders](https://github.com/eventuate-tram/eventuate-tram-sagas-examples-customers-and-orders) como aplicação **REF**. A skill é `backend-transactional-outbox`.
+
+{/* current-curation:transactional-outbox */}
+
+A [curadoria de Transactional Outbox](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#transactional-outbox) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e003" />
+
+## Transactional Inbox
+
+Uma inbox registra a identidade recebida junto do efeito local na mesma transação. Uma mensagem de atualização repetida pode ser reconhecida antes de aplicar novamente esse efeito.
+
+O custo é guardar e reter identidades. O limite é a fronteira local: uma chamada externa não participa automaticamente da transação. O claim HTTP do MakersHub não foi classificado como inbox de broker. A referência **REF** é [Eventuate Tram Core](https://github.com/eventuate-tram/eventuate-tram-core), para deduplicação do consumidor. As skills são `backend-message-queue` e `backend-idempotency`.
+
+{/* current-curation:transactional-inbox */}
+
+A [curadoria de Transactional Inbox](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#transactional-inbox) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e004" />
+
+## Outbox + CDC
+
+A aplicação registra a outbox, e um capturador de mudanças lê essas alterações confirmadas para publicá-las. Um evento proposto de reatribuição pode sair desse registro sem polling da aplicação.
+
+O custo inclui conector, checkpoints e retenção de WAL. A captura não remove duplicação ou evolução de contratos. A base **PROD** é [Debezium Outbox Event Router](https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html). Uma aplicação Faz desse conjunto não foi confirmada. As skills são `backend-transactional-outbox` e `data-streaming`.
+
+{/* current-curation:outbox-cdc */}
+
+A [curadoria de Outbox + CDC](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#outbox-cdc) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e005" />
+
+## Change Data Capture (CDC)
+
+CDC acompanha mudanças confirmadas em uma fonte. Um desenho proposto pode detectar alterações feitas por Airflow e FastAPI, com representação e checkpoint definidos.
+
+O custo é administrar captura, retenção e schema. Uma linha alterada não revela sozinha sua intenção ou todos os consumidores afetados. [Debezium](https://github.com/debezium/debezium) é base e produto **PROD**. Decodificação lógica não estava habilitada pelo `wal_level=minimal` medido na instância `.137` às 16:08 UTC de 14/10. A skill é `data-streaming`.
+
+{/* current-curation:change-data-capture-cdc */}
+
+A [curadoria de Change Data Capture (CDC)](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#change-data-capture-cdc) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e006" />
+
+## Saga
+
+Uma Saga organiza commits locais de uma operação distribuída e suas compensações. No desembolso hipotético, a reserva é liberada se o banco rejeitar antes da liquidação.
+
+O custo inclui estados intermediários, retomada e compensações que também podem falhar. A liquidação aceita é um pivô; devolução passa a ser nova operação. Saga não define uma categoria CAP universal. [Eventuate Tram Sagas](https://github.com/eventuate-tram/eventuate-tram-sagas) é a base; Customers and Orders é aplicação **REF**. A skill é `saga-orchestration`.
+
+{/* current-curation:saga */}
+
+A [curadoria de Saga](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#saga) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e007" />
+
+## Choreography Saga
+
+Participantes de uma Saga reagem a eventos e decidem localmente os próximos passos. A base é Eventuate Tram; a aplicação **REF** [Customers and Orders por coreografia](https://github.com/eventuate-tram/eventuate-tram-examples-customers-and-orders) é distinta do sample orquestrado. Em [`OrderEventConsumer`](https://github.com/eventuate-tram/eventuate-tram-examples-customers-and-orders/blob/e7ec5b7153bdf7d3d941792d9b92ebf13b53452a/customer-service/customer-service-event-handling/src/main/java/io/eventuate/examples/tram/ordersandcustomers/customers/eventhandlers/OrderEventConsumer.java), pedido criado aciona `reserveCredit` e pedido cancelado aciona `releaseCredit`.
+
+[`CustomerEventConsumer`](https://github.com/eventuate-tram/eventuate-tram-examples-customers-and-orders/blob/e7ec5b7153bdf7d3d941792d9b92ebf13b53452a/order-service/order-service-event-handling/src/main/java/io/eventuate/examples/tram/ordersandcustomers/orders/eventhandlers/CustomerEventConsumer.java) aprova ou rejeita o pedido conforme o resultado do crédito. O custo é acompanhar esse processo entre consumidores e recuperar mensagens. O limite é que cada commit continua local e compensação exige contrato de negócio. A skill de apoio é `saga-orchestration`.
+
+{/* current-curation:choreography-saga */}
+
+A [curadoria de Choreography Saga](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#choreography-saga) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e008" />
+
+## Orchestration Saga
+
+Um coordenador acompanha o estado e comanda os passos da Saga. No caso hipotético, ele decide entre confirmar a liquidação e liberar a reserva.
+
+O custo é tornar esse coordenador recuperável e manter os contratos dos participantes. Centralizar a decisão não torna os commits uma transação global. [Eventuate Tram Sagas](https://github.com/eventuate-tram/eventuate-tram-sagas) e [Customers and Orders](https://github.com/eventuate-tram/eventuate-tram-sagas-examples-customers-and-orders) são base e aplicação **REF**. O servidor Temporal é uma comparação de execução durável, sem sample app verificado. A skill é `saga-orchestration`.
+
+{/* current-curation:orchestration-saga */}
+
+A [curadoria de Orchestration Saga](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#orchestration-saga) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e009" />
+
+## Two-Phase Commit / 2PC
+
+Um coordenador pede preparação aos participantes e depois comunica commit ou abort. PostgreSQL oferece o participante **PROD** [`PREPARE TRANSACTION`](https://www.postgresql.org/docs/16/sql-prepare-transaction.html). Uma aplicação executável **REF** é [Committer](https://github.com/vadiminshakov/committer/tree/8cdba9f473039ff5541665853274d0525810b5bf), com base Go/gRPC e modo `two-phase`.
+
+Em [`Coordinator.Broadcast`](https://github.com/vadiminshakov/committer/blob/8cdba9f473039ff5541665853274d0525810b5bf/core/coordinator/coordinator.go), a votação precede a decisão; o modo de duas fases não inclui a etapa `Precommit`. O cliente de exemplo grava chaves pela API. O custo inclui estado preparado, locks e entrega da decisão. Um participante preparado pode bloquear ao perder o coordenador; a leitura desse sample não certifica tolerância a toda falha. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:two-phase-commit-2pc */}
+
+A [curadoria de Two-Phase Commit / 2PC](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#two-phase-commit-2pc) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e010" />
+
+## Three-Phase Commit / 3PC
+
+O 3PC acrescenta pré-commit entre votação e decisão final, dentro de um modelo de comunicação e falhas. A aplicação OSS **REF** [Committer, Apache-2.0](https://github.com/vadiminshakov/committer/tree/8cdba9f473039ff5541665853274d0525810b5bf) usa a base Go/gRPC e uma máquina de estados própria; não é apresentada como uma plataforma 3PC comprovada em produção.
+
+[`Coordinator.Broadcast`](https://github.com/vadiminshakov/committer/blob/8cdba9f473039ff5541665853274d0525810b5bf/core/coordinator/coordinator.go) distingue `VoteProposal`, `Precommit`, `VotePrecommit` e decisão. O participante implementa [`Propose`, `Precommit` e `Commit`](https://github.com/vadiminshakov/committer/blob/8cdba9f473039ff5541665853274d0525810b5bf/core/cohort/commitalgo/commitalgo.go); [`examples/client/client.go`](https://github.com/vadiminshakov/committer/blob/8cdba9f473039ff5541665853274d0525810b5bf/examples/client/client.go) envia e consulta chaves. O custo é outra fase, estado e recuperação. O sample permite estudar esses mecanismos, mas sua leitura não prova segurança sob partição arbitrária; a suposição teórica continua em [Skeen](https://doi.org/10.1145/582318.582339). TCC não substitui esse protocolo. Não há skill 3PC específica verificada; `backend-concurrency-mechanics` é adjacente.
+
+{/* current-curation:three-phase-commit-3pc */}
+
+A [curadoria de Three-Phase Commit / 3PC](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#three-phase-commit-3pc) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e011" />
+
+## TCC — Try/Confirm/Cancel
+
+Try valida e reserva; Confirm finaliza; Cancel libera a reserva. Uma reserva hipotética de R$ 1.000 sobre R$ 1.500 deixa R$ 500 disponíveis enquanto a operação está pendente.
+
+O custo é implementar e tornar idempotentes os três caminhos. Cancel não desfaz uma liquidação irreversível. A base **PROD** é [Apache Seata TCC](https://seata.apache.org/docs/user/mode/tcc/); a documentação aponta samples **REF**, sem execução confirmada no corpus local. As skills adjacentes são `backend-idempotency` e `saga-orchestration`.
+
+{/* current-curation:tcc-try-confirm-cancel */}
+
+A [curadoria de TCC — Try/Confirm/Cancel](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#tcc-try-confirm-cancel) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e012" />
+
+## Compensating Transaction
+
+Uma compensação aplica uma nova operação para corrigir semanticamente um passo confirmado. Liberar uma reserva hipotética recupera disponibilidade sem apagar a tentativa anterior.
+
+O custo é definir reversibilidade e recuperação da própria compensação. Enviar um e-mail ou liquidar um pagamento não se desfaz com rollback local. A base é [Eventuate Tram Sagas](https://github.com/eventuate-tram/eventuate-tram-sagas), com Customers and Orders como aplicação **REF**. As skills são `saga-orchestration` e `backend-idempotency`.
+
+{/* current-curation:compensating-transaction */}
+
+A [curadoria de Compensating Transaction](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#compensating-transaction) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e013" />
+
+## Reservation Pattern
+
+Uma reserva torna um recurso temporariamente indisponível antes da conclusão definitiva. No exemplo hipotético de agenda, o horário fica reservado enquanto a confirmação necessária está pendente.
+
+O custo é gerir validade, liberação e recuperação. Uma expiração local não cancela automaticamente um efeito externo aceito. A referência é [TCC do Seata](https://seata.apache.org/docs/user/mode/tcc/), **REF** para o caso de reserva; não foi demonstrada essa aplicação de agenda na Faz. As skills adjacentes são `backend-idempotency` e `backend-concurrency-mechanics`.
+
+{/* current-curation:reservation-pattern */}
+
+A [curadoria de Reservation Pattern](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#reservation-pattern) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e014" />
+
+## Idempotency
+
+Repetir a mesma intenção não acrescenta outro efeito relevante dentro da fronteira definida. `claim_or_replay` no código lido usa chave e hash para reconhecer pedidos e reproduzir resultados locais.
+
+O custo é manter identidade, estado e retenção. Isso não fecha sozinho a janela de escrita Salesforce antes de `finish`. A aplicação **REF** é o [contador transacional Watermill](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/exactly-once-delivery-counter), cujo efeito fica no mesmo banco do consumo. A skill é `backend-idempotency`.
+
+{/* current-curation:idempotency */}
+
+A [curadoria de Idempotency](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#idempotency) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e015" />
+
+## Idempotency Key
+
+A chave idempotente identifica uma intenção repetida, com escopo e retenção definidos. A base de framework do exemplo é Node.js/TypeORM; a aplicação OSS **PROD histórica** é Medusa 1.20.10.
+
+A rota [`complete-cart.ts`](https://github.com/medusajs/medusa/blob/v1.20.10/packages/medusa/src/api/routes/store/carts/complete-cart.ts) lê `Idempotency-Key` e usa o [`IdempotencyKeyService`](https://github.com/medusajs/medusa/blob/v1.20.10/packages/medusa/src/services/idempotency-key.ts). O [modelo](https://github.com/medusajs/medusa/blob/v1.20.10/packages/medusa/src/models/idempotency-key.ts) conserva chave única, estado de recuperação e resposta. O custo é gerir identidade, compatibilidade do pedido e validade. Criar uma chave nova em cada retry perde a intenção original; o registro local não fornece automaticamente idempotência de um provedor externo. O MakersHub lido acrescenta escopo, usuário e `request_hash` em seu próprio contrato. A skill é `backend-idempotency`.
+
+{/* current-curation:idempotency-key */}
+
+A [curadoria de Idempotency Key](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#idempotency-key) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e016" />
+
+## Deduplication
+
+Deduplicação detecta ocorrências repetidas segundo uma identidade e política. Um consumidor proposto pode reconhecer o mesmo messageId antes de aplicar novamente uma alteração local.
+
+O custo é guardar identidades e decidir quando expiram. Deduplicar mensagens não corrige uma JOIN que multiplica linhas de movimentos. A referência **REF** é [Eventuate Tram Core](https://github.com/eventuate-tram/eventuate-tram-core), para detecção de duplicatas do consumidor. As skills são `backend-idempotency` e `backend-message-queue`.
+
+{/* current-curation:deduplication */}
+
+A [curadoria de Deduplication](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#deduplication) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e017" />
+
+## Exactly Once Semantics
+
+Exactly Once Semantics identifica um efeito lógico aplicado uma vez dentro da fronteira comprovada. A base é Watermill SQL pub/sub; a aplicação OSS **REF** é o [`exactly-once-delivery-counter`](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/exactly-once-delivery-counter).
+
+Seu [`worker/main.go`](https://github.com/ThreeDotsLabs/watermill/blob/master/_examples/real-world-examples/exactly-once-delivery-counter/worker/main.go) obtém a transação de `msg.Context()` e usa essa mesma transação para consultar e alterar o contador. O custo é reunir progresso de consumo e efeito nesse banco. A garantia não cobre Salesforce nem transforma todo retry do produtor na mesma mensagem armazenada. Essa é uma aplicação do efeito transacional delimitado, não uma promessa global. A skill adjacente é `backend-idempotency`.
+
+{/* current-curation:exactly-once-semantics */}
+
+A [curadoria de Exactly Once Semantics](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#exactly-once-semantics) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e018" />
+
+## At-Least-Once Delivery
+
+O transporte pode reentregar uma mensagem enquanto busca sua confirmação, portanto o consumidor precisa tolerar repetição. Uma queda após o efeito e antes do ACK é um caso típico.
+
+O custo é deduplicar e acompanhar mensagens ainda não concluídas. Progresso depende das condições de recuperação e retenção do mecanismo; não é promessa de conclusão sob falha permanente. A base **PROD** é [RabbitMQ acknowledgements](https://www.rabbitmq.com/docs/confirms); o exemplo AMQP Watermill é **REF**, sem comprovação de todas as opções de durabilidade. A skill é `backend-message-queue`.
+
+{/* current-curation:at-least-once-delivery */}
+
+A [curadoria de At-Least-Once Delivery](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#at-least-once-delivery) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e019" />
+
+## At-Most-Once Delivery
+
+O mecanismo não reentrega a ocorrência depois do envio, podendo perdê-la. Um assinante desconectado de Redis Pub/Sub pode deixar de receber uma notificação.
+
+O custo é aceitar a perda ou usar outra fonte para recuperar o estado. Isso não garante que um produtor jamais publique duas ocorrências distintas do mesmo fato. A base e produto **PROD** são [Redis Pub/Sub](https://redis.io/docs/latest/develop/pubsub/); o sample Redis Streams do Watermill não é uma aplicação desse transporte volátil. A skill é `backend-message-queue`.
+
+{/* current-curation:at-most-once-delivery */}
+
+A [curadoria de At-Most-Once Delivery](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#at-most-once-delivery) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e020" />
+
+## Eventual Consistency
+
+Consistência eventual permite que representações convirjam após propagação bem-sucedida e pausa das mudanças relevantes. A base aplicada é o framework Marten, com seu [`ProjectionDaemon`](https://github.com/JasperFx/marten/blob/master/src/Marten/Events/Daemon/ProjectionDaemon.cs); a aplicação OSS **REF** é o Helpdesk de EventSourcing.NetCore.
+
+Seu [`Program.cs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Program.cs) registra `CustomerIncidentsSummaryProjection` como `Async` e habilita `AddAsyncDaemon`. O resumo é uma leitura derivada processada por esse caminho, enquanto outras projeções são inline. O custo é acompanhar progresso e recuperar falhas. A promessa não estabelece prazo máximo nem frescor imediato; o mecanismo assíncrono precisa continuar propagando. [Dynamo](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf) permanece como fonte conceitual, não como framework. A skill é `projection-patterns`.
+
+{/* current-curation:eventual-consistency */}
+
+A [curadoria de Eventual Consistency](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#eventual-consistency) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e021" />
+
+## Strong Consistency
+
+O termo precisa indicar a propriedade exigida, como linearizabilidade, que respeita a ordem real de operações completadas. A base aplicada é a biblioteca de cliente `client/v3` do etcd e sua coordenação Raft; a aplicação OSS **PROD** é o serviço KV do etcd.
+
+Em [`EtcdServer.Range`](https://github.com/etcd-io/etcd/blob/main/server/etcdserver/v3_server.go), uma leitura não serializable espera `LinearizableReadNotify` antes de consultar o KV. A [documentação da API](https://github.com/etcd-io/website/blob/main/content/en/docs/v3.6/learning/api_guarantees.md) delimita essa promessa. O custo é coordenação e possível espera ou falha. Reads serializable e watchers têm outros contratos; a propriedade não deve ser transferida a qualquer cache diante do etcd. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:strong-consistency */}
+
+A [curadoria de Strong Consistency](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#strong-consistency) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e022" />
+
+## Read-your-writes
+
+Read-your-writes inclui alterações anteriores da sessão, embora uma escrita concorrente posterior possa ser observada. A biblioteca base aplicada é `client/v3` do etcd. A fundamentação teórica está em [Terry e colaboradores](https://www.cs.cornell.edu/courses/cs734/2000FA/cached%20papers/SessionGuaranteesPDIS_1.html). Uma aplicação OSS **PROD** concreta é o etcd: um `Put` concluído seguido de `Range` linearizável fornece uma promessa mais forte que RYW.
+
+[`EtcdServer.Range`](https://github.com/etcd-io/etcd/blob/main/server/etcdserver/v3_server.go) chama `LinearizableReadNotify` quando `Serializable` é falso; a [API documenta a ordem entre escrita e leitura](https://github.com/etcd-io/website/blob/main/content/en/docs/v3.6/learning/api_guarantees.md). O custo é a coordenação Raft. Uma leitura serializable local pode estar atrasada; TTL de afinidade a um servidor não equivale a verificar uma revisão aplicada. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:read-your-writes */}
+
+A [curadoria de Read-your-writes](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#read-your-writes) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e023" />
+
+## Monotonic Reads
+
+Monotonic reads impede que uma sessão perca alterações já vistas. A biblioteca base aplicada é `client/v3` do etcd, e a fonte conceitual são as [garantias de sessão](https://www.cs.cornell.edu/courses/cs734/2000FA/cached%20papers/SessionGuaranteesPDIS_1.html); uma aplicação OSS **PROD** é o etcd usando `Range` linearizável em leituras sequenciais.
+
+O [serviço Range](https://github.com/etcd-io/etcd/blob/main/server/etcdserver/v3_server.go) aguarda a barreira de leitura antes do acesso. Pela [ordem real documentada](https://github.com/etcd-io/website/blob/main/content/en/docs/v3.6/learning/api_guarantees.md), uma leitura posterior não retorna uma revisão anterior à que uma leitura concluída já incluiu. Isso não significa que o valor textual jamais volte a ser igual a um valor antigo por uma nova escrita. O custo é coordenação; reads serializable ou caches diante do serviço não herdam a promessa automaticamente. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:monotonic-reads */}
+
+A [curadoria de Monotonic Reads](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#monotonic-reads) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e024" />
+
+## Optimistic Concurrency Control
+
+A atualização é aceita se a versão ou condição esperada ainda coincide. O `_apply` lido exige o responsável anterior no WHERE e retorna False quando perde a disputa.
+
+O custo é tratar conflitos; a condição sobre um campo não foi demonstrada como versão universal e pode ter limites próprios. Versionar um lead não protege sozinho um horário compartilhado. A base **PROD** é PostgreSQL; [EventSourcing.NetCore](https://github.com/oskardudycz/EventSourcing.NetCore) é **REF**. A skill é `backend-concurrency-mechanics`; o desenvolvimento está em [concorrência](/explicacoes/concurrency/).
+
+{/* current-curation:optimistic-concurrency-control */}
+
+A [curadoria de Optimistic Concurrency Control](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#optimistic-concurrency-control) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e025" />
+
+## Pessimistic Locking
+
+Um lock reserva acesso incompatível antes de concluir a operação. `FOR UPDATE SKIP LOCKED` no claim lido permite que outros claims evitem linhas já travadas.
+
+O custo é espera, contenção ou trabalho pulado, conforme o mecanismo. O lock transacional termina com a transação; não cerca uma chamada externa que continue depois. A base e produto **PROD** são [PostgreSQL](https://www.postgresql.org/docs/16/transaction-iso.html). A skill é `backend-concurrency-mechanics`.
+
+{/* current-curation:pessimistic-locking */}
+
+A [curadoria de Pessimistic Locking](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#pessimistic-locking) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e026" />
+
+## Distributed Lock
+
+Um mecanismo compartilhado coordena exclusividade entre processos ou máquinas. A base e aplicação OSS **PROD**, na versão de referência 5.3, são [Hazelcast FencedLock](https://docs.hazelcast.com/hazelcast/5.3/data-structures/fencedlock). O [`Lock.acquire`](https://github.com/hazelcast/hazelcast/blob/v5.3.8/hazelcast/src/main/java/com/hazelcast/cp/internal/datastructures/lock/Lock.java) administra owner, esperas e invocações repetidas no recurso CP.
+
+O custo é manter coordenação e sessões. O contrato depende do modo CP e da configuração usados; a referência não prova configuração de uma implantação. Perder o lock não interrompe um processo suspenso nem cerca, sozinho, um efeito no Salesforce. A skill é `backend-distributed-locking`.
+
+{/* current-curation:distributed-lock */}
+
+A [curadoria de Distributed Lock](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#distributed-lock) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e027" />
+
+## Lease
+
+Uma lease concede autoridade por um prazo renovável. A base de comparação é etcd/Raft, com o próprio etcd como aplicação OSS **PROD**. O [`lessor`](https://github.com/etcd-io/etcd/blob/main/server/lease/lessor.go) implementa concessão, revogação, TTL e acompanhamento de expiração das leases ligadas a recursos KV.
+
+O custo é renovar, acompanhar abandono e retomar recursos. A expiração da lease altera o contrato do serviço; não mata automaticamente um executor nem cancela um pagamento externo. No MakersHub lido, a lease de idempotência é outro mecanismo, limitado ao registro PostgreSQL. A skill é `backend-distributed-locking`.
+
+{/* current-curation:lease */}
+
+A [curadoria de Lease](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#lease) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e028" />
+
+## Fencing Token
+
+Um token ordenável permite que o destino rejeite um escritor cuja autoridade ficou antiga. A base [Hazelcast FencedLock 5.3](https://docs.hazelcast.com/hazelcast/5.3/data-structures/fencedlock) expõe fences monotônicos; o destino ainda precisa validá-los.
+
+Uma aplicação OSS **PROD** desse princípio é o Journal do Hadoop HDFS. Em [`Journal.checkRequest`](https://github.com/apache/hadoop/blob/trunk/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/server/Journal.java), uma requisição com época menor que `lastPromisedEpoch` é rejeitada; uma época posterior atualiza a promessa persistida. O custo é conservar a autoridade e conferir cada escrita. Isso cerca o journal desse protocolo, não qualquer serviço externo. O UUID do claim MakersHub verifica igualdade local e não demonstra essa proteção no Salesforce. A skill é `backend-distributed-locking`.
+
+{/* current-curation:fencing-token */}
+
+A [curadoria de Fencing Token](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#fencing-token) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e029" />
+
+## Compare-and-Swap / CAS
+
+CAS altera um valor somente se ele ainda coincide com o esperado. A condição do UPDATE de responsável no `_apply` fornece uma aplicação delimitada dessa comparação.
+
+O custo é tratar o retorno sem alteração. Comparar apenas um valor pode deixar de detectar uma sequência em que ele muda e volta, conhecida como ABA; uma versão é outro contrato. A base e produto **PROD** são PostgreSQL; o caso foi lido no MakersHub, sem prova de execução dessa disputa. A skill é `backend-concurrency-mechanics`.
+
+{/* current-curation:compare-and-swap-cas */}
+
+A [curadoria de Compare-and-Swap / CAS](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#compare-and-swap-cas) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e030" />
+
+## Version Vector
+
+Um version vector conserva contadores por participante para distinguir causalidade e concorrência. A base OSS é [`riak_core/vclock.erl`](https://github.com/basho/riak_core/blob/develop/src/vclock.erl), com `descends`, `increment` e `merge`; a aplicação **PROD histórica** é Riak KV.
+
+[`riak_object.erl`](https://github.com/basho/riak_kv/blob/develop/src/riak_object.erl) usa o vetor para comparar objetos e combinar versões. No caso de duas alterações concorrentes, o metadado ajuda a distinguir descendência de conflito. O custo é manter e limitar esses metadados. O vetor não escolhe sozinho qual informação de negócio deve vencer, e pruning tem seu contrato. A fonte histórica não é recomendação de adoção atual. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:version-vector */}
+
+A [curadoria de Version Vector](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#version-vector) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e031" />
+
+## Lamport Clock
+
+Um Lamport clock conserva uma ordem compatível com acontecimentos causalmente relacionados. A base concreta é [`LamportClock` do Serf](https://github.com/hashicorp/serf/blob/master/serf/lamport.go), construído sobre operações atômicas de Go; a aplicação OSS **PROD** é o próprio Serf.
+
+`Witness` avança o contador ao receber um valor remoto, e [`serf.go`](https://github.com/hashicorp/serf/blob/master/serf/serf.go) utiliza clocks de intents, eventos e queries. O custo é propagar metadados e gerir seu escopo. Um número maior não prova causalidade inversa nem horário físico. O [artigo de Lamport](https://lamport.azurewebsites.net/pubs/time-clocks.pdf) fornece o fundamento. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:lamport-clock */}
+
+A [curadoria de Lamport Clock](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#lamport-clock) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e032" />
+
+## Hybrid Logical Clock
+
+Um Hybrid Logical Clock combina tempo físico aproximado e contador lógico para acompanhar causalidade recebida. A base é [`HybridClock` do YugabyteDB](https://github.com/yugabyte/yugabyte-db/blob/master/src/yb/server/hybrid_clock.cc); a aplicação OSS **PROD** é o servidor YugabyteDB.
+
+`NowWithError` produz valores e `Update` incorpora o componente físico recebido e um componente lógico posterior. [`server_base.cc`](https://github.com/yugabyte/yugabyte-db/blob/master/src/yb/server/server_base.cc) instancia esse relógio quando `use_hybrid_clock` está selecionado. O custo inclui sincronização e tratamento de incerteza. HLC não prova a hora legal exata de um fato, nem autoriza uma promessa para outra configuração do servidor. A [fonte teórica HLC](https://www.cse.buffalo.edu/tech-reports/2014-04.pdf) delimita a causalidade. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:hybrid-logical-clock */}
+
+A [curadoria de Hybrid Logical Clock](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#hybrid-logical-clock) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e033" />
+
+## Quorum Read/Write
+
+No mesmo conjunto fixo de N réplicas, conjuntos R e W com soma maior que N têm interseção. Para N=5, R=3 e W=3, 6 é maior que 5. A base aplicada é Apache Cassandra e sua API de níveis de consistência; a aplicação OSS **PROD** é o próprio banco. [Dynamo](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf) fornece a fundamentação teórica.
+
+[`ConsistencyLevel.quorumFor` e `blockFor`](https://github.com/apache/cassandra/blob/trunk/src/java/org/apache/cassandra/db/ConsistencyLevel.java) calculam as respostas requeridas conforme fator de replicação e nível. O custo é esperar respostas e lidar com falhas. Topologia, conjunto elegível, versões e conflitos limitam a conclusão; a conta não prova sozinha linearizabilidade. A referência não precisa ser financeira para demonstrar o mecanismo. A skill adjacente é `backend-concurrency-mechanics`.
+
+{/* current-curation:quorum-read-write */}
+
+A [curadoria de Quorum Read/Write](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#quorum-read-write) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e034" />
+
+## Leader Election
+
+A eleição escolhe um participante para exercer um papel. Um cluster pode eleger o coordenador que ordena seu trabalho conforme o protocolo.
+
+O custo é gerir membership, comunicação e retomada. A eleição não impede sozinha um líder antigo de gravar. As bases são [etcd](https://github.com/etcd-io/etcd) e client-go, com Kubernetes como aplicação **PROD** no recorte S6. O caso e seus recibos estão em [disponibilidade](/explicacoes/availability/). A skill adjacente é `backend-distributed-locking`.
+
+{/* current-curation:leader-election */}
+
+A [curadoria de Leader Election](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#leader-election) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e035" />
+
+## Consensus
+
+Consenso estabelece acordo entre participantes sob propriedades e modelo de falhas definidos. A base OSS concreta é a biblioteca [`etcd-io/raft`](https://github.com/etcd-io/raft), cuja máquina processa mensagens em `raft.Step`; a aplicação OSS **PROD** é o serviço etcd.
+
+Esse vínculo permite estudar a biblioteca de acordo dentro do produto que mantém seu log. O custo é comunicação, persistência e condições para progresso. Segurança e progresso são propriedades distintas: perder a maioria pode impedir novos avanços sem autorizar decisões incompatíveis. O [artigo Raft](https://raft.github.io/raft.pdf) fornece a fundamentação teórica. A skill adjacente é `backend-concurrency-mechanics`; S6 desenvolve a operação.
+
+{/* current-curation:consensus */}
+
+A [curadoria de Consensus](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#consensus) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e036" />
+
+## Raft
+
+Raft organiza eleição, replicação de log e regras de segurança para consenso. A biblioteca base OSS é [`etcd-io/raft/raft.go`](https://github.com/etcd-io/raft/blob/main/raft.go), com estado de termo, voto e processamento em `Step`; a aplicação **PROD** é etcd.
+
+O caso de S6 mediu um cluster de três membros com líder no recorte datado. O custo é conservar estado e obter a maioria necessária para progresso. Dois sobreviventes só sustentam a maioria se ainda se comunicarem conforme o contrato. O [artigo Raft](https://raft.github.io/raft.pdf) permanece fonte teórica, não nome de framework. Não há skill Raft específica verificada; `backend-distributed-locking` é apoio adjacente.
+
+{/* current-curation:raft */}
+
+A [curadoria de Raft](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#raft) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e037" />
+
+## Paxos
+
+Paxos é uma família de protocolos de acordo com condições de segurança e progresso. A fonte teórica é [Paxos Made Simple](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf). A base aplicada é o motor Paxos do Cassandra; a aplicação OSS **PROD** é Apache Cassandra, em seu caminho de transações leves.
+
+[`service/paxos/Paxos.java`](https://github.com/apache/cassandra/blob/trunk/src/java/org/apache/cassandra/service/paxos/Paxos.java) conduz preparação, proposta e commit, e trata propostas em andamento e novas tentativas. O custo é coordenação, espera e contenção. A garantia pertence a esse caminho e seus níveis de consistência, não a qualquer escrita comum do banco. Não há skill Paxos específica verificada; `backend-concurrency-mechanics` oferece apoio adjacente.
+
+{/* current-curation:paxos */}
+
+A [curadoria de Paxos](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#paxos) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g02-e038" />
+
+## Gossip Protocol
+
+Gossip dissemina informação por trocas entre participantes. Um cluster proposto pode espalhar membership e estado sem consultar sempre um único distribuidor.
+
+O custo é tráfego, convergência e informação temporariamente diferente entre nós. Gossip não decide sozinho um log único nem fornece fencing. [memberlist](https://github.com/hashicorp/memberlist) é a base; [Loki](https://grafana.com/docs/loki/latest/get-started/components/) é produto **PROD** de referência, sem implantação Faz demonstrada. Não há skill gossip específica verificada; `backend-concurrency-mechanics` é apoio adjacente.
+
+{/* current-curation:gossip-protocol */}
+
+A [curadoria de Gossip Protocol](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#gossip-protocol) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

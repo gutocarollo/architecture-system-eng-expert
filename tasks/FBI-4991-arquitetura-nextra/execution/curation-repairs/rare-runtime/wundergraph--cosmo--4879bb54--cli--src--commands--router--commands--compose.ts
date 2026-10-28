@@ -1,0 +1,847 @@
+import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { create, fromJsonString, toJsonString } from '@bufbuild/protobuf';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
+import {
+  buildRouterConfig,
+  type ComposedSubgraph,
+  type ComposedSubgraphGRPC,
+  type ComposedSubgraphPlugin,
+  normalizeURL,
+  type RouterSubgraph,
+  SubgraphKind,
+} from '@wundergraph/cosmo-shared';
+import { Command, program } from 'commander';
+import { parse } from 'graphql';
+import * as yaml from 'js-yaml';
+import { basename, dirname, join, resolve } from 'pathe';
+import pc from 'picocolors';
+import semver from 'semver';
+
+import {
+  FeatureFlagRouterExecutionConfigSchema,
+  FeatureFlagRouterExecutionConfigsSchema,
+  GRPCMappingSchema,
+  RouterConfigSchema,
+} from '@wundergraph/cosmo-connect/dist/node/v1/node_pb';
+
+import type { FeatureFlagRouterExecutionConfigs } from '@wundergraph/cosmo-connect/dist/node/v1/node_pb';
+
+import {
+  type ContractTagOptions,
+  FederationSuccess,
+  newContractTagOptionsFromArrays,
+  ROUTER_COMPATIBILITY_VERSION_ONE,
+} from '@wundergraph/composition';
+import Table from 'cli-table3';
+import { BaseCommandOptions } from '../../../core/types/types.js';
+import { composeSubgraphs, introspectSubgraph } from '../../../utils.js';
+import {
+  featureFlagsDir,
+  getRouterConfigOutputFile,
+  mapperFile,
+  routerConfigFile,
+  writeFeatureFlagConfigToFile,
+} from '../utils.js';
+import { HandleRouterConfigParams } from './types/params.js';
+import {
+  Config,
+  ConfigSubgraph,
+  GRPCSubgraphConfig,
+  GRPCSubgraphMetadata,
+  StandardSubgraphConfig,
+  StandardSubgraphMetaData,
+  SubgraphMetaData,
+  SubgraphPluginConfig,
+  SubgraphPluginMetadata,
+} from './types/types.js';
+
+const STATIC_SCHEMA_VERSION_ID = '00000000-0000-0000-0000-000000000000';
+
+function constructRouterSubgraph(result: FederationSuccess, s: SubgraphMetaData, index: number): RouterSubgraph {
+  const subgraphConfig = result.subgraphConfigBySubgraphName.get(s.name);
+  const schema = subgraphConfig?.schema;
+  const configurationDataByTypeName = subgraphConfig?.configurationDataByTypeName;
+  const costs = subgraphConfig?.costs;
+
+  if (s.kind === SubgraphKind.Standard) {
+    return {
+      kind: SubgraphKind.Standard,
+      id: `${index}`,
+      name: s.name,
+      url: s.routingUrl,
+      sdl: s.sdl,
+      subscriptionUrl: s.subscriptionUrl,
+      subscriptionProtocol: s.subscriptionProtocol,
+      websocketSubprotocol: s.websocketSubprotocol,
+      schema,
+      configurationDataByTypeName,
+      costs,
+    } satisfies ComposedSubgraph;
+  }
+
+  if (s.kind === SubgraphKind.Plugin) {
+    return {
+      kind: SubgraphKind.Plugin,
+      id: `${index}`,
+      name: s.name,
+      url: `http://localhost:3000/plugin/${index}`,
+      sdl: s.sdl,
+      mapping: s.mapping,
+      protoSchema: s.protoSchema,
+      version: s.version,
+      schema,
+      configurationDataByTypeName,
+      costs,
+    } satisfies ComposedSubgraphPlugin;
+  }
+
+  return {
+    kind: SubgraphKind.GRPC,
+    id: `${index}`,
+    name: s.name,
+    sdl: s.sdl,
+    url: s.routingUrl,
+    protoSchema: s.protoSchema,
+    mapping: s.mapping,
+    schema,
+    configurationDataByTypeName,
+    costs,
+  } satisfies ComposedSubgraphGRPC;
+}
+
+async function handleSplitRouterConfig({
+  config,
+  contractTagOptionsByFeatureFlagName,
+  inputFileLocation,
+  options,
+  routerConfig,
+  subgraphs,
+}: HandleRouterConfigParams) {
+  let outputDir = options.out ? resolve(options.out) : options.out;
+  if (!outputDir) {
+    outputDir = resolve('router-compose-output');
+  }
+  if (!existsSync(outputDir)) {
+    await mkdir(outputDir);
+  }
+  const entries = await readdir(outputDir);
+  if (entries.length > 0) {
+    console.log(
+      pc.red(
+        `Split-config flag enabled; output directory "${outputDir}" is not empty. Please provide an empty directory path.`,
+      ),
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const routerConfigJSON = toJsonString(RouterConfigSchema, routerConfig);
+  const mapper = new Map<string, string>();
+  mapper.set('', createHash('sha256').update(routerConfigJSON).digest('hex'));
+  await writeFile(join(outputDir, routerConfigFile), routerConfigJSON);
+  if (!config.feature_flags || config.feature_flags.length === 0) {
+    await writeFile(join(outputDir, mapperFile), JSON.stringify(Object.fromEntries(mapper)));
+    return;
+  }
+
+  const ffConfigs = await buildFeatureFlagsConfig(
+    config,
+    inputFileLocation,
+    subgraphs,
+    options,
+    contractTagOptionsByFeatureFlagName,
+  );
+  const ffDir = join(outputDir, featureFlagsDir);
+  try {
+    await mkdir(ffDir);
+  } catch {
+    console.log(
+      pc.red(
+        `Split-config flag enabled; output directory "${ffDir}" already exists. Please provide an empty root directory path.`,
+      ),
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  for (const [featureFlagName, featureFlagConfig] of Object.entries(ffConfigs.configByFeatureFlagName)) {
+    const ffRouterConfig = create(RouterConfigSchema, {
+      engineConfig: featureFlagConfig.engineConfig,
+      version: featureFlagConfig.version,
+      subgraphs: featureFlagConfig.subgraphs,
+      compatibilityVersion: routerConfig.compatibilityVersion,
+    });
+
+    const routerConfigJson = toJsonString(RouterConfigSchema, ffRouterConfig);
+    await writeFeatureFlagConfigToFile(ffDir, featureFlagName, routerConfigJson);
+    mapper.set(featureFlagName, createHash('sha256').update(routerConfigJson).digest('hex'));
+  }
+
+  await writeFile(join(outputDir, mapperFile), JSON.stringify(Object.fromEntries(mapper)));
+  console.log(pc.green(`Router execution manifest successfully written to "${pc.bold(outputDir)}".`));
+}
+
+async function handleEmbeddedRouterConfig({
+  config,
+  contractTagOptionsByFeatureFlagName,
+  inputFileLocation,
+  options,
+  routerConfig,
+  subgraphs,
+}: HandleRouterConfigParams) {
+  if (!config.feature_flags || config.feature_flags.length > 0) {
+    routerConfig.featureFlagConfigs = await buildFeatureFlagsConfig(
+      config,
+      inputFileLocation,
+      subgraphs,
+      options,
+      contractTagOptionsByFeatureFlagName,
+    );
+  }
+
+  const routerConfigJson = toJsonString(RouterConfigSchema, routerConfig);
+  if (options.out) {
+    const output = await getRouterConfigOutputFile(options.out);
+    await writeFile(output, routerConfigJson);
+    console.log(pc.green(`Router execution config successfully written to "${pc.bold(options.out)}".`));
+  } else {
+    console.log(routerConfigJson);
+  }
+}
+
+export default (_: BaseCommandOptions) => {
+  const command = new Command('compose');
+  command.description(
+    'Generates a router config from a local composition file. This makes it easy to test your router without a control-plane connection. For production, please use the "router fetch" command',
+  );
+  command.requiredOption('-i, --input <path-to-input>', 'The yaml file with data about graph and subgraphs.');
+  command.option('-o, --out [string]', 'Destination file for the router config.');
+  command.option('--suppress-warnings', 'This flag suppresses any warnings produced by composition.');
+  command.option(
+    '--disable-resolvability-validation',
+    'This flag will disable the validation for whether all nodes of the federated graph are resolvable. Do NOT use unless troubleshooting.',
+  );
+  command.option('--ignore-external-keys', 'This flag ignores errors related to true external entity keys.');
+  command.option(
+    '--split-configs-enabled',
+    'This flag enables splitting the router config into multiple files. Router version 0.315.0 or higher is required.',
+  );
+  command.option(
+    '--exclude [tags...]',
+    'Schema elements with these tags will be excluded from the composed schema. Providing exclude and/or include tags produces a contract of the supergraph rather than the full supergraph.',
+  );
+  command.option(
+    '--include [tags...]',
+    'Schema elements with these tags will be included in the composed schema. Providing exclude and/or include tags produces a contract of the supergraph rather than the full supergraph.',
+  );
+  command.option('--disable-base-contract', 'Specify whether a contract of the base federated graph should be made.');
+  command.option(
+    '--contract-feature-flag-names [feature-flag-names...]',
+    'Specify the feature flag name(s) for which the contract(s) should be created.',
+  );
+
+  command.action(async (options) => {
+    const inputFile = resolve(options.input);
+    const inputFileLocation = dirname(inputFile);
+
+    if (!existsSync(inputFile)) {
+      program.error(
+        pc.red(pc.bold(`The input file '${pc.bold(inputFile)}' does not exist. Please check the path and try again.`)),
+      );
+    }
+
+    const fileContent = (await readFile(inputFile)).toString();
+    const config = yaml.load(fileContent) as Config;
+
+    const validFeatureFlagNames = new Set<string>(config.feature_flags?.map((ff) => ff.name));
+    const contractTagOptions = toContractTagOptions(options.exclude, options.include);
+    const contractTagOptionsByFeatureFlagName = new Map<string, ContractTagOptions>();
+    if (typeof options.contractFeatureFlagNames === 'boolean') {
+      program.error(
+        pc.red(pc.bold(`The "contract-feature-flag-names" option requires at least one feature flag name.`)),
+      );
+    }
+    if (contractTagOptions) {
+      for (const featureFlagName of options.contractFeatureFlagNames ?? []) {
+        if (!validFeatureFlagNames.has(featureFlagName)) {
+          program.error(
+            pc.red(
+              pc.bold(`The "contract-feature-flag-names" option defines unknown feature flag "${featureFlagName}".`),
+            ),
+          );
+        }
+        contractTagOptionsByFeatureFlagName.set(featureFlagName, contractTagOptions);
+      }
+
+      // Error so that the message does appear in a shell pipe
+      console.error(
+        pc.dim(
+          `Composing a supergraph contract (excluded tags: [${[...contractTagOptions.tagNamesToExclude].join(', ')}], included tags:` +
+            ` [${[...contractTagOptions.tagNamesToInclude].join(', ')}]).`,
+        ),
+      );
+    } else if (options.disableBaseContract) {
+      program.error(
+        pc.red(pc.bold(`The "disable-base-contract" option requires at least one included or excluded tag.`)),
+      );
+    } else if (options.contractFeatureFlagNames) {
+      program.error(
+        pc.red(pc.bold(`The "contract-feature-flag-names" option requires at least one included or excluded tag.`)),
+      );
+    }
+
+    if (contractTagOptions && options.disableBaseContract && contractTagOptionsByFeatureFlagName.size === 0) {
+      program.error(
+        pc.red(
+          pc.bold(
+            `Defining tags also requires either "--disable-base-contract" to be removed or at least one "contract-feature-flag-names" to be defined.`,
+          ),
+        ),
+      );
+    }
+
+    if (options.out) {
+      options.out = resolve(options.out);
+      if (options.splitConfigsEnabled) {
+        await mkdir(options.out, { recursive: true });
+      }
+    }
+
+    const subgraphs: SubgraphMetaData[] = [];
+
+    for (const [index, subgraphConfig] of config.subgraphs.entries()) {
+      const metadata = await toSubgraphMetadata(inputFileLocation, index, subgraphConfig, subgraphs);
+      subgraphs.push(metadata);
+    }
+
+    const result = composeSubgraphs(
+      subgraphs.map((s, index) => {
+        if (s.kind === SubgraphKind.Plugin) {
+          return {
+            name: s.name,
+            url: `http://localhost:3000/plugin/${index}`,
+            definitions: parse(s.sdl ?? ''),
+          };
+        }
+        return {
+          name: s.name,
+          url: s.routingUrl,
+          definitions: parse(s.sdl),
+        };
+      }),
+      {
+        disableResolvabilityValidation: options.disableResolvabilityValidation,
+        ignoreExternalKeys: options.ignoreExternalKeys,
+      },
+      options.disableBaseContract ? undefined : contractTagOptions,
+    );
+
+    if (!result.success) {
+      const compositionErrorsTable = new Table({
+        head: [pc.bold(pc.white('ERROR_MESSAGE'))],
+        colWidths: [120],
+        wordWrap: true,
+      });
+
+      console.log(
+        pc.red(`We found composition errors, while composing.\n${pc.bold('Please check the errors below:')}`),
+      );
+      for (const compositionError of result.errors) {
+        compositionErrorsTable.push([compositionError.message]);
+      }
+      console.log(compositionErrorsTable.toString());
+      process.exitCode = 1;
+      return;
+    }
+
+    if (!options.suppressWarnings && result.warnings.length > 0) {
+      const compositionWarningsTable = new Table({
+        head: [pc.bold(pc.white('WARNING_MESSAGE'))],
+        colWidths: [120],
+        wordWrap: true,
+      });
+
+      console.log(pc.yellow(`The following warnings were produced while composing:`));
+      for (const warning of result.warnings) {
+        compositionWarningsTable.push([warning.message]);
+      }
+      console.log(compositionWarningsTable.toString());
+    }
+
+    const federatedClientSDL = result.shouldIncludeClientSchema
+      ? printSchemaWithDirectives(result.federatedGraphClientSchema)
+      : '';
+    const routerConfig = buildRouterConfig({
+      federatedClientSDL,
+      federatedSDL: printSchemaWithDirectives(result.federatedGraphSchema),
+      fieldConfigurations: result.fieldConfigurations,
+      // @TODO get router compatibility version programmatically
+      routerCompatibilityVersion: ROUTER_COMPATIBILITY_VERSION_ONE,
+      schemaVersionId: STATIC_SCHEMA_VERSION_ID,
+      subgraphs: subgraphs.map((s, index) => constructRouterSubgraph(result, s, index)),
+    });
+
+    await (options.splitConfigsEnabled
+      ? handleSplitRouterConfig({
+          config,
+          contractTagOptionsByFeatureFlagName,
+          inputFileLocation,
+          options,
+          routerConfig,
+          subgraphs,
+        })
+      : handleEmbeddedRouterConfig({
+          config,
+          contractTagOptionsByFeatureFlagName,
+          inputFileLocation,
+          options,
+          routerConfig,
+          subgraphs,
+        }));
+  });
+
+  return command;
+};
+
+/**
+ * Returns the contract tag options for the provided exclude and include tags, or undefined if
+ * neither option was provided, in which case the full supergraph is composed.
+ */
+function toContractTagOptions(exclude: unknown, include: unknown): ContractTagOptions | undefined {
+  const excludeTags = toTags(exclude, '--exclude');
+  const includeTags = toTags(include, '--include');
+
+  if (excludeTags.length === 0 && includeTags.length === 0) {
+    return undefined;
+  }
+  return newContractTagOptionsFromArrays(excludeTags, includeTags);
+}
+
+function toTags(value: unknown, optionName: string): Array<string> {
+  if (value === undefined) {
+    return [];
+  }
+
+  /**
+   * Commander parses a variadic option without values, e.g. "--exclude", as a boolean. Such an
+   * option provides no tags, so it cannot define a contract.
+   */
+  if (typeof value === 'boolean') {
+    program.error(pc.red(pc.bold(`The "${optionName}" option requires at least one tag.`)));
+  }
+
+  const tags = value as Array<string>;
+  for (const tag of tags) {
+    if (tag.trim() === '') {
+      program.error(pc.red(pc.bold(`The "${optionName}" option contains a blank tag. Tags must not be blank.`)));
+    }
+  }
+
+  return [...new Set(tags)];
+}
+
+function toSubgraphMetadata(
+  inputFileLocation: string,
+  index: number,
+  subgraphConfig: ConfigSubgraph,
+  subgraphs: SubgraphMetaData[],
+): Promise<SubgraphMetaData> {
+  if ('plugin' in subgraphConfig) {
+    return toSubgraphMetadataPlugin(inputFileLocation, subgraphConfig, subgraphs);
+  }
+
+  if ('grpc' in subgraphConfig) {
+    return toSubgraphMetadataGRPC(inputFileLocation, subgraphConfig);
+  }
+
+  return toSubgraphMetadataStandard(inputFileLocation, index, subgraphConfig, subgraphs);
+}
+
+async function toSubgraphMetadataGRPC(inputFileLocation: string, s: GRPCSubgraphConfig): Promise<GRPCSubgraphMetadata> {
+  validateGRPCSubgraph(inputFileLocation, s);
+
+  const mappingFileContent = await readFile(resolve(inputFileLocation, s.grpc.mapping_file), 'utf8');
+  const mapping = fromJsonString(GRPCMappingSchema, mappingFileContent);
+
+  const protoSchemaFileContent = await readFile(resolve(inputFileLocation, s.grpc.proto_file), 'utf8');
+  const sdl = await readFile(resolve(inputFileLocation, s.grpc.schema_file), 'utf8');
+
+  return {
+    kind: SubgraphKind.GRPC,
+    name: s.name,
+    sdl,
+    routingUrl: s.routing_url,
+    protoSchema: protoSchemaFileContent,
+    mapping,
+  };
+}
+
+async function toSubgraphMetadataPlugin(
+  inputFileLocation: string,
+  s: SubgraphPluginConfig,
+  subgraphs: SubgraphMetaData[],
+): Promise<SubgraphPluginMetadata> {
+  const pluginName = basename(s.plugin.path);
+  if (subgraphs.some((sg) => sg.kind === SubgraphKind.Plugin && sg.name === pluginName)) {
+    program.error(
+      pc.red(
+        pc.bold(`A plugin with the name '${pc.bold(pluginName)}' is already registered. Plugin names must be unique.`),
+      ),
+    );
+  }
+
+  validateSubgraphPlugin(inputFileLocation, s);
+
+  // Check if a plugin with the same name already exists
+  const mappingFilePath = resolve(inputFileLocation, s.plugin.path, 'generated', 'mapping.json');
+  const mappingFile = await readFile(mappingFilePath, 'utf8');
+  const schemaFilePath = resolve(inputFileLocation, s.plugin.path, 'src', 'schema.graphql');
+  const sdl = await readFile(schemaFilePath, 'utf8');
+  const protoSchemaFilePath = resolve(inputFileLocation, s.plugin.path, 'generated', 'service.proto');
+  const protoSchema = await readFile(protoSchemaFilePath, 'utf8');
+
+  return {
+    kind: SubgraphKind.Plugin,
+    name: pluginName,
+    protoSchema,
+    version: s.plugin.version,
+    sdl,
+    mapping: fromJsonString(GRPCMappingSchema, mappingFile),
+  };
+}
+
+async function toSubgraphMetadataStandard(
+  inputFileLocation: string,
+  index: number,
+  s: StandardSubgraphConfig,
+  subgraphs: SubgraphMetaData[],
+): Promise<StandardSubgraphMetaData> {
+  // The subgraph name is required
+  if (!s.name) {
+    program.error(
+      pc.red(
+        pc.bold(`The subgraph name is required for subgraph at index ${index}. Please provide a name and try again.`),
+      ),
+    );
+  }
+
+  const url = s.introspection?.url ?? s.routing_url;
+
+  // Check if a subgraph with the same name already exists
+  if (subgraphs.some((sg) => sg.name === s.name)) {
+    program.error(
+      pc.red(
+        pc.bold(`A subgraph with the name '${pc.bold(s.name)}' is already registered. Subgraph names must be unique.`),
+      ),
+    );
+  }
+
+  let schemaSDL = '';
+
+  // The GraphQL schema is provided in the input file
+  if (s.schema?.file) {
+    const schemaFile = resolve(inputFileLocation, s.schema.file);
+    schemaSDL = (await readFile(schemaFile)).toString();
+  } else {
+    // The GraphQL schema is not provided in the input file, so we need to introspect it
+    try {
+      const result = await introspectSubgraph({
+        subgraphURL: url,
+        additionalHeaders: Object.entries(s.introspection?.headers ?? {}).map(([key, value]) => ({
+          key,
+          value,
+        })),
+        rawIntrospection: s.introspection?.raw,
+      });
+
+      if (!result.success) {
+        program.error(`Could not introspect subgraph ${s.name}, URL: ${url}: ${result.errorMessage ?? 'failed'}`);
+      }
+
+      schemaSDL = result.sdl;
+    } catch (e: any) {
+      program.error(`Could not introspect subgraph ${s.name}, URL: ${url}: ${e.message}`);
+    }
+  }
+
+  return {
+    kind: SubgraphKind.Standard,
+    name: s.name,
+    sdl: schemaSDL,
+    subscriptionUrl: s.subscription?.url || s.routing_url,
+    subscriptionProtocol: s.subscription?.protocol || 'ws',
+    websocketSubprotocol: s.subscription?.protocol === 'ws' ? (s.subscription?.websocketSubprotocol ?? 'auto') : 'auto',
+    routingUrl: normalizeURL(s.routing_url),
+  };
+}
+
+function validateGRPCSubgraph(inputFileLocation: string, s: GRPCSubgraphConfig) {
+  if (!s.name) {
+    program.error(
+      pc.red(pc.bold(`The subgraph name is missing in the input file. Please check the name and try again.`)),
+    );
+  }
+
+  if (!s.routing_url) {
+    program.error(
+      pc.red(pc.bold(`The routing URL is missing in the input file. Please check the routing URL and try again.`)),
+    );
+  }
+
+  if (!s.grpc.schema_file) {
+    program.error(
+      pc.red(pc.bold(`The schema file is missing in the input file. Please check the schema file and try again.`)),
+    );
+  }
+
+  if (!s.grpc.proto_file) {
+    program.error(
+      pc.red(pc.bold(`The proto file is missing in the input file. Please check the proto file and try again.`)),
+    );
+  }
+
+  if (!s.grpc.mapping_file) {
+    program.error(
+      pc.red(pc.bold(`The mapping file is missing in the input file. Please check the mapping file and try again.`)),
+    );
+  }
+
+  if (!existsSync(resolve(inputFileLocation, s.grpc.schema_file))) {
+    program.error(
+      pc.red(
+        pc.bold(
+          `The schema file '${pc.bold(s.grpc.schema_file)}' does not exist. Please check the path and try again.`,
+        ),
+      ),
+    );
+  }
+
+  if (!existsSync(resolve(inputFileLocation, s.grpc.proto_file))) {
+    program.error(
+      pc.red(
+        pc.bold(`The proto file '${pc.bold(s.grpc.proto_file)}' does not exist. Please check the path and try again.`),
+      ),
+    );
+  }
+
+  if (!existsSync(resolve(inputFileLocation, s.grpc.mapping_file))) {
+    program.error(
+      pc.red(
+        pc.bold(
+          `The mapping file '${pc.bold(s.grpc.mapping_file)}' does not exist. Please check the path and try again.`,
+        ),
+      ),
+    );
+  }
+}
+
+function validateSubgraphPlugin(inputFileLocation: string, s: SubgraphPluginConfig) {
+  if (!s.plugin.path) {
+    program.error(
+      pc.red(pc.bold(`The plugin path is missing in the input file. Please check the path and try again.`)),
+    );
+  }
+  if (!existsSync(resolve(inputFileLocation, s.plugin.path))) {
+    program.error(
+      pc.red(
+        pc.bold(`The plugin path '${pc.bold(s.plugin.path)}' does not exist. Please check the path and try again.`),
+      ),
+    );
+  }
+
+  if (!s.plugin.version) {
+    program.error(
+      pc.red(pc.bold(`The plugin version is missing in the input file. Please check the version and try again.`)),
+    );
+  }
+
+  // Check if valid semver
+  if (!semver.valid(s.plugin.version)) {
+    program.error(
+      pc.red(
+        pc.bold(
+          `The plugin version '${pc.bold(s.plugin.version)}' is not a valid semver. Please check the version and try again.`,
+        ),
+      ),
+    );
+  }
+}
+
+async function buildFeatureFlagsConfig(
+  config: Config,
+  inputFileLocation: string,
+  subgraphs: SubgraphMetaData[],
+  options: any,
+  contractTagOptionsByFeatureFlagName?: Map<string, ContractTagOptions>,
+): Promise<FeatureFlagRouterExecutionConfigs> {
+  const ffConfigs: FeatureFlagRouterExecutionConfigs = create(FeatureFlagRouterExecutionConfigsSchema);
+
+  // @TODO This logic should exist only once in the shared package and reused across
+  // control-plane and cli
+
+  for (const ff of config.feature_flags ?? []) {
+    const featureSubgraphs: StandardSubgraphMetaData[] = [];
+    const standardSubgraphs = config.subgraphs.filter(
+      (ss) => !('plugin' in ss) && !('grpc' in ss),
+    ) as StandardSubgraphConfig[];
+
+    // Process each subgraph for this feature flag
+    for (const s of standardSubgraphs) {
+      // Check if this subgraph is overridden by a feature graph
+      const featureSubgraph = ff.feature_graphs.find((ffs) => ffs.subgraph_name === s.name);
+
+      if (featureSubgraph) {
+        // This subgraph is overridden by a feature graph
+        const url = featureSubgraph.introspection?.url ?? featureSubgraph.routing_url;
+        let schemaSDL = '';
+
+        if (featureSubgraph.schema?.file) {
+          const schemaFile = resolve(inputFileLocation, featureSubgraph.schema.file);
+          schemaSDL = await readFile(schemaFile, 'utf8');
+        } else {
+          try {
+            const result = await introspectSubgraph({
+              subgraphURL: url,
+              additionalHeaders: Object.entries(featureSubgraph.introspection?.headers ?? {}).map(([key, value]) => ({
+                key,
+                value,
+              })),
+              rawIntrospection: featureSubgraph.introspection?.raw,
+            });
+
+            if (!result.success) {
+              program.error(
+                `Could not introspect feature-graph subgraph ${featureSubgraph.name}, URL: ${url}: ${
+                  result.errorMessage ?? 'failed'
+                }`,
+              );
+            }
+
+            schemaSDL = result.sdl;
+          } catch (e: any) {
+            program.error(
+              `Could not introspect feature-graph subgraph ${featureSubgraph.name}, URL: ${url}: ${e.message}`,
+            );
+          }
+        }
+
+        featureSubgraphs.push({
+          kind: SubgraphKind.Standard,
+          name: featureSubgraph.name,
+          sdl: schemaSDL,
+          routingUrl: featureSubgraph.routing_url,
+          subscriptionUrl: featureSubgraph.subscription?.url || featureSubgraph.routing_url,
+          subscriptionProtocol: featureSubgraph.subscription?.protocol || 'ws',
+          websocketSubprotocol:
+            featureSubgraph.subscription?.protocol === 'ws'
+              ? featureSubgraph.subscription?.websocketSubprotocol || 'auto'
+              : 'auto',
+        });
+      } else {
+        // Use the base subgraph as is
+        // Find the corresponding metadata in the original subgraphs array
+        const originalSubgraph = subgraphs.find(
+          (sub) => sub.kind === SubgraphKind.Standard && sub.name === s.name,
+        ) as StandardSubgraphMetaData;
+
+        if (originalSubgraph) {
+          featureSubgraphs.push(originalSubgraph);
+        }
+      }
+    }
+
+    const featureResult = composeSubgraphs(
+      featureSubgraphs.map((s) => ({
+        name: s.name,
+        url: normalizeURL(s.routingUrl),
+        definitions: parse(s.sdl),
+      })),
+      {
+        disableResolvabilityValidation: options.disableResolvabilityValidation,
+        ignoreExternalKeys: options.ignoreExternalKeys,
+      },
+      contractTagOptionsByFeatureFlagName?.get(ff.name),
+    );
+
+    if (!featureResult.success) {
+      const compositionErrorsTable = new Table({
+        head: [pc.bold(pc.white('ERROR_MESSAGE'))],
+        colWidths: [120],
+        wordWrap: true,
+      });
+
+      console.log(
+        pc.red(
+          `We found composition errors, while composing the feature flag ${pc.italic(ff.name)}.\n${pc.bold(
+            'Please check the errors below:',
+          )}`,
+        ),
+      );
+      for (const compositionError of featureResult.errors) {
+        compositionErrorsTable.push([compositionError.message]);
+      }
+      console.log(compositionErrorsTable.toString());
+      continue;
+    }
+
+    if (!options.suppressWarnings && featureResult.warnings.length > 0) {
+      const compositionWarningsTable = new Table({
+        head: [pc.bold(pc.white('WARNING_MESSAGE'))],
+        colWidths: [120],
+        wordWrap: true,
+      });
+
+      console.log(
+        pc.yellow(`The following warnings were produced while composing the feature flag ${pc.italic(ff.name)}:`),
+      );
+      for (const warning of featureResult.warnings) {
+        compositionWarningsTable.push([warning.message]);
+      }
+      console.log(compositionWarningsTable.toString());
+    }
+
+    const featureFederatedClientSDL = featureResult.shouldIncludeClientSchema
+      ? printSchemaWithDirectives(featureResult.federatedGraphClientSchema)
+      : '';
+    const featureRouterConfig = buildRouterConfig({
+      federatedClientSDL: featureFederatedClientSDL,
+      federatedSDL: printSchemaWithDirectives(featureResult.federatedGraphSchema),
+      fieldConfigurations: featureResult.fieldConfigurations,
+      // @TODO get router compatibility version programmatically
+      routerCompatibilityVersion: ROUTER_COMPATIBILITY_VERSION_ONE,
+      schemaVersionId: `static`,
+      subgraphs: featureSubgraphs.map((s, index): RouterSubgraph => {
+        const subgraphConfig = featureResult.subgraphConfigBySubgraphName.get(s.name);
+        const schema = subgraphConfig?.schema;
+        const configurationDataByTypeName = subgraphConfig?.configurationDataByTypeName;
+        const costs = subgraphConfig?.costs;
+
+        return {
+          kind: SubgraphKind.Standard,
+          id: `${index}`,
+          name: s.name,
+          url: s.routingUrl,
+          sdl: s.sdl,
+          subscriptionUrl: s.subscriptionUrl,
+          subscriptionProtocol: s.subscriptionProtocol,
+          websocketSubprotocol: s.websocketSubprotocol,
+          schema,
+          configurationDataByTypeName,
+          costs,
+        } satisfies ComposedSubgraph;
+      }),
+    });
+
+    ffConfigs.configByFeatureFlagName[ff.name] = create(FeatureFlagRouterExecutionConfigSchema, {
+      version: featureRouterConfig.version,
+      subgraphs: featureRouterConfig.subgraphs,
+      engineConfig: featureRouterConfig.engineConfig,
+    });
+
+    ffConfigs.configByFeatureFlagName[ff.name].version = STATIC_SCHEMA_VERSION_ID;
+  }
+
+  return ffConfigs;
+}

@@ -1,0 +1,10 @@
+{
+  "lesson_id": "lesson:processo/success-without-domain-invariant@1",
+  "canonical_ledger": "/Users/augustocarollo/Developer/fazgraph-canonical-v4/tasks/lessons.jsonl",
+  "canonical_ledger_sha256": "6778753bf546310c7b810447e0166cd7333aad622f9ed34ba70b080c88ce3350",
+  "record_present": true,
+  "schema_gate_exit": 0,
+  "secret_gate_exit": 0,
+  "view_render_exit": 0,
+  "ingest_apply_verify_exit": 0
+}

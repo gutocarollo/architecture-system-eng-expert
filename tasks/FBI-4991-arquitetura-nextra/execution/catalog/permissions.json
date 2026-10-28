@@ -1,0 +1,7 @@
+{
+  "observed_at": "2026-10-15 01:13:45 UTC",
+  "endpoint": "https://fazcapital.atlassian.net/rest/api/3/mypermissions?permissions=ADMINISTER",
+  "http_status": 200,
+  "permission": true,
+  "error": null
+}

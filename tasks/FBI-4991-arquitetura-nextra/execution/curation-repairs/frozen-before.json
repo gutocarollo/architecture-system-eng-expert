@@ -1,0 +1,14 @@
+{
+  "observed_utc": "2026-10-15T03:20:11.608355+00:00",
+  "files": {
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/sources.json": "51638c494e7cbbac9c6d7389ea4f3ab2b40239c6930501a791bafc6796ad3209",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json.gz": "b7aedc4ff85625ec0546ceded96bf5d734bf19318f12637dea964998e43c6e4d",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/sources.json.gz": "87f2616ba1db8fd855b1e7bfde505db425e6f82167640eed0ca119c4115b7586",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/source-selections.json": "590e967179b040f903cb41405fd48a7dc2b3d05e0bdb92bc1c1751f994c08c04",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/select_sources.py": "60e18d156a6b529253d2534099b6659ed3be50601ce783b0af086acd93e300e1",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/build_matrix.py": "f252e63f6cacfb52bcf5a4b922f3fe82807fd177baf39f9fe12368b9db89fa82",
+    "content/referencia/curadoria/09-apis-e-integracao.mdx": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+    "content/referencia/curadoria/03-event-driven-messaging.mdx": "541b6c437d380788626fc11fd419ca57cea3b8282c4a80cade885d17c511e506"
+  }
+}

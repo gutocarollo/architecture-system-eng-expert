@@ -1,0 +1,15 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "tutoriais/single-flight",
+  "document_sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+  "context_sha256": "99fecd5d302c39b3fa2c6ac13f0c497d98b9bed81c6dec258bb1e037b0883892",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "l1c"
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "observed_at_utc": "2026-10-15T18:11:13.073195+00:00",
+  "scope": "Current bytes and actual independent judgment lineage, not a renewed semantic approval of 310 concepts or all 94 diagrams.",
+  "checkouts": [
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+      "branch": "docs/FBI-4991-arquitetura-aplicada",
+      "head": "623ae1d3d34143df53c571327a508de47ab58951",
+      "tracked_changes": []
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/sites/architecture-course",
+      "branch": "main",
+      "head": "1677c81236d3588736e88597e9589d942b655a25",
+      "tracked_changes": []
+    }
+  ],
+  "scanner_applicability": {
+    "codegraph_present": false,
+    "harness_scanner_present": false,
+    "request_anchor_present": false,
+    "anchor_used": "Inline terminal task and execution/profile.json bounded_anchor; standalone original request archive absent."
+  },
+  "curation": {
+    "freeze_files_checked": 18,
+    "freeze_errors": [],
+    "matrix_sha256": "ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b",
+    "reviewed_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+    "concepts": 310,
+    "states": {
+      "APPROVED": 92,
+      "APPROVED_BOUNDED": 204,
+      "APPROVED_WITH_MEDIUM": 10,
+      "MEDIUM_BACKLOG": 4
+    },
+    "warm_rechecked_highs": 51,
+    "mechanism_fingerprints_preserved": 310,
+    "metadata_corrections": {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/license-metadata-corrections.json",
+      "sha256": "078f85efc4b7df1d02d8c7ded4889fa7a4f7aa6de2926bb5503ba5d39d89c214",
+      "affected_concepts": 12
+    },
+    "unresolved_high": 0
+  },
+  "deterministic_gates": [
+    {
+      "script": "tasks/FBI-4991-arquitetura-nextra/execution/curation/check_adjudication_gate.py",
+      "source_sha256": "fbe10b2ca467f68d51afe6aa2555e72289fd7a4561d14a808d1615e6c7f73506",
+      "arguments": [],
+      "write_redirection_only": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-curation-guard.json",
+      "output": "{\"observed_utc\": \"2026-10-15T18:11:13.609126+00:00\", \"scope\": \"Deterministic current-adjudication and fingerprint checks; no semantic approval is inferred.\", \"matrix_sha256\": \"ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b\", \"repaired_positive_judgments\": 51, \"unchanged_first_pass\": 259, \"checks\": 375, \"failures\": 0, \"independent_pending_count\": 0}\n"
+    },
+    {
+      "script": "tasks/FBI-4991-arquitetura-nextra/execution/curation/verify_curation.py",
+      "source_sha256": "8379edfbfe7b10524ba45381c3a2141167c85eb298d6a8c0e5c3823ac7383be1",
+      "arguments": [
+        "--require-complete",
+        "--require-independent"
+      ],
+      "write_redirection_only": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-curation-validation.json",
+      "output": "{\"observed_utc\": \"2026-10-15T18:11:14.356648+00:00\", \"scope\": \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991\", \"canonical_concepts\": 310, \"priority_entries\": 40, \"active_source_locators\": 753, \"source_artifacts_checked\": 749, \"license_revisions_checked\": 192, \"matrix_sha256\": \"ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b\", \"structural_integrity\": \"PASS\", \"requested_gate\": \"PASS\", \"semantic_pending\": [], \"independent_pending_count\": 0, \"errors_by_kind\": {}}\n"
+    },
+    {
+      "script": "tasks/FBI-4991-arquitetura-nextra/execution/history/audit_public_history.py",
+      "source_sha256": "de9e9afd268144c65c73215e397577293432f0e2598a06c22e5ba131c7ef186a",
+      "arguments": [],
+      "write_redirection_only": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-history.json",
+      "output": "{\n  \"measured_at\": \"2026-10-15T18:11:25.849252+00:00\",\n  \"semantic_commits\": 12697,\n  \"commit_matrix_rows\": 12697,\n  \"classified_fbi_issues\": 595,\n  \"concept_rows\": 310,\n  \"specific_concept_history_routes\": 40,\n  \"concepts_without_specific_history_route\": 270,\n  \"all_parts_below_1mb\": true,\n  \"gzip_contents_decoded_and_scanned\": true,\n  \"classification_counts\": {\n    \"CAUSE_REPORTED_AND_CODE_SUPPORTED\": 7,\n    \"MISSING_CAUSE_EVIDENCE\": 35,\n    \"REPORTED_ONLY\": 290,\n    \"NOT_APPLICABLE_CHANGE\": 263\n  }\n}\n"
+    }
+  ],
+  "inherited_reviews": [
+    {
+      "receipt": "reviews/teaching-recheck.json",
+      "receipt_sha256": "40814e7a05d585b4414e755307cc77b2f5e57849ed86978da4c0b3599d26a015",
+      "bindings": 23,
+      "changed": [
+        "labs/architecture/run_all.py"
+      ],
+      "preserved_verdict": "PASS",
+      "scope": "One warm HIGH-only recheck of T1, T2 and T3; unrelated new PostgreSQL cases and changing external-reference content excluded"
+    },
+    {
+      "receipt": "reviews/root-cases.json",
+      "receipt_sha256": "16393fc094a84c6b0143fbbd9927a4577aca86205b4479157276a2c0ef9cbeee",
+      "bindings": 57,
+      "changed": [],
+      "preserved_verdict": "PASS",
+      "scope": [
+        "query-grain-postgres",
+        "revision-cas-postgres",
+        "airflow-lock-retry"
+      ]
+    }
+  ],
+  "runner_delta": {
+    "before_sha256": "a66bd476372947b2ca9dfc4e33eb79211a44f02481342035927f367af88f4fdc",
+    "current_sha256": "91a3129096765b64db14cf1eb08551b14d0d2d2510ca735c17331a5c626c49b3",
+    "diff": "diff --git a/labs/architecture/run_all.py b/labs/architecture/run_all.py\nindex 23c40e4a..80c1500c 100644\n--- a/labs/architecture/run_all.py\n+++ b/labs/architecture/run_all.py\n@@ -4,6 +4,7 @@ import hashlib\n import json\n import os\n import platform\n+import shutil\n import subprocess\n from datetime import datetime, timezone\n from pathlib import Path\n@@ -41,7 +42,9 @@ def main():\n         print(f'case={case} exit={result.returncode} stdout_lines={len(result.stdout.splitlines())}')\n     hashes={str(path.relative_to(ROOT)):hashlib.sha256(path.read_bytes()).hexdigest()\n             for path in LAB_ROOT.rglob('*') if path.is_file() and '__pycache__' not in str(path) and '.venv' not in path.parts}\n-    data=dict(schema_version=1,workspace=str(ROOT),base_sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),\n+    revision=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True) if shutil.which('git') else None\n+    source_revision=revision.stdout.strip() if revision is not None and revision.returncode==0 else None\n+    data=dict(schema_version=1,workspace=str(ROOT),base_sha=source_revision,source_revision_kind='GIT_HEAD' if source_revision else 'UNVERSIONED_SOURCE_SNAPSHOT',\n               receipts=receipts,source_sha256=hashes,\n               verdict='PASS' if all(r['exit_code']==0 for r in receipts) else 'FAIL',\n               independent_review='PENDING',production_execution=False)",
+    "judgment": "Only optional Git metadata and source_revision_kind changed; sixteen runners independently rerun from the downloadable unversioned archive."
+  },
+  "packet": {
+    "sha256": "a2436693ff4807a59c097790f4c0a87dd3a7f95eb86bbc9573021d534c2b2b88",
+    "status": "PARTIAL",
+    "documents_verified": 181,
+    "evidence": 63,
+    "diagram_source_and_render_bindings_verified": 94,
+    "per_document_reviews_in_packet": 0,
+    "gaps": [
+      {
+        "id": "catalog-registration",
+        "kind": "authorization",
+        "critical": true,
+        "source_id": "project",
+        "description": "The exact repository and asset remain outside the approved catalog contract; the concrete proposal is preserved without bypassing validation."
+      },
+      {
+        "id": "history-causal-proof",
+        "kind": "source",
+        "critical": true,
+        "source_id": "project",
+        "description": "Individual classification is complete for 595 FBI issues, with 35 explicitly missing causal evidence and 290 reported-only classifications. Full causal confirmation is not established by patch indexing or source triage."
+      },
+      {
+        "id": "independent-final-review",
+        "kind": "review",
+        "critical": true,
+        "source_id": "project",
+        "description": "The current packet and diagrams require actual independent receipts; earlier-cycle receipts were not transplanted."
+      },
+      {
+        "id": "production-boundary",
+        "kind": "scope",
+        "critical": false,
+        "source_id": "project",
+        "description": "Local experiments and read-only source inspection do not establish deployment or end-to-end production execution."
+      }
+    ],
+    "diagram_semantic_review_is_separate": true
+  },
+  "site_source_projection": {
+    "files_checked": 208,
+    "errors": []
+  },
+  "prerequisite_delta": {
+    "tutorials": [
+      "content/tutoriais/casos/access-policy/index.mdx",
+      "content/tutoriais/casos/cache-policy/index.mdx",
+      "content/tutoriais/casos/consensus/index.mdx",
+      "content/tutoriais/casos/date-only/index.mdx",
+      "content/tutoriais/casos/diagnostics/index.mdx",
+      "content/tutoriais/casos/early-refresh/index.mdx",
+      "content/tutoriais/casos/ledger-projection/index.mdx",
+      "content/tutoriais/casos/opportunity-entry/index.mdx",
+      "content/tutoriais/casos/order-boundaries/index.mdx",
+      "content/tutoriais/casos/order-delivery/index.mdx",
+      "content/tutoriais/casos/queue-workflow/index.mdx",
+      "content/tutoriais/casos/reservation/index.mdx",
+      "content/tutoriais/casos/safe-release/index.mdx",
+      "content/tutoriais/casos/single-flight-cancel/index.mdx",
+      "content/tutoriais/casos/storage-partitions/index.mdx"
+    ],
+    "count": 15,
+    "only_exact_dependency_sentence_changed": true
+  },
+  "journey_integration": {
+    "journeys": [
+      "access-policy",
+      "airflow-lock-retry",
+      "cache-policy",
+      "consensus",
+      "date-only",
+      "diagnostics",
+      "early-refresh",
+      "ledger-projection",
+      "opportunity-entry",
+      "order-boundaries",
+      "order-delivery",
+      "query-grain-postgres",
+      "queue-workflow",
+      "reservation",
+      "revision-cas-postgres",
+      "safe-release",
+      "single-flight-cancel",
+      "storage-partitions"
+    ],
+    "destination_pages_checked": 90,
+    "missing_sibling_links": []
+  },
+  "worker_artifact": {
+    "manifest_sha256": "ec98b0779b1de3fdf9c950459c46f5693d869f75df6e5e9bed996dc5c63c0baf",
+    "has_public_static_assets": false,
+    "server_bundle_sha256": "d529084f4b9e776258cebee912bede540b65b8f89faa4abebc07bd7d143256c2",
+    "isolated_dependencies": {
+      "name": "architecture-course-server-build",
+      "private": true,
+      "type": "module",
+      "scripts": {
+        "build": "node build.mjs",
+        "test": "node build.mjs --test && node --test ../worker/index.test.mjs",
+        "verify": "node verify.mjs"
+      },
+      "dependencies": {
+        "hono": "4.13.13"
+      },
+      "devDependencies": {
+        "esbuild": "0.28.2"
+      }
+    }
+  },
+  "verdict": "PASS_WITH_DECLARED_DELIVERY_GAPS",
+  "finished_at_utc": "2026-10-15T18:11:26.364585+00:00"
+}

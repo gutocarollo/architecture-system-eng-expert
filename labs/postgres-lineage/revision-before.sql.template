@@ -1,0 +1,8 @@
+
+            UPDATE {EMPLOYEE_TABLE}
+            SET {FIELD_IS_CURRENT} = FALSE,
+                {FIELD_VALID_TO} = :current_timestamp
+            WHERE {FIELD_EMPLOYEE_ID} = :{FIELD_EMPLOYEE_ID}
+            AND {FIELD_IS_CURRENT} = TRUE
+            {concurrency_predicate}
+        

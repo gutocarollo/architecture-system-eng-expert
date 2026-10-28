@@ -1,0 +1,240 @@
+---
+title: "9. APIs e integração"
+description: "Contratos, direção de comunicação e fronteiras dos vinte e três conceitos de APIs do catálogo."
+diataxis: reference
+---
+
+# 9. APIs e integração
+
+Cada entrada conserva o label do catálogo e distingue capacidade de biblioteca, exemplo **REF** e caminho observado. Os casos MakersHub são código `main@e233fb046ec333982cd1547171b0f0bd8d8d92ee`, lido em 14/10/2026 às 16:16 UTC, sem prova de gateway de produção. As skills estão na [curadoria](/referencia/skills-e-projetos/); a discussão está em [API e integração](/explicacoes/api-integration/).
+
+<span id="g09-e001" />
+
+## API Gateway
+
+Organiza entrada, roteamento e políticas gerais de API. Num desenho proposto, reúne a entrada de Next e FastAPI. O limite é que regra de negócio e autorização por objeto continuam no dono da operação. A skill de apoio é `api-and-interface-design`; a base OSS [APISIX](https://apisix.apache.org/docs/apisix/getting-started/) tem uma [rota de exemplo com limit-count](https://github.com/apache/apisix/blob/master/docs/en/latest/plugins/limit-count.md), **REF didática**, sem implantação local. Veja [prioritário 21](/explicacoes/api-integration/#pattern-21).
+
+{/* current-curation:api-gateway */}
+
+A [curadoria de API Gateway](/referencia/curadoria/09-apis-e-integracao/#api-gateway) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e002" />
+
+## Backend for Frontend (BFF)
+
+Oferece um contrato específico para um tipo de frontend, compondo ou adaptando dados. Calendar faz adaptação de sessão/token/Graph no código; agregação Call Sprint é proposta. O limite é evitar uma segunda regra de negócio. A skill é `backend-bff-pattern`; a base YARP tem aplicação **REF** [eShop ConfigureMobileBffRoutes](https://github.com/dotnet/eShop/blob/main/src/eShop.AppHost/Extensions.cs). Roteamento não comprova toda agregação. Veja [prioritário 22](/explicacoes/api-integration/#pattern-22).
+
+{/* current-curation:backend-for-frontend-bff */}
+
+A [curadoria de Backend for Frontend (BFF)](/referencia/curadoria/09-apis-e-integracao/#backend-for-frontend-bff) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e003" />
+
+## Gateway Aggregation
+
+Reúne respostas de diferentes serviços na entrada. Na tela proposta, lead e histórico poderiam compor um payload. O limite é decidir erro parcial, prazo e responsabilidade da composição. A skill é `backend-bff-pattern`; a base [Gateway Aggregation](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-aggregation) descreve o mecanismo. A aplicação OSS **REF histórica** [BasketController de eShopOnContainers, commit c09191fb](https://github.com/dotnet-architecture/eShopOnContainers/blob/c09191fb78e400e7e4cd2efb6c13201f71da37b8/src/ApiGateways/Web.Bff.Shopping/aggregator/Controllers/BasketController.cs) é o agregador para estudo. O repo é arquivado; não é uma configuração de eShop atual ou MakersHub.
+
+{/* current-curation:gateway-aggregation */}
+
+A [curadoria de Gateway Aggregation](/referencia/curadoria/09-apis-e-integracao/#gateway-aggregation) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e004" />
+
+## Gateway Routing
+
+Escolhe um serviço de destino segundo o pedido. Uma entrada proposta diferencia rotas de autenticação e negócio. O limite é manter configuração e versões de destino coerentes. A skill de apoio é `api-and-interface-design`; a base [Gateway Routing](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-routing) e a aplicação **REF** [rotas YARP eShop](https://github.com/dotnet/eShop/blob/main/src/eShop.AppHost/Extensions.cs) fornecem comparação concreta.
+
+{/* current-curation:gateway-routing */}
+
+A [curadoria de Gateway Routing](/referencia/curadoria/09-apis-e-integracao/#gateway-routing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e005" />
+
+## Gateway Offloading
+
+Move responsabilidades gerais definidas, como quota de entrada, para a camada de gateway. O exemplo proposto evita repetir um limitador por rota de produto. O limite é não mover automaticamente regras de elegibilidade ou acesso ao objeto. A skill de apoio é `api-and-interface-design`; a base [Gateway Offloading](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-offloading) tem comparação OSS **REF** no [plugin APISIX limit-count](https://github.com/apache/apisix/blob/master/docs/en/latest/plugins/limit-count.md).
+
+{/* current-curation:gateway-offloading */}
+
+A [curadoria de Gateway Offloading](/referencia/curadoria/09-apis-e-integracao/#gateway-offloading) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e006" />
+
+## Reverse Proxy
+
+Recebe pedidos e os encaminha a servidores do lado backend. O rewrite Next observado encaminha `/api/v1/*` a um destino local declarado. O limite é não tratar esse arquivo como topologia de produção. A skill é `api-and-interface-design`; a base e produto OSS [HTTP routing Envoy](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/http/http_routing) fornecem referência de encaminhamento. eShop é uma aplicação **REF** de YARP.
+
+{/* current-curation:reverse-proxy */}
+
+A [curadoria de Reverse Proxy](/referencia/curadoria/09-apis-e-integracao/#reverse-proxy) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e007" />
+
+## Service Mesh
+
+Administra comunicação entre serviços conforme as funções configuradas. Num cluster proposto, pode padronizar políticas de tráfego. O limite é custo operacional e configuração; Kubernetes sozinho não comprova mesh. A skill adjacente é `service-mesh-observability`; a base e produto OSS [Istio traffic management](https://istio.io/latest/docs/concepts/traffic-management/) fornecem mecanismo e exemplos **REF**, sem mesh local inferido. Veja [disponibilidade](/explicacoes/availability/).
+
+{/* current-curation:service-mesh */}
+
+A [curadoria de Service Mesh](/referencia/curadoria/09-apis-e-integracao/#service-mesh) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e008" />
+
+## Sidecar
+
+Executa um componente auxiliar junto a outro numa fronteira de implantação definida. Um proxy proposto acompanha o serviço para comunicar ou observar. O limite é recurso compartilhado, ordem de início e falha; proximidade não implica isolamento completo. A skill adjacente é `cloud-infrastructure:service-mesh-observability`; a base [Sidecar](https://learn.microsoft.com/en-us/azure/architecture/patterns/sidecar) e o produto OSS [Istio](https://istio.io/latest/docs/concepts/traffic-management/) fornecem comparação, sem atribuir todo modo Istio a sidecar.
+
+{/* current-curation:sidecar */}
+
+A [curadoria de Sidecar](/referencia/curadoria/09-apis-e-integracao/#sidecar) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e009" />
+
+## Ambassador
+
+Um proxy próximo ao chamador intermedeia acesso a dependências. Numa aplicação legada proposta, concentra conexão e política externa. O limite é que o proxy não elimina os contratos do destino. A skill adjacente é `api-and-interface-design`; a base é o [padrão Ambassador](https://learn.microsoft.com/en-us/azure/architecture/patterns/ambassador). O [quickstart de invocação Dapr](https://docs.dapr.io/getting-started/quickstarts/serviceinvocation-quickstart/) é aplicação OSS **REF didática** de chamada via sidecar local, útil para comparar esse papel de proxy. Isso não classifica toda implantação Dapr como Ambassador nem prova adoção MakersHub.
+
+{/* current-curation:ambassador */}
+
+A [curadoria de Ambassador](/referencia/curadoria/09-apis-e-integracao/#ambassador) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e010" />
+
+## Adapter
+
+Converte uma interface para o contrato esperado pelo chamador. `TrainerGrpc` converte horário Go em timestamp Protobuf. O limite é que conversão de representação não comprova equivalência semântica ampla. A skill é `api-and-interface-design`; a base gRPC tem aplicação **REF** [Wild Workouts](https://github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/blob/master/internal/trainings/adapters/trainer_grpc.go). As formas de composição estão em [padrões de código](/explicacoes/code-patterns/).
+
+{/* current-curation:adapter */}
+
+A [curadoria de Adapter](/referencia/curadoria/09-apis-e-integracao/#adapter) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e011" />
+
+## Anti-Corruption Layer
+
+Traduz o modelo externo para o significado do contexto local. A proposta Super R1 preserva a distinção Lead/Account/Opportunity antes da regra. O limite é não assumir que renomear campos traduziu estados e identidades. As skills são `domain-driven-design` e `backend-api-design`; a base é o [padrão ACL](https://learn.microsoft.com/en-us/azure/architecture/patterns/anti-corruption-layer). [Wild Workouts](https://github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/blob/master/internal/trainings/adapters/trainer_grpc.go) é **REF** de fronteira/adaptador, com alcance semântico limitado. Veja [prioritário 37](/explicacoes/api-integration/#pattern-37).
+
+{/* current-curation:anti-corruption-layer */}
+
+A [curadoria de Anti-Corruption Layer](/referencia/curadoria/09-apis-e-integracao/#anti-corruption-layer) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e012" />
+
+## Facade
+
+Oferece uma interface simplificada para um conjunto de operações. `InsuranceDataManager.getAllInsuranceData` reúne as consultas da tela no exemplo S2. O limite é que simplificar a chamada não garante transação ou resultado conjunto. A skill é `api-and-interface-design`; a aplicação **REF** [DwarvenGoldmineFacade](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/facade/src/main/java/com/iluwatar/facade/DwarvenGoldmineFacade.java), verificada pela S2, fornece a composição de base. Veja [GoF Facade](/referencia/catalogo/17-padroes-classicos-gof/#facade).
+
+{/* current-curation:facade */}
+
+A [curadoria de Facade](/referencia/curadoria/09-apis-e-integracao/#facade) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e013" />
+
+## Proxy
+
+Intermedeia acesso conservando uma interface conforme seu contrato. Um chamador proposto acessa o destino pelo intermediário. O limite é que transparência de interface não significa ausência de latência ou política adicional. A skill é `api-and-interface-design`; a aplicação **REF** [WizardTowerProxy](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/proxy/src/main/java/com/iluwatar/proxy/WizardTowerProxy.java), verificada pela S2, fornece base de estudo. O produto OSS [Envoy HTTP routing](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/http/http_routing) fornece comparação de proxy de rede.
+
+{/* current-curation:proxy */}
+
+A [curadoria de Proxy](/referencia/curadoria/09-apis-e-integracao/#proxy) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e014" />
+
+## API Composition
+
+Consulta componentes e monta um resultado útil ao cliente. A composição proposta Call Sprint reúne dados sem repetir elegibilidade no frontend. O limite é erro parcial, fan-out e prazo. A skill é `backend-bff-pattern`; a base [Gateway Aggregation](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-aggregation) orienta o mecanismo. A aplicação **REF histórica** [BasketController eShopOnContainers em c09191fb](https://github.com/dotnet-architecture/eShopOnContainers/blob/c09191fb78e400e7e4cd2efb6c13201f71da37b8/src/ApiGateways/Web.Bff.Shopping/aggregator/Controllers/BasketController.cs) fornece um agregador; o repo arquivado não comprova o blueprint Call Sprint.
+
+{/* current-curation:api-composition */}
+
+A [curadoria de API Composition](/referencia/curadoria/09-apis-e-integracao/#api-composition) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e015" />
+
+## GraphQL Federation
+
+Compõe schemas de subgraphs para consulta sob um contrato de entidades e campos. Uma leitura proposta poderia unir áreas mantidas por equipes distintas. O limite é governança de schema, planejamento e custo; dividir schemas não garante consultas baratas. A skill adjacente é `api-graphql-federation`; a base e **REF didática** são [exemplos Apollo Federation](https://www.apollographql.com/docs/graphos/schema-design/federated-schemas/federation). Não foi comprovada federação MakersHub.
+
+{/* current-curation:graphql-federation */}
+
+A [curadoria de GraphQL Federation](/referencia/curadoria/09-apis-e-integracao/#graphql-federation) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e016" />
+
+## RPC
+
+Invoca uma operação remota com argumentos e resposta definidos. `TrainerGrpc.ScheduleTraining` chama o serviço externo no exemplo Wild Workouts. O limite inclui falha parcial, timeout e repetição de efeitos. A skill é `api-and-interface-design`; a base gRPC tem aplicação **REF** [TrainerGrpc](https://github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/blob/master/internal/trainings/adapters/trainer_grpc.go), sem adoção local inferida.
+
+{/* current-curation:rpc */}
+
+A [curadoria de RPC](/referencia/curadoria/09-apis-e-integracao/#rpc) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e017" />
+
+## REST
+
+Um estilo arquitetural organiza recursos e interação sob restrições, incluindo interface uniforme. As consultas HTTP do curso permitem discutir recursos e representação. O limite é que HTTP com JSON não prova conformidade integral. A skill é `backend-api-design`; a base é a [definição de Fielding](https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm). A aplicação OSS **REF** [Spring REST HATEOAS](https://spring.io/guides/gs/rest-hateoas/) fornece um serviço de estudo, sem classificar todo MakersHub.
+
+{/* current-curation:rest */}
+
+A [curadoria de REST](/referencia/curadoria/09-apis-e-integracao/#rest) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e018" />
+
+## HATEOAS
+
+Uma representação inclui controles de navegação para o cliente seguir a interação. Um pedido proposto poderia trazer vínculos de próximas operações permitidas. O limite é que um link self isolado não demonstra todas as transições do negócio. A skill é `backend-api-design`; a base Spring HATEOAS tem aplicação **REF didática** [GreetingController do guia](https://spring.io/guides/gs/rest-hateoas/), com links derivados da rota.
+
+{/* current-curation:hateoas */}
+
+A [curadoria de HATEOAS](/referencia/curadoria/09-apis-e-integracao/#hateoas) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e019" />
+
+## Webhook
+
+Um produtor chama um receptor HTTP quando ocorre um fato. No cenário proposto, a conclusão de ligação notifica o receptor, que reconhece a identidade do evento. O limite é entrega, repetição e autenticação; uma chamada perdida exige recuperação quando o fato é crítico. A skill adjacente é `backend-idempotency`; [GitHub webhooks](https://docs.github.com/en/webhooks/about-webhooks) fornece a base. A biblioteca OSS Probot tem aplicação **REF didática** no [guia de desenvolvimento](https://probot.github.io/docs/development/), com app que recebe eventos; não foi executada nesta autoria.
+
+{/* current-curation:webhook */}
+
+A [curadoria de Webhook](/referencia/curadoria/09-apis-e-integracao/#webhook) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e020" />
+
+## Polling
+
+O consumidor consulta periodicamente. `useOnlineCalls` declara intervalo de 1.500 ms no checkout. O limite é chamadas sem mudança e atraso de detecção; o intervalo não prova latência upstream. A skill é `api-and-interface-design`; HTTPX e React Query são bases do caso local. A aplicação OSS **REF** [configuração Prometheus de scrapes periódicos](https://github.com/prometheus/prometheus/blob/main/documentation/examples/prometheus.yml) fornece outro caso, sem transferir seu intervalo ao Call Sprint.
+
+{/* current-curation:polling */}
+
+A [curadoria de Polling](/referencia/curadoria/09-apis-e-integracao/#polling) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e021" />
+
+## Long Polling
+
+O servidor segura um pedido até haver resultado ou atingir o prazo, e o cliente pode abrir outro. Um canal proposto aguarda uma atualização sem pedidos curtos repetidos. O limite inclui conexões, reconexão e proxies. A skill de apoio é `api-and-interface-design`; a base [RFC 6202](https://datatracker.ietf.org/doc/html/rfc6202) documenta o mecanismo. A aplicação OSS **REF** [chatdemo Tornado](https://github.com/tornadoweb/tornado/blob/master/demos/chat/chatdemo.py) usa `MessageUpdatesHandler` e espera em Condition; seu buffer em memória não demonstra replay durável.
+
+{/* current-curation:long-polling */}
+
+A [curadoria de Long Polling](/referencia/curadoria/09-apis-e-integracao/#long-polling) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e022" />
+
+## Server-Sent Events
+
+Um stream HTTP entrega eventos do servidor ao browser. O broker de oportunidades e EventSource mostram esse caminho local. O limite é que fila de 200 com descarte não comprova replay ou durabilidade; heartbeat não reconstitui eventos perdidos. A skill é `api-and-interface-design`; [StreamingResponse FastAPI](https://fastapi.tiangolo.com/advanced/custom-response/#streamingresponse) fornece a base de stream. A biblioteca OSS [sse-starlette](https://github.com/sysid/sse-starlette) oferece uma aplicação **REF didática** com `EventSourceResponse`. Isso não atribui essa biblioteca ao MakersHub nem chama qualquer stream de arquivo de SSE.
+
+{/* current-curation:server-sent-events */}
+
+A [curadoria de Server-Sent Events](/referencia/curadoria/09-apis-e-integracao/#server-sent-events) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g09-e023" />
+
+## WebSocket
+
+Abre um canal bidirecional para mensagens. WhatsApp envia JSON e recebe ping no código lido. O limite é que bidirecionalidade do transporte não comprova comandos de negócio em ambos os sentidos. A skill é `api-and-interface-design`; a base e aplicação **REF didática** são [servidor e cliente FastAPI WebSocket](https://fastapi.tiangolo.com/advanced/websockets/). O contrato de sessão e reconexão permanece próprio de cada aplicação.
+
+{/* current-curation:websocket */}
+
+A [curadoria de WebSocket](/referencia/curadoria/09-apis-e-integracao/#websocket) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

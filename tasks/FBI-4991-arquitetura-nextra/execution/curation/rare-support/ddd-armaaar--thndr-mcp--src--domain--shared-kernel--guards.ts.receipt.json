@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/shared-kernel/guards.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/guards.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:02:17.564107+00:00",
+  "sha256": "1a5b756ac24835de73df86c7fd752b6fb8c10ed58b7bba0f19bee07d80cdb1ba",
+  "line_count": 29,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--shared-kernel--guards.ts"
+}

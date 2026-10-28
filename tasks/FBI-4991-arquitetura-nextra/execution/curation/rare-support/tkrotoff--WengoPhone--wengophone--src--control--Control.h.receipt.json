@@ -1,0 +1,12 @@
+{
+  "repo": "tkrotoff/WengoPhone",
+  "path": "wengophone/src/control/Control.h",
+  "revision": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+  "url": "https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/Control.h",
+  "raw_url": "https://raw.githubusercontent.com/tkrotoff/WengoPhone/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/Control.h",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.311168+00:00",
+  "sha256": "7970c63b63d7cb68d1d6094fbe8da7d76c7b736d9be4b91f4432775bd128578b",
+  "line_count": 89,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/tkrotoff--WengoPhone--wengophone--src--control--Control.h"
+}

@@ -1,0 +1,25 @@
+{
+  "observed_at": "2026-10-15T04:20:44.733891+00:00",
+  "verdict": "PASS",
+  "source_scope": "Temporary candidates only; owned files unchanged",
+  "mutants": [
+    {
+      "name": "wrong_error_retried",
+      "exit_code": 1,
+      "expected_contract": "permanent_error",
+      "error": "AssertionError: permanent_error: after violates retry contract: {'attempts': 2, 'waits': [30], 'outcome': 'success'}"
+    },
+    {
+      "name": "four_total_attempts",
+      "exit_code": 1,
+      "expected_contract": "lock_budget",
+      "error": "AssertionError: lock_budget: after violates retry contract: {'attempts': 4, 'waits': [30, 30, 30], 'outcome': 'RuntimeError'}"
+    },
+    {
+      "name": "wrong_fixed_wait",
+      "exit_code": 1,
+      "expected_contract": "transient_lock",
+      "error": "AssertionError: transient_lock: after violates retry contract: {'attempts': 2, 'waits': [31], 'outcome': 'success'}"
+    }
+  ]
+}

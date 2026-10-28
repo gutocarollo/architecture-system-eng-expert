@@ -1,0 +1,9 @@
+{
+  "observed_at": "2026-10-15T03:29:03.045579+00:00",
+  "before_exit": 1,
+  "before_error": "Traceback (most recent call last):\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/airflow-lock-retry/run.py\", line 106, in <module>\n    if __name__=='__main__': main()\n                             ~~~~^^\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/airflow-lock-retry/run.py\", line 92, in main\n    raise AssertionError(f'{scenario}: {label} violates retry contract: {measured!r}')\nAssertionError: transient_lock: after violates retry contract: {'attempts': 1, 'waits': [], 'outcome': 'RuntimeError'}\n",
+  "patch_exit": 0,
+  "after_exit": 0,
+  "after_output": "transient_lock: before_attempts=1 failure=True after_attempts=2 success=True waits=[30]\npermanent_error: before_attempts=1 after_attempts=1 failure_preserved=True\nlock_budget: before_attempts=1 after_attempts=3 waits=[30, 30] failure_preserved=True\nprocess_timeout: before_attempts=1 after_attempts=1 timeout_preserved=True\ncomparison=PASS real_subprocesses=0 real_database_connections=0 real_sleep_seconds=0\n",
+  "verdict": "PASS"
+}

@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "pilot/pkg/networking/plugin/authz/authorization.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/plugin/authz/authorization.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/plugin/authz/authorization.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--networking--plugin--authz--authorization.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.342861+00:00",
+  "sha256": "c45f24754d4e5eb59eb160337e4f91af4d044b36195deba5a80524891c73b2fb",
+  "line_count": 244,
+  "source": "raw_primary"
+}

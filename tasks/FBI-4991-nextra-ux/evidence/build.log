@@ -1,0 +1,342 @@
+
+> fazcapital-architecture-course@1.0.0 build
+> next build --webpack
+
+▲ Next.js 16.4.0 (webpack)
+- Environments: .env.local
+✓ Running next.config.mjs took 4.8s
+- Experiments (use with caution):
+  · optimizePackageImports
+
+  Creating an optimized production build ...
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/cache/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/api-integration/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/business-rules/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-patterns/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-distribution/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/concurrency/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/observability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-durability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/distributed-work/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/reliable-integration/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/security/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/matriz.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/matriz.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/prioritarios.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/catalogo/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/02-sistemas-distribuidos-e-consistencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/01-arquiteturas-de-aplicacao.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/03-event-driven-messaging.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/05-banco-de-dados-e-armazenamento.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/07-resiliencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/08-concorrencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/09-apis-e-integracao.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/14-seguranca.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/12-deploy-e-releases.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/15-observabilidade.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/16-workflow-e-processamento.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/17-padroes-classicos-gof.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/06-cache.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/10-ddd-domain-driven-design.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/13-alta-disponibilidade.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/api-integration/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/availability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/cache/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/capacity/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/business-rules/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-distribution/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/code-patterns/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/concurrency/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/data-durability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/distributed-work/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/messages/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/observability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/reliable-integration/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/safe-change/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/security/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/guias/casos/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/jornadas/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/revision-cas-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/casos/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/catalogo/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/01-arquiteturas-de-aplicacao.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/02-sistemas-distribuidos-e-consistencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/05-banco-de-dados-e-armazenamento.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/03-event-driven-messaging.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/06-cache.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/08-concorrencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/07-resiliencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/10-ddd-domain-driven-design.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/12-deploy-e-releases.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/14-seguranca.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/09-apis-e-integracao.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/13-alta-disponibilidade.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/15-observabilidade.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/16-workflow-e-processamento.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/17-padroes-classicos-gof.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/curadoria/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/referencia/prioritarios.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/access-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/airflow-lock-retry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/consensus/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/cache-policy/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/date-only/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/ledger-projection/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/diagnostics/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/order-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/early-refresh/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/opportunity-entry/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/queue-workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/order-delivery/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/reservation/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/safe-release/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/single-flight-cancel/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/query-grain-postgres/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/storage-partitions/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../../../Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/casos/revision-cas-postgres/index.mdx
+✓ Compiled successfully in 3.1min
+  Running TypeScript ...
+  Finished TypeScript in 2ms ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/183) ...
+  Generating static pages using 4 workers (45/183) 
+  Generating static pages using 4 workers (91/183) 
+  Generating static pages using 4 workers (137/183) 
+✓ Generating static pages using 4 workers (183/183) in 10.5s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /_not-found
+└   /[[...mdxPath]]
+  ├ ● /explicacoes/api-integration
+  ├ ● /explicacoes/availability
+  ├ ● /explicacoes/business-rules
+  └ ● [+178 more paths]
+
+
+○  (Static)  prerendered as static content
+●  (SSG)     prerendered as static HTML (uses generateStaticParams)
+
+
+> fazcapital-architecture-course@1.0.0 postbuild
+> pagefind --site .next/server/app --output-path public/_pagefind
+
+
+Running Pagefind v1.5.2 (Extended)
+Running from: "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991"
+Source:       ".next/server/app"
+Output:       "public/_pagefind"
+
+[Walking source directory]
+Found 183 files matching **/*.{html}
+
+[Parsing files]
+Found a data-pagefind-body element on the site.
+↳ Ignoring pages without this tag.
+
+[Reading languages]
+Discovered 1 language: pt-br
+
+[Building search indexes]
+Total: 
+  Indexed 1 language
+  Indexed 181 pages
+  Indexed 9142 words
+  Indexed 0 filters
+  Indexed 0 sorts
+
+Finished in 0.621 seconds

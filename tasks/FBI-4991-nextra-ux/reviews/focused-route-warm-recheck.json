@@ -1,0 +1,28 @@
+{
+  "observed_at_utc": "2026-10-17T03:46:42.229128+00:00",
+  "verdict": "PASS_BOUNDED",
+  "scope": "Warm recheck only: focused-route trailing-slash normalization in the Folder component. Prior counts/CSS/metadata scopes remain closed.",
+  "base_sha": "d5c3c1cf5808e88a2bfe4c4e109ae01fbc4f8a43",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "patch_sha256": "91997cc001618fed04170cbfa449c465143928c7e52299dfed5ce84e9ca52cad",
+  "source_sha256": "3bea0462895aa3683bb87397332ccbc4951963ad57adfe6db5f5bbadafbb5833",
+  "high_findings": 0,
+  "source_contract": {
+    "focus_store_type": "string; initialized to empty string in stores/focused-route.js; declaration returns string",
+    "focus_writer": "sidebar.js handleFocus reads href/data-href and stores the route",
+    "normalization": "Only final slash removed from focused-route comparison value; actual href and current route unchanged",
+    "own_folder": "/jornadas/reservation/ normalizes to /jornadas/reservation, so it no longer passes startsWith(/jornadas/reservation/)",
+    "descendant": "/jornadas/reservation/conceitos/ normalizes to /jornadas/reservation/conceitos and retains the descendant prefix",
+    "sibling": "/jornadas/reservation-other/ retains a different path segment and does not match the reservation descendant prefix",
+    "native_handler": "Existing arrow preventDefault and TreeState toggle remain unchanged",
+    "local_isolation": "Installed theme package resolves inside wt-FBI-4991; site dependency symlink resolves to the same worktree node_modules"
+  },
+  "runtime_evidence_consumed": {
+    "artifact": "evidence/hosted-ui-verification.json",
+    "completed_at": "2026-10-17T03:43:53.425Z",
+    "status": "Pre-fix failure only; before/after both open active, URL unchanged, transition 0.3s",
+    "fresh_host_after_patch": "PENDING_ORCHESTRATOR"
+  },
+  "no_product_writes": true,
+  "no_tests_added_or_run": true
+}

@@ -1,0 +1,125 @@
+{
+  "prepared_at_utc": "2026-10-15T18:46:29.339021+00:00",
+  "external_mutations_performed": false,
+  "status": "SUPERSEDED_BY_FINAL_PUBLICATION",
+  "no_literal_placeholders_in_jira_adf": true,
+  "fill_before_final_write": {
+    "final_course_commit": null,
+    "root_94_diagram_aggregate_receipt": null,
+    "final_release_id": null,
+    "final_native_site_version": null,
+    "final_deployment_receipt": null,
+    "final_worker_source_commit": null,
+    "final_public_qa_receipt": null,
+    "final_public_qa_functional_assessment": null,
+    "actual_draft_pr_url": null
+  },
+  "replacement_instructions": [
+    {
+      "indices": [
+        66
+      ],
+      "action": "Replace the earlier v2 publication paragraph with exact final source commit, corrected release, native version, public policy revision and deployment receipt. Do not imply the earlier1677worker deployed corrected diagrams."
+    },
+    {
+      "indices": [
+        67
+      ],
+      "action": "Replace or explicitly retain as historical the earlier1397pathQA paragraph; bind any final QA claim to its exact release and recorded timestamps, including raw verdict and diagnostics."
+    },
+    {
+      "indices": [
+        68,
+        75
+      ],
+      "action": "Add root aggregate94judgmentreceipt and final evidence paths. Keep source/snapshot limits and medium/low backlog."
+    },
+    {
+      "indices": [
+        63,
+        75
+      ],
+      "action": "Append a separate paragraph linking the actual GitHub draftPR only after root has its returnedURL; no inventedURL or merge claim."
+    }
+  ],
+  "preservation_rule": "Reread Story just before mutation. Preserve the entire current body including concurrent changes. If its updated value or customfield10054hash differs, rebase appended blocks and rerun both gates. The known initial63blocks remain unchanged.",
+  "gate_invocation": [
+    "node /Users/augustocarollo/.agents/skills/jira-fbi/scripts/jira-fbi-gate.mjs < tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-update-preview.json",
+    "node /Users/augustocarollo/.agents/skills/jira-fbi/scripts/claude-hook-wrapper.cjs < tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-update-preview.json"
+  ],
+  "gate_expected": [
+    "Catalog gate: exit0and permissionDecisionallow",
+    "ADF wrapper: exit0and emptystdout; any emitteddeny rejects payload"
+  ],
+  "rerun_warning": "prepare.py regenerates the current prepared v2historical paragraphs. If root substitutes final values directly in the request, update the previewtool_inputto match and rerun gates; do not rerunprepare.pyand overwrite substitutions.",
+  "blocks": [
+    {
+      "adf_content_index_zero_based": 63,
+      "type": "heading",
+      "starts_with": "Resultado da execução e entrega protegida — 15 de outubro de 2026"
+    },
+    {
+      "adf_content_index_zero_based": 64,
+      "type": "paragraph",
+      "starts_with": "O curso reúne 181 documentos MDX no Nextra, 18 jornadas e 90 destinos de aprendizado. Sete casos têm origem hi"
+    },
+    {
+      "adf_content_index_zero_based": 65,
+      "type": "paragraph",
+      "starts_with": "O pacote de exercícios oferece 16 executores em um ZIP com 98 arquivos e foi executado após extração sem diret"
+    },
+    {
+      "adf_content_index_zero_based": 66,
+      "type": "paragraph",
+      "starts_with": "A base examinada do curso é 623ae1d3d34143df53c571327a508de47ab58951, acrescida das duas correções de diagrama"
+    },
+    {
+      "adf_content_index_zero_based": 67,
+      "type": "paragraph",
+      "starts_with": "Na publicação anterior às correções semânticas, entre 18:13:33 e 18:15:02 UTC de 15 de outubro, a verificação "
+    },
+    {
+      "adf_content_index_zero_based": 68,
+      "type": "paragraph",
+      "starts_with": "A auditoria terminal em reviews/terminal.json aprovou o escopo de site protegido e entrega em rascunho com PAS"
+    },
+    {
+      "adf_content_index_zero_based": 69,
+      "type": "paragraph",
+      "starts_with": "A classificação do histórico abrange 12.697 commits e 595 cards FBI: sete relações tiveram causa relatada e ap"
+    },
+    {
+      "adf_content_index_zero_based": 70,
+      "type": "heading",
+      "starts_with": "R18 — Entrega com senha compartilhada, sem conta ChatGPT"
+    },
+    {
+      "adf_content_index_zero_based": 71,
+      "type": "paragraph",
+      "starts_with": "O estudante que recebeu a senha deve conseguir abrir o endereço publicado sem criar ou usar uma conta ChatGPT."
+    },
+    {
+      "adf_content_index_zero_based": 72,
+      "type": "heading",
+      "starts_with": "Critério de aceite adicional 19 — Comprovar a entrega protegida"
+    },
+    {
+      "adf_content_index_zero_based": 73,
+      "type": "paragraph",
+      "starts_with": "Um recibo identifica o endereço publicado, a versão de código, a versão nativa, a revisão da política de acess"
+    },
+    {
+      "adf_content_index_zero_based": 74,
+      "type": "heading",
+      "starts_with": "Fontes e fronteira deste complemento"
+    },
+    {
+      "adf_content_index_zero_based": 75,
+      "type": "paragraph",
+      "starts_with": "Os recibos desta execução estão em tasks/FBI-4991-arquitetura-nextra/execution/: reviews/terminal.json, review"
+    }
+  ],
+  "final_readback_receipt": "../publication/jira-readback-receipt.json",
+  "final_adf_blocks": 74,
+  "instruction": "This was a historical preparation contract. Do not replay its old block indices. The root finalized and remotely verified the condensed update."
+}

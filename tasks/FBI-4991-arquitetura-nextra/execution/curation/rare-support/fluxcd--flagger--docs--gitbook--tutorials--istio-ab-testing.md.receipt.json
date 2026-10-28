@@ -1,0 +1,12 @@
+{
+  "repo": "fluxcd/flagger",
+  "path": "docs/gitbook/tutorials/istio-ab-testing.md",
+  "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+  "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/docs/gitbook/tutorials/istio-ab-testing.md",
+  "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/docs/gitbook/tutorials/istio-ab-testing.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.597876+00:00",
+  "sha256": "1e49fe0f59de5426e7a023503a7994d5add3b76edb2f9db6df380418c23389bc",
+  "line_count": 259,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--docs--gitbook--tutorials--istio-ab-testing.md"
+}

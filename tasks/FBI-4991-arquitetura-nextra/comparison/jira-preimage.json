@@ -1,0 +1,1807 @@
+{
+  "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+  "id": "25528",
+  "self": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/3/issue/25528",
+  "key": "FBI-4991",
+  "fields": {
+    "summary": "Criar documentação de arquitetura aplicada em Nextra/Diátaxis com casos reais da Faz Capital",
+    "issuetype": {
+      "self": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/3/issuetype/10006",
+      "id": "10006",
+      "description": "Functionality or a feature expressed as a user goal.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/2/universal_avatar/view/type/issuetype/avatar/10300?size=medium",
+      "name": "Story",
+      "subtask": false,
+      "avatarId": 10300,
+      "hierarchyLevel": 0
+    },
+    "customfield_10054": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 1
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Criar documentação de arquitetura aplicada em Nextra/Diátaxis com casos reais da Faz Capital"
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "História do estudante"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Como estudante e integrante da equipe que trabalha com MakersHub, Airflow e integrações da Faz Capital, quero aprender os conceitos de arquitetura pelos problemas, dados e caminhos reais dos nossos sistemas, para entender por que uma operação falha, quais garantias uma solução oferece e como escolher uma alternativa antes de alterar o código."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Objetivos solicitados"
+            }
+          ]
+        },
+        {
+          "type": "orderedList",
+          "attrs": {
+            "order": 1
+          },
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Transformar todo o texto fornecido em documentação MDX no padrão do Nextra, usando a skill do framework Diátaxis. A cobertura inclui todos os conceitos dos 18 grupos e os 40 padrões destacados como prioritários; o pedido não se limita à lista de quarenta."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Analisar e abstrair o conteúdo, respeitar seus níveis arquiteturais e agrupar os conceitos em capítulos que façam sentido. A organização deve ajudar o estudante a passar do problema ao mecanismo e à decisão."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Produzir uma leitura didática e estimulante, com ganchos que mostrem o valor de aprender cada conceito e histórias curtas que expliquem a dor, sua causa sustentada por evidência e o que mudaria com outra escolha. A prosa deve ser clara para uma pessoa de 18 anos."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Explicar os conceitos com casos e códigos reais do MakersHub e do Airflow, usando o MCP PostgreSQL para obter dados e valores reais e o MCP FazGraph para identificar relações e blast radius."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Usar o histórico de commits e problemas já enfrentados para explicar por que aconteceram e como o conhecimento dos conceitos poderia ter orientado a solução desde o início. O pedido descreveu como ideal analisar todos os commits e problemas; um censo de metadados não deve ser apresentado como análise causal de todo esse histórico."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Curar, para cada item, skills relevantes, em destaque e com estrelas verificadas, bibliotecas e frameworks GitHub que implementem o mecanismo, e pelo menos uma aplicação real open source de referência."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Executar o trabalho em ondas, com especialistas e auxiliares distribuídos pela complexidade, council e o máximo de reuso de agentes aquecidos e de contexto/cache verificável."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Escopo conceitual integral"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "O conteúdo de cada grupo do texto original deve continuar rastreável até sua explicação e referência. Os grupos são:"
+            }
+          ]
+        },
+        {
+          "type": "orderedList",
+          "attrs": {
+            "order": 1
+          },
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Arquiteturas de aplicação, incluindo camadas, monólito modular, serviços, Serverless, Hexagonal/Clean/Onion, fatias verticais, MVC/MVP/MVVM/PAC, componentes, células, actors, P2P, Blackboard, Pipe and Filter e eventos."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sistemas distribuídos e consistência, incluindo dual write, Outbox/Inbox/CDC, Sagas, 2PC/3PC/TCC, reservas e compensações, idempotência, entrega e efeitos, garantias de leitura, concorrência, locks/leases/fencing, relógios, quórum, eleição, consenso, Raft/Paxos e gossip."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Eventos e mensageria, incluindo Pub/Sub, filas e consumidores, Request/Reply, fan-out/fan-in, roteadores, filtros, tradução, enriquecimento, divisão, agregação, ordenação, correlação, DLQ, retries, atraso, prioridade, poison messages e streaming."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CQRS, Event Sourcing e modelos de leitura, incluindo handlers, modelos de escrita/leitura, projeções, views materializadas, snapshots e eventos de domínio/integração."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Banco e armazenamento, incluindo replicação, particionamento, sharding, hashing, WAL, logs, Copy-on-Write, armazenamento estruturado por log, amplificação de escrita, índices e pré-computação."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cache, incluindo os modos de leitura/escrita, TTL, ausência, caches local/distribuído e em níveis, proteção contra recomputação simultânea, single-flight, warming, refresh e invalidação."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Resiliência, incluindo retry/backoff/jitter, circuit breaker, bulkhead, timeout/deadline, fallback, degradação, rejeição de carga, backpressure, limitação de taxa, saúde e recuperação."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Concorrência, incluindo locks, semáforos, CAS, estruturas lock-free/wait-free, actors, pools, Work Stealing, Fork/Join, Futures/Promises, Async/Await, Reactive Streams, single writer e dados imutáveis."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "APIs e integração, incluindo gateway, BFF, composição/roteamento/offloading, proxies, mesh/sidecar/ambassador, Adapter/ACL/Facade, GraphQL Federation, RPC/REST/HATEOAS, webhooks, polling, SSE e WebSocket."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "DDD, incluindo contexto delimitado, linguagem, entidades, valores, agregados, serviços, repositórios, factories, eventos, políticas, Specification e relações entre contextos."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Decomposição e evolução de sistemas, incluindo Strangler Fig, Branch by Abstraction, execuções paralelas e shadow, flags, Expand/Contract, modularização, extração e migração de dados."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Deploy e releases, incluindo Blue/Green, Canary, Rolling/Recreate/Shadow, Dark Launch, flags, entrega progressiva, A/B, infraestrutura imutável, IaC e GitOps."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Alta disponibilidade, incluindo modos ativo/passivo, standbys, regiões/zonas, quórum, failover, prevenção de split-brain, fencing, eleição, replicação e serviços stateless."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Segurança, incluindo Zero Trust, defesa em profundidade, privilégio mínimo, RBAC/ABAC/ReBAC, políticas, OAuth2/OIDC, troca de tokens, credenciais curtas, rotação, mTLS e identidade/segmentação."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Observabilidade, incluindo logs estruturados/centralizados, tracing, IDs de correlação/requisição, métricas RED/USE/Golden Signals, OpenTelemetry, health checks e monitoramento sintético."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Workflow e processamento, incluindo máquinas de estado, engines, DAGs, pipelines, orquestração/coreografia, filas/pools, batch/stream, Lambda/Kappa, MapReduce e divisão/coleta de trabalho."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Os padrões GoF de criação, estrutura e comportamento, incluindo todos os itens do texto original."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "O núcleo de quarenta padrões modernos prioritários, como roteiro aprofundado relacionado aos outros grupos."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Os quarenta itens que devem ser aprofundados"
+            }
+          ]
+        },
+        {
+          "type": "orderedList",
+          "attrs": {
+            "order": 1
+          },
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Modular Monolith."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hexagonal Architecture / Ports and Adapters."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vertical Slice Architecture."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "DDD / Bounded Context."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Event-Driven Architecture."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pub/Sub."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Transactional Outbox."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Change Data Capture — CDC."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Saga."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Idempotency."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CQRS."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Event Sourcing."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Materialized Views / Projections."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cache Aside."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Refresh Ahead."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Circuit Breaker."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Retry com Exponential Backoff e Jitter."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bulkhead."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Backpressure."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rate Limiting."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "API Gateway."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Backend for Frontend — BFF."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Strangler Fig."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Expand/Contract."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Blue/Green Deployment."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Canary Release."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Feature Flags."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Leader Election."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Distributed Lock com Lease e Fencing."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Replication."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sharding."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Consistent Hashing."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Optimistic Concurrency."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Write-Ahead Log — WAL."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sidecar."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Service Mesh."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Anti-Corruption Layer."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Competing Consumers."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dead Letter Queue."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "State Machine."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Requisitos de entrega e de evidência"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R1 — Formato e organização.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Entregar os arquivos MDX, os metadados e a navegação do Nextra. Aplicar o Diátaxis para distinguir explicações, tutoriais, guias de tarefa e referência. Os capítulos devem expressar uma jornada de aprendizado; a presença do nome de um conceito em uma lista não constitui sua explicação."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R2 — Cobertura.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Manter uma matriz que ligue todas as ocorrências do texto original aos conceitos, capítulos, exemplos e referências. Preservar distinções de significado, mesmo quando um termo aparece em mais de um nível. Explicar cada prioritário com problema, mecanismo, benefício, custo, limites e critérios de escolha."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R3 — Casos reais e valores.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Usar dados e valores obtidos pelo MCP PostgreSQL e relações/blast radius obtidos pelo MCP FazGraph. Registrar consulta, resultado, fonte, ambiente e horário. Proteger credenciais e dados pessoais; agregados podem fundamentar os exemplos. Uma contagem não prova por si só a causa de um incidente."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R4 — Código e produção.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Vincular os casos aos caminhos, funções e páginas reais quando isso ajudar o aprendizado. Distinguir o SHA de um checkout local do código efetivamente lido em um runtime. Afirmar implantação ou comportamento de produção somente com a prova correspondente. A solicitação de investigar o PR 362 e sua relação com CQRS exige leitura atual do PR e do código; a hipótese do pedido não é uma conclusão."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R5 — Ecossistema distribuído.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Procurar exemplos no MakersHub, Airflow e scraping, incluindo suas interações com Salesforce, Azure, PostgreSQL, MinIO, SeaweedFS, Redis, n8n e dbt. Explicar o Airflow no Rancher/Kubernetes informado pelo usuário. Integrações não confirmadas devem permanecer identificadas como não confirmadas."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R6 — Apresentação e cache.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Analisar que organização de apresentação o MakersHub utiliza no recorte examinado e comparar MVC, MVP e MVVM com exemplos de como a solução mudaria. Explicar os conceitos de Redis/cache já encontrados e apresentar, como propostas, a utilidade e o funcionamento dos que não foram encontrados."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R7 — Diagramas.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Focar os exemplos em fluxos Mermaid que expliquem o macro, as decisões, as fronteiras entre sistemas, falhas e recuperação. Acrescentar funções, paths e páginas quando esclarecerem o caminho. Diferenciar desenho do código observado de desenho proposto."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R8 — Alternativas financeiras.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Quando não houver exemplo implementado no ecossistema, criar um caso financeiro aplicado, como o que uma corretora poderia enfrentar. Usar XP apenas como referência de setor no cenário hipotético; não atribuir uma arquitetura real à empresa sem fonte."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R9 — Retrospectivas.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Investigar commits e problemas, sustentar a causa das histórias selecionadas com fontes e explicar como os conceitos poderiam ter mudado a abordagem inicial. Registrar o universo e a profundidade realmente examinados. A intenção de analisar todo o histórico permanece distinta de um inventário de metadados ou de algumas autópsias."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R10 — Skills e GitHub.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Para cada item, indicar skill pertinente, pelo menos um framework base e pelo menos uma aplicação real OSS de referência, além de bibliotecas complementares quando pertinentes. Verificar a evidência do mecanismo, popularidade, manutenção, licença e data da consulta. Para selecionar as skills mais estreladas e em tendência, declarar o universo comparado e o critério de seleção, citar fonte primária datada para a contagem de estrelas e apresentar uma medida de tendência no período informado, como crescimento de estrelas ou presença em um ranking datado. Sem essa medida, a tendência continua pendente; a contagem pontual de estrelas não pode substituí-la. Distinguir produto OSS, exemplo didático executável, modelo de referência e código source available. Estrelas pontuais não provam tendência, qualidade ou que uma biblioteca implementa qualquer padrão citado."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R11 — Orquestração originalmente solicitada.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " O usuário pediu pelo menos seis Sol 6.1 xhigh, pelo menos três Luna 6 max por Sol — mínimo de dezoito auxiliares —, divisão por complexidade, ondas, council e reuso máximo dos agentes aquecidos/cache. O council inicial foi especificado como um Opus 5.5, um Grok 4.7 xhigh e um Sol 6.1 xhigh. A mineração de histórico também mencionou Luna 6 ou Haiku 5.5 como opção."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R12 — Emenda de modelo.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " O usuário cancelou o Opus por prever falha da subscription e autorizou substituição por “muse muse wonder full high”, na grafia fornecida pelo usuário, Sol 6.1 xhigh, Grok 4.7 xhigh, AGY Gemini 3.8 Flash high ou OpenCode DeepSeek v4.1 Flash. A opção selecionada nesta execução foi um segundo Sol independente. A rota configurada ficou com dois Sol e um Grok no council; não houve chamada LLM ao Opus. A lista de alternativas autorizadas não comprova disponibilidade técnica de todas elas. Novos despachos devem observar a política de modelos vigente do proprietário."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "R13 — Clareza e verificação.",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " Escrever prosa completa em português, simples e concreta; manter identificadores e comentários de código em inglês. Conferir compilação MDX, navegação, anchors, cobertura e Mermaid. Separar prova de sintaxe, renderização e semântica; vincular a revisão independente aos hashes e fontes realmente examinados."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Complemento posterior: busca global padrão do Nextra"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Após a entrega, o usuário perguntou onde estava a busca global. A configuração entregue tinha search:false e search={null}; essa foi uma pendência funcional. A busca padrão deve aparecer no cabeçalho, indexar o conteúdo pelo Pagefind, aceitar o atalho do componente e abrir o resultado no capítulo ou seção correspondente. Essa exigência foi explicitada depois da solicitação original e integra o aceite atual."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Critérios de aceite verificáveis"
+            }
+          ]
+        },
+        {
+          "type": "orderedList",
+          "attrs": {
+            "order": 1
+          },
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A matriz demonstra cobertura de todos os conceitos e das ocorrências dos 18 grupos, sem substituir explicação por menção. Os quarenta prioritários têm desenvolvimento identificável."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A organização Diátaxis é visível nas páginas e na navegação; cada tipo de página tem uma necessidade clara do estudante. Os títulos e ganchos mostram o valor de aprender."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Os casos reais apontam ao código e às fontes usados. Os exemplos com números têm consulta/resultado e horário; o blast radius tem nó, snapshot e consumidores discriminados."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As histórias de falha distinguem fato verificado, hipótese e proposta. O alcance do histórico examinado está documentado; a intenção de analisar todos os commits não é marcada como satisfeita por censo de metadados."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "MVC/MVP/MVVM, cache/Redis e o ambiente Rancher/Kubernetes do Airflow estão tratados com exemplos concretos e alternativas delimitadas."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cada item tem uma skill selecionada com evidência primária datada de estrelas e tendência, critério e universo comparado declarados, pelo menos um framework base e pelo menos uma aplicação real open source de referência, com fonte que demonstre o mecanismo e classificação correta. Um exemplo didático ou modelo pode complementar o estudo, mas não satisfaz sozinho a exigência de aplicação real OSS. Eventuais lacunas permanecem pendentes e explícitas; uma URL genérica ou produto proprietário rotulado como OSS não satisfaz esse aceite."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Os Mermaid dos exemplos passam em parsing, renderização e revisão semântica contra a fonte. As conexões declaradas preservam o ambiente e a fronteira do efeito."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "O Nextra compila; links locais e anchors funcionam; as rotas da entrega respondem e os leitores encontram o conteúdo pela navegação."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A busca global padrão está visível, o índice cobre as páginas entregues e uma consulta como outbox retorna conteúdo pertinente; clicar no resultado abre a página/seção esperada. O índice é regenerado pelo build."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Os despachos, configurações, ondas, reusos e council têm recibos reais. Autores não aprovam o próprio recorte; o resultado da revisão está ligado à versão examinada. Cache só é quantificado quando o runtime expõe a medida."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A entrega tem arquivos/fontes, instrução de uso, provas e limitações claras. Quantidades produzidas e aprovação técnica são registradas como evidência, sem reescrever retroativamente o pedido."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Evidência de entrega já produzida"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "O recibo local de 14/10/2026 às 20:39 UTC registra 52 MDX, 18 capítulos escolhidos pela organização, 310 conceitos normalizados, quarenta prioritários, seis tutoriais, dois guias e 76 diagramas. Registra também build aprovado, 52 aprovações independentes ligadas aos hashes, zero links locais inválidos e 52 rotas HTTP 200. Essas quantidades são o resultado da execução; o usuário não impôs originalmente 52 páginas, seis tutoriais ou 76 diagramas."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "As fontes incluem valores agregados do PostgreSQL e blast radius FazGraph com snapshot/horário, casos de código MakersHub e arquivos/configuração Airflow lidos no ambiente identificado. As referências diferenciam código local, runtime, histórico, exemplos REF e propostas."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "O censo de histórico registrou 12.697 commits por metadados e aprofundou diffs selecionados. A análise causal de todos os commits e problemas não foi demonstrada. Essa limitação permanece visível para que a Story não encerre uma intenção maior com uma prova menor."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "A busca foi corrigida em 14/10/2026 às 23:18 UTC: Pagefind indexou 52 páginas e 5.465 palavras. No navegador headless, outbox retornou sete páginas e abriu o tutorial; refresh retornou a seção Refresh Ahead e o capítulo de cache. O recibo registra ausência de erros de página."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Prévia local no Mac: "
+            },
+            {
+              "type": "text",
+              "text": "http://127.0.0.1:59024",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "http://127.0.0.1:59024"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "."
+            },
+            {
+              "type": "text",
+              "text": " Esse endereço não constitui publicação externa. Repositório-alvo: "
+            },
+            {
+              "type": "text",
+              "text": "https://github.com/gutocarollo/architecture-system-eng-expert",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://github.com/gutocarollo/architecture-system-eng-expert"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "."
+            },
+            {
+              "type": "text",
+              "text": " Os arquivos desta frente ainda são artefatos locais; o link do repositório não comprova commit, push, merge ou deploy."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Fontes para reconstituir o pedido e as provas"
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "O pedido de direção e a emenda do Opus estão em tasks/architecture-course-2026-10-14/original-request.md. A fonte primária continua sendo a conversa do usuário."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "O corpus conceitual original está em docs/catalogos/catalogo-patterns.md, docs/aplicado/aplicacao-makershub-40-patterns.md e docs/referencias/catalogo-40-patterns-skills-frameworks.md; a matriz preserva seus hashes e linhas."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A cobertura está em tasks/architecture-course-2026-10-14/evidence/coverage.json. Os recibos de dados, código, runtime e curadoria estão na pasta evidence dessa frente."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A entrega anterior está em tasks/architecture-course-2026-10-14/delivery.json; o aceite independente e os hashes estão em prepared-council/packet.json e reviews/."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A correção de busca está em tasks/architecture-story-2026-10-14/search/receipt.json, com build, consulta real, navegação e captura do navegador."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Topologia, arquivos compartilhados e fronteira de escrita"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "A implementação local já está no worktree perfect-citizen-a30f5998, cujo HEAD observado é 23d5d158d3a964dceba296296368ec14bcd8970b. Esta Story registra uma entrega documental autônoma. O comportamento de produção fornece os casos estudados; as regras e dados desses sistemas são somente consultados."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Os arquivos do curso estão em content/, app/, mdx-components.jsx e next.config.mjs. A busca altera a configuração, package.json/package-lock.json, app/layout.jsx e o índice gerado. Esses são os arquivos compartilhados desta frente; alterações concorrentes precisam preservar os trabalhos existentes. MakersHub, Airflow, Salesforce e os outros sistemas são fontes consultadas nesta entrega documental, sem mutação de suas regras ou dados."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "A busca por duplicatas encontrou cards de Central de Ajuda, documentação de telas e cobertura de vídeos, mas não um card equivalente a este currículo de arquitetura. Nenhum desses pais foi copiado para esta Story."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Pendência de catálogo e de fechamento"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "O catálogo controlado instalado não registra gutocarollo/architecture-system-eng-expert nem um asset canônico confirmado do curso. A Story deve registrar Catalog Validation Status blocked, com a justificativa e os campos controlados de repositório/assets vazios. As camadas aplicáveis são documentation e frontend. Contextos e capacidades de negócio, páginas MakersHub, labels de página e sistemas operacionais afetados não são inferidos a partir de exemplos somente lidos."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Este registro preserva os objetivos e a entrega observada. A classificação de catálogo pendente e a cobertura causal integral do histórico continuam documentadas; a criação da Story não declara automaticamente todos os critérios cumpridos nem autoriza publicação externa ou alteração de sistemas de produção."
+            }
+          ]
+        }
+      ]
+    },
+    "customfield_10520": {
+      "self": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/3/customFieldOption/10149",
+      "value": "blocked",
+      "id": "10149"
+    },
+    "customfield_10521": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "O catálogo permanece blocked porque o repositório material e o objeto do curso não foram resolvidos. Os campos de negócio e de página ficam vazios por não se aplicarem à alteração."
+            }
+          ]
+        },
+        {
+          "type": "codeBlock",
+          "content": [
+            {
+              "type": "text",
+              "text": "CATALOG_AUDIT_JSON={\"schema_version\":4,\"issue_key\":\"CREATE\",\"registry_sha256\":\"770e1b4e13bad6c9eaf0aba6496976c7a95e1043deba55c76620cd85cb4ab6fb\",\"proposal_sha256\":\"c76f179a5059bb8cb2eba6d4420665e5dfd5de76c4c6e2b63d39b06a7456345f\",\"decisions\":{\"system\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"O curso e sua busca pertencem ao repositório de documentação. MakersHub, Airflow, PostgreSQL e FazGraph fornecem exemplos consultados; nenhum sistema operacional do catálogo é alterado.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"businessContexts\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"O trabalho ensina conceitos de arquitetura; citar produtos e jornadas em exemplos não altera esses produtos ou jornadas.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"businessCapabilities\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"O trabalho explica ações de negócio em exemplos, sem modificar nenhuma ação sobre leads, assessores, comissões ou feedback.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"repositories\":{\"state\":\"unresolved\",\"values\":[],\"reason\":\"O alvo material gutocarollo/architecture-system-eng-expert foi confirmado no remote origin, mas não consta nos cinco valores permitidos. Nenhum repositório de exemplo pode substituir esse alvo.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"development\",\"code\"]},\"technicalLayers\":{\"state\":\"resolved\",\"values\":[\"documentation\",\"frontend\"],\"reason\":\"O conteúdo MDX é documentação e a busca padrão Nextra/Pagefind acrescentada ao escopo é comportamento renderizado no frontend do curso.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"affectedAssets\":{\"state\":\"unresolved\",\"values\":[],\"reason\":\"Não há objeto canônico confirmado para o curso ou sua busca. A busca FazGraph architecture-system-eng-expert retornou zero hits; isso não prova ausência em todas as classes de entidade. Os assets dos exemplos são somente fontes.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"fazgraph\"]},\"page\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"Nenhuma página MakersHub é alterada. As rotas e páginas do curso não recebem a projeção page:makershub.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]},\"labels\":{\"state\":\"not_applicable\",\"values\":[],\"reason\":\"A política de labels projeta páginas MakersHub afetadas; não há uma página MakersHub materialmente alterada.\",\"source\":\"direct-task-scope-and-current-source\",\"evidence_families\":[\"jira-self\",\"code\"]}},\"parent_prior\":{\"key\":null,\"used_for_discovery\":false,\"copied\":false},\"page_slugs\":[],\"page_projections\":[],\"page_sources\":[],\"page_evidence_families\":[],\"material_catalog_gaps\":[\"repositories\",\"affectedAssets\"],\"measured_at_utc\":\"2026-10-14 23:18 UTC\",\"source_checkout\":\"/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998\",\"source_sha\":\"23d5d158d3a964dceba296296368ec14bcd8970b\",\"source_origin\":\"https://github.com/gutocarollo/architecture-system-eng-expert.git\",\"proposal_hash_basis\":\"SHA256 of stable compact JSON of base_fields before customfield_10521 insertion. Recompute for final preview.\",\"proposal_prepared_at_utc\":\"2026-10-14 23:28:39 UTC\"}"
+            }
+          ]
+        }
+      ]
+    },
+    "customfield_10522": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "O repositório material é gutocarollo/architecture-system-eng-expert, confirmado no remote origin. O contrato catalog-v4 instalado não registra esse repositório nem um objeto canônico do curso. A Story registra esta lacuna com Catalog Validation Status blocked e campos controlados vazios. MakersHub, Airflow, PostgreSQL e FazGraph são fontes de exemplos consultados. Este waiver explica a lacuna e não cria valor canônico, não autoriza alteração do registry e não afirma que o catálogo esteja completo."
+            }
+          ]
+        }
+      ]
+    },
+    "customfield_10514": [
+      {
+        "self": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/3/customFieldOption/10129",
+        "value": "frontend",
+        "id": "10129"
+      },
+      {
+        "self": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/3/customFieldOption/10139",
+        "value": "documentation",
+        "id": "10139"
+      }
+    ],
+    "customfield_10515": null,
+    "customfield_10516": null,
+    "customfield_10517": null,
+    "customfield_10518": null,
+    "customfield_10519": "catalog-v4-business-contexts-2026-08-13",
+    "updated": "2026-10-14T20:29:15.360-0300",
+    "status": {
+      "self": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/3/status/10003",
+      "description": "",
+      "iconUrl": "https://fazcapital.atlassian.net/images/icons/status_generic.gif",
+      "name": "To Do",
+      "id": "10003",
+      "statusCategory": {
+        "self": "https://api.atlassian.com/ex/jira/941be6d6-e8c6-481a-9346-6c425e72d22f/rest/api/3/statuscategory/2",
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+[
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/dataobj/metadatacache/cache.go"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/logline/hintprovider/hint_cache.go"
+  },
+  {
+    "repo": "pyeventsourcing/eventsourcing",
+    "path": "eventsourcing/domain.py"
+  },
+  {
+    "repo": "pyeventsourcing/eventsourcing",
+    "path": "eventsourcing/application.py"
+  },
+  {
+    "repo": "encode/django-rest-framework",
+    "path": "rest_framework/routers.py"
+  },
+  {
+    "repo": "encode/django-rest-framework",
+    "path": "rest_framework/viewsets.py"
+  },
+  {
+    "repo": "zulip/zulip",
+    "path": "zproject/urls.py"
+  },
+  {
+    "repo": "zulip/zulip",
+    "path": "zerver/lib/rest.py"
+  },
+  {
+    "repo": "apache/nifi",
+    "path": "nifi-framework-bundle/nifi-framework/nifi-framework-components/src/main/java/org/apache/nifi/controller/repository/StandardProcessSession.java"
+  },
+  {
+    "repo": "apache/nifi",
+    "path": "nifi-framework-bundle/nifi-framework/nifi-framework-components/src/main/java/org/apache/nifi/connectable/StandardConnection.java"
+  },
+  {
+    "repo": "apache/nifi",
+    "path": "nifi-framework-bundle/nifi-framework/nifi-framework-core/src/main/java/org/apache/nifi/controller/tasks/ConnectableTask.java"
+  },
+  {
+    "repo": "gravitational/teleport",
+    "path": "lib/srv/authhandlers.go"
+  },
+  {
+    "repo": "gravitational/teleport",
+    "path": "lib/services/role.go"
+  },
+  {
+    "repo": "gravitational/teleport",
+    "path": "lib/auth/authorizer.go"
+  },
+  {
+    "repo": "istio/istio",
+    "path": "pkg/spiffe/spiffe.go"
+  },
+  {
+    "repo": "istio/istio",
+    "path": "security/pkg/server/ca/server.go"
+  },
+  {
+    "repo": "istio/istio",
+    "path": "security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go"
+  },
+  {
+    "repo": "istio/istio",
+    "path": "security/pkg/nodeagent/cache/secretcache.go"
+  },
+  {
+    "repo": "keycloak/keycloak",
+    "path": "services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java"
+  },
+  {
+    "repo": "keycloak/keycloak",
+    "path": "services/src/main/java/org/keycloak/protocol/oidc/grants/TokenExchangeGrantType.java"
+  },
+  {
+    "repo": "spring-projects/spring-security",
+    "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequestEntityConverter.java"
+  },
+  {
+    "repo": "spring-projects/spring-security",
+    "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultTokenExchangeTokenResponseClient.java"
+  },
+  {
+    "repo": "google/guava",
+    "path": "guava/src/com/google/common/cache/CacheBuilder.java"
+  },
+  {
+    "repo": "killbill/killbill",
+    "path": "invoice/src/main/java/org/killbill/billing/invoice/generator/InvoicePruner.java"
+  }
+]

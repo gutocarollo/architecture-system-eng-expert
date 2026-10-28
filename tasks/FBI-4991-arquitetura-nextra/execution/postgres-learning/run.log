@@ -1,0 +1,3 @@
+grain: before_rows=2 before_commission=200 after_rows=1 after_commission=100
+revision: before_current_rows=1 lost_azure_update=True after_current_rows=1 stale_writer_rejected=True
+comparison=PASS isolation_verified=True temporary_server_stopped=True

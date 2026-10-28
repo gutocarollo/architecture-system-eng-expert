@@ -1,0 +1,39 @@
+{
+  "observed_utc": "2026-10-15T03:45:55.774437+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "historical_http200_records": 799,
+  "historical_unique_source_artifacts": 737,
+  "active_locators": 545,
+  "active_license_revisions": 176,
+  "publications": [
+    {
+      "archive": "matrix.json.gz",
+      "verified": true,
+      "sha256": "b7aedc4ff85625ec0546ceded96bf5d734bf19318f12637dea964998e43c6e4d",
+      "contents_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+    },
+    {
+      "archive": "sources.json.gz",
+      "verified": true,
+      "sha256": "87f2616ba1db8fd855b1e7bfde505db425e6f82167640eed0ca119c4115b7586",
+      "contents_sha256": "51638c494e7cbbac9c6d7389ea4f3ab2b40239c6930501a791bafc6796ad3209"
+    }
+  ],
+  "canonical_concepts": 310,
+  "catalog_occurrences": 335,
+  "catalog_unique_concepts": 310,
+  "priority_entries": 40,
+  "priority_links": 46,
+  "assigned_concepts": 183,
+  "assigned_states": {
+    "APPROVED_BOUNDED": 153,
+    "REPAIR_HIGH": 20,
+    "APPROVED_WITH_MEDIUM": 10
+  },
+  "other_lane_concepts": 127,
+  "mutation_expected_hash_corruption": "REJECTED",
+  "errors": [],
+  "verdict": "PASS",
+  "boundary": "Integrity PASS does not override semantic REPAIR or approve the other lane."
+}

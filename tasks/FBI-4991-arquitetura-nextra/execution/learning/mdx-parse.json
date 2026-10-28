@@ -1,0 +1,408 @@
+{
+  "observed_at_utc": "2026-10-15T02:34:49.252Z",
+  "parser": "@mdx-js/mdx",
+  "files": 80,
+  "failures": [],
+  "receipts": [
+    {
+      "file": "content/jornadas/index.mdx",
+      "sha256": "bbca38c5c7c46b5780541cb1ab347e28a971a3e29bdd178fe1cd2bfb76fc8084",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/matriz.mdx",
+      "sha256": "c3924104a1f841a4c415dc87e1859ceaffeaa31acce283af1de805c7985c8110",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/access-policy/conceitos.mdx",
+      "sha256": "a7a63705312c5b9ad8b5fe21ea1557dab5cf38ea301f80b4ac21a2da8c7a068a",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/access-policy/index.mdx",
+      "sha256": "c471c18acb8e13e61048fb336983e3973eff1ac53c335b1bbec527257444180c",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/cache-policy/conceitos.mdx",
+      "sha256": "7039b4a1aa3a3ceb6b8d8b966844b7271dfee3e251db87286007b615cb109a16",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/cache-policy/index.mdx",
+      "sha256": "2a0ab08dd14553d507e16318c69e2c12cd84e0d75f19206e77ff93299977ec81",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/consensus/conceitos.mdx",
+      "sha256": "59131bfc619796b31621b381a93842e51a1919ab593ac640e23583a9c7d05a06",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/consensus/index.mdx",
+      "sha256": "018471970cbee49aa1107d70437656fe8f396babcb95cd37dafd029ae71b518d",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/date-only/conceitos.mdx",
+      "sha256": "5197bea00377b84219c51bef5552dfef49f93a16759d12f69bcf8ff57437b214",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/date-only/index.mdx",
+      "sha256": "53ebe9242bd3f447c31ef4664bafdd3b91f943d639678bff7286ee3fa5b23808",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/diagnostics/conceitos.mdx",
+      "sha256": "9d89f7c51124902578fd7a5da6cec94c50418aaa9a071e863be232a42e97af32",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/diagnostics/index.mdx",
+      "sha256": "953e946296fdeb8b770ccc04b0f6a5f00b222706ef5dc4fa662d6461a0b2a46f",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/early-refresh/conceitos.mdx",
+      "sha256": "77fcb21e14f27931cfe7137bcf53426eae9d2e96036619991839dfe7db770266",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/early-refresh/index.mdx",
+      "sha256": "da523074c316eba98dae9885868b756554e95fa9b5f3e2969568d1ffaf881c20",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/ledger-projection/conceitos.mdx",
+      "sha256": "05c166cecbbb21b0f64729b3c8512bbaf36a48112abae86a87a13411fa53f13b",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/ledger-projection/index.mdx",
+      "sha256": "4642ef9b5f4c1ffebd0692394c4c1b3aa84e12702b24813fb69157266c7909f4",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/opportunity-entry/conceitos.mdx",
+      "sha256": "14e9bf8388edb5f76718ea43bc928979bccf3b4875b1092487d8abdefe51852d",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/opportunity-entry/index.mdx",
+      "sha256": "9d6aac38e90a7f5e259dbe89fb70d12f19012a9b6d82f32c19ea83c24c911e21",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/order-boundaries/conceitos.mdx",
+      "sha256": "c1e9ebcb051fc51dcdc8a2560b2783cbb8fcbc20414acba626014c24b298e0c1",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/order-boundaries/index.mdx",
+      "sha256": "364a657661bc28ac496e8ca840a0b41e5b8accc088d21aa0109c1c8b4f8dce88",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/order-delivery/conceitos.mdx",
+      "sha256": "373b3ad82a70f1d542a80fff2505883424e04866c7fe4b61604ad438d40ddd93",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/order-delivery/index.mdx",
+      "sha256": "ac34d6cc2e995eb7ba70392a1df058c62c05fd6fe4800f15990ed8df00b1b358",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/queue-workflow/conceitos.mdx",
+      "sha256": "1e7b0b7609b00bce3212fd9a138778fd32096f657a493187cb813231692514c0",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/queue-workflow/index.mdx",
+      "sha256": "ab4a6637793a604f3a8c387f32174308c62c274f08189039b6ba505550782ad9",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/reservation/conceitos.mdx",
+      "sha256": "fb845e12796e8fbe6f94dfcda729b5775eabb28458f6620f65f647028ff633d9",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/reservation/index.mdx",
+      "sha256": "3252ecca4698f096a527384e1b5103315ca2fd7ae41819d0babaef4911dcd9d7",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/safe-release/conceitos.mdx",
+      "sha256": "820a8dc4eacf4fa6b363d053bdb8eb910a53a9d6ce25d3d13e31d960685927fa",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/safe-release/index.mdx",
+      "sha256": "0c924a6bbebaeae372f8469d8603c0cd947eb1e60974503f437e0c1dbf4b00b7",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/single-flight-cancel/conceitos.mdx",
+      "sha256": "e4aac23d665903dc6e4134b7243252c3e286c8ff06b5bb94719b97ea952023fc",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/single-flight-cancel/index.mdx",
+      "sha256": "e7e44bba587e5ba860417bbbafd9f96c4d6a0eb695ecd86ba29f9706ae0b78e7",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/storage-partitions/conceitos.mdx",
+      "sha256": "e9e0816322747fee188b665a14d4d8606ed3ce697d5ef36fe5950f8cdcba6778",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/jornadas/storage-partitions/index.mdx",
+      "sha256": "d40278ff3f192413656de3b8621ce866f37a09143d8b48b20a90335d1a8478c9",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/index.mdx",
+      "sha256": "d21b439d4aeb7d2169f726b16ff74ae2ba95940cc77239ad416be51d2e934dc9",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/access-policy/index.mdx",
+      "sha256": "c38e421bcf2d5574ac22a1940230f687fb8dbbf9e26527d5ca32e12965bf89b8",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/cache-policy/index.mdx",
+      "sha256": "ff960e8095f0515230a8f2946f429030ea6659c52033b06dce763e3cd65fec25",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/consensus/index.mdx",
+      "sha256": "942512b4ae79d96f96b0e62c22226adef15ee45188b6191bd8e1806cc81ce750",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/date-only/index.mdx",
+      "sha256": "61482e552c25c5094b5aa6d0189b85eef7ad1f0b0a3826928a621916d9921454",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/diagnostics/index.mdx",
+      "sha256": "c062c1456a037844f0e44e8027c5241e8ab7f00b5e9404c2868d0cdfee1fa4c4",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/early-refresh/index.mdx",
+      "sha256": "f9ac95ec12625770cb5f3ec68cd9767664aec2ca5a7c6980ccbea56c3b56e4a4",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/ledger-projection/index.mdx",
+      "sha256": "25fd1903aa70d88669cae9cb54e8a2e0d25944c4f2dcb79d7cefa16beab13e74",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/opportunity-entry/index.mdx",
+      "sha256": "b613139a97f583a38306f5fee68a41dbad4de3c88a8f6ddc1e0b9696d926fe11",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/order-boundaries/index.mdx",
+      "sha256": "4d5dc484c87cb62673d6d0b62a1b434abed38ff9009e0b8844d963d2eea46232",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/order-delivery/index.mdx",
+      "sha256": "160e503736eb4cb31e4f65912f94bc574aef9d0c373a1fe95423ba6935ab5d78",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/queue-workflow/index.mdx",
+      "sha256": "2a254250d96b29a1ec12a8afed3b29ab4472c98d0d1c3a3bf58a929f6fda1cb0",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/reservation/index.mdx",
+      "sha256": "d54ae4b1433243cf3b6bb69571f163de36d56547c8e71f6f1e6b15198c63e4e9",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/safe-release/index.mdx",
+      "sha256": "b2a27050fe08d62a4707ee7922ea58610eb9464ce0d30ad47c2902ea2b7c86a4",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "sha256": "2235302b3237c994f2ff678b8807493bdfa57b01881cc2e6390a158f2302ca7a",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/explicacoes/casos/storage-partitions/index.mdx",
+      "sha256": "84e5fd9b484a6d65153624ca84fdf367eab3c516093e50d56739f74667739398",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/index.mdx",
+      "sha256": "6deb675c1f3acdde24b421351c79f4cf95de3985d62ad34260f1e2517510c1af",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/access-policy/index.mdx",
+      "sha256": "ad3ee41d17e7a0f5f370669b0077ad7605a74ce6baf2ed5aac14731bc681071b",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/cache-policy/index.mdx",
+      "sha256": "f75948c182e5a0408d492a453034584660cc4df5873255324c2325b01de188d7",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/consensus/index.mdx",
+      "sha256": "d021b89ad11b97c5f197e0a9f87bfa51c01baa8888295a51333da85fdfbdca69",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/date-only/index.mdx",
+      "sha256": "897fe446a4a0f9b46fc974b43906673304d26f6d39674e659e7c815d0cae60c0",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/diagnostics/index.mdx",
+      "sha256": "83f1e9c6f856685d626471cebf9271086b33c445fe0b5bd7aa2627079fd9d921",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/early-refresh/index.mdx",
+      "sha256": "271008aae51871a5c1b341eb8258ddacb56d39d6a052273f5fb8856adad37d09",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/ledger-projection/index.mdx",
+      "sha256": "235bd98d3158899a130826763a98c57c3bf09c2f28d75dd8645b5e429df1ef81",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/opportunity-entry/index.mdx",
+      "sha256": "51b8d4c553852f6d53fa89bc0ac2b954ab70d6d5a76bf0c44531a42903a2daa3",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/order-boundaries/index.mdx",
+      "sha256": "32ced3a6918d759c154e53299621ef412ec0285e01a066547b1a0d624694e657",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/order-delivery/index.mdx",
+      "sha256": "99dea04b23692688a69218a3fabf2619d70b39450fae7571e3dae10e7f657082",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/queue-workflow/index.mdx",
+      "sha256": "b7dde8cda0dcc4453db7ff2cc96bf4d93fe002e9501d66000e997aead29286b5",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/reservation/index.mdx",
+      "sha256": "0a40c645bd550a6419fc7fa5ebc22708c81264365e463f87318357b999605f71",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/safe-release/index.mdx",
+      "sha256": "9320caee03e2e482fd1b011504001b93015bfd04efef00cea9f82f84a04ed016",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/single-flight-cancel/index.mdx",
+      "sha256": "42335e50cf2f54af8985c8276cc64c54989112b9f1a2e796ef1cc71cda927613",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/tutoriais/casos/storage-partitions/index.mdx",
+      "sha256": "ba5e79cb1182c7119845db1770a37493af1365e4dc5fb7f1f09d51fd9103262b",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/index.mdx",
+      "sha256": "8925f466ddcd826362ecd6df47be22ee4052165195a7b3a3f31cb72f099e227a",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/access-policy/index.mdx",
+      "sha256": "e311a1baff2d8e756037a31f5aa9f28f5b01137388d55138d8ed93daa9054d6c",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/cache-policy/index.mdx",
+      "sha256": "b4058d6af946e1e50a0a41275c0fcfcbbc36a24d41df3793527524419e9a6e47",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/consensus/index.mdx",
+      "sha256": "2a09b353000646853a65c9b335c32fac9ffc05f633b48d08b271e14f19f8f7d1",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/date-only/index.mdx",
+      "sha256": "ef2c4a23f10639c4dda7c0facac5ceac2be06e6e277c36c3acda286c834692a1",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/diagnostics/index.mdx",
+      "sha256": "76d406b1f0073dc44c8333699a228cb476deb7240e254366f9e728c13631c498",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/early-refresh/index.mdx",
+      "sha256": "98f00e115c9598c346d0f20b410d95937649960e825a83853d03a0f49d95629c",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/ledger-projection/index.mdx",
+      "sha256": "af847a0e7fa03e437b16e970005413ffcdd07508cf7493c05c61ca332c6bea09",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/opportunity-entry/index.mdx",
+      "sha256": "9d7f6b23652e6aa9088b029701dec99d092798941728dd3b0de9219f7e4967bd",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/order-boundaries/index.mdx",
+      "sha256": "50a51261c2afaca80809ddb0df81827695f0a4899ff51d715aa41ed1b7de4bd6",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/order-delivery/index.mdx",
+      "sha256": "77b12b3ff34c6536081ec70033101a30f21a872f73d3ced64f6e765c033aec9b",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/queue-workflow/index.mdx",
+      "sha256": "e22cf7af25602c26b73ae082d6c3839063ae6977c579e831bdb04a97b97d1798",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/reservation/index.mdx",
+      "sha256": "47a4be9aab976ac398d63e77ce4d480e5ec5a6835dce249a4128fea41b25bc30",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/safe-release/index.mdx",
+      "sha256": "3b230312e14d183fd3a8318c1aa3890804c8b8fef2c776811b63268174f34995",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/single-flight-cancel/index.mdx",
+      "sha256": "e93a05fffe647590d744febfab56f7a7d5279c1b90622d92300e828865d2bb43",
+      "verdict": "PASS"
+    },
+    {
+      "file": "content/guias/casos/storage-partitions/index.mdx",
+      "sha256": "de7a86390e957db6223cc35a0faafbc342486ce4023f1e6b9aeb05bf85aeeb5c",
+      "verdict": "PASS"
+    }
+  ]
+}

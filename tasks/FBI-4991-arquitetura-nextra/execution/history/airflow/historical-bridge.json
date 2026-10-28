@@ -1,0 +1,16 @@
+{
+  "measured_at": "2026-10-15T03:13:53.094607+00:00",
+  "host": "airflow-70",
+  "source_path": "/home/fazcapital/airflow/airflow-dags",
+  "command": "git merge-base --is-ancestor ce08e7025606280ac926442b4d89fe88283ae88d def3e84bfe0a",
+  "exit_code": 0,
+  "ancestor": "ce08e7025606280ac926442b4d89fe88283ae88d",
+  "descendant": "def3e84bfe0adbaccb84ca701f7a41dab79abefa",
+  "pr": 101,
+  "related_pr": 156,
+  "related_pr_object": "b8f0ce62c89c943573aff33c1148eb3464699ef8",
+  "related_pr_object_available": false,
+  "related_pr_show_exit_code": 128,
+  "historical_gate_ast_sha256": "ae1a3a9ea41c1faee1e453aa1d993e98b3616e9e458018434b8e1a5e20e81d53",
+  "scope": "A ancestralidade prova que o kernel ce08e702 está na revisão do PR101. A descrição do PR156 relata sua migração para o arquivo renomeado; o objeto desse segundo PR não estava acessível. Não houve fetch nem prova de produção."
+}

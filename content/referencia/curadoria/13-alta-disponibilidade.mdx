@@ -1,0 +1,205 @@
+---
+title: "Curadoria: Alta disponibilidade"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Alta disponibilidade."
+diataxis: reference
+---
+
+# Curadoria: Alta disponibilidade
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## Automatic Failover
+
+O identificador canônico é `automatic-failover`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Patroni decide quando adquirir ou renovar liderança e quando promover um PostgreSQL standby.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [patroni/patroni / ha.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/ha.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/ha.py#L613-L619). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#automatic-failover). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Cold Standby
+
+O identificador canônico é `cold-standby`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O controlador CloudNativePG valida o backup ou os snapshots de origem, prepara os volumes e escolhe o comando de bootstrap por recuperação para materializar uma nova instância antes de atender.
+
+A base de estudo é [postgres/postgres / xlogrecovery.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/transam/xlogrecovery.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [cloudnative-pg/cloudnative-pg / cluster_create.go @ 0a1b0627](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/controller/cluster_create.go); licença [Apache-2.0](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/LICENSE); [cloudnative-pg/cloudnative-pg / jobs.go @ 0a1b0627](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/pkg/specs/jobs.go); licença [Apache-2.0](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/LICENSE); [cloudnative-pg/cloudnative-pg / restore.go @ 0a1b0627](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/cmd/manager/instance/restore/restore.go); licença [Apache-2.0](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/controller/cluster_create.go#L1232-L1238). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O exemplo é a recuperação fria que precisa materializar uma nova instância a partir do estado preservado. O código não é um ensaio de restore nem uma medição de RTO ou do backup de produção.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#cold-standby). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Failover
+
+O identificador canônico é `failover`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Patroni decide quando adquirir ou renovar liderança e quando promover um PostgreSQL standby.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [patroni/patroni / ha.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/ha.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/ha.py#L613-L619). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#failover). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Fencing
+
+O identificador canônico é `fencing`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O journal rejeita uma época de escritor anterior à época prometida, impedindo que um líder antigo continue gravando.
+
+A base de estudo é [apache/hadoop / QuorumJournalManager.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/client/QuorumJournalManager.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/hadoop / Journal.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/server/Journal.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/server/Journal.java#L284-L290). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#fencing). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Hot Standby
+
+O identificador canônico é `hot-standby`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgreSQL implementa o envio e a recepção de WAL; Patroni configura o PostgreSQL seguidor e a conexão com o upstream escolhido.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / walreceiver.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walreceiver.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c#L4047-L4053). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#hot-standby). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Multi-AZ
+
+O identificador canônico é `multi-az`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O provider AWS reconcilia a declaração do cluster e as zonas de disponibilidade como failure domains.
+
+A base de estudo é [kubernetes-sigs/cluster-api / cluster_types.go @ 3d286e2c](https://github.com/kubernetes-sigs/cluster-api/blob/3d286e2c957495174300aa82cc98065ab82653fd/api/core/v1beta1/cluster_types.go); licença [Apache-2.0](https://github.com/kubernetes-sigs/cluster-api/blob/3d286e2c957495174300aa82cc98065ab82653fd/LICENSE). A aplicação ou candidato de aplicação é [kubernetes-sigs/cluster-api-provider-aws / awscluster_controller.go @ 5ffa11af](https://github.com/kubernetes-sigs/cluster-api-provider-aws/blob/5ffa11af3b508eff794fba48a673cda2bbed03d6/controllers/awscluster_controller.go); licença [Apache-2.0](https://github.com/kubernetes-sigs/cluster-api-provider-aws/blob/5ffa11af3b508eff794fba48a673cda2bbed03d6/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/kubernetes-sigs/cluster-api-provider-aws/blob/5ffa11af3b508eff794fba48a673cda2bbed03d6/controllers/awscluster_controller.go#L426-L432). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A reconciliação declarativa não comprova uma implantação específica nem continuidade durante perda de zona.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#multi-az). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Multi-Region
+
+O identificador canônico é `multi-region`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Yugabyte associa partições SQL a tablespaces com políticas de colocação de réplicas. O gerenciador de tablespaces resolve a política da tabela e o master a usa ao organizar os tablets. Os campos de nuvem, região e zona delimitam onde a população correspondente pode ser colocada.
+
+A base de estudo é [yugabyte/yugabyte-db / common_net.proto @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/common/common_net.proto); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md). A aplicação ou candidato de aplicação é [yugabyte/yugabyte-db / ysql_tablespace_manager.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/ysql_tablespace_manager.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / catalog_manager.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/catalog_manager.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / row-level-geo-partitioning.md @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/docs/content/stable/explore/multi-region-deployments/row-level-geo-partitioning.md); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / pg_ddl.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/yql/pggate/pg_ddl.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / ts_descriptor.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/ts_descriptor.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / cluster_balance.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/cluster_balance.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / pg_ddl.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/yql/pggate/pg_ddl.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / ts_descriptor.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/ts_descriptor.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / cluster_balance.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/cluster_balance.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/ysql_tablespace_manager.cc#L34-L40). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O recorte mostra a ligação entre particionamento geográfico e política regional no servidor, com configuração primária de referência. Não mede latência, RPO, RTO ou residência efetiva dos dados de uma implantação. Réplicas e líderes precisam ser avaliados separadamente; uma string com o nome de uma região, sozinha, não seria prova de sharding geográfico.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#multi-region). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Quorum
+
+O identificador canônico é `quorum`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O servidor etcd alimenta a máquina Raft, que representa líder, seguidores e decisões por quorum.
+
+A base de estudo é [etcd-io/raft / raft.go @ 638f4273](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/raft.go); licença [Apache-2.0](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / raft.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go#L124-L130). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#quorum). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Replication
+
+O identificador canônico é `replication`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgreSQL implementa o envio e a recepção de WAL; Patroni configura o PostgreSQL seguidor e a conexão com o upstream escolhido.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / walreceiver.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walreceiver.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c#L4047-L4053). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#replication). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Split-Brain Prevention
+
+O identificador canônico é `split-brain-prevention`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O servidor etcd alimenta a máquina Raft, que representa líder, seguidores e decisões por quorum.
+
+A base de estudo é [etcd-io/raft / raft.go @ 638f4273](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/raft.go); licença [Apache-2.0](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / raft.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go#L124-L130). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#split-brain-prevention). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Stateless Services
+
+O identificador canônico é `stateless-services`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O serviço MCP Superset encaminha a opção MCP_STATELESS_HTTP ao servidor FastMCP. Nesse modo, o transporte não exige que a próxima requisição recupere uma sessão HTTP mantida pelo mesmo processo.
+
+A base de estudo é [jlowin/fastmcp / server.py @ e2fcc412](https://github.com/jlowin/fastmcp/blob/e2fcc412001ff7414095c5dc282f94c70299a612/fastmcp_slim/fastmcp/server/server.py); licença [Apache-2.0](https://github.com/jlowin/fastmcp/blob/e2fcc412001ff7414095c5dc282f94c70299a612/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / server.py @ 9659a13a](https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/superset/mcp_service/server.py); licença [Apache-2.0](https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/LICENSE.txt); [apache/superset / mcp_config.py @ 9659a13a](https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/superset/mcp_service/mcp_config.py); licença [Apache-2.0](https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/superset/mcp_service/server.py#L1261-L1267). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O recorte comprovado é o modo de transporte configurável do serviço MCP. Dados de negócio, autorização e persistência continuam tendo seus próprios responsáveis; a leitura não declara toda a aplicação Superset sem estado.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#stateless-services). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Warm Standby
+
+O identificador canônico é `warm-standby`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O servidor PostgreSQL entra em modo standby por standby.signal e continua recuperando WAL. O controle de hot standby é separado: a recuperação pode prosseguir sem abrir consultas desse modo.
+
+A base de estudo é [postgres/postgres / xlogrecovery.h @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/include/access/xlogrecovery.h); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / xlogrecovery.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/transam/xlogrecovery.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/enterprise/high-availability/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/transam/xlogrecovery.c#L557-L563). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O recorte é o processo PostgreSQL em recuperação e sua prontidão configurada. Ele não mede RTO, nem prova que uma réplica da Faz usa essa configuração.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#warm-standby). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

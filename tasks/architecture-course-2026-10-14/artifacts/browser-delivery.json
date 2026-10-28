@@ -1,0 +1,242 @@
+{
+  "observed_at": "2026-10-14T20:32:03.849Z",
+  "url": "http://127.0.0.1:59024",
+  "route_count": 52,
+  "route_reads": [
+    {
+      "path": "/explicacoes/api-integration",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/availability",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/business-rules",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/cache",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/capacity",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/code-boundaries",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/code-patterns",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/concurrency",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/data-distribution",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/data-durability",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/distributed-work",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/messages",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/observability",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/read-models",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/reliable-integration",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/safe-change",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/security",
+      "status": 200
+    },
+    {
+      "path": "/explicacoes/workflow",
+      "status": 200
+    },
+    {
+      "path": "/guias",
+      "status": 200
+    },
+    {
+      "path": "/guias/investigar-impacto",
+      "status": 200
+    },
+    {
+      "path": "/guias/recuperar-pipeline",
+      "status": 200
+    },
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/01-arquiteturas-de-aplicacao",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/03-event-driven-messaging",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/05-banco-de-dados-e-armazenamento",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/06-cache",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/07-resiliencia",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/08-concorrencia",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/09-apis-e-integracao",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/10-ddd-domain-driven-design",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/11-padroes-para-decompor-sistemas",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/12-deploy-e-releases",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/13-alta-disponibilidade",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/14-seguranca",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/15-observabilidade",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/16-workflow-e-processamento",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo/17-padroes-classicos-gof",
+      "status": 200
+    },
+    {
+      "path": "/referencia/catalogo",
+      "status": 200
+    },
+    {
+      "path": "/referencia/evidencias",
+      "status": 200
+    },
+    {
+      "path": "/referencia",
+      "status": 200
+    },
+    {
+      "path": "/referencia/prioritarios",
+      "status": 200
+    },
+    {
+      "path": "/referencia/skills-e-projetos",
+      "status": 200
+    },
+    {
+      "path": "/tutoriais/idempotency",
+      "status": 200
+    },
+    {
+      "path": "/tutoriais",
+      "status": 200
+    },
+    {
+      "path": "/tutoriais/optimistic-concurrency",
+      "status": 200
+    },
+    {
+      "path": "/tutoriais/outbox",
+      "status": 200
+    },
+    {
+      "path": "/tutoriais/read-projection",
+      "status": 200
+    },
+    {
+      "path": "/tutoriais/single-flight",
+      "status": 200
+    },
+    {
+      "path": "/tutoriais/state-machine",
+      "status": 200
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "/",
+      "status": 200,
+      "heading": "Aprenda a enxergar o problema antes de escolher o padrão",
+      "mermaidSvgCount": 0,
+      "screenshot": "tasks/architecture-course-2026-10-14/artifacts/final-preview-home.png"
+    },
+    {
+      "path": "/explicacoes/cache#pattern-15",
+      "status": 200,
+      "heading": "Carregar indicadores sem repetir trabalho nem misturar recortes",
+      "mermaidSvgCount": 1,
+      "screenshot": "tasks/architecture-course-2026-10-14/artifacts/final-preview-cache.png"
+    },
+    {
+      "path": "/tutoriais/idempotency",
+      "status": 200,
+      "heading": "Repita um pedido sem criar outra reserva",
+      "mermaidSvgCount": 0,
+      "screenshot": "tasks/architecture-course-2026-10-14/artifacts/final-preview-idempotency.png"
+    }
+  ],
+  "page_errors": [],
+  "route_read_at": "2026-10-14T20:35:32.213Z",
+  "all_routes_200": true,
+  "validation_adapter_note": "First route inventory used the Puppeteer status() API on a Fetch Response. It was corrected to status; the first receipt is retained separately. Screenshot responses used the correct Puppeteer API."
+}

@@ -1,0 +1,18 @@
+{
+  "document_id": "explicacoes/observability/index",
+  "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "s5",
+    "l5b",
+    "l5c",
+    "airflow-client-code",
+    "original-request"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "context_sha256": "231fb0d9bce7f5cacd836c026ae2eb793305cf6aa32984c0b0b2ea436bed7134"
+}

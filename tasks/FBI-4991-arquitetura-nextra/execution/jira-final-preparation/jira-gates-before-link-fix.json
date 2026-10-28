@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-10-15T19:01:50.404278+00:00",
+  "payload_file": "jira-update-preview.json",
+  "runs": [
+    {
+      "script": "jira-fbi-gate.mjs",
+      "exit_code": 0,
+      "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"jira-fbi catalog-v4 gate passed\"}}\n",
+      "stderr": ""
+    },
+    {
+      "script": "claude-hook-wrapper.cjs",
+      "exit_code": 0,
+      "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"BLOQUEADO por jira-fbi: customfield_10054 inv\u00e1lido. chaves Jira sem link ADF: FBI-4991.\"}}",
+      "stderr": ""
+    }
+  ],
+  "verdict": "FAIL"
+}

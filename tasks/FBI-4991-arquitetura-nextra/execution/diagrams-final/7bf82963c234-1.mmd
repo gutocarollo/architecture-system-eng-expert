@@ -1,0 +1,10 @@
+flowchart TD
+    I["ORDER-1 passa por REQUEST-1 e REQUEST-2"] --> B["Antes: health ok e uma request isolada"]
+    B --> X["Tentativa seguinte e etapa do erro ficam ocultas"]
+    I --> A["financial.py::diagnostics reúne operation_id"]
+    A --> S["Três spans: gateway, provider e retry"]
+    S --> M["Mede contagem, um erro e duração máxima 800 ms"]
+    M --> Q{"Prova sintética completa caminho da ordem?"}
+    Q -->|não| R["provider_failed revela etapa a investigar"]
+    Q -->|sim| O["Conserva evidência do recorte executado"]
+    R --> L["O conjunto não prova causa nem SLO de produção"]

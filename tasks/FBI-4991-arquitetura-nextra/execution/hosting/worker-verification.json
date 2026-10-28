@@ -1,0 +1,51 @@
+{
+  "startedAt": "2026-10-15T17:54:32.688Z",
+  "finishedAt": "2026-10-15T17:54:33.409Z",
+  "runtime": "v26.8.1",
+  "evidenceScope": "Local Worker bundle, Node WebCrypto, fake private R2, documented FixedLengthStream double; not a deployment or live R2 result.",
+  "results": [
+    {
+      "name": "baseline",
+      "expectedSuccess": true,
+      "exitCode": 0,
+      "expectationMet": true,
+      "output": "✔ anonymous document redirects; every asset, search fragment and RSC denies without any R2 read (12.663791ms)\n✔ every file in the actual Nextra export stays behind the anonymous gate (40.952625ms)\nℹ actual_export_files=1397; anonymous_r2_reads=0\n✔ signed login cookie protects HTML, bundles, Pagefind and RSC under the active release (8.360917ms)\n✔ forged, malformed, expired, future and oversized session cookies never read R2 (1.171708ms)\n✔ password and session-secret rotation invalidate existing cookies (0.618125ms)\n✔ missing or invalid configuration fails closed before reads and writes (0.282083ms)\n✔ login rejects cross-origin, absent Origin, wrong password, duplicate fields and oversized streamed bodies (0.745375ms)\n✔ returnTo prevents open redirects and HTML attribute injection (1.245333ms)\n✔ logout requires same Origin and clears the same host cookie (0.245208ms)\n✔ traversal, nulls, encoded separators, double encoding and malformed escapes never read R2 (0.607833ms)\n✔ documents permit GET/HEAD only and report absent assets without external fallback (0.643416ms)\n✔ upload authenticates separately before parsing or consuming the body (0.955708ms)\n✔ authorized streaming upload validates checksum and supports a future release without activation (2.096042ms)\n✔ upload bounds size, validates length, destination and content metadata (1.45725ms)\n✔ R2 read and write failures do not leave persistent request state or expose details (0.788959ms)\nℹ tests 15\nℹ suites 0\nℹ pass 15\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 112.832792\n"
+    },
+    {
+      "name": "anonymous-gate-removed",
+      "expectedSuccess": false,
+      "exitCode": 1,
+      "expectationMet": true,
+      "output": "✖ anonymous document redirects; every asset, search fragment and RSC denies without any R2 read (10.888875ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 51.200625\n\n✖ failing tests:\n\ntest at ../worker/index.test.mjs:96:1\n✖ anonymous document redirects; every asset, search fragment and RSC denies without any R2 read (10.888875ms)\n  AssertionError [ERR_ASSERTION]: /\n  \n  200 !== 303\n  \n      at TestContext.<anonymous> (file:///Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/sites/architecture-course/worker/index.test.mjs:100:12)\n      at async Test.run (node:internal/test_runner/test:1409:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: 200,\n    expected: 303,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+    },
+    {
+      "name": "upload-gate-removed",
+      "expectedSuccess": false,
+      "exitCode": 1,
+      "expectationMet": true,
+      "output": "✖ upload authenticates separately before parsing or consuming the body (14.574834ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 55.287\n\n✖ failing tests:\n\ntest at ../worker/index.test.mjs:263:1\n✖ upload authenticates separately before parsing or consuming the body (14.574834ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  400 !== 401\n  \n      at TestContext.<anonymous> (file:///Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/sites/architecture-course/worker/index.test.mjs:269:12)\n      at async Test.run (node:internal/test_runner/test:1409:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 400,\n    expected: 401,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+    },
+    {
+      "name": "upload-checksum-removed",
+      "expectedSuccess": false,
+      "exitCode": 1,
+      "expectationMet": true,
+      "output": "✖ authorized streaming upload validates checksum and supports a future release without activation (17.321959ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 59.669666\n\n✖ failing tests:\n\ntest at ../worker/index.test.mjs:276:1\n✖ authorized streaming upload validates checksum and supports a future release without activation (17.321959ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  204 !== 400\n  \n      at TestContext.<anonymous> (file:///Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/sites/architecture-course/worker/index.test.mjs:288:10)\n      at async Test.run (node:internal/test_runner/test:1409:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 204,\n    expected: 400,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+    },
+    {
+      "name": "no-referrer-regression",
+      "expectedSuccess": false,
+      "exitCode": 1,
+      "expectationMet": true,
+      "output": "✖ anonymous document redirects; every asset, search fragment and RSC denies without any R2 read (10.938792ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 51.429708\n\n✖ failing tests:\n\ntest at ../worker/index.test.mjs:96:1\n✖ anonymous document redirects; every asset, search fragment and RSC denies without any R2 read (10.938792ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'no-referrer'\n  - 'same-origin'\n  \n      at TestContext.<anonymous> (file:///Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/sites/architecture-course/worker/index.test.mjs:102:12)\n      at async Test.run (node:internal/test_runner/test:1409:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'no-referrer',\n    expected: 'same-origin',\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+    },
+    {
+      "name": "platform-script-csp-regression",
+      "expectedSuccess": false,
+      "exitCode": 1,
+      "expectationMet": true,
+      "output": "✖ returnTo prevents open redirects and HTML attribute injection (17.814541ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 59.545666\n\n✖ failing tests:\n\ntest at ../worker/index.test.mjs:211:1\n✖ returnTo prevents open redirects and HTML attribute injection (17.814541ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + \"default-src 'none'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'\"\n  - \"form-action 'self'; base-uri 'none'; frame-ancestors 'none'\"\n  \n      at TestContext.<anonymous> (file:///Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/sites/architecture-course/worker/index.test.mjs:219:10)\n      at async Test.run (node:internal/test_runner/test:1409:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: \"default-src 'none'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'\",\n    expected: \"form-action 'self'; base-uri 'none'; frame-ancestors 'none'\",\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+    }
+  ],
+  "allExpectationsMet": true
+}

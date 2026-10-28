@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "README.md",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/README.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:02:17.272100+00:00",
+  "sha256": "0340edfdc1e5e872c6349043d3e3d94ca9b1edda94c3eddd0eea79c57f647152",
+  "line_count": 240,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--README.md"
+}

@@ -1,0 +1,175 @@
+---
+title: "Curadoria: Observabilidade"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Observabilidade."
+diataxis: reference
+---
+
+# Curadoria: Observabilidade
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## Centralized Logging
+
+O identificador canônico é `centralized-logging`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O Fluent Bit envia lotes de registros pelo plugin Loki. No serviço Loki, o handler recebe os streams de produtores externos, o distribuidor os encaminha aos ingesters e estes os agrupam por tenant e labels, acrescentando entradas aos chunks e ao WAL. O querier oferece o caminho para consultar esse conjunto pelo intervalo solicitado. Esse fluxo demonstra coleta e consulta centralizadas de logs.
+
+A base de estudo é [fluent/fluent-bit / loki.c @ 54b97f8f](https://github.com/fluent/fluent-bit/blob/54b97f8ff1e69948ee794ca3e01c41d148f4fe36/plugins/out_loki/loki.c); licença [Apache-2.0](https://github.com/fluent/fluent-bit/blob/54b97f8ff1e69948ee794ca3e01c41d148f4fe36/LICENSE). A aplicação ou candidato de aplicação é [grafana/loki / http.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/distributor/http.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE); [grafana/loki / distributor.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/distributor/distributor.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE); [grafana/loki / instance.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/ingester/instance.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE); [grafana/loki / stream.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/ingester/stream.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE); [grafana/loki / querier.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/querier.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/distributor/http.go#L27-L42). O servidor recebe requisições de logs e resolve o tenant.
+
+O recorte são os componentes OSS de envio, ingestão e consulta. Não é uma observação de agentes instalados nem uma garantia de coleta de todos os logs de uma empresa. Retenção, falhas de rede, limites e configuração do WAL/armazenamento continuam relevantes; a prova não se baseia no logger interno do processo Loki.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#centralized-logging). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Distributed Tracing
+
+O identificador canônico é `distributed-tracing`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+HttpRemoteTask serializa stageSpan no TaskUpdateRequest e o envia por HTTP ao worker. O TracingModule instalado pelo servidor registra os serializers de Span: a serialização injeta o contexto em um mapa e a desserialização extrai um Span remoto desse mapa. TaskResource recebe o pedido e entrega o stageSpan a SqlTaskManager, que o passa para SqlTask. O worker cria o span task com esse stageSpan como pai. Em paralelo, o cliente HTTP injeta contexto em headers e o filtro do servidor extrai os headers para criar um span SERVER correlacionado. Com tracing habilitado, o mesmo módulo instala BatchSpanProcessor e exporter OTLP.
+
+A base de estudo é [airlift/airlift / SpanSerialization.java @ 2fd0bb60](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/SpanSerialization.java); licença [Apache-2.0](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE); [airlift/airlift / TracingModule.java @ 2fd0bb60](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/TracingModule.java); licença [Apache-2.0](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE); [airlift/airlift / JettyHttpClient.java @ 2fd0bb60](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java); licença [Apache-2.0](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE); [airlift/airlift / TracingServletFilter.java @ 2fd0bb60](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java); licença [Apache-2.0](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE); [airlift/airlift / HttpServerModule.java @ 2fd0bb60](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/HttpServerModule.java); licença [Apache-2.0](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE); [airlift/airlift / OpenTelemetryModule.java @ 2fd0bb60](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java); licença [Apache-2.0](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE); [airlift/airlift / OpenTelemetryExporterModule.java @ 2fd0bb60](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryExporterModule.java); licença [Apache-2.0](https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE). A aplicação ou candidato de aplicação é [trinodb/trino / HttpRemoteTask.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE); [trinodb/trino / TaskResource.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/TaskResource.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE); [trinodb/trino / SqlTaskManager.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE); [trinodb/trino / SqlTask.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTask.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE); [trinodb/trino / Server.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/Server.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE); [trinodb/trino / pom.xml @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/pom.xml); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE); [trinodb/trino / opentelemetry.md @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/docs/src/main/sphinx/admin/opentelemetry.md); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java#L778-L789). O coordinator envia stageSpan no pedido real e cria o span da chamada HTTP com pai explícito.
+
+Tracing é desabilitado por padrão. A classificação comprova o caminho implementado e configurável; não comprova que algum cluster esteja exportando traces neste momento. O span task no worker é filho do stageSpan transportado no JSON. Ele não é apresentado como filho do span HTTP task-update; ambos pertencem à mesma árvore por rotas explícitas diferentes. A prova não pressupõe que todos os connectors propaguem contexto. A documentação exige suporte e habilitação nas integrações externas.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://trino.io/docs/current/admin/opentelemetry.html). Contexto primário de suporte.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#distributed-tracing). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Golden Signals
+
+O identificador canônico é `golden-signals`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O API server registra volume e código de resposta das requisições e histogramas de duração. O controle de fluxo registra requisições em fila e execução, que revelam pressão sobre a capacidade. O mixin apresenta volume, erros, duração e filas do mesmo serviço, permitindo estudar os quatro sinais: tráfego, erros, latência e saturação.
+
+A base de estudo é [prometheus/prometheus / engine.go @ 6e69e843](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/promql/engine.go); licença [Apache-2.0](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/LICENSE). A aplicação ou candidato de aplicação é [kubernetes-monitoring/kubernetes-mixin / apiserver.libsonnet @ 73ea726e](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/73ea726e63cc53c40e0412da02ea3da474f52686/dashboards/apiserver.libsonnet); licença [Apache-2.0](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/73ea726e63cc53c40e0412da02ea3da474f52686/LICENSE); [kubernetes/kubernetes / metrics.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/staging/src/k8s.io/apiserver/pkg/endpoints/metrics/metrics.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE); [kubernetes/kubernetes / metrics.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/metrics/metrics.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/73ea726e63cc53c40e0412da02ea3da474f52686/dashboards/apiserver.libsonnet#L147-L153). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Os sinais precisam conservar rótulos e populações compatíveis. Fila e concorrência são sinais da capacidade do API server; não são o mesmo dado que CPU de qualquer nó. O arquivo do mixin contém consultas que precisam ser revisadas antes do uso operacional, inclusive o tratamento de gauges de profundidade. Não se afirma que os painéis estejam instalados.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#golden-signals). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Metrics
+
+O identificador canônico é `metrics`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O ingester Loki cria e atualiza contadores, gauges e histogramas por seu registro Prometheus. Cada instrumento conserva um nome, labels e a unidade da medição.
+
+A base de estudo é [prometheus/client_golang / registry.go @ 2b01b52f](https://github.com/prometheus/client_golang/blob/2b01b52f0c18088adf4cf7b0206acc1c3e55c7ab/prometheus/registry.go); licença [Apache-2.0](https://github.com/prometheus/client_golang/blob/2b01b52f0c18088adf4cf7b0206acc1c3e55c7ab/LICENSE). A aplicação ou candidato de aplicação é [grafana/loki / metrics.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/ingester/metrics.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/ingester/metrics.go#L95-L101). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Criar um instrumento não prova que ele está sendo coletado numa implantação. Cardinalidade e interpretação do denominador continuam sendo decisões do operador.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#metrics). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## OpenTelemetry
+
+O identificador canônico é `opentelemetry`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Airflow usa o SDK OpenTelemetry e TraceContextTextMapPropagator. Ao existir um contexto pai válido, o carrier reutiliza seu trace_id para relacionar os spans da execução.
+
+A base de estudo é [open-telemetry/opentelemetry-python / tracecontext.py @ 155ead51](https://github.com/open-telemetry/opentelemetry-python/blob/155ead5140311a98b59c876819b96007001c3fed/opentelemetry-api/src/opentelemetry/trace/propagation/tracecontext.py); licença [Apache-2.0](https://github.com/open-telemetry/opentelemetry-python/blob/155ead5140311a98b59c876819b96007001c3fed/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / __init__.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/shared/observability/src/airflow_shared/observability/traces/__init__.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/shared/observability/src/airflow_shared/observability/traces/__init__.py#L244-L250). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O trace_id correlaciona o recorte de execução instrumentado. Ele não substitui a chave de negócio da ordem nem promete que todas as tentativas futuras conservam a mesma identidade.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#opentelemetry). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## RED Method (Rate, Errors, Duration)
+
+O identificador canônico é `red-method-rate-errors-duration`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+As consultas dos dashboards combinam métricas de taxa, erro, duração, utilização e saturação para observar tarefas do cluster.
+
+A base de estudo é [prometheus/prometheus / engine.go @ 6e69e843](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/promql/engine.go); licença [Apache-2.0](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/LICENSE). A aplicação ou candidato de aplicação é [kubernetes-monitoring/kubernetes-mixin / apiserver.libsonnet @ 73ea726e](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/73ea726e63cc53c40e0412da02ea3da474f52686/dashboards/apiserver.libsonnet); licença [Apache-2.0](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/73ea726e63cc53c40e0412da02ea3da474f52686/LICENSE); [kubernetes-monitoring/kubernetes-mixin / node.libsonnet @ 73ea726e](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/73ea726e63cc53c40e0412da02ea3da474f52686/dashboards/resources/node.libsonnet); licença [Apache-2.0](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/73ea726e63cc53c40e0412da02ea3da474f52686/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/73ea726e63cc53c40e0412da02ea3da474f52686/dashboards/apiserver.libsonnet#L147-L153). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A presença das métricas não certifica cobertura de todo serviço. Cada painel indica o componente e os denominadores da medição.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#red-method-rate-errors-duration). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Request ID
+
+O identificador canônico é `request-id`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+APISIX gera ou conserva o identificador da requisição e o acrescenta ao caminho encaminhado.
+
+A base de estudo é [grpc/grpc-go / metadata.go @ 4d4d4284](https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/metadata/metadata.go); licença [Apache-2.0](https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/LICENSE). A aplicação ou candidato de aplicação é [apache/apisix / request-id.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/request-id.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/request-id.lua#L128-L134). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Um Request ID não é automaticamente o Correlation ID de uma jornada que atravessa mensagens. Esse vínculo precisa de propagação adicional.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#request-id). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Structured Logging
+
+O identificador canônico é `structured-logging`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Loki monta o servidor de logs e seu logger estruturado. Zap fornece uma base de campos tipados para comparar estrutura de eventos.
+
+A base de estudo é [uber-go/zap / logger.go @ 4892335e](https://github.com/uber-go/zap/blob/4892335e05f14bce8a98a69a577fcf3844a42623/logger.go); licença [MIT](https://github.com/uber-go/zap/blob/4892335e05f14bce8a98a69a577fcf3844a42623/LICENSE). A aplicação ou candidato de aplicação é [grafana/loki / main.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/cmd/loki/main.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/cmd/loki/main.go#L81-L87). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#structured-logging). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Synthetic Monitoring
+
+O identificador canônico é `synthetic-monitoring`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Blackbox Exporter executa uma requisição de prova e publica o resultado e a duração como métricas.
+
+A base de estudo é [prometheus/client_golang / registry.go @ 2b01b52f](https://github.com/prometheus/client_golang/blob/2b01b52f0c18088adf4cf7b0206acc1c3e55c7ab/prometheus/registry.go); licença [Apache-2.0](https://github.com/prometheus/client_golang/blob/2b01b52f0c18088adf4cf7b0206acc1c3e55c7ab/LICENSE). A aplicação ou candidato de aplicação é [prometheus/blackbox_exporter / http.go @ d18e9bed](https://github.com/prometheus/blackbox_exporter/blob/d18e9bed33270911c09826234a4e4f500f775087/prober/http.go); licença [Apache-2.0](https://github.com/prometheus/blackbox_exporter/blob/d18e9bed33270911c09826234a4e4f500f775087/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/prometheus/blackbox_exporter/blob/d18e9bed33270911c09826234a4e4f500f775087/prober/http.go#L322-L328). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#synthetic-monitoring). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## USE Method (Utilization, Saturation, Errors)
+
+O identificador canônico é `use-method-utilization-saturation-errors`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O exemplo delimita um recurso: a memória de um host Linux. O collector meminfo fornece capacidade e disponibilidade para calcular utilização. PSI fornece o tempo em que tarefas esperaram por memória, como sinal de saturação. O collector vmstat inclui oom_kill, que registra falhas de atendimento de memória que levaram o kernel a matar processos. O mixin conserva os exemplos de utilização e saturação como ponto de partida.
+
+A base de estudo é [prometheus/prometheus / engine.go @ 6e69e843](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/promql/engine.go); licença [Apache-2.0](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/LICENSE). A aplicação ou candidato de aplicação é [prometheus/node_exporter / meminfo_linux.go @ ec12b978](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/collector/meminfo_linux.go); licença [Apache-2.0](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/LICENSE); [prometheus/node_exporter / pressure_linux.go @ ec12b978](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/collector/pressure_linux.go); licença [Apache-2.0](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/LICENSE); [prometheus/node_exporter / vmstat_linux.go @ ec12b978](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/collector/vmstat_linux.go); licença [Apache-2.0](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/LICENSE); [prometheus/node_exporter / use.libsonnet @ ec12b978](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/docs/node-mixin/dashboards/use.libsonnet); licença [Apache-2.0](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/observability-and-instrumentation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/prometheus/node_exporter/blob/ec12b97885625a7ade058c60f1419e5cda8f6edc/collector/meminfo_linux.go#L119-L125). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+USE é um método de diagnóstico, não uma métrica única. O recorte cobre memória Linux com os collectors e o suporte do kernel necessários. OOM kills são uma classe de erro por exaustão e não representam todos os erros de memória. Page faults, sozinhos, não foram tratados como prova inequívoca de saturação. Não se afirma cobertura completa dos demais recursos nem coleta ativa na Faz.
+
+No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e o probe deste conceito](/jornadas/diagnostics/conceitos/#use-method-utilization-saturation-errors). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

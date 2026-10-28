@@ -1,0 +1,28 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura",
+  "document_sha256": "e78f0062cd624be9232cbd49a168eb95fbc2fbabbf3928e1b6966c223de49a6f",
+  "context_sha256": "295c83b42b1140d226d4d8462833b01b3608b4ffbe132bfdde4520f0be38104f",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [
+    "report-api-service",
+    "report-service-repository"
+  ],
+  "evidence_ids": [
+    "bootstrap",
+    "inflow-query",
+    "l4a",
+    "l4c",
+    "original-catalog",
+    "original-request",
+    "pending-intent-code",
+    "report-api",
+    "report-repository",
+    "report-service",
+    "s4",
+    "s4-reference-repair"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "explicacoes/index",
+  "document_sha256": "100eb14d37d0386c5c452b827c57e34ea151c5a4e5dab69a2dc8f68f3ec8b99b",
+  "context_sha256": "e2548168bcf254f25df67d4d07c7d3e8d985732bcb39a4c9ce5bcdb2bad832b0",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "original-catalog",
+    "s1"
+  ]
+}

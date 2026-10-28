@@ -1,0 +1,16 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "guias/investigar-impacto",
+  "document_sha256": "6a936ddbbe4b3fe330ddc1654b3c8520f103d61bd18144b769e9507b8a70324c",
+  "context_sha256": "b1c0b56821bef5e07ba9e72bc243d2bc98203c44fe517058724058d7b02cede5",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "bootstrap",
+    "inflow-query"
+  ]
+}

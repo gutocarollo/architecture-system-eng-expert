@@ -1,0 +1,18 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "referencia/catalogo/10-ddd-domain-driven-design",
+  "document_sha256": "c0a23012114f5d9169959853498fb2148b5116c5d928e4d1e635c2f190932633",
+  "context_sha256": "26abae13331e4ab1a0974c60d2cf0c428dd47ada87a563154632d4334bd1f4fd",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "original-catalog",
+    "s2",
+    "l2b",
+    "s2-reference-repair"
+  ]
+}

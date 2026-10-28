@@ -1,0 +1,23 @@
+{
+  "requests": [
+    {
+      "library": "Masto.js",
+      "status": "QUOTA_BLOCKED",
+      "literal_result": "Monthly quota reached. You'll receive 20 bonus API requests tomorrow."
+    },
+    {
+      "library": "Medusa",
+      "status": "QUOTA_BLOCKED",
+      "literal_result": "Monthly quota reached. You'll receive 20 bonus API requests tomorrow."
+    },
+    {
+      "library": "Infinispan",
+      "status": "AMBIGUOUS_MATCH",
+      "library_id": "/infinispan/infinispan.github.io",
+      "returned_title": "Upstream Community Theme"
+    }
+  ],
+  "fallback": "Dated official repository code, exact source revisions and primary project documentation. No Context7 API-contract proof is claimed for these quota-blocked requests.",
+  "recorded_utc": "2026-10-15T02:40:24.503677Z",
+  "observation_scope": "The literal responses were received earlier during this active task; an exact response wall-clock timestamp was not emitted by the connector."
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "repo": "xataio/pgroll",
+    "path": "pkg/migrations/op_alter_column.go"
+  },
+  {
+    "repo": "xataio/pgroll",
+    "path": "pkg/pgroll/pgroll.go"
+  },
+  {
+    "repo": "julien-duponchelle/python-mysql-replication",
+    "path": "pymysqlreplication/binlogstream.py"
+  },
+  {
+    "repo": "spring-projects/spring-data-jpa",
+    "path": "spring-data-jpa/src/main/java/org/springframework/data/jpa/domain/AbstractPersistable.java"
+  },
+  {
+    "repo": "LuckyPennySoftware/MediatR",
+    "path": "src/MediatR/Wrappers/RequestHandlerWrapper.cs",
+    "ref": "v12.4.1"
+  },
+  {
+    "repo": "JasperFx/marten",
+    "path": "src/Marten/IQuerySession.cs"
+  },
+  {
+    "repo": "JasperFx/marten",
+    "path": "src/Marten/Internal/Sessions/QuerySession.Load.cs"
+  },
+  {
+    "repo": "rails/rails",
+    "path": "activerecord/lib/active_record/associations/has_one_association.rb"
+  },
+  {
+    "repo": "rails/rails",
+    "path": "activerecord/lib/active_record/associations/singular_association.rb"
+  },
+  {
+    "repo": "grpc/grpc-go",
+    "path": "server.go"
+  },
+  {
+    "repo": "apache/superset",
+    "path": "superset/common/query_context_processor.py"
+  }
+]

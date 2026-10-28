@@ -1,0 +1,26 @@
+{
+  "observed_at_utc": "2026-10-17T03:32:58.507Z",
+  "count": 26,
+  "unexpected": [],
+  "removed_index_count": 26,
+  "old_index_not_first": [
+    {
+      "path": "content/explicacoes/_meta.js",
+      "old_first_key": "casos",
+      "removed_index": true,
+      "only_expected_changes": true
+    },
+    {
+      "path": "content/guias/_meta.js",
+      "old_first_key": "casos",
+      "removed_index": true,
+      "only_expected_changes": true
+    },
+    {
+      "path": "content/tutoriais/_meta.js",
+      "old_first_key": "casos",
+      "removed_index": true,
+      "only_expected_changes": true
+    }
+  ]
+}

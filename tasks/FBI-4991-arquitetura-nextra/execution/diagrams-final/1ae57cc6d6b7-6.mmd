@@ -1,0 +1,16 @@
+sequenceDiagram
+    actor User as Operador
+    participant View as View passiva
+    participant Presenter
+    participant Model
+    User->>View: escolhe Automático
+    View->>Presenter: selectMode(automatic)
+    Presenter->>Model: solicita a escolha
+    alt Entrada reconhecida
+        Model-->>Presenter: modo atual
+        Presenter->>View: renderMode(automatic)
+    else Escolha recusada
+        Model-->>Presenter: motivo da recusa
+        Presenter->>View: renderMode(modo anterior)
+        Presenter->>View: mostra a recusa
+    end

@@ -1,0 +1,15 @@
+{
+  "repo": "keycloak/keycloak",
+  "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+  "path": "LICENSE.txt",
+  "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/LICENSE.txt",
+  "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/LICENSE.txt",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--LICENSE.txt",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.145491+00:00",
+  "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "line_count": 202,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-6c04d3558ce4bd2cef636eeeb97e05c96629b1c9ece481736b7b5f83a9bad784.txt",
+  "upstream_observed_utc": "2026-10-15T01:28:28.124559Z"
+}

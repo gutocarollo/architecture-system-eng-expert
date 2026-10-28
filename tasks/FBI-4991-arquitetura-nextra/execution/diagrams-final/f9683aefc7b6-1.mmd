@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant Client as Cliente
+    participant Api as API instrumentada
+    participant Db as Consulta instrumentada
+    participant External as Cliente externo instrumentado
+    participant Collector as Collector e backend de telemetria
+    Client->>Api: pedido com contexto quando disponível
+    Api->>Db: consulta com span filho
+    Db-->>Api: resultado
+    Api->>External: chamada com contexto propagado
+    alt resposta confirmada
+        External-->>Api: resultado e duração
+        Api-->>Client: resposta
+    else chamada falha
+        External-->>Api: erro registrado no span
+        Api-->>Client: falha explícita
+        Note over Api: recuperação mantém identidade da operação
+    end
+    Api-->>Collector: exporta sinais conforme política

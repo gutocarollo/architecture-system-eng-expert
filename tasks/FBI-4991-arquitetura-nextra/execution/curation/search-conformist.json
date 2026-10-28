@@ -1,0 +1,32 @@
+{
+  "query": "conformist path:docs/architecture -repo:ContextMapper/context-mapper-examples",
+  "observed_utc": "2026-10-15T01:59:00.612558Z",
+  "total_count": 150,
+  "items": [
+    {
+      "repo": "ruvnet/RuVector",
+      "path": "docs/architecture/DDD.md",
+      "url": "https://github.com/ruvnet/RuVector/blob/46d816ddc4c2a8a06cd3613534a79b1d557d858b/docs/architecture/DDD.md"
+    },
+    {
+      "repo": "ruvnet/RuVector",
+      "path": "docs/architecture/temporal-tensor-store-ddd.md",
+      "url": "https://github.com/ruvnet/RuVector/blob/46d816ddc4c2a8a06cd3613534a79b1d557d858b/docs/architecture/temporal-tensor-store-ddd.md"
+    },
+    {
+      "repo": "ruvnet/RuVector",
+      "path": "docs/architecture/quantum-engine/quantum-engine-ddd-integration.md",
+      "url": "https://github.com/ruvnet/RuVector/blob/46d816ddc4c2a8a06cd3613534a79b1d557d858b/docs/architecture/quantum-engine/quantum-engine-ddd-integration.md"
+    },
+    {
+      "repo": "ruvnet/RuVector",
+      "path": "docs/architecture/quantum-engine/quantum-engine-ddd-strategic.md",
+      "url": "https://github.com/ruvnet/RuVector/blob/46d816ddc4c2a8a06cd3613534a79b1d557d858b/docs/architecture/quantum-engine/quantum-engine-ddd-strategic.md"
+    },
+    {
+      "repo": "colinlet/PHP-Interview-QA",
+      "path": "docs/architecture/\u5fae\u670d\u52a1\u670d\u52a1\u8fb9\u754c\u5212\u5206\uff1a\u4e1a\u52a1\u80fd\u529b\u4e0eDDD\u9650\u754c\u4e0a\u4e0b\u6587.md",
+      "url": "https://github.com/colinlet/PHP-Interview-QA/blob/741fb57183dca0712702aeb3d11575dcd7a099fb/docs/architecture/\u5fae\u670d\u52a1\u670d\u52a1\u8fb9\u754c\u5212\u5206\uff1a\u4e1a\u52a1\u80fd\u529b\u4e0eDDD\u9650\u754c\u4e0a\u4e0b\u6587.md"
+    }
+  ]
+}

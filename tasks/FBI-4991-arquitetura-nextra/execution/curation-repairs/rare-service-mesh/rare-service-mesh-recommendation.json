@@ -1,0 +1,852 @@
+{
+  "schema_version": "rare-service-mesh-repair/v1",
+  "author_lane": {
+    "agent": "/root/rare_oss_sources",
+    "native_type": "default",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "xhigh",
+    "routing": "WARM_REUSE",
+    "role": "DEEP_EXPLORE primary-source curation; not an independent review"
+  },
+  "observed_utc": "2026-10-15T04:14:06.128882+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "32b80d5fc8eda42e2aa9b496d82c30b574120e68",
+  "review_input": {
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-second.concepts.json",
+    "sha256": "1b767d48cfa0d4e6b0e664480fbd596ae0c4e07045a3b6c0608b1ae3579ac074",
+    "matrix_sha256_from_review": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "write_scope": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/**",
+  "delivery_limits": [
+    "Uma única proposta autoral foi produzida. A integração e a revisão independente pertencem ao curador e ao reviewer.",
+    "Esta lane escreveu somente rare-service-mesh. Nenhuma matriz congelada, fonte global, MDX, configuração, Jira ou produção foi editada por ela.",
+    "Os caches existentes foram consultados primeiro e reutilizados após conferência SHA-256. A montagem apenas relê e confere os artefatos; não executa testes de produto ou builds."
+  ],
+  "licenses": {
+    "istio/istio@4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631": {
+      "repo": "istio/istio",
+      "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+      "path": "LICENSE",
+      "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--LICENSE",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T04:09:57.271953+00:00",
+      "source": "reused_cache",
+      "sha256": "9fa6e54dafda853bb3cdc01486b677a55102f0d488282a85ba6e426d9125f8c5",
+      "line_count": 202,
+      "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-4d9034e524b507e809b27da7868d111a42881ba4c90ba7109622e4cea90a49d2.txt",
+      "license_spdx": "Apache-2.0"
+    },
+    "envoyproxy/envoy@960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1": {
+      "repo": "envoyproxy/envoy",
+      "revision": "960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1",
+      "path": "LICENSE",
+      "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/envoyproxy/envoy/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/envoyproxy--envoy--960eacbb--LICENSE",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T04:09:57.902433+00:00",
+      "source": "raw_primary",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "line_count": 202,
+      "license_spdx": "Apache-2.0"
+    }
+  },
+  "concepts": [
+    {
+      "concept_id": "service-mesh",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "Envoy fornece a assinatura CDS e o consumidor que instala clusters recebidos por xDS. A base selecionada agora mostra consumo efetivo de configuração, além do bootstrap genérico de servidor.",
+      "application_role": "Istio é o produto OSS real. O recorte é seu plano de controle e o caminho sidecar Envoy, com um exemplo concreto de DestinationRule que altera a política de balanceamento do cluster.",
+      "mechanism": "O controlador Kubernetes converte eventos de Service para o modelo do Istio e notifica a atualização. PushContext reúne o catálogo de serviços e as DestinationRules. O gerador CDS selecionado para ClusterType chama BuildClusters, que percorre os serviços visíveis ao sidecar, cria clusters e aplica a DestinationRule correspondente. applyTrafficPolicy altera o protobuf de cluster; por exemplo, LoadBalancerSettings_RANDOM vira Cluster_RANDOM. O servidor serializa esses recursos em DiscoveryResponse e os envia pelo stream xDS. No workload, o agente gera o bootstrap do Envoy com CDS/LDS via ADS e um cluster xds-grpc ligado ao socket local XDS. XdsProxy encaminha requisições para Istiod e respostas para Envoy. O consumidor CDS de Envoy recebe os recursos e chama addOrUpdateCluster ou removeCluster, atualizando sua configuração de comunicação.",
+      "review_gap_addressed": "A nova seleção liga descoberta e política à geração, transporte e consumo de configuração do proxy. O injector permanece evidência complementar de implantação do sidecar.",
+      "call_path": [
+        "O controlador onServiceEvent converte o Service Kubernetes e notifica os handlers; mudanças de endpoints também podem pedir ConfigUpdate.",
+        "DiscoveryServer.Push chama initPushContext; PushContext.initServiceRegistry lê env.Services e initDestinationRules lê o ConfigStore.",
+        "InitGenerators associa ClusterType a CdsGenerator. O pedido ADS chega a processRequest e pushXds seleciona esse gerador.",
+        "CdsGenerator.Generate chama ConfigGenerator.BuildClusters; buildClusters chama buildOutboundClusters para o sidecar.",
+        "O builder cria o cluster de cada serviço e chama applyDestinationRule; applyTrafficPolicy configura pool, detecção de falhas, balanceamento e TLS.",
+        "pushXds monta DiscoveryResponse com ResourcesToAny e chama xds.Send.",
+        "O agente cria o bootstrap e inicia Envoy com o arquivo gerado. O bootstrap assina CDS e LDS por ADS no socket local XDS.",
+        "XdsProxy abre o stream para Istiod, envia os pedidos e entrega as respostas ao stream downstream de Envoy.",
+        "CdsApiImpl.onConfigUpdate chama CdsApiHelper.onConfigUpdate, que aplica as alterações no ClusterManager de Envoy."
+      ],
+      "limits": [
+        "A prova é estática e delimitada ao caminho sidecar e CDS. Ela não mede um cluster em execução, entrega real de xDS, ACKs, convergência ou desempenho.",
+        "A política concreta demonstrada é DestinationRule aplicada a clusters. O pacote não afirma ter seguido toda tradução de VirtualService/RDS, EDS ou todas as políticas possíveis.",
+        "O bootstrap pode ser substituído por configuração customizada, e Istio também possui caminho ambient. Não se afirma que toda instalação use o mesmo template ou sidecar.",
+        "Os SHAs fixam fontes Istio e Envoy que implementam a fronteira xDS v3. Não se afirma que o binário Envoy empacotado com esse snapshot Istio tenha sido construído exatamente do SHA Envoy escolhido como base.",
+        "O pacote anterior de identidade foi reaproveitado como suporte complementar de segurança no mesmo SHA Istio; a classificação Service Mesh aqui se sustenta na cadeia de controle e dados demonstrada, sem depender apenas de certificado ou injeção."
+      ],
+      "licenses": [
+        "istio/istio@4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+        "envoyproxy/envoy@960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1"
+      ],
+      "evidence": [
+        {
+          "repo": "envoyproxy/envoy",
+          "revision": "960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1",
+          "path": "source/common/upstream/cds_api_impl.cc",
+          "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_impl.cc",
+          "raw_url": "https://raw.githubusercontent.com/envoyproxy/envoy/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_impl.cc",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/envoyproxy--envoy--960eacbb--source--common--upstream--cds_api_impl.cc",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.914379+00:00",
+          "source": "raw_primary",
+          "sha256": "789b6fa98bd9e01f3ea1e02f0bdcf64fd911698256e95d18fb8591f1ef0ab965",
+          "line_count": 136,
+          "role": "base",
+          "proves": "Envoy cria a assinatura CDS e entrega mudanças de configuração ao helper de clusters.",
+          "inspected_ranges": [
+            [
+              25,
+              48
+            ],
+            [
+              102,
+              117
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 25,
+              "end_line": 48,
+              "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_impl.cc#L25-L48",
+              "text": "25: CdsApiImpl::CdsApiImpl(const envoy::config::core::v3::ConfigSource& cds_config,\n26:                        const xds::core::v3::ResourceLocator* cds_resources_locator,\n27:                        ClusterManager& cm, Stats::Scope& scope,\n28:                        ProtobufMessage::ValidationVisitor& validation_visitor,\n29:                        Server::Configuration::ServerFactoryContext& factory_context,\n30:                        bool support_multi_ads_sources, absl::Status& creation_status)\n31:     : helper_(cm, factory_context.xdsManager(), \"cds\"),\n32:       resource_type_helper_(validation_visitor, \"name\"), cm_(cm),\n33:       scope_(scope.createScope(\"cluster_manager.cds.\")), factory_context_(factory_context),\n34:       stats_({ALL_CDS_STATS(POOL_COUNTER(*scope_), POOL_GAUGE(*scope_))}),\n35:       support_multi_ads_sources_(support_multi_ads_sources) {\n36:   const auto resource_name = resource_type_helper_.getResourceName();\n37:   absl::StatusOr<Config::SubscriptionPtr> subscription_or_error;\n38:   if (cds_resources_locator == nullptr) {\n39:     subscription_or_error = cm_.subscriptionFactory().subscriptionFromConfigSource(\n40:         cds_config, Grpc::Common::typeUrl(resource_name), *scope_, *this,\n41:         resource_type_helper_.resourceDecoder(), {});\n42:   } else {\n43:     subscription_or_error = cm.subscriptionFactory().collectionSubscriptionFromUrl(\n44:         *cds_resources_locator, cds_config, resource_name, *scope_, *this,\n45:         resource_type_helper_.resourceDecoder());\n46:   }\n47:   SET_AND_RETURN_IF_NOT_OK(subscription_or_error.status(), creation_status);\n48:   subscription_ = std::move(*subscription_or_error);"
+            },
+            {
+              "start_line": 102,
+              "end_line": 117,
+              "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_impl.cc#L102-L117",
+              "text": "102: absl::Status\n103: CdsApiImpl::onConfigUpdate(const std::vector<Config::DecodedResourceRef>& added_resources,\n104:                            const Protobuf::RepeatedPtrField<std::string>& removed_resources,\n105:                            const std::string& system_version_info) {\n106:   auto [added_or_updated, exception_msgs] =\n107:       helper_.onConfigUpdate(added_resources, removed_resources, system_version_info);\n108:   runInitializeCallbackIfAny();\n109:   if (!exception_msgs.empty()) {\n110:     return absl::InvalidArgumentError(\n111:         fmt::format(\"Error adding/updating cluster(s) {}\", absl::StrJoin(exception_msgs, \", \")));\n112:   }\n113:   if (added_or_updated > 0) {\n114:     stats_.config_reload_.inc();\n115:     stats_.config_reload_time_ms_.set(DateUtil::nowToMilliseconds(factory_context_.timeSource()));\n116:   }\n117:   return absl::OkStatus();"
+            }
+          ]
+        },
+        {
+          "repo": "envoyproxy/envoy",
+          "revision": "960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1",
+          "path": "source/common/upstream/cds_api_helper.cc",
+          "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_helper.cc",
+          "raw_url": "https://raw.githubusercontent.com/envoyproxy/envoy/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_helper.cc",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/envoyproxy--envoy--960eacbb--source--common--upstream--cds_api_helper.cc",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:11:17.844458+00:00",
+          "sha256": "5d11bacb3d8105879991316f2574ebddfc896142c3eb5b3d58bdf17b956ffd20",
+          "line_count": 100,
+          "source": "raw_primary",
+          "role": "data_plane_effect",
+          "proves": "O consumidor converte os recursos recebidos em Cluster e chama addOrUpdateCluster; remove clusters retirados da configuração.",
+          "inspected_ranges": [
+            [
+              38,
+              66
+            ],
+            [
+              79,
+              85
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 38,
+              "end_line": 66,
+              "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_helper.cc#L38-L66",
+              "text": "38:   for (const auto& resource : added_resources) {\n39:     // Holds a reference to the name of the currently parsed cluster resource.\n40:     // This is needed for the CATCH clause below.\n41:     absl::string_view cluster_name = EMPTY_STRING;\n42:     TRY_ASSERT_MAIN_THREAD {\n43:       const envoy::config::cluster::v3::Cluster& cluster =\n44:           Envoy::Protobuf::DynamicCastMessage<envoy::config::cluster::v3::Cluster>(\n45:               resource.get().resource());\n46:       cluster_name = cluster.name();\n47:       if (!cluster_names.insert(cluster.name()).second) {\n48:         // NOTE: at this point, the first of these duplicates has already been successfully applied.\n49:         const std::string msg =\n50:             fmt::format(\"{}: duplicate cluster {} found\", cluster_name, cluster_name);\n51:         ENVOY_LOG(warn, \"cds: cluster '{}' config rejected: {}\", cluster_name, msg);\n52:         exception_msgs.push_back(msg);\n53:         continue;\n54:       }\n55:       auto update_or_error = cm_.addOrUpdateCluster(cluster, resource.get().version());\n56:       if (!update_or_error.status().ok()) {\n57:         ENVOY_LOG(warn, \"cds: cluster '{}' config rejected: {}\", cluster_name,\n58:                   update_or_error.status().message());\n59:         exception_msgs.push_back(\n60:             fmt::format(\"{}: {}\", cluster_name, update_or_error.status().message()));\n61:         continue;\n62:       }\n63:       if (*update_or_error) {\n64:         any_applied = true;\n65:         ENVOY_LOG(debug, \"{}: add/update cluster '{}'\", name_, cluster_name);\n66:         ++added_or_updated;"
+            },
+            {
+              "start_line": 79,
+              "end_line": 85,
+              "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_helper.cc#L79-L85",
+              "text": "79:   uint32_t removed = 0;\n80:   for (const auto& resource_name : removed_resources) {\n81:     if (cm_.removeCluster(resource_name)) {\n82:       any_applied = true;\n83:       ENVOY_LOG(debug, \"{}: remove cluster '{}'\", name_, resource_name);\n84:       ++removed;\n85:     }"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/networking/core/cluster.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.652063+00:00",
+          "source": "raw_primary",
+          "sha256": "428c0223d64dd690a9e3dcceb1d309efe80ba632d0d756047bb4b4398e592804",
+          "line_count": 1052,
+          "role": "application",
+          "proves": "A geração real usa serviços visíveis ao proxy, percorre o ramo sidecar e aplica a política ao cluster antes de empacotá-lo.",
+          "inspected_ranges": [
+            [
+              64,
+              74
+            ],
+            [
+              313,
+              328
+            ],
+            [
+              554,
+              559
+            ],
+            [
+              579,
+              586
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 64,
+              "end_line": 74,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go#L64-L74",
+              "text": "64: func (configgen *ConfigGeneratorImpl) BuildClusters(proxy *model.Proxy, req *model.PushRequest) ([]*discovery.Resource, model.XdsLogDetails) {\n65: \tenvoyFilterPatches := req.Push.EnvoyFilters(proxy)\n66: \t// In Sotw, we care about all services.\n67: \tvar services []*model.Service\n68: \tif filtersGatewayClusters(proxy) {\n69: \t\tservices = req.Push.GatewayServices(proxy, envoyFilterPatches)\n70: \t} else {\n71: \t\tservices = proxy.SidecarScope.Services()\n72: \t}\n73: \treturn configgen.buildClusters(proxy, req, services, envoyFilterPatches)\n74: }"
+            },
+            {
+              "start_line": 313,
+              "end_line": 328,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go#L313-L328",
+              "text": "313: // buildClusters builds clusters for the proxy with the services passed.\n314: func (configgen *ConfigGeneratorImpl) buildClusters(proxy *model.Proxy, req *model.PushRequest,\n315: \tservices []*model.Service, envoyFilterPatches *model.MergedEnvoyFilterWrapper,\n316: ) ([]*discovery.Resource, model.XdsLogDetails) {\n317: \tclusters := make([]*cluster.Cluster, 0)\n318: \tresources := model.Resources{}\n319: \tcb := NewClusterBuilder(proxy, req, configgen.Cache)\n320: \tinstances := proxy.ServiceTargets\n321: \tcacheStats := cacheStats{}\n322: \tswitch proxy.Type {\n323: \tcase model.SidecarProxy:\n324: \t\t// Setup outbound clusters\n325: \t\toutboundPatcher := clusterPatcher{efw: envoyFilterPatches, pctx: networking.EnvoyFilter_SIDECAR_OUTBOUND}\n326: \t\tob, cs := configgen.buildOutboundClusters(cb, proxy, outboundPatcher, services)\n327: \t\tcacheStats = cacheStats.merge(cs)\n328: \t\tresources = append(resources, ob...)"
+            },
+            {
+              "start_line": 554,
+              "end_line": 559,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go#L554-L559",
+              "text": "554: \t\t\t// create default cluster\n555: \t\t\tdiscoveryType := convertResolution(cb.proxyType, service)\n556: \t\t\tdefaultCluster := cb.buildCluster(clusterKey.clusterName, discoveryType, lbEndpoints, model.TrafficDirectionOutbound, port, service, nil, \"\")\n557: \t\t\tif defaultCluster == nil {\n558: \t\t\t\tcontinue\n559: \t\t\t}"
+            },
+            {
+              "start_line": 579,
+              "end_line": 586,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go#L579-L586",
+              "text": "579: \t\t\tsubsetClusters := cb.applyDestinationRule(defaultCluster, DefaultClusterMode, service, port,\n580: \t\t\t\tclusterKey.endpointBuilder, clusterKey.destinationRule.GetRule(), clusterKey.serviceAccounts)\n581: \n582: \t\t\tif service.UseInferenceSemantics() && proxy.Type == model.Router {\n583: \t\t\t\tcb.applyOverrideHostPolicy(defaultCluster)\n584: \t\t\t}\n585: \t\t\tif patched := cp.patch(nil, defaultCluster.build()); patched != nil {\n586: \t\t\t\tresources = append(resources, patched)"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/serviceregistry/kube/controller/controller.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--serviceregistry--kube--controller--controller.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:10:46.414167+00:00",
+          "sha256": "41dfaecbeb24936039f45342b56b2525c8dd0c67655cabd28991c35b7feb8471",
+          "line_count": 1265,
+          "role": "discovery_source",
+          "proves": "Eventos de Service e endpoints alimentam o modelo e notificam atualizações do plano de controle.",
+          "inspected_ranges": [
+            [
+              419,
+              436
+            ],
+            [
+              493,
+              508
+            ],
+            [
+              545,
+              556
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 419,
+              "end_line": 436,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go#L419-L436",
+              "text": "419: func (c *Controller) onServiceEvent(pre, curr *v1.Service, event model.Event) error {\n420: \tlog.Debugf(\"Handle event %s for service %s in namespace %s\", event, curr.Name, curr.Namespace)\n421: \n422: \t// Get namespace annotations for traffic distribution inheritance\n423: \tvar nsAnnotations map[string]string\n424: \tns := c.namespaces.Get(curr.Namespace, \"\")\n425: \tif ns != nil {\n426: \t\tnsAnnotations = ns.Annotations\n427: \t}\n428: \n429: \t// Create the standard (cluster.local) service.\n430: \tsvcConv := kube.ConvertService(*curr, nsAnnotations, c.opts.DomainSuffix, c.Cluster(), c.meshWatcher.TrustDomain())\n431: \n432: \tswitch event {\n433: \tcase model.EventDelete:\n434: \t\tc.deleteService(svcConv)\n435: \tdefault:\n436: \t\tc.addOrUpdateService(pre, curr, svcConv, event, false)"
+            },
+            {
+              "start_line": 493,
+              "end_line": 508,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go#L493-L508",
+              "text": "493: \t\tshard := model.ShardKeyFromRegistry(c)\n494: \t\tendpoints := c.buildEndpointsForService(conv, true)\n495: \t\tif len(endpoints) > 0 {\n496: \t\t\tc.opts.XDSUpdater.EDSCacheUpdate(shard, string(hostname), svc.Namespace, endpoints)\n497: \t\t}\n498: \t\tcu.Insert(model.ConfigKey{\n499: \t\t\tKind:      kind.Endpoints,\n500: \t\t\tName:      string(hostname),\n501: \t\t\tNamespace: svc.Namespace,\n502: \t\t})\n503: \t}\n504: \tif len(cu) > 0 {\n505: \t\tc.opts.XDSUpdater.ConfigUpdate(&model.PushRequest{\n506: \t\t\tConfigsUpdated: cu,\n507: \t\t\tReason:         model.NewReasonStats(model.EndpointUpdate),\n508: \t\t})"
+            },
+            {
+              "start_line": 545,
+              "end_line": 556,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go#L545-L556",
+              "text": "545: \tif updateEDSCache || features.EnableK8SServiceSelectWorkloadEntries {\n546: \t\tendpoints := c.buildEndpointsForService(currConv, updateEDSCache)\n547: \t\tif len(endpoints) > 0 {\n548: \t\t\tc.opts.XDSUpdater.EDSCacheUpdate(shard, string(currConv.Hostname), ns, endpoints)\n549: \t\t}\n550: \t}\n551: \n552: \tc.opts.XDSUpdater.SvcUpdate(shard, string(currConv.Hostname), ns, event)\n553: \tif serviceUpdateNeedsPush(pre, curr, prevConv, currConv) {\n554: \t\tlog.Debugf(\"Service %s in namespace %s updated and needs push\", currConv.Hostname, ns)\n555: \t\tc.handlers.NotifyServiceHandlers(prevConv, currConv, event)\n556: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/model/push_context.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/model/push_context.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/model/push_context.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--model--push_context.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.664841+00:00",
+          "source": "raw_primary",
+          "sha256": "9b3e060c018d719ccee219313e94fb3d15a006e5434705444cbb1958bd59887d",
+          "line_count": 2713,
+          "role": "discovery_and_policy_input",
+          "proves": "O contexto de geração lê o registro real de serviços e as DestinationRules do ConfigStore.",
+          "inspected_ranges": [
+            [
+              1389,
+              1399
+            ],
+            [
+              1547,
+              1555
+            ],
+            [
+              2014,
+              2024
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 1389,
+              "end_line": 1399,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/model/push_context.go#L1389-L1399",
+              "text": "1389: func (ps *PushContext) createNewContext(env *Environment) {\n1390: \tps.initServiceRegistry(env, nil)\n1391: \n1392: \tps.initKubernetesGateways(env)\n1393: \n1394: \tps.initVirtualServices(env)\n1395: \n1396: \tps.initDestinationRules(env)\n1397: \tps.initAuthnPolicies(env)\n1398: \n1399: \tps.initAuthorizationPolicies(env)"
+            },
+            {
+              "start_line": 1547,
+              "end_line": 1555,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/model/push_context.go#L1547-L1555",
+              "text": "1547: func (ps *PushContext) initServiceRegistry(env *Environment, configsUpdate sets.Set[ConfigKey]) {\n1548: \t// Sort the services in order of creation.\n1549: \tallServices := SortServicesByCreationTime(env.Services())\n1550: \tresolveServiceAliases(allServices, configsUpdate)\n1551: \n1552: \tps.ServiceIndex.count = len(allServices)\n1553: \n1554: \tps.ServiceIndex.instancesByPort = make(map[string]map[int][]*IstioEndpoint, len(allServices))\n1555: \tps.serviceAccounts = make(map[serviceAccountKey][]string, len(allServices))"
+            },
+            {
+              "start_line": 2014,
+              "end_line": 2024,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/model/push_context.go#L2014-L2024",
+              "text": "2014: func (ps *PushContext) initDestinationRules(env *Environment) {\n2015: \tconfigs := env.List(gvk.DestinationRule, NamespaceAll)\n2016: \n2017: \t// values returned from ConfigStore.List are immutable.\n2018: \t// Therefore, we make a copy\n2019: \tdestRules := make([]config.Config, len(configs))\n2020: \tfor i := range destRules {\n2021: \t\tdestRules[i] = configs[i]\n2022: \t}\n2023: \n2024: \tps.setDestinationRules(destRules)"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/xds/discovery.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/discovery.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/discovery.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--xds--discovery.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.626837+00:00",
+          "source": "raw_primary",
+          "sha256": "7dc3cb1f8476fcba21425aa769cc6066d17559a852e52ce4bc8f8bf129ab6bf3",
+          "line_count": 653,
+          "role": "refresh_caller",
+          "proves": "Push inicializa um novo contexto de configuração e inicia o push ADS para as conexões.",
+          "inspected_ranges": [
+            [
+              317,
+              342
+            ],
+            [
+              574,
+              583
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 317,
+              "end_line": 342,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/discovery.go#L317-L342",
+              "text": "317: func (s *DiscoveryServer) Push(req *model.PushRequest, initializePushContext bool) {\n318: \tif !initializePushContext {\n319: \t\treq.Push = s.globalPushContext()\n320: \t\ts.dropCacheForRequest(req)\n321: \t\ts.AdsPushAll(req)\n322: \t\treturn\n323: \t}\n324: \n325: \t// Reset the status during the push.\n326: \toldPushContext := s.globalPushContext()\n327: \tif oldPushContext != nil {\n328: \t\toldPushContext.OnConfigChange()\n329: \t\t// Push the previous push Envoy metrics.\n330: \t\tenvoyfilter.RecordMetrics()\n331: \t}\n332: \t// PushContext is reset after a config change. Previous status is\n333: \t// saved.\n334: \tt0 := time.Now()\n335: \tversionLocal := s.NextVersion()\n336: \tpush := s.initPushContext(req, oldPushContext, versionLocal)\n337: \tinitContextTime := time.Since(t0)\n338: \tlog.Debugf(\"InitContext %v for push took %s\", versionLocal, initContextTime)\n339: \tpushContextInitTime.Record(initContextTime.Seconds())\n340: \n341: \treq.Push = push\n342: \ts.AdsPushAll(req)"
+            },
+            {
+              "start_line": 574,
+              "end_line": 583,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/discovery.go#L574-L583",
+              "text": "574: func (s *DiscoveryServer) initPushContext(req *model.PushRequest, oldPushContext *model.PushContext, version string) *model.PushContext {\n575: \tpush := model.NewPushContext()\n576: \tpush.PushVersion = version\n577: \tpush.JwtKeyResolver = s.JwtKeyResolver\n578: \tpush.InitContext(s.Env, oldPushContext, req)\n579: \n580: \ts.dropCacheForRequest(req)\n581: \ts.Env.SetPushContext(push)\n582: \n583: \treturn push"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/bootstrap/discovery.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/bootstrap/discovery.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/bootstrap/discovery.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--bootstrap--discovery.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:11:58.446447+00:00",
+          "sha256": "13f4170b49866b74d813585f57622e951d994f3e7cc7383ac124c23efbdeabd2",
+          "line_count": 69,
+          "source": "raw_primary",
+          "role": "generator_registration",
+          "proves": "ClusterType é ligado ao CdsGenerator do gerador de configuração real.",
+          "inspected_ranges": [
+            [
+              29,
+              42
+            ],
+            [
+              68,
+              69
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 29,
+              "end_line": 42,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/bootstrap/discovery.go#L29-L42",
+              "text": "29: func InitGenerators(\n30: \ts *xds.DiscoveryServer,\n31: \tcg core.ConfigGenerator,\n32: \tsystemNameSpace string,\n33: \tclusterID cluster.ID,\n34: \tinternalDebugMux *http.ServeMux,\n35: ) {\n36: \tenv := s.Env\n37: \tgenerators := map[string]model.XdsResourceGenerator{}\n38: \tedsGen := &xds.EdsGenerator{Cache: s.Cache, EndpointIndex: env.EndpointIndex}\n39: \tgenerators[v3.ClusterType] = &xds.CdsGenerator{ConfigGenerator: cg}\n40: \tgenerators[v3.ListenerType] = &xds.LdsGenerator{ConfigGenerator: cg}\n41: \tgenerators[v3.RouteType] = &xds.RdsGenerator{ConfigGenerator: cg}\n42: \tgenerators[v3.EndpointType] = edsGen"
+            },
+            {
+              "start_line": 68,
+              "end_line": 69,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/bootstrap/discovery.go#L68-L69",
+              "text": "68: \ts.Generators = generators\n69: }"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/xds/cds.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/cds.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/cds.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--xds--cds.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.629723+00:00",
+          "source": "raw_primary",
+          "sha256": "749cf5c2712da30a281afc6a2cff11df513c86f575fc63bbf15953586c42f7e3",
+          "line_count": 153,
+          "role": "generation_caller",
+          "proves": "O gerador CDS chama ConfigGenerator.BuildClusters com o proxy e o pedido de push.",
+          "inspected_ranges": [
+            [
+              135,
+              141
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 135,
+              "end_line": 141,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/cds.go#L135-L141",
+              "text": "135: func (c CdsGenerator) Generate(proxy *model.Proxy, w *model.WatchedResource, req *model.PushRequest) (model.Resources, model.XdsLogDetails, error) {\n136: \treq, needsPush := cdsNeedsPush(req, proxy)\n137: \tif !needsPush {\n138: \t\treturn nil, model.DefaultXdsLogDetails, nil\n139: \t}\n140: \tclusters, logs := c.ConfigGenerator.BuildClusters(proxy, req)\n141: \treturn clusters, logs, nil"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/networking/core/cluster_builder.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_builder.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_builder.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster_builder.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.653467+00:00",
+          "source": "raw_primary",
+          "sha256": "04ac7ea79d380f6c8980f824aedeb115a7853ef1af17479513390638c4821473",
+          "line_count": 1131,
+          "role": "policy_bridge",
+          "proves": "A DestinationRule é selecionada e mesclada por porta antes de applyTrafficPolicy alterar o cluster.",
+          "inspected_ranges": [
+            [
+              350,
+              365
+            ],
+            [
+              385,
+              393
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 350,
+              "end_line": 365,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_builder.go#L350-L365",
+              "text": "350: // applyDestinationRule applies the destination rule if it exists for the Service.\n351: // It returns the subset clusters if any created as it applies the destination rule.\n352: func (cb *ClusterBuilder) applyDestinationRule(mc *clusterWrapper, clusterMode ClusterMode, service *model.Service,\n353: \tport *model.Port, eb *endpoints.EndpointBuilder, destRule *config.Config, serviceAccounts []string,\n354: ) []*cluster.Cluster {\n355: \tdestinationRule := CastDestinationRule(destRule)\n356: \t// merge applicable port level traffic policy settings\n357: \ttrafficPolicy, _ := util.GetPortLevelTrafficPolicy(destinationRule.GetTrafficPolicy(), port)\n358: \t// Seed the mesh-wide baseline so per-host clusters (including those with no matching\n359: \t// DestinationRule) inherit it for any connectionPool / outlierDetection block the DR\n360: \t// leaves unset. Subset / portLevelSettings still override on top via the merge below.\n361: \ttrafficPolicy = applyDefaultTrafficPolicy(cb.req.Push.Mesh.GetDefaultTrafficPolicy(), trafficPolicy)\n362: \topts := buildClusterOpts{\n363: \t\tmesh:                      cb.req.Push.Mesh,\n364: \t\tmutable:                   mc,\n365: \t\tpolicy:                    trafficPolicy,"
+            },
+            {
+              "start_line": 385,
+              "end_line": 393,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_builder.go#L385-L393",
+              "text": "385: \tif destRule != nil {\n386: \t\topts.isDrWithSelector = destinationRule.GetWorkloadSelector() != nil\n387: \t}\n388: \t// Apply traffic policy for the main default cluster.\n389: \tcb.applyTrafficPolicy(service, opts)\n390: \n391: \t// Apply EdsConfig if needed. This should be called after traffic policy is applied because, traffic policy might change\n392: \t// discovery type.\n393: \tmaybeApplyEdsConfig(mc.cluster)"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/networking/core/cluster_traffic_policy.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_traffic_policy.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_traffic_policy.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster_traffic_policy.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:11:05.234165+00:00",
+          "sha256": "44d5630cdedd859978a082ea5def17b509d5568bc26f23d7456ebf9bee256f67",
+          "line_count": 764,
+          "source": "raw_primary",
+          "role": "concrete_policy_translation",
+          "proves": "A tradução aplica os componentes de política ao protobuf Envoy; RANDOM vira Cluster_RANDOM, com ramos próprios para os demais algoritmos.",
+          "inspected_ranges": [
+            [
+              46,
+              76
+            ],
+            [
+              374,
+              390
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 46,
+              "end_line": 76,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_traffic_policy.go#L46-L76",
+              "text": "46: // applyTrafficPolicy applies the trafficPolicy defined within destinationRule,\n47: // which can be called for both outbound and inbound cluster, but only connection pool will be applied to inbound cluster.\n48: func (cb *ClusterBuilder) applyTrafficPolicy(service *model.Service, opts buildClusterOpts) {\n49: \tconnectionPool, outlierDetection, loadBalancer, tls, proxyProtocol, retryBudget := selectTrafficPolicyComponents(opts.policy)\n50: \t// Connection pool settings are applicable for both inbound and outbound clusters.\n51: \tif connectionPool == nil {\n52: \t\tconnectionPool = &networking.ConnectionPoolSettings{}\n53: \t}\n54: \t// Apply h2 upgrade s.t. h2 connection pool settings can be applied to the cluster.\n55: \tif opts.direction != model.TrafficDirectionInbound {\n56: \t\tcb.applyH2Upgrade(opts.mutable, opts.port, opts.mesh, connectionPool)\n57: \t}\n58: \tcb.applyConnectionPool(opts.mesh, opts.mutable, connectionPool, retryBudget)\n59: \tif opts.direction != model.TrafficDirectionInbound {\n60: \t\tapplyOutlierDetection(service, opts.mutable.cluster, outlierDetection)\n61: \t\tif outlierDetection != nil && len(outlierDetection.OutlierDetectionHttpErrorCodes) > 0 {\n62: \t\t\tapplyOutlierDetectionErrorCodes(opts.mutable, outlierDetection.OutlierDetectionHttpErrorCodes)\n63: \t\t}\n64: \t\tenableSelfDiscovery := cb.proxyMetadata != nil && bool(cb.proxyMetadata.EnableSelfDiscovery)\n65: \t\tapplyLoadBalancer(\n66: \t\t\tservice, opts.mutable.cluster, loadBalancer, opts.port, cb.locality,\n67: \t\t\tcb.proxyLabels, opts.mesh, opts.mutable.dnsWrappedLocalityLbEndpoints,\n68: \t\t\tcb.proxyType, cb.proxyID, enableSelfDiscovery,\n69: \t\t)\n70: \t\tif opts.clusterMode != SniDnatClusterMode {\n71: \t\t\tautoMTLSEnabled := opts.mesh.GetEnableAutoMtls().Value\n72: \t\t\ttls, mtlsCtxType := cb.buildUpstreamTLSSettings(tls, opts.serviceAccounts, opts.istioMtlsSni,\n73: \t\t\t\tautoMTLSEnabled, opts.meshExternal, opts.serviceMTLSMode)\n74: \t\t\tcb.applyUpstreamTLSSettings(&opts, tls, mtlsCtxType)\n75: \t\t\tcb.applyUpstreamProxyProtocol(&opts, proxyProtocol)\n76: \t\t}"
+            },
+            {
+              "start_line": 374,
+              "end_line": 390,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_traffic_policy.go#L374-L390",
+              "text": "374: \t// DO not do if else here. since lb.GetSimple returns a enum value (not pointer).\n375: \tswitch lb.GetSimple() {\n376: \t// nolint: staticcheck\n377: \tcase networking.LoadBalancerSettings_LEAST_CONN, networking.LoadBalancerSettings_LEAST_REQUEST:\n378: \t\tapplyLeastRequestLoadBalancer(c, lb)\n379: \tcase networking.LoadBalancerSettings_RANDOM:\n380: \t\tc.LbPolicy = cluster.Cluster_RANDOM\n381: \tcase networking.LoadBalancerSettings_ROUND_ROBIN:\n382: \t\tapplyRoundRobinLoadBalancer(c, lb)\n383: \tcase networking.LoadBalancerSettings_PASSTHROUGH:\n384: \t\tc.LbPolicy = cluster.Cluster_CLUSTER_PROVIDED\n385: \t\tc.ClusterDiscoveryType = &cluster.Cluster_Type{Type: cluster.Cluster_ORIGINAL_DST}\n386: \t\t// Wipe out any LoadAssignment, if set. This can occur when we have a STATIC Service but PASSTHROUGH traffic policy\n387: \t\tc.LoadAssignment = nil\n388: \tdefault:\n389: \t\tapplySimpleDefaultLoadBalancer(c, lb)\n390: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/xds/ads.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/ads.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/ads.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--xds--ads.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.617058+00:00",
+          "source": "raw_primary",
+          "sha256": "abd80261cfa6e324f5f55bf178f81d165477b6464225a2b7b17bfd54709ba0b4",
+          "line_count": 641,
+          "role": "request_entry",
+          "proves": "O endpoint ADS processa o DiscoveryRequest e solicita o push do recurso observado pelo proxy.",
+          "inspected_ranges": [
+            [
+              140,
+              143
+            ],
+            [
+              156,
+              180
+            ],
+            [
+              183,
+              186
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 140,
+              "end_line": 143,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/ads.go#L140-L143",
+              "text": "140: func (s *DiscoveryServer) processRequest(req *discovery.DiscoveryRequest, con *Connection) error {\n141: \tstype := v3.GetShortType(req.TypeUrl)\n142: \tlog.Debugf(\"ADS:%s: REQ %s resources:%d nonce:%s version:%s \", stype,\n143: \t\tcon.ID(), len(req.ResourceNames), req.ResponseNonce, req.VersionInfo)"
+            },
+            {
+              "start_line": 156,
+              "end_line": 180,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/ads.go#L156-L180",
+              "text": "156: \tshouldRespond, delta := xds.ShouldRespond(con.proxy, con.ID(), req)\n157: \tif !shouldRespond {\n158: \t\treturn nil\n159: \t}\n160: \n161: \trequest := &model.PushRequest{\n162: \t\tPush:   con.proxy.LastPushContext,\n163: \t\tReason: model.NewReasonStats(model.ProxyRequest),\n164: \n165: \t\t// The usage of LastPushTime (rather than time.Now()), is critical here for correctness; This time\n166: \t\t// is used by the XDS cache to determine if a entry is stale. If we use Now() with an old push context,\n167: \t\t// we may end up overriding active cache entries with stale ones.\n168: \t\tStart:  con.proxy.LastPushTime,\n169: \t\tDelta:  delta,\n170: \t\tForced: true,\n171: \t}\n172: \n173: \t// SidecarScope for the proxy may not have been updated based on this pushContext.\n174: \t// It can happen when `processRequest` comes after push context has been updated(s.initPushContext),\n175: \t// but proxy's SidecarScope has been updated(s.computeProxyState -> SetSidecarScope) due to optimizations that skip sidecar scope\n176: \t// computation.\n177: \tif con.proxy.SidecarScope != nil && con.proxy.SidecarScope.Version != request.Push.PushVersion {\n178: \t\ts.computeProxyState(con.proxy, request)\n179: \t}\n180: \treturn s.pushXds(con, con.proxy.GetWatchedResource(req.TypeUrl), request)"
+            },
+            {
+              "start_line": 183,
+              "end_line": 186,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/ads.go#L183-L186",
+              "text": "183: // StreamAggregatedResources implements the ADS interface.\n184: func (s *DiscoveryServer) StreamAggregatedResources(stream DiscoveryStream) error {\n185: \treturn s.Stream(stream)\n186: }"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/xds/xdsgen.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/xdsgen.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/xdsgen.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pilot--pkg--xds--xdsgen.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.622361+00:00",
+          "source": "raw_primary",
+          "sha256": "d81f98a201aa82abf436e713bca0b7b20f1596162d9cc91ec0e7cc69f29d5e46",
+          "line_count": 254,
+          "role": "generation_and_transport",
+          "proves": "O servidor seleciona o gerador por tipo, executa Generate, serializa os recursos e envia DiscoveryResponse.",
+          "inspected_ranges": [
+            [
+              84,
+              93
+            ],
+            [
+              112,
+              119
+            ],
+            [
+              136,
+              160
+            ],
+            [
+              170,
+              175
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 84,
+              "end_line": 93,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/xdsgen.go#L84-L93",
+              "text": "84: \tif g, f := s.Generators[con.proxy.Metadata.Generator+\"/\"+typeURL]; f {\n85: \t\treturn g\n86: \t}\n87: \tif g, f := s.Generators[string(con.proxy.Type)+\"/\"+typeURL]; f {\n88: \t\treturn g\n89: \t}\n90: \n91: \tif g, f := s.Generators[typeURL]; f {\n92: \t\treturn g\n93: \t}"
+            },
+            {
+              "start_line": 112,
+              "end_line": 119,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/xdsgen.go#L112-L119",
+              "text": "112: func (s *DiscoveryServer) pushXds(con *Connection, w *model.WatchedResource, req *model.PushRequest) error {\n113: \tif w == nil {\n114: \t\treturn nil\n115: \t}\n116: \tgen := s.findGenerator(w.TypeUrl, con)\n117: \tif gen == nil {\n118: \t\treturn nil\n119: \t}"
+            },
+            {
+              "start_line": 136,
+              "end_line": 160,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/xdsgen.go#L136-L160",
+              "text": "136: \tres, logdata, err := gen.Generate(con.proxy, w, req)\n137: \tinfo := \"\"\n138: \tif len(logdata.AdditionalInfo) > 0 {\n139: \t\tinfo = \" \" + logdata.AdditionalInfo\n140: \t}\n141: \tif len(logFiltered) > 0 {\n142: \t\tinfo += logFiltered\n143: \t}\n144: \tif err != nil || res == nil {\n145: \t\tif log.DebugEnabled() {\n146: \t\t\tlog.Debugf(\"%s: SKIP%s for node:%s%s\", v3.GetShortType(w.TypeUrl), req.PushReason(), con.proxy.ID, info)\n147: \t\t}\n148: \n149: \t\treturn err\n150: \t}\n151: \tdefer func() { recordPushTime(w.TypeUrl, time.Since(t0)) }()\n152: \n153: \tresp := &discovery.DiscoveryResponse{\n154: \t\tControlPlane: ControlPlane(w.TypeUrl),\n155: \t\tTypeUrl:      w.TypeUrl,\n156: \t\t// TODO: send different version for incremental eds\n157: \t\tVersionInfo: req.Push.PushVersion,\n158: \t\tNonce:       nonce(req.Push.PushVersion),\n159: \t\tResources:   xds.ResourcesToAny(res),\n160: \t}"
+            },
+            {
+              "start_line": 170,
+              "end_line": 175,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/xdsgen.go#L170-L175",
+              "text": "170: \tif err := xds.Send(con, resp); err != nil {\n171: \t\tif recordSendError(w.TypeUrl, err) {\n172: \t\t\tlog.Warnf(\"%s: Send failure for node:%s resources:%d size:%s%s: %v\",\n173: \t\t\t\tv3.GetShortType(w.TypeUrl), con.proxy.ID, len(res), util.ByteCount(configSize), info, err)\n174: \t\t}\n175: \t\treturn err"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pkg/istio-agent/agent.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/agent.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/agent.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--istio-agent--agent.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:11:58.448638+00:00",
+          "sha256": "ef9d086d4712cbfb76262bdad0c907da1d5261ee1f5d5af192cb46478adf2743",
+          "line_count": 893,
+          "source": "raw_primary",
+          "role": "bootstrap_caller",
+          "proves": "O agente cria o bootstrap e atribui seu arquivo a envoyOpts.ConfigPath, salvo configuração customizada.",
+          "inspected_ranges": [
+            [
+              308,
+              333
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 308,
+              "end_line": 333,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/agent.go#L308-L333",
+              "text": "308: func (a *Agent) initializeEnvoyAgent(_ context.Context) error {\n309: \tnode, err := a.generateNodeMetadata()\n310: \tif err != nil {\n311: \t\treturn fmt.Errorf(\"failed to generate bootstrap metadata: %v\", err)\n312: \t}\n313: \n314: \tlog.Infof(\"Pilot SAN: %v\", node.Metadata.PilotSubjectAltName)\n315: \n316: \t// Note: the cert checking still works, the generated file is updated if certs are changed.\n317: \t// We just don't save the generated file, but use a custom one instead. Pilot will keep\n318: \t// monitoring the certs and restart if the content of the certs changes.\n319: \tif len(a.proxyConfig.CustomConfigFile) > 0 {\n320: \t\t// there is a custom configuration. Don't write our own config - but keep watching the certs.\n321: \t\ta.envoyOpts.ConfigPath = a.proxyConfig.CustomConfigFile\n322: \t\ta.envoyOpts.ConfigCleanup = false\n323: \t} else {\n324: \t\tout, err := bootstrap.New(bootstrap.Config{\n325: \t\t\tNode:             node,\n326: \t\t\tCompliancePolicy: common_features.CompliancePolicy,\n327: \t\t\tLogAsJSON:        a.envoyOpts.LogAsJSON,\n328: \t\t}).CreateFile()\n329: \t\tif err != nil {\n330: \t\t\treturn fmt.Errorf(\"failed to generate bootstrap config: %v\", err)\n331: \t\t}\n332: \t\ta.envoyOpts.ConfigPath = out\n333: \t\ta.envoyOpts.ConfigCleanup = true"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "tools/packaging/common/envoy_bootstrap.json",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/packaging/common/envoy_bootstrap.json",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/packaging/common/envoy_bootstrap.json",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--tools--packaging--common--envoy_bootstrap.json",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.628524+00:00",
+          "source": "raw_primary",
+          "sha256": "d3a3fe34ac9f314ddd5e6db9c049d8deb405f6088ae398608f85a3d7007c7c28",
+          "line_count": 1125,
+          "role": "data_plane_configuration",
+          "proves": "O template configura CDS/LDS por ADS v3 e aponta xds-grpc para o socket XDS local do agente.",
+          "inspected_ranges": [
+            [
+              213,
+              235
+            ],
+            [
+              346,
+              359
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 213,
+              "end_line": 235,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/packaging/common/envoy_bootstrap.json#L213-L235",
+              "text": "213:   \"dynamic_resources\": {\n214:     \"lds_config\": {\n215:       \"ads\": {},\n216:       \"initial_fetch_timeout\": \"0s\",\n217:       \"resource_api_version\": \"V3\"\n218:     },\n219:     \"cds_config\": {\n220:       \"ads\": {},\n221:       \"initial_fetch_timeout\": \"0s\",\n222:       \"resource_api_version\": \"V3\"\n223:     },\n224:     \"ads_config\": {\n225:       \"api_type\": \"{{ .xds_type }}\",\n226:       \"set_node_on_first_message_only\": true,\n227:       \"transport_api_version\": \"V3\",\n228:       \"grpc_services\": [\n229:         {\n230:           \"envoy_grpc\": {\n231:             \"cluster_name\": \"xds-grpc\"\n232:           }\n233:         }\n234:       ]\n235:     }"
+            },
+            {
+              "start_line": 346,
+              "end_line": 359,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/packaging/common/envoy_bootstrap.json#L346-L359",
+              "text": "346:         \"name\": \"xds-grpc\",\n347:         \"alt_stat_name\": \"xds-grpc;\",\n348:         \"type\" : \"STATIC\",\n349:         \"connect_timeout\": \"1s\",\n350:         \"lb_policy\": \"ROUND_ROBIN\",\n351:         \"load_assignment\": {\n352:           \"cluster_name\": \"xds-grpc\",\n353:           \"endpoints\": [{\n354:             \"lb_endpoints\": [{\n355:               \"endpoint\": {\n356:                 \"address\":{\n357:                   \"pipe\": {\n358:                     \"path\": \"{{ .config.ConfigPath }}/XDS\"\n359:                   }"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pkg/envoy/proxy.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/envoy/proxy.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/envoy/proxy.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--envoy--proxy.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:11:05.236300+00:00",
+          "sha256": "cc90aea89b3bb98f3ecf8b2487783ad185bf618dd63529ba7183ac3acacfb213",
+          "line_count": 255,
+          "source": "raw_primary",
+          "role": "envoy_startup",
+          "proves": "O agente inicia o processo Envoy com -c apontando para ConfigPath.",
+          "inspected_ranges": [
+            [
+              126,
+              139
+            ],
+            [
+              205,
+              212
+            ],
+            [
+              229,
+              234
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 126,
+              "end_line": 139,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/envoy/proxy.go#L126-L139",
+              "text": "126: func (e *envoy) args(fname string, overrideFname string) []string {\n127: \tproxyLocalAddressType := \"v4\"\n128: \tif network.AllIPv6(e.NodeIPs) {\n129: \t\tproxyLocalAddressType = \"v6\"\n130: \t}\n131: \tfileFlushInterval := \"1000\" // Default 1s\n132: \tif e.FileFlushInterval != nil {\n133: \t\tfileFlushInterval = fmt.Sprint(e.FileFlushInterval.AsDuration().Milliseconds())\n134: \t}\n135: \n136: \tstartupArgs := []string{\n137: \t\t\"-c\", fname,\n138: \t\t\"--drain-time-s\", fmt.Sprint(int(e.DrainDuration.AsDuration().Seconds())),\n139: \t\t\"--drain-strategy\", \"immediate\", // Clients are notified as soon as the drain process starts."
+            },
+            {
+              "start_line": 205,
+              "end_line": 212,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/envoy/proxy.go#L205-L212",
+              "text": "205: func (e *envoy) Run(abort <-chan error) error {\n206: \t// spin up a new Envoy process\n207: \targs := e.args(e.ConfigPath, istioBootstrapOverrideVar.Get())\n208: \tlog.Infof(\"Envoy command: %v\", args)\n209: \n210: \t/* #nosec */\n211: \tcmd := exec.Command(e.BinaryPath, args...)\n212: \tcmd.Env = os.Environ()"
+            },
+            {
+              "start_line": 229,
+              "end_line": 234,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/envoy/proxy.go#L229-L234",
+              "text": "229: \tif err := cmd.Start(); err != nil {\n230: \t\treturn err\n231: \t}\n232: \tdone := make(chan error, 1)\n233: \tgo func() {\n234: \t\tdone <- cmd.Wait()"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pkg/istio-agent/xds_proxy.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--istio-agent--xds_proxy.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:12:37.855423+00:00",
+          "sha256": "53c9812cbd6f09d2b685c24e88733d7643a0338da142b6f3ad0ac0f08e3b72d5",
+          "line_count": 691,
+          "source": "raw_primary",
+          "role": "agent_transport_bridge",
+          "proves": "O proxy xDS recebe o stream de Envoy, abre stream para Istiod e encaminha pedidos e respostas entre as duas pontas.",
+          "inspected_ranges": [
+            [
+              291,
+              294
+            ],
+            [
+              350,
+              368
+            ],
+            [
+              455,
+              466
+            ],
+            [
+              525,
+              529
+            ],
+            [
+              554,
+              579
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 291,
+              "end_line": 294,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go#L291-L294",
+              "text": "291: func (p *XdsProxy) StreamAggregatedResources(downstream DiscoveryStream) error {\n292: \tproxyLog.Debugf(\"accepted XDS connection from Envoy, forwarding to upstream XDS server\")\n293: \treturn p.handleStream(downstream)\n294: }"
+            },
+            {
+              "start_line": 350,
+              "end_line": 368,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go#L350-L368",
+              "text": "350: \tp.optsMutex.RLock()\n351: \topts := p.dialOptions\n352: \tp.optsMutex.RUnlock()\n353: \treturn grpc.DialContext(ctx, p.istiodAddress, opts...)\n354: }\n355: \n356: func (p *XdsProxy) handleUpstream(ctx context.Context, con *ProxyConnection, xds discovery.AggregatedDiscoveryServiceClient) error {\n357: \tlog := proxyLog.WithLabels(\"id\", con.conID)\n358: \tupstream, err := xds.StreamAggregatedResources(ctx,\n359: \t\tgrpc.MaxCallRecvMsgSize(defaultClientMaxReceiveMessageSize))\n360: \tif err != nil {\n361: \t\t// Envoy logs errors again, so no need to log beyond debug level\n362: \t\tlog.Debugf(\"failed to create upstream grpc client: %v\", err)\n363: \t\t// Increase metric when xds connection error, for example: forgot to restart ingressgateway or sidecar after changing root CA.\n364: \t\tmetrics.IstiodConnectionErrors.Increment()\n365: \t\treturn err\n366: \t}\n367: \tlog.Infof(\"connected to upstream XDS server: %s\", p.istiodAddress)\n368: \tdefer log.Debugf(\"disconnected from XDS server: %s\", p.istiodAddress)"
+            },
+            {
+              "start_line": 455,
+              "end_line": 466,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go#L455-L466",
+              "text": "455: \t\t\tproxyLog.Debugf(\"request for type url %s\", req.TypeUrl)\n456: \t\t\tmetrics.XdsProxyRequests.Increment()\n457: \t\t\tif req.TypeUrl == model.ExtensionConfigurationType {\n458: \t\t\t\tif req.VersionInfo != \"\" {\n459: \t\t\t\t\tp.ecdsLastAckVersion.Store(req.VersionInfo)\n460: \t\t\t\t}\n461: \t\t\t\tp.ecdsLastNonce.Store(req.ResponseNonce)\n462: \t\t\t}\n463: \t\t\tif err := con.upstream.Send(req); err != nil {\n464: \t\t\t\terr = fmt.Errorf(\"send error for type url %s: %v\", req.TypeUrl, err)\n465: \t\t\t\tupstreamErr(con, err)\n466: \t\t\t\treturn"
+            },
+            {
+              "start_line": 525,
+              "end_line": 529,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go#L525-L529",
+              "text": "525: \t\t\tdefault:\n526: \t\t\t\tforwardToEnvoy(con, resp)\n527: \t\t\t}\n528: \t\tcase resp := <-forwardEnvoyCh:\n529: \t\t\tforwardToEnvoy(con, resp)"
+            },
+            {
+              "start_line": 554,
+              "end_line": 579,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go#L554-L579",
+              "text": "554: func forwardToEnvoy(con *ProxyConnection, resp *discovery.DiscoveryResponse) {\n555: \tif !model.IsEnvoyType(resp.TypeUrl) && resp.TypeUrl != model.WorkloadType {\n556: \t\tproxyLog.Errorf(\"Skipping forwarding type url %s to Envoy as is not a valid Envoy type\", resp.TypeUrl)\n557: \t\treturn\n558: \t}\n559: \tif con.isClosed() {\n560: \t\tproxyLog.WithLabels(\"id\", con.conID).Errorf(\"downstream dropped xds push to Envoy, connection already closed\")\n561: \t\treturn\n562: \t}\n563: \tif err := sendDownstream(con.downstream, resp); err != nil {\n564: \t\terr = fmt.Errorf(\"send error for type url %s: %v\", resp.TypeUrl, err)\n565: \t\tdownstreamErr(con, err)\n566: \t\treturn\n567: \t}\n568: }\n569: \n570: // sendDownstream sends discovery response.\n571: func sendDownstream(downstream adsStream, response *discovery.DiscoveryResponse) error {\n572: \ttStart := time.Now()\n573: \tdefer func() {\n574: \t\t// This is a hint to help debug slow responses.\n575: \t\tif time.Since(tStart) > 10*time.Second {\n576: \t\t\tproxyLog.Warnf(\"sendDownstream took %v\", time.Since(tStart))\n577: \t\t}\n578: \t}()\n579: \treturn downstream.Send(response)"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pkg/kube/inject/inject.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/istio--istio--4e2c1c57--pkg--kube--inject--inject.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:09:57.271110+00:00",
+          "source": "reused_cache",
+          "sha256": "6ac851e93fcb82bb937401c710c05a5a0bb15311ceb5568d45ae2ff9d6ca6289",
+          "line_count": 999,
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/6d9d38f65ef29e10584d9485b2dce24d002f9fb07a7bbf17ebf0a4b82514a8dc.txt",
+          "role": "secondary_deployment_context",
+          "proves": "A opção de injeção do sidecar é preservada como contexto, sem ser usada sozinha para provar a malha.",
+          "inspected_ranges": [
+            [
+              221,
+              232
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 221,
+              "end_line": 232,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go#L221-L232",
+              "text": "221: \tvar inject bool\n222: \n223: \t// The sidecar.istio.io/inject *annotation* has been deprecated since Istio 1.11 in favor of\n224: \t// the sidecar.istio.io/inject *label* and is no longer honored here.\n225: \tobjectSelector := metadata.GetLabels()[label.SidecarInject.Name]\n226: \tswitch objectSelector {\n227: \tcase \"true\":\n228: \t\tinject = true\n229: \tcase \"false\":\n230: \t\tinject = false\n231: \tcase \"\":\n232: \t\tuseDefault = true"
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://istio.io/latest/docs/ops/deployment/architecture/",
+          "scope": "A documentação primária descreve o plano de controle Istiod e o plano de dados de proxies."
+        },
+        {
+          "url": "https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol",
+          "scope": "O protocolo primário documenta a entrega de configuração dinâmica por DiscoveryRequest/DiscoveryResponse. As fontes fixadas são a prova do mecanismo."
+        }
+      ],
+      "reused_identity_packet": {
+        "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/rare-security-recommendations.json",
+        "sha256": "f47fef6f1f7af1dc1ca6082043d03b1a9431f8d44070fae34175390fc73a8d6d",
+        "scope": "Suporte complementar da emissão e distribuição de identidade em Istio no mesmo SHA; não é revisão independente nem prova de implantação."
+      },
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "Istio inject.go proves optional proxy injection and Envoy server.cc proves a proxy server/xDS machinery. Row claims generation of connection/traffic configuration, but no captured Istio control-plane service discovery or policy-to-Envoy configuration source is selected. Add that actual control-plane/data-plane path; sidecar injection alone cannot close Service Mesh."
+    }
+  ]
+}

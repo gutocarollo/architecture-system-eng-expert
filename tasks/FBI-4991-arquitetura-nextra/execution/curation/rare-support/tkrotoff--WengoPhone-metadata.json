@@ -1,0 +1,8 @@
+{
+  "repository": "tkrotoff/WengoPhone",
+  "default_branch": "master",
+  "sha": "f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39",
+  "description": "SIP VoIP client",
+  "license": null,
+  "observed_utc": "2026-10-15T01:43:50.501380+00:00"
+}

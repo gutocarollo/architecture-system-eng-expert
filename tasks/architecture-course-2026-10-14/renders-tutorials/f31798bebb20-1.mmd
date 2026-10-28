@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant C as Cliente local
+    participant K as Registro em memória
+    participant E as Efeito simulado
+    C->>K: key-01 + slot-01
+    K->>E: cria uma reserva
+    E-->>K: reservation-01
+    K-->>C: OWN + resposta
+    C->>K: repete key-01 + slot-01
+    K-->>C: HIT + resposta salva
+    C->>K: key-01 + slot-02
+    K-->>C: MISMATCH 422

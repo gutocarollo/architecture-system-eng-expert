@@ -1,0 +1,79 @@
+{
+  "observed_at": "2026-10-15T03:11:08.608825+00:00",
+  "scope": "ISOLATED_SYNTHETIC_POSTGRESQL",
+  "production_execution": false,
+  "postgres_version": "postgres (PostgreSQL) 16.15 (Homebrew)",
+  "isolation_verified": true,
+  "revision": {
+    "before": {
+      "stale_writer_rejected": false,
+      "azure_id": "AZURE-OLD",
+      "current_rows": 1
+    },
+    "after": {
+      "stale_writer_rejected": true,
+      "azure_id": "AZURE-CONFIRMED",
+      "current_rows": 1
+    }
+  },
+  "verdict": "PASS",
+  "temporary_server_stopped": true,
+  "source_manifest": {
+    "grain": {
+      "path": "backend/app/repositories/account.py",
+      "function": "get_family_revenue_by_period",
+      "before": "b1df42295ce42d593ae14f0a8a9092c28d1b410d",
+      "after": "05b2cacdddd59b968641b12d8d124bad1888392f",
+      "sources": {
+        "before": {
+          "sha": "b1df42295ce42d593ae14f0a8a9092c28d1b410d",
+          "file_sha256": "788284c5d78ec62e218e90db9f154d5c9be946530ee01c5a380112ad17e9deeb",
+          "function_lines": [
+            2234,
+            2301
+          ],
+          "template_sha256": "5d5e8c0c94f62ec4ef61d437e51afc43c258956e77b3a297d4dfa6ca339329c8",
+          "template": "grain-before.sql.template"
+        },
+        "after": {
+          "sha": "05b2cacdddd59b968641b12d8d124bad1888392f",
+          "file_sha256": "cc552670e7637f39b56382eb75ff80e7671143c1a6ec8263bf1e2f940f0ff6ec",
+          "function_lines": [
+            2234,
+            2324
+          ],
+          "template_sha256": "5763e281efee82243efd47520d27432fe59913720a0bb2ef2b5a25a147d13874",
+          "template": "grain-after.sql.template"
+        }
+      }
+    },
+    "revision": {
+      "path": "backend/app/repositories/employee_repository.py",
+      "function": "update_employee_scd2_without_commit",
+      "before": "3ad846049c32fedee09d458c8d685fb39b675b82",
+      "after": "c5e8efc5913355a8545b8a27b8b72e0828f77660",
+      "sources": {
+        "before": {
+          "sha": "3ad846049c32fedee09d458c8d685fb39b675b82",
+          "file_sha256": "f58f098e6f86dbac61b4817c1b82e124866bb510ed8356c24652bf19b7513305",
+          "function_lines": [
+            645,
+            791
+          ],
+          "template_sha256": "290e9ade7894a339e5086b2ce6e81744f080b306aa2f4ad7059f67c3ea28c3a9",
+          "template": "revision-before.sql.template"
+        },
+        "after": {
+          "sha": "c5e8efc5913355a8545b8a27b8b72e0828f77660",
+          "file_sha256": "e14d330276256e199052edf77ef2d4695305913ee0a5442357806388e782ebe2",
+          "function_lines": [
+            654,
+            819
+          ],
+          "template_sha256": "7705f280f959ae8bcf09016a9f1085d0ceb4918a78777c666e54143e7a7e34de",
+          "template": "revision-after.sql.template"
+        }
+      }
+    }
+  }
+}

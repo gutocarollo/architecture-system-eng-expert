@@ -1,0 +1,79 @@
+import type { AssetId } from '../shared-kernel/asset-id';
+import type { AssetClass, Market } from '../shared-kernel/market';
+import type { Currency } from '../shared-kernel/money';
+import type { Ticker } from '../shared-kernel/ticker';
+
+/** A tradable (or reference) instrument listed on a market. */
+export interface Instrument {
+  readonly id: AssetId;
+  readonly ticker: Ticker;
+  readonly name: string;
+  readonly assetClass: AssetClass;
+  readonly market: Market;
+  readonly currency: Currency | null;
+  readonly sector: string | null;
+  /** EGX board (`NOPL` main, `OOTC`, `SME`, `INDX`, `FNDS`…), when known. */
+  readonly board: string | null;
+  readonly tradable: boolean | null;
+  readonly suspended: boolean;
+  /** Price precision (EGX quotes have 2 or 3 decimals). */
+  readonly priceDecimals: number | null;
+  readonly description?: string | null;
+  readonly logoUrl?: string | null;
+  /** Thndr's labels for the instrument (e.g. "Banks", "EGX30", "sharia", "Same Day Tradable"), when known. */
+  readonly tags?: readonly string[];
+}
+
+/**
+ * The point-in-time trading snapshot of an instrument: one marketwatch row in Egypt; elsewhere built from Thndr's bulk
+ * latest price (`quoteFromLatestPrice` in latest-price.ts), where only last, open, previous close, change, bid/ask and the price time
+ * are known and every other field is null.
+ */
+export interface Quote {
+  readonly instrumentId: AssetId;
+  readonly ticker: Ticker;
+  readonly name: string | null;
+  readonly sector: string | null;
+  /** EGX board (`NOPL` main, `INDX` for indices…), when known. */
+  readonly board: string | null;
+  readonly currency: Currency | null;
+  readonly last: number | null;
+  readonly previousClose: number | null;
+  readonly open: number | null;
+  readonly high: number | null;
+  readonly low: number | null;
+  readonly change: number | null;
+  readonly changePercent: number | null;
+  readonly bid: number | null;
+  readonly bidSize: number | null;
+  readonly ask: number | null;
+  readonly askSize: number | null;
+  readonly volume: number | null;
+  readonly value: number | null;
+  readonly trades: number | null;
+  /** Daily price band (circuit breaker limits). */
+  readonly lowerLimit: number | null;
+  readonly upperLimit: number | null;
+  readonly week52High: number | null;
+  readonly week52Low: number | null;
+  readonly peRatio: number | null;
+  readonly eps: number | null;
+  readonly dividendYieldPercent: number | null;
+  readonly listedShares: number | null;
+  readonly marketCap: number | null;
+  readonly averageVolume30d: number | null;
+  readonly averageVolume5d: number | null;
+  readonly averageVolume90d: number | null;
+  /** Price of today's last trade as Thndr sends it: 0 when nothing traded yet today (then `last` is the close). */
+  readonly lastTradePrice: number | null;
+  readonly lastTradeVolume: number | null;
+  readonly suspended: boolean;
+  /** Time of the last trade; outside Egypt, the time of the latest price Thndr reports. */
+  readonly lastTradeAt: Date | null;
+}
+
+/** Relative volume in percent of the 30-day average, as ThndrX computes it. */
+export function relativeVolume(quote: Pick<Quote, 'volume' | 'averageVolume30d'>): number | null {
+  if (quote.volume === null || !quote.averageVolume30d) return null;
+  return (quote.volume / quote.averageVolume30d) * 100;
+}

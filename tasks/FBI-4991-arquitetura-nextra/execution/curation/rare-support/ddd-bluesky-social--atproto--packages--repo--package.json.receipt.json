@@ -1,0 +1,11 @@
+{
+  "repo": "bluesky-social/atproto",
+  "path": "packages/repo/package.json",
+  "revision": "388dac9f7fdfa5ba8e4af08217b4afdc30d993ee",
+  "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/repo/package.json",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:11:07.336765+00:00",
+  "sha256": "cd8cff38aefd0fb9642fe8fee017646795e28e9ab6fa2ba871821b1a2e3c3589",
+  "line_count": 49,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-bluesky-social--atproto--packages--repo--package.json"
+}

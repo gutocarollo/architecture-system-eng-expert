@@ -1,0 +1,17 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "referencia/catalogo/17-padroes-classicos-gof",
+  "document_sha256": "c66ad891424d7e0475a7457f9c4567f092c8218d12fe421ed694bf513b0649b7",
+  "context_sha256": "9592e5e145745503e06a06708a5c587b06a1a68a8a580d80fbf04efa7b77444a",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "original-catalog",
+    "s2",
+    "l2c"
+  ]
+}

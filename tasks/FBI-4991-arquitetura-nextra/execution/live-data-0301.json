@@ -1,0 +1,28 @@
+{
+  "sql": "SELECT inet_server_addr()::text AS server_address, inet_server_port() AS server_port, current_database() AS database_name, current_user AS role_name, COUNT(*) AS row_count, COUNT(DISTINCT movement_adjusted_sk) AS distinct_movement_keys, MAX(movement_date) AS latest_movement_date, COUNT(*) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01') AS october_movement_count, ROUND(SUM(brl_amount) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01')::numeric, 2) AS october_signed_brl_amount, clock_timestamp() AS observed_at FROM public.rpt_inflow__movement_adjusted;",
+  "result": {
+    "rows": [
+      {
+        "server_address": "192.168.254.137/32",
+        "server_port": 5432,
+        "database_name": "faz_capital",
+        "role_name": "augusto_carollo",
+        "row_count": 557731,
+        "distinct_movement_keys": 557731,
+        "latest_movement_date": "2026-10-08",
+        "october_movement_count": 3380,
+        "october_signed_brl_amount": "18742122.16",
+        "observed_at": "2026-10-15 00:01:35.715697-03:00"
+      }
+    ],
+    "row_count": 1,
+    "returned_row_count": 1,
+    "truncated": false,
+    "max_rows": 1
+  },
+  "source": "MCP postgres: 192.168.254.137:5432/faz_capital",
+  "graph_snapshot": "2026-10-13T03:08:04+00:00",
+  "graph_runtime_stale": true,
+  "graph_source_mode": "built",
+  "graph_data_dir": "/Users/augustocarollo/Developer.noindex/fazgraph-canonical-v4/data"
+}

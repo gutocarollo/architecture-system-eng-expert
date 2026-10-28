@@ -1,0 +1,13 @@
+{
+  "repo": "gravitational/teleport",
+  "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+  "path": "lib/services/ssh_access_checker.go",
+  "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/ssh_access_checker.go",
+  "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/ssh_access_checker.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--services--ssh_access_checker.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.052909+00:00",
+  "sha256": "d31c7f02502ced4cc7c0b60396a67c861a5e072bbc0f4ebba2ac76994a5d925c",
+  "line_count": 302,
+  "source": "raw_primary"
+}

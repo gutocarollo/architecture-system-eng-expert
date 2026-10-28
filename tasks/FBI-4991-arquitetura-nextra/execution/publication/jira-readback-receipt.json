@@ -1,0 +1,16 @@
+{
+  "observed_at": "2026-10-15T19:06:05.316135+00:00",
+  "verdict": "PASS",
+  "issue_key": "FBI-4991",
+  "issue_type": "10006",
+  "field": "customfield_10054",
+  "remote_updated": "2026-10-15T16:05:26.886-0300",
+  "original_blocks_preserved": 63,
+  "final_blocks": 74,
+  "full_adf_matches_request": true,
+  "canonical_adf_sha256": "81838366c6db0a1d96fc0ae2bec98dbcbceab97bcceb8ee8a1704903f1c95f1b",
+  "status_preserved": "In Progress",
+  "resolution_preserved": null,
+  "read_format": "Raw content JSON carries full ADF; structuredContent renders the custom rich-text field as Markdown.",
+  "catalog_fields_mutated": false
+}

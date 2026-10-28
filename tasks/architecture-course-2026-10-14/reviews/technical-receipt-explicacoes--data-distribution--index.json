@@ -1,0 +1,24 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "explicacoes/data-distribution/index",
+  "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+  "context_sha256": "c58ca1b97d6dda4d28533ae09e2ebc3eb84f0679ed4672b290e4558ef2007e4a",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "bootstrap",
+    "idempotency-code",
+    "inflow-query",
+    "l4c",
+    "l6a",
+    "original-catalog",
+    "original-request",
+    "pending-intent-code",
+    "s4",
+    "s4-reference-repair",
+    "s6"
+  ]
+}

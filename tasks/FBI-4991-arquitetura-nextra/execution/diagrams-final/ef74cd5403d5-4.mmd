@@ -1,0 +1,8 @@
+flowchart LR
+    App["Airflow envia transação"] --> P["Primário airflow-pg-2"]
+    P --> R1["Standby airflow-pg-1"]
+    P --> R3["Standby airflow-pg-3"]
+    R1 -. "confirmação elegível" .-> Gate["ANY 1: aguarda um standby"]
+    R3 -. "confirmação alternativa" .-> Gate
+    Gate --> App
+    Gate -->|"nenhum satisfaz a condição"| Pending["Escrita pode esperar"]

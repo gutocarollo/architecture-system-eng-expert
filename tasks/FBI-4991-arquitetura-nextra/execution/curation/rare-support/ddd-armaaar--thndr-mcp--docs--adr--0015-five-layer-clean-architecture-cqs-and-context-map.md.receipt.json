@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:02:17.272026+00:00",
+  "sha256": "8bac1f5c296cc32363a000ae88248da14b029211f575a382d7b4539c6102308c",
+  "line_count": 70,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--docs--adr--0015-five-layer-clean-architecture-cqs-and-context-map.md"
+}

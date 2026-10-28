@@ -1,0 +1,16 @@
+classDiagram
+    class ReadOperation {
+        read()
+    }
+    class ProviderPort {
+        fetch()
+    }
+    class PostgresProvider {
+        fetch()
+    }
+    class SalesforceProvider {
+        fetch()
+    }
+    ReadOperation --> ProviderPort : usa um contrato
+    PostgresProvider ..|> ProviderPort : implementa
+    SalesforceProvider ..|> ProviderPort : implementa

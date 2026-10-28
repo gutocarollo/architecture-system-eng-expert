@@ -1,0 +1,17 @@
+{
+  "families": [
+    {
+      "case_id": "airflow-lock-retry",
+      "title": "Uma falha de lock derruba a tarefa do Airflow",
+      "destinations": {
+        "journey": "/jornadas/airflow-lock-retry/",
+        "explanation": "/explicacoes/casos/airflow-lock-retry/",
+        "tutorial": "/tutoriais/casos/airflow-lock-retry/",
+        "how_to": "/guias/casos/airflow-lock-retry/",
+        "reference": "/referencia/casos/airflow-lock-retry/"
+      },
+      "kind": "historical",
+      "lab": "labs/airflow-lock-retry/run.py"
+    }
+  ]
+}

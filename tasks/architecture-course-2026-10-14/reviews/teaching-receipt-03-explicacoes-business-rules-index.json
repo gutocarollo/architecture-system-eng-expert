@@ -1,0 +1,17 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "explicacoes/business-rules/index",
+  "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+  "context_sha256": "7dda576596fcc57569b55bd6500ba1ccc894d87df659305fe8c3dc82b6f61228",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "original-catalog",
+    "s2",
+    "l2b"
+  ]
+}

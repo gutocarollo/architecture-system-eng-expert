@@ -1,0 +1,73 @@
+[
+  {
+    "command": "check-packet",
+    "exit_code": 0,
+    "result": {
+      "ok": true,
+      "command": "check-packet",
+      "ready": false,
+      "status": "DRAFT"
+    }
+  },
+  {
+    "command": "gate",
+    "exit_code": 1,
+    "result": {
+      "ok": false,
+      "errors": [
+        {
+          "code": "PACKET_NOT_READY",
+          "message": "Gate requires packet status READY."
+        },
+        {
+          "code": "INVENTORY_EMPTY",
+          "message": "Gate cannot infer absence of material items from an empty inventory."
+        },
+        {
+          "code": "COVERAGE_OPEN",
+          "message": "Gate requires closed coverage.",
+          "subject": "L0"
+        },
+        {
+          "code": "COVERAGE_OPEN",
+          "message": "Gate requires closed coverage.",
+          "subject": "L1"
+        },
+        {
+          "code": "COVERAGE_OPEN",
+          "message": "Gate requires closed coverage.",
+          "subject": "L2"
+        },
+        {
+          "code": "COVERAGE_OPEN",
+          "message": "Gate requires closed coverage.",
+          "subject": "L3"
+        },
+        {
+          "code": "COVERAGE_OPEN",
+          "message": "Gate requires closed coverage.",
+          "subject": "L4"
+        },
+        {
+          "code": "DOCUMENTS_EMPTY",
+          "message": "Gate requires at least one document."
+        },
+        {
+          "code": "SOURCE_REVISION_UNPINNED",
+          "message": "Gate requires an explicit source revision.",
+          "subject": "project"
+        },
+        {
+          "code": "SOURCE_REVISION_UNPINNED",
+          "message": "Gate requires an explicit source revision.",
+          "subject": "makershub-help"
+        },
+        {
+          "code": "SOURCE_REVISION_UNPINNED",
+          "message": "Gate requires an explicit source revision.",
+          "subject": "workflow-evidence"
+        }
+      ]
+    }
+  }
+]

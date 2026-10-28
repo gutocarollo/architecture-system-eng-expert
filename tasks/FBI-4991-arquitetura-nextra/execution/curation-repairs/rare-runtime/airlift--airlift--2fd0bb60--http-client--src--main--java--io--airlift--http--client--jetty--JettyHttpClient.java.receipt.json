@@ -1,0 +1,12 @@
+{
+  "repo": "airlift/airlift",
+  "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+  "path": "http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java",
+  "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java",
+  "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--http-client--src--main--java--io--airlift--http--client--jetty--JettyHttpClient.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:12.504760+00:00",
+  "sha256": "f66f1018c510ba8f6a1af46a8e1b55b4ffc67b7f564333af7006162d7615097c",
+  "line_count": 1377
+}

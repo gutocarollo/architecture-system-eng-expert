@@ -1,0 +1,10 @@
+flowchart TD
+    I["Advisor do tenant A pede objeto do tenant B"] --> B["Antes: verifica apenas papel advisor"]
+    B --> X["Permite objeto de outro tenant"]
+    I --> A["financial.py::access_policy confere objeto"]
+    A --> Q{"Papel, tenant e vínculo coincidem?"}
+    Q -->|não| R["Recusa o acesso"]
+    Q -->|sim| C{"Audience, validade e chave são aceitas?"}
+    C -->|não| R
+    C -->|sim| W["Prossegue no modelo de política"]
+    W --> L["Assinatura, mTLS e firewall não são executados aqui"]

@@ -1,0 +1,12 @@
+flowchart LR
+    subgraph ProposedMap[Mapa de contextos proposto para estudo]
+        Qualification[Qualificação]
+        Telephony[Telefonia]
+        Insurance[Indicadores de Seguros]
+        ExternalCrm[Modelo externo Salesforce]
+        Batch[Processamento D1]
+    end
+    Telephony -. contrato a confirmar .-> Qualification
+    Qualification -. intenção e resultado a confirmar .-> Batch
+    ExternalCrm -. tradução a definir .-> Qualification
+    ExternalCrm -. leitura e significado a confirmar .-> Insurance

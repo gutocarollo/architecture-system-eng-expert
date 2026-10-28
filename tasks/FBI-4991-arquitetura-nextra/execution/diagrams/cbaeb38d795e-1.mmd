@@ -1,0 +1,4 @@
+flowchart LR
+    Query[Consulta hipotética de outubro] --> P[Uma tabela particionada no mesmo PostgreSQL]
+    P --> Oct[Partição de outubro]
+    P -. outras partes evitadas se o plano permitir .-> Other[Partições de outros meses]

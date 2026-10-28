@@ -1,0 +1,15 @@
+flowchart TD
+    I["SDR entra por OPP aberta fictícia"] --> B["Antes: salesforce_integration.py::execute_r1_from_opportunity_flow"]
+    B --> C["Opportunity.create gera outra OPP"]
+    I --> A["Depois: qualify_service.py::qualify identifica OPP"]
+    A --> V["super_r1_service.py::opportunity_entry_refusal"]
+    V --> P{"OPP aberta e permitida?"}
+    P -->|não| R["Ganha ou perdida: 409; outro tipo: 422"]
+    P -->|sim| L["_claim_opportunity_entry: scope e actor fixos mais OPP"]
+    L --> O{"Claim é OWN?"}
+    O -->|não| F["409: outro agendamento em andamento"]
+    O -->|sim| E["execute_r1_from_opportunity_flow usa source_opp_id"]
+    E --> K["Conserva OPP e pula create"]
+    K --> D["Passos de Event e owner: doubles no laboratório"]
+    D --> W["Código histórico aguarda writers antes de liberar"]
+    W --> N["Esse último ciclo de thread não é executado pelo probe"]

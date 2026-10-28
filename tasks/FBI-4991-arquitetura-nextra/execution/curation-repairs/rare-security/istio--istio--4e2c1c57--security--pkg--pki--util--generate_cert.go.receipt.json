@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "security/pkg/pki/util/generate_cert.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/generate_cert.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/generate_cert.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--pki--util--generate_cert.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T04:02:16.745571+00:00",
+  "sha256": "58631a26ae2943a4f5719b7b86f5574539eb5ecf437f1a0b5c917ea42fc68a8e",
+  "line_count": 469,
+  "source": "raw_primary"
+}

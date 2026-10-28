@@ -1,0 +1,389 @@
+---
+title: "Curadoria: APIs e integração"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de APIs e integração."
+diataxis: reference
+---
+
+# Curadoria: APIs e integração
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## Adapter
+
+O identificador canônico é `adapter`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgresEngineSpec fornece o contrato de engine esperado pelo Superset e traduz as particularidades do PostgreSQL. A base Dialect SQLAlchemy separa a interface do engine das implementações DBAPI.
+
+A base de estudo é [sqlalchemy/sqlalchemy / interfaces.py @ f46ead80](https://github.com/sqlalchemy/sqlalchemy/blob/f46ead8007f8f814f0639b785c637b29afdaec79/lib/sqlalchemy/engine/interfaces.py); licença [MIT](https://github.com/sqlalchemy/sqlalchemy/blob/f46ead8007f8f814f0639b785c637b29afdaec79/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / postgres.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/db_engine_specs/postgres.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/db_engine_specs/postgres.py#L371-L377). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O exemplo é o adaptador de um engine. Ele não estabelece uma ACL de domínio inteira nem uma política universal de integração.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#adapter). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Ambassador
+
+O identificador canônico é `ambassador`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O sidecar Istio representa o cliente no tráfego de saída capturado. A injeção prepara o proxy, as regras iptables redirecionam a saída selecionada para ele e os listeners outbound encaminham essa conexão ao destino configurado.
+
+A base de estudo é [envoyproxy/envoy / tcp_proxy.cc @ 960eacbb](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/tcp_proxy/tcp_proxy.cc); licença [Apache-2.0](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE). A aplicação ou candidato de aplicação é [istio/istio / inject.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / run.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/istio-iptables/pkg/capture/run.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / listener.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/listener.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go#L223-L229). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A correspondência Ambassador está limitada ao caminho de saída efetivamente capturado pela configuração. A presença de qualquer sidecar, sozinha, não prova esse papel; tráfego excluído do redirecionamento segue outro caminho.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#ambassador). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Anti-Corruption Layer
+
+O identificador canônico é `anti-corruption-layer`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O cliente financeiro thndr-mcp conserva os DTOs do fornecedor na camada de dados e os traduz para modelos próprios. A tradução de preços distingue negócio executado, fechamento, valor de cota e taxa; resolve a precedência entre as leituras e mantém a natureza escolhida no resultado. A tradução de carteira valida os dados e aplica a política de valor e moeda do domínio. Os repositórios chamam essas funções antes de devolver os modelos à aplicação.
+
+A base de estudo é [ContextMapper/context-mapper-dsl / ContextMappingDSL.xtext @ 995f486a](https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext); licença [Apache-2.0](https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE). A aplicação ou candidato de aplicação é [armaaar/thndr-mcp / README.md @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / market-data-repository.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/market-data-repository.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / prices.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/prices.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / portfolio.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/portfolio.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md#L132-L142). O produto identifica os tradutores como sua camada anticorrupção.
+
+O recorte mostra escolhas semânticas e validação além da troca de nomes de campos. A correção financeira dessas políticas não foi certificada nem foi feita uma chamada à API financeira nesta pesquisa. Context Mapper é uma base de modelagem comparada; não foi identificado como dependência do cliente.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#anti-corruption-layer). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## API Composition
+
+O identificador canônico é `api-composition`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O endpoint de consulta Grafana entrega a requisição ao serviço de consultas. O pipeline representa fontes e expressões como nós, executa as consultas dos provedores e reúne os resultados por refID na resposta. GraphQL Java fornece uma base alternativa que compõe os resultados dos resolvers de uma consulta.
+
+A base de estudo é [graphql-java/graphql-java / AsyncExecutionStrategy.java @ 4c096208](https://github.com/graphql-java/graphql-java/blob/4c096208ba7203c92ed6617ddfdc35653c8aca11/src/main/java/graphql/execution/AsyncExecutionStrategy.java); licença [MIT](https://github.com/graphql-java/graphql-java/blob/4c096208ba7203c92ed6617ddfdc35653c8aca11/LICENSE.md). A aplicação ou candidato de aplicação é [grafana/grafana / ds_query.go @ ed943820](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/api/ds_query.go); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/LICENSE); [grafana/grafana / graph.go @ ed943820](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/expr/graph.go); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/LICENSE); [grafana/grafana / nodes.go @ ed943820](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/expr/nodes.go); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/LICENSE); [grafana/grafana / service.go @ ed943820](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/expr/service.go); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/api/ds_query.go#L80-L86). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A agregação comprovada é o caminho de consultas e expressões do servidor Grafana. As chamadas podem falhar por fonte e as dependências de uma expressão podem impedir seu resultado. Isso não implica uma transação entre provedores nem descreve todo gateway HTTP como agregador.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#api-composition). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## API Gateway
+
+O identificador canônico é `api-gateway`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+APISIX casa a rota, aplica plugins de limite e autenticação e encaminha a requisição por seu gateway.
+
+A base de estudo é [openresty/lua-nginx-module / ngx_http_lua_module.c @ 62d9257f](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/src/ngx_http_lua_module.c); licença [BSD-2-Clause](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/README.markdown#copyright-and-license). A aplicação ou candidato de aplicação é [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / jwt-auth.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/jwt-auth.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua#L36-L42). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#api-gateway). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Backend for Frontend (BFF)
+
+O identificador canônico é `backend-for-frontend-bff`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O BFF de observabilidade GitLab recebe o pedido da interface, confere a permissão do projeto e devolve os tokens da sessão do portal em uma resposta adequada ao navegador. O controller declara explicitamente esse papel para a interface de observabilidade.
+
+A base de estudo é [rails/rails / api.rb @ ba3572c8](https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/actionpack/lib/action_controller/api.rb); licença [MIT](https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/MIT-LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / session_actions.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/controllers/concerns/observability/session_actions.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE); [gitlabhq/gitlabhq / sessions_controller.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/controllers/projects/observability/sessions_controller.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/controllers/concerns/observability/session_actions.rb#L2-L8). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A prova é o componente BFF de autenticação do portal. Ela não demonstra agregação de múltiplas APIs nem classifica todas as APIs GitLab como BFF.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#backend-for-frontend-bff). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Facade
+
+O identificador canônico é `facade`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+A classe Celery oferece a entrada que reúne configuração, conexão com broker, tarefas e backend. Superset usa essa entrada para montar sua aplicação de processamento assíncrono.
+
+A base de estudo é [celery/celery / base.py @ 33868c3d](https://github.com/celery/celery/blob/33868c3dbe98acd236ac95648ed7f1effb7b2385/celery/app/base.py); licença [BSD-3-Clause](https://github.com/celery/celery/blob/33868c3dbe98acd236ac95648ed7f1effb7b2385/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / celery_app.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A fachada simplifica a interface de uso. Ela não elimina falhas do broker, repetição de tarefas nem a obrigação de configurar os workers.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#facade). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Gateway Aggregation
+
+O identificador canônico é `gateway-aggregation`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O endpoint de consulta Grafana entrega a requisição ao serviço de consultas. O pipeline representa fontes e expressões como nós, executa as consultas dos provedores e reúne os resultados por refID na resposta. GraphQL Java fornece uma base alternativa que compõe os resultados dos resolvers de uma consulta.
+
+A base de estudo é [graphql-java/graphql-java / AsyncExecutionStrategy.java @ 4c096208](https://github.com/graphql-java/graphql-java/blob/4c096208ba7203c92ed6617ddfdc35653c8aca11/src/main/java/graphql/execution/AsyncExecutionStrategy.java); licença [MIT](https://github.com/graphql-java/graphql-java/blob/4c096208ba7203c92ed6617ddfdc35653c8aca11/LICENSE.md). A aplicação ou candidato de aplicação é [grafana/grafana / ds_query.go @ ed943820](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/api/ds_query.go); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/LICENSE); [grafana/grafana / graph.go @ ed943820](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/expr/graph.go); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/LICENSE); [grafana/grafana / nodes.go @ ed943820](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/expr/nodes.go); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/LICENSE); [grafana/grafana / service.go @ ed943820](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/expr/service.go); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/grafana/grafana/blob/ed943820ed6f445b940a0d8d7a9a08deebfae4b6/pkg/api/ds_query.go#L80-L86). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A agregação comprovada é o caminho de consultas e expressões do servidor Grafana. As chamadas podem falhar por fonte e as dependências de uma expressão podem impedir seu resultado. Isso não implica uma transação entre provedores nem descreve todo gateway HTTP como agregador.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#gateway-aggregation). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Gateway Offloading
+
+O identificador canônico é `gateway-offloading`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+APISIX casa a rota, aplica plugins de limite e autenticação e encaminha a requisição por seu gateway.
+
+A base de estudo é [openresty/lua-nginx-module / ngx_http_lua_module.c @ 62d9257f](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/src/ngx_http_lua_module.c); licença [BSD-2-Clause](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/README.markdown#copyright-and-license). A aplicação ou candidato de aplicação é [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / jwt-auth.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/jwt-auth.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua#L36-L42). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#gateway-offloading). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Gateway Routing
+
+O identificador canônico é `gateway-routing`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+APISIX casa a rota, aplica plugins de limite e autenticação e encaminha a requisição por seu gateway.
+
+A base de estudo é [openresty/lua-nginx-module / ngx_http_lua_module.c @ 62d9257f](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/src/ngx_http_lua_module.c); licença [BSD-2-Clause](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/README.markdown#copyright-and-license). A aplicação ou candidato de aplicação é [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / jwt-auth.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/jwt-auth.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua#L36-L42). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#gateway-routing). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## GraphQL Federation
+
+O identificador canônico é `graphql-federation`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+A CLI lê os SDLs dos subgraphs e chama a composição. O resultado fornece schema federado e configuração por subgraph. O builder gera a configuração do router com URLs, keys, requires e provides. O loader do router converte esses dados em datasources e metadados do planejador. O prehandler planeja a consulta contra RouterSchema, e o handler executa o plano com o Resolver. Para uma busca aninhada de entidade, a biblioteca constrói representations com os campos exigidos e gera _entities; o loader executa a árvore de fetches em sequência ou paralelo e combina seus resultados.
+
+A base de estudo é [wundergraph/graphql-go-tools / graphql_datasource.go @ 4d20fae7](https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go); licença [MIT](https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/LICENSE); [wundergraph/graphql-go-tools / representation_variable.go @ 4d20fae7](https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/representation_variable.go); licença [MIT](https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/LICENSE); [wundergraph/graphql-go-tools / loader.go @ 4d20fae7](https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go); licença [MIT](https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/LICENSE). A aplicação ou candidato de aplicação é [wundergraph/cosmo / operation_planner.go @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/operation_planner.go); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / go.mod @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/go.mod); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / compose.ts @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / utils.ts @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/utils.ts); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / federation.ts @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/federation/federation.ts); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / federation-factory.ts @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / builder.ts @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/shared/src/router-config/builder.ts); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / factoryresolver.go @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/factoryresolver.go); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / executor.go @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/executor.go); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / graphql_prehandler.go @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_prehandler.go); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE); [wundergraph/cosmo / graphql_handler.go @ 4879bb54](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_handler.go); licença [Apache-2.0](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/operation_planner.go#L74-L112). O router instancia plan.NewPlanner com PlanConfig e planeja contra RouterSchema.
+
+O recorte é o próprio router federado e sua ferramenta de composição; não se afirma uma adoção por uma empresa cliente ou um deployment medido. O caminho mostrado é GraphQL HTTP com entidades. Os ramos opcionais de gRPC, plugins e pub/sub não são necessários à classificação. Cosmo usa Apache-2.0 e a biblioteca selecionada usa MIT. O novo par dispensa Apollo Router e seu enquadramento de licença.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://cosmo-docs.wundergraph.com/router/intro). Contexto primário de suporte.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#graphql-federation). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## HATEOAS
+
+O identificador canônico é `hateoas`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+A API v3 OpenProject constrói a representação de um pacote de trabalho com links de ações e relações. O representer inclui ou omite ações conforme permissões e estado do recurso, e seus hrefs apontam para as operações disponíveis. O cliente descobre essas transições pela representação HAL recebida.
+
+A base de estudo é [trailblazer/roar / hal.rb @ 365b28be](https://github.com/trailblazer/roar/blob/365b28be85b61c43181f2868cb8f452f5945b4cf/lib/roar/json/hal.rb); licença [MIT](https://github.com/trailblazer/roar/blob/365b28be85b61c43181f2868cb8f452f5945b4cf/LICENSE). A aplicação ou candidato de aplicação é [opf/openproject / work_package_representer.rb @ 739ee9d2](https://github.com/opf/openproject/blob/739ee9d241f5ee24fd73a731376e2b92979857a6/lib/api/v3/work_packages/work_package_representer.rb); licença [GPL-3.0](https://github.com/opf/openproject/blob/739ee9d241f5ee24fd73a731376e2b92979857a6/LICENSE); [opf/openproject / single.rb @ 739ee9d2](https://github.com/opf/openproject/blob/739ee9d241f5ee24fd73a731376e2b92979857a6/lib/api/decorators/single.rb); licença [GPL-3.0](https://github.com/opf/openproject/blob/739ee9d241f5ee24fd73a731376e2b92979857a6/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/opf/openproject/blob/739ee9d241f5ee24fd73a731376e2b92979857a6/lib/api/v3/work_packages/work_package_representer.rb#L65-L71). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O recorte mostra links de ações condicionais na API HAL; a presença de uma URL relacionada isolada não bastaria para HATEOAS. O cliente ainda precisa respeitar método, payload e autorização. O exemplo não afirma que toda API REST implemente esse nível de navegação.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#hateoas). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Long Polling
+
+O identificador canônico é `long-polling`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+A aplicação Zulip mantém pedidos de eventos pendentes no servidor Tornado e devolve os eventos quando disponíveis.
+
+A base de estudo é [tornadoweb/tornado / web.py @ 8e759472](https://github.com/tornadoweb/tornado/blob/8e7594727c88891c7e7b4fb78219daa03d7f9922/tornado/web.py); licença [Apache-2.0](https://github.com/tornadoweb/tornado/blob/8e7594727c88891c7e7b4fb78219daa03d7f9922/LICENSE). A aplicação ou candidato de aplicação é [zulip/zulip / views.py @ 4dacd6db](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zerver/tornado/views.py); licença [Apache-2.0](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zerver/tornado/views.py#L65-L71). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#long-polling). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Polling
+
+O identificador canônico é `polling`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Prometheus percorre os alvos em loops de scrape e recolhe a resposta de métricas periodicamente.
+
+A base de estudo é [prometheus/client_golang / http.go @ 2b01b52f](https://github.com/prometheus/client_golang/blob/2b01b52f0c18088adf4cf7b0206acc1c3e55c7ab/prometheus/promhttp/http.go); licença [Apache-2.0](https://github.com/prometheus/client_golang/blob/2b01b52f0c18088adf4cf7b0206acc1c3e55c7ab/LICENSE). A aplicação ou candidato de aplicação é [prometheus/prometheus / scrape.go @ 6e69e843](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go); licença [Apache-2.0](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go#L159-L165). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#polling). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Proxy
+
+O identificador canônico é `proxy`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O protocolo RPC de VS Code devolve um proxy para a interface remota e encaminha as chamadas identificadas para o extension host. Comlink oferece uma base comparável de Proxy remoto.
+
+A base de estudo é [GoogleChromeLabs/comlink / comlink.ts @ 114a4a64](https://github.com/GoogleChromeLabs/comlink/blob/114a4a6448a855a613f1cb9a7c89290606c003cf/src/comlink.ts); licença [Apache-2.0](https://github.com/GoogleChromeLabs/comlink/blob/114a4a6448a855a613f1cb9a7c89290606c003cf/LICENSE). A aplicação ou candidato de aplicação é [microsoft/vscode / rpcProtocol.ts @ 5bed87aa](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/src/vs/workbench/services/extensions/common/rpcProtocol.ts); licença [MIT](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/LICENSE.txt).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/src/vs/workbench/services/extensions/common/rpcProtocol.ts#L239-L245). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A interface conserva chamadas de métodos, mas a comunicação acrescenta serialização, atraso e falhas remotas. Um proxy não transforma a chamada em operação local.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#proxy). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## REST
+
+O identificador canônico é `rest`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Na API do Zulip, messages é a coleção de mensagens: GET lista e POST envia uma mensagem. A URI que contém message_id representa uma mensagem específica e aceita leitura, alteração parcial e exclusão por GET, PATCH e DELETE. O dispatcher seleciona o handler pelo método da requisição. O Django REST Framework mostra uma base comparativa que oferece o mesmo tipo de mapeamento entre recursos e verbos.
+
+A base de estudo é [encode/django-rest-framework / routers.py @ 14998d0a](https://github.com/encode/django-rest-framework/blob/14998d0a735f8ed6abd86751fd6984a9277a1d40/rest_framework/routers.py); licença [BSD-3-Clause](https://github.com/encode/django-rest-framework/blob/14998d0a735f8ed6abd86751fd6984a9277a1d40/LICENSE.md); [encode/django-rest-framework / viewsets.py @ 14998d0a](https://github.com/encode/django-rest-framework/blob/14998d0a735f8ed6abd86751fd6984a9277a1d40/rest_framework/viewsets.py); licença [BSD-3-Clause](https://github.com/encode/django-rest-framework/blob/14998d0a735f8ed6abd86751fd6984a9277a1d40/LICENSE.md). A aplicação ou candidato de aplicação é [zulip/zulip / urls.py @ 4dacd6db](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zproject/urls.py); licença [Apache-2.0](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/LICENSE); [zulip/zulip / rest.py @ 4dacd6db](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zerver/lib/rest.py); licença [Apache-2.0](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zproject/urls.py#L415-L427). A coleção messages aceita GET/POST; messages/&lt;message_id&gt; aceita GET/PATCH/DELETE com handlers distintos.
+
+A classificação é uma API HTTP orientada a recursos no recorte de mensagens. Não certifica todos os níveis de maturidade REST, HATEOAS nem a pureza de todos os endpoints do produto. Zulip usa seu próprio dispatcher Django, não os ViewSets do DRF. O POST de envio pode ter efeitos de entrega e não recebe uma promessa de idempotência por esta referência.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#rest). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Reverse Proxy
+
+O identificador canônico é `reverse-proxy`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+APISIX casa a rota, aplica plugins de limite e autenticação e encaminha a requisição por seu gateway.
+
+A base de estudo é [openresty/lua-nginx-module / ngx_http_lua_module.c @ 62d9257f](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/src/ngx_http_lua_module.c); licença [BSD-2-Clause](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/README.markdown#copyright-and-license). A aplicação ou candidato de aplicação é [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / jwt-auth.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/jwt-auth.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua#L36-L42). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#reverse-proxy). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## RPC
+
+O identificador canônico é `rpc`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+GitLab envia operações para o serviço Gitaly por RPC e usa a resposta da chamada.
+
+A base de estudo é [grpc/grpc-go / server.go @ 4d4d4284](https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/server.go); licença [Apache-2.0](https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / operation_service.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/gitaly_client/operation_service.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/gitaly_client/operation_service.rb#L27-L33). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#rpc). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Server-Sent Events
+
+O identificador canônico é `server-sent-events`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Home Assistant abre o endpoint de stream de eventos com content type text/event-stream e escreve eventos na resposta aberta.
+
+A base de estudo é [aio-libs/aiohttp / web_response.py @ 129d1b40](https://github.com/aio-libs/aiohttp/blob/129d1b400d04aab7c7e98b761b279dcc8aac7144/aiohttp/web_response.py); licença [Apache-2.0](https://github.com/aio-libs/aiohttp/blob/129d1b400d04aab7c7e98b761b279dcc8aac7144/LICENSE.txt). A aplicação ou candidato de aplicação é [home-assistant/core / __init__.py @ 40881ede](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/api/__init__.py); licença [Apache-2.0](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/api/__init__.py#L159-L165). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O stream é SSE do endpoint citado. A presença do contrato não prova reconexão sem perda ou autorização de todos os eventos do cliente.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#server-sent-events). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Service Mesh
+
+O identificador canônico é `service-mesh`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O controlador Kubernetes converte eventos de Service para o modelo do Istio e notifica a atualização. PushContext reúne o catálogo de serviços e as DestinationRules. O gerador CDS selecionado para ClusterType chama BuildClusters, que percorre os serviços visíveis ao sidecar, cria clusters e aplica a DestinationRule correspondente. applyTrafficPolicy altera o protobuf de cluster; por exemplo, LoadBalancerSettings_RANDOM vira Cluster_RANDOM. O servidor serializa esses recursos em DiscoveryResponse e os envia pelo stream xDS. No workload, o agente gera o bootstrap do Envoy com CDS/LDS via ADS e um cluster xds-grpc ligado ao socket local XDS. XdsProxy encaminha requisições para Istiod e respostas para Envoy. O consumidor CDS de Envoy recebe os recursos e chama addOrUpdateCluster ou removeCluster, atualizando sua configuração de comunicação.
+
+A base de estudo é [envoyproxy/envoy / cds_api_impl.cc @ 960eacbb](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_impl.cc); licença [Apache-2.0](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE); [envoyproxy/envoy / cds_api_helper.cc @ 960eacbb](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_helper.cc); licença [Apache-2.0](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE). A aplicação ou candidato de aplicação é [istio/istio / cluster.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / controller.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / push_context.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/model/push_context.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / discovery.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/discovery.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / discovery.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/bootstrap/discovery.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / cds.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/cds.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / cluster_builder.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_builder.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / cluster_traffic_policy.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_traffic_policy.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / ads.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/ads.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / xdsgen.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/xdsgen.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / agent.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/agent.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / envoy_bootstrap.json @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/packaging/common/envoy_bootstrap.json); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / proxy.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/envoy/proxy.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / xds_proxy.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE); [istio/istio / inject.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go#L64-L74). A geração real usa serviços visíveis ao proxy, percorre o ramo sidecar e aplica a política ao cluster antes de empacotá-lo.
+
+A prova é estática e delimitada ao caminho sidecar e CDS. Ela não mede um cluster em execução, entrega real de xDS, ACKs, convergência ou desempenho. A política concreta demonstrada é DestinationRule aplicada a clusters. O pacote não afirma ter seguido toda tradução de VirtualService/RDS, EDS ou todas as políticas possíveis. O bootstrap pode ser substituído por configuração customizada, e Istio também possui caminho ambient. Não se afirma que toda instalação use o mesmo template ou sidecar. Os SHAs fixam fontes Istio e Envoy que implementam a fronteira xDS v3. Não se afirma que o binário Envoy empacotado com esse snapshot Istio tenha sido construído exatamente do SHA Envoy escolhido como base. O pacote anterior de identidade foi reaproveitado como suporte complementar de segurança no mesmo SHA Istio; a classificação Service Mesh aqui se sustenta na cadeia de controle e dados demonstrada, sem depender apenas de certificado ou injeção.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://istio.io/latest/docs/ops/deployment/architecture/). Contexto primário de suporte.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol). Contexto primário de suporte.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#service-mesh). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Sidecar
+
+O identificador canônico é `sidecar`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Istio injeta o proxy Envoy no pod e gera sua configuração de conexão e tráfego.
+
+A base de estudo é [envoyproxy/envoy / server.cc @ 960eacbb](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/server/server.cc); licença [Apache-2.0](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE). A aplicação ou candidato de aplicação é [istio/istio / inject.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go#L223-L229). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O sidecar prova co localização e intermediação. Uma implantação precisa conferir as políticas para assegurar o serviço como mesh. Ambassador exige delimitar o caminho de saída.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#sidecar). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Webhook
+
+O identificador canônico é `webhook`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Zulip expõe API de mensagens e processa webhooks de GitHub. A base FastAPI permite comparar o contrato de entrada.
+
+A base de estudo é [fastapi/fastapi / routing.py @ 49a09a0d](https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/routing.py); licença [MIT](https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/LICENSE). A aplicação ou candidato de aplicação é [zulip/zulip / message_send.py @ 4dacd6db](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zerver/views/message_send.py); licença [Apache-2.0](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/LICENSE); [zulip/zulip / view.py @ 4dacd6db](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zerver/webhooks/github/view.py); licença [Apache-2.0](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zerver/views/message_send.py#L168-L174). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O trecho não demonstra WebSocket e esse conceito permanece pendente até localizar um consumidor real dessa conexão.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#webhook). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## WebSocket
+
+O identificador canônico é `websocket`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Home Assistant registra a rota WebSocket e cria WebSocketResponse do aiohttp. O handler prepara a conexão, valida a autenticação da sessão, recebe frames de comandos e entrega os dados ao dispatcher. Uma assinatura de eventos liga o barramento do aplicativo à fila de saída da conexão, que envia frames TEXT ao cliente. Assim, a aplicação usa uma conexão persistente para receber comandos e transmitir resultados e eventos.
+
+A base de estudo é [aio-libs/aiohttp / web_ws.py @ f17c631b](https://github.com/aio-libs/aiohttp/blob/f17c631bddcfd4ec712342db28f1d3381a3fec71/aiohttp/web_ws.py); licença [Apache-2.0](https://github.com/aio-libs/aiohttp/blob/f17c631bddcfd4ec712342db28f1d3381a3fec71/LICENSE.txt). A aplicação ou candidato de aplicação é [home-assistant/core / __init__.py @ 40881ede](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/__init__.py); licença [Apache-2.0](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md); [home-assistant/core / const.py @ 40881ede](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/const.py); licença [Apache-2.0](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md); [home-assistant/core / http.py @ 40881ede](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py); licença [Apache-2.0](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md); [home-assistant/core / auth.py @ 40881ede](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/auth.py); licença [Apache-2.0](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md); [home-assistant/core / connection.py @ 40881ede](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/connection.py); licença [Apache-2.0](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md); [home-assistant/core / commands.py @ 40881ede](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/commands.py); licença [Apache-2.0](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/api-and-interface-design/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/__init__.py#L64-L70). O setup do produto registra a view e os handlers de comandos.
+
+O recorte é o protocolo da API WebSocket do Home Assistant. O handshake normal exige autenticação da sessão; a revisão também aceita a entrada Unix do Supervisor já autenticada pelo middleware. Conexões, filas e assinaturas são encerradas na limpeza, e a fila tem limites. Não se atribui durabilidade ou replay dos eventos após uma desconexão. O código usa internals de aiohttp, por isso a dependência 3.14.5 foi conferida na revisão do aplicativo. Não houve implantação nem ensaio de rede nesta pesquisa.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://developers.home-assistant.io/docs/api/websocket/). A documentação primária descreve a rota, as fases de autenticação/comandos e a transmissão de eventos.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#websocket). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

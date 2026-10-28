@@ -1,0 +1,14 @@
+{
+  "mode": "candidate-parser-dry-run",
+  "canonical_docs": [
+    {
+      "id": "doc:architecture/architecture-system-eng-expert",
+      "kind": "document",
+      "path": "docs/canonical/operations/architecture-system-eng-expert.md",
+      "entity_key": null,
+      "lifecycle": "active_candidate"
+    }
+  ],
+  "existing_document_id_pattern_pass": true,
+  "global_source_writes": false
+}

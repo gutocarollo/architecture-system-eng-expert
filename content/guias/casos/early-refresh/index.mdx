@@ -1,0 +1,49 @@
+---
+asIndexPage: true
+title: "Verifique a proteção: a lista precisa continuar disponível"
+description: "Você aprenderá a separar a idade do valor, a renovação em andamento e o vencimento que obriga o leitor a esperar."
+diataxis: how-to
+---
+
+# Verifique a proteção: a lista precisa continuar disponível
+
+Continue o mesmo caso: [volte ao caso](/jornadas/early-refresh/); [entenda o mecanismo](/explicacoes/casos/early-refresh/); [execute a experiência](/tutoriais/casos/early-refresh/); [consulte contratos e fontes](/referencia/casos/early-refresh/).
+
+Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+
+## Antes de começar
+
+Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Prepare o ambiente local com `python3 labs/architecture/setup_labs.py`, conforme o tutorial; ele instala apenas as dependências fixadas na virtualenv do laboratório. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+
+## 1. Fixe o contrato e a fronteira
+
+Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use: TTL 1,0, janela antecipada 0,5, instantes 0,0; 0,6; 1,05 e respostas calls-v1/calls-v2. Registre a versão anterior, a versão proposta e o localizador `SingleFlightCache.get / _start_background_refresh`.
+
+## 2. Confira quem executa a decisão
+
+A versão nova usa early_ttl_seconds=0.5. A leitura em 0,6 devolve calls-v1 e inicia a renovação compartilhada. O roteiro libera essa renovação antes de avançar para 1,05. Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
+
+## 3. Repita a mesma condição em isolamento
+
+```sh
+python3 labs/architecture/early-refresh/run.py
+```
+
+Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
+
+## 4. Avalie a garantia adquirida
+
+A leitura em 1,05 recebe calls-v2 sem esperar. As duas versões realizam duas buscas no cenário concluído. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
+
+## 5. Feche a decisão com seu limite
+
+O relógio e o produtor são controlados. Se a renovação ainda estiver lenta quando houver expiração dura, a versão nova também pode precisar esperar. Não se provou uma redução de latência em produção. Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
+
+## Localizadores de consulta
+
+- `backend/app/utils/single_flight.py` foi preservado em `labs/architecture/early-refresh/before.py`, na versão `f34e4d3d22d9dcdb53074332dcbf7a48c254c221`, com SHA-256 `48b7e1c814452eaf495e52ff137d877d363472a2100c52fd9c4abca06da5f406`.
+- `backend/app/utils/single_flight.py` foi preservado em `labs/architecture/early-refresh/after.py`, na versão `a8bb7023f1ad080cb899cccfb73225231b28e235`, com SHA-256 `c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7`.
+
+Continue o mesmo caso: [volte ao caso](/jornadas/early-refresh/); [entenda o mecanismo](/explicacoes/casos/early-refresh/); [execute a experiência](/tutoriais/casos/early-refresh/); [consulte contratos e fontes](/referencia/casos/early-refresh/).
+
+O [mapa de conceitos deste caso](/jornadas/early-refresh/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

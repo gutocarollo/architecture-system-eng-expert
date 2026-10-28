@@ -1,0 +1,22 @@
+{
+  "round": "curation-HIGH-only-warm-recheck/1",
+  "mission_total": 100,
+  "mission_weight_affected": 30,
+  "mission_weight_source": "Reference source correctness and curation, original documentation mission.",
+  "unresolved_high": 51,
+  "decision_this_round_can_change": "repair or accept the repaired reference candidates",
+  "scores": {
+    "decision": 5,
+    "risk": 5,
+    "evidence": 5,
+    "blast_radius": 4,
+    "reuse": 5
+  },
+  "quality_factor_pct": 98,
+  "gross_gain_pct_of_whole": 29.4,
+  "opportunity_cost_pct_of_whole": 1,
+  "net_gain_pct_of_whole": 28.4,
+  "expected_loss_if_skipped_pct_of_whole": 15,
+  "round_decision": "DISPATCH",
+  "stop_condition": "Each original reviewer adjudicates only its twenty or31 repaired HIGHs on fa8e01d. Preserve259 unchanged fingerprints. No third source-review cycle; remaining highs become explicit delivery limits unless terminal material correction."
+}

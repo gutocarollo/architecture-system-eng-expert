@@ -1,0 +1,212 @@
+[
+  {
+    "case_id": "single-flight-cancel",
+    "path": "content/referencia/casos/single-flight-cancel/index.mdx",
+    "sha256": "496c9d8bcddc2471cb79218e01371b5d6c7df6e51e0f4fb974f2003a169832b7",
+    "probes": 0,
+    "receipt_observed_utc": "2026-10-15T01:35:29.888924+00:00",
+    "links": {
+      "journey": "/jornadas/single-flight-cancel/",
+      "explanation": "/explicacoes/casos/single-flight-cancel/",
+      "tutorial": "/tutoriais/casos/single-flight-cancel/",
+      "how_to": "/guias/casos/single-flight-cancel/",
+      "reference": "/referencia/casos/single-flight-cancel/"
+    }
+  },
+  {
+    "case_id": "early-refresh",
+    "path": "content/referencia/casos/early-refresh/index.mdx",
+    "sha256": "82cbb371e167bf1bbe8b745c0783dfccf4ecf148eface596fe9adec151652398",
+    "probes": 0,
+    "receipt_observed_utc": "2026-10-15T01:35:29.983178+00:00",
+    "links": {
+      "journey": "/jornadas/early-refresh/",
+      "explanation": "/explicacoes/casos/early-refresh/",
+      "tutorial": "/tutoriais/casos/early-refresh/",
+      "how_to": "/guias/casos/early-refresh/",
+      "reference": "/referencia/casos/early-refresh/"
+    }
+  },
+  {
+    "case_id": "date-only",
+    "path": "content/referencia/casos/date-only/index.mdx",
+    "sha256": "8708d571faff32e120ea78aba26f37e5bc532affce42eb50c77d569ec22a6d12",
+    "probes": 0,
+    "receipt_observed_utc": "2026-10-15T01:35:30.065277+00:00",
+    "links": {
+      "journey": "/jornadas/date-only/",
+      "explanation": "/explicacoes/casos/date-only/",
+      "tutorial": "/tutoriais/casos/date-only/",
+      "how_to": "/guias/casos/date-only/",
+      "reference": "/referencia/casos/date-only/"
+    }
+  },
+  {
+    "case_id": "opportunity-entry",
+    "path": "content/referencia/casos/opportunity-entry/index.mdx",
+    "sha256": "1fb15ae649c451138e5844f1a1f4c756539973bfe9d8942a060d52c9e3327d78",
+    "probes": 0,
+    "receipt_observed_utc": "2026-10-15T01:35:30.287094+00:00",
+    "links": {
+      "journey": "/jornadas/opportunity-entry/",
+      "explanation": "/explicacoes/casos/opportunity-entry/",
+      "tutorial": "/tutoriais/casos/opportunity-entry/",
+      "how_to": "/guias/casos/opportunity-entry/",
+      "reference": "/referencia/casos/opportunity-entry/"
+    }
+  },
+  {
+    "case_id": "order-boundaries",
+    "path": "content/referencia/casos/order-boundaries/index.mdx",
+    "sha256": "723c767b6b3dba8dd99efcdcc6e325ca6f3b6a9d74a01c6eae6af3f48d640fd5",
+    "probes": 3,
+    "receipt_observed_utc": "2026-10-15T01:35:30.426423+00:00",
+    "links": {
+      "journey": "/jornadas/order-boundaries/",
+      "explanation": "/explicacoes/casos/order-boundaries/",
+      "tutorial": "/tutoriais/casos/order-boundaries/",
+      "how_to": "/guias/casos/order-boundaries/",
+      "reference": "/referencia/casos/order-boundaries/"
+    }
+  },
+  {
+    "case_id": "order-delivery",
+    "path": "content/referencia/casos/order-delivery/index.mdx",
+    "sha256": "987e5d0c64534737fade67d81f5afc1a7262bd6293aa33c8eed45fec6a857d61",
+    "probes": 3,
+    "receipt_observed_utc": "2026-10-15T01:35:30.501294+00:00",
+    "links": {
+      "journey": "/jornadas/order-delivery/",
+      "explanation": "/explicacoes/casos/order-delivery/",
+      "tutorial": "/tutoriais/casos/order-delivery/",
+      "how_to": "/guias/casos/order-delivery/",
+      "reference": "/referencia/casos/order-delivery/"
+    }
+  },
+  {
+    "case_id": "reservation",
+    "path": "content/referencia/casos/reservation/index.mdx",
+    "sha256": "62b1fa359bc2137545352443c02bb35df2481a67becc3695625102322a86598e",
+    "probes": 3,
+    "receipt_observed_utc": "2026-10-15T01:35:30.570814+00:00",
+    "links": {
+      "journey": "/jornadas/reservation/",
+      "explanation": "/explicacoes/casos/reservation/",
+      "tutorial": "/tutoriais/casos/reservation/",
+      "how_to": "/guias/casos/reservation/",
+      "reference": "/referencia/casos/reservation/"
+    }
+  },
+  {
+    "case_id": "consensus",
+    "path": "content/referencia/casos/consensus/index.mdx",
+    "sha256": "6426867cec6d91c3b73bb44c776d4302f4d86fa2e9f9b562cd399df7f91719ea",
+    "probes": 5,
+    "receipt_observed_utc": "2026-10-15T01:35:30.643452+00:00",
+    "links": {
+      "journey": "/jornadas/consensus/",
+      "explanation": "/explicacoes/casos/consensus/",
+      "tutorial": "/tutoriais/casos/consensus/",
+      "how_to": "/guias/casos/consensus/",
+      "reference": "/referencia/casos/consensus/"
+    }
+  },
+  {
+    "case_id": "queue-workflow",
+    "path": "content/referencia/casos/queue-workflow/index.mdx",
+    "sha256": "0fe2c9428d2f165edf11a72187141dd264314243bb4c5a2fe3a894ef3484c8e3",
+    "probes": 7,
+    "receipt_observed_utc": "2026-10-15T01:35:30.711401+00:00",
+    "links": {
+      "journey": "/jornadas/queue-workflow/",
+      "explanation": "/explicacoes/casos/queue-workflow/",
+      "tutorial": "/tutoriais/casos/queue-workflow/",
+      "how_to": "/guias/casos/queue-workflow/",
+      "reference": "/referencia/casos/queue-workflow/"
+    }
+  },
+  {
+    "case_id": "cache-policy",
+    "path": "content/referencia/casos/cache-policy/index.mdx",
+    "sha256": "c5c0560fe4540041c7c66b0582ce7f03a9e2884a5b37751de19d5281d4155aaa",
+    "probes": 4,
+    "receipt_observed_utc": "2026-10-15T01:35:30.778294+00:00",
+    "links": {
+      "journey": "/jornadas/cache-policy/",
+      "explanation": "/explicacoes/casos/cache-policy/",
+      "tutorial": "/tutoriais/casos/cache-policy/",
+      "how_to": "/guias/casos/cache-policy/",
+      "reference": "/referencia/casos/cache-policy/"
+    }
+  },
+  {
+    "case_id": "ledger-projection",
+    "path": "content/referencia/casos/ledger-projection/index.mdx",
+    "sha256": "98b899faeb376e9b346d2472ac6852638cb213d338714dabe41c231cfe3e7c6d",
+    "probes": 4,
+    "receipt_observed_utc": "2026-10-15T01:35:30.851025+00:00",
+    "links": {
+      "journey": "/jornadas/ledger-projection/",
+      "explanation": "/explicacoes/casos/ledger-projection/",
+      "tutorial": "/tutoriais/casos/ledger-projection/",
+      "how_to": "/guias/casos/ledger-projection/",
+      "reference": "/referencia/casos/ledger-projection/"
+    }
+  },
+  {
+    "case_id": "storage-partitions",
+    "path": "content/referencia/casos/storage-partitions/index.mdx",
+    "sha256": "e9ffa350a6d663eca919eab9fc110c61735ce1cc7d5964056e52aab169993aa3",
+    "probes": 4,
+    "receipt_observed_utc": "2026-10-15T01:35:30.928161+00:00",
+    "links": {
+      "journey": "/jornadas/storage-partitions/",
+      "explanation": "/explicacoes/casos/storage-partitions/",
+      "tutorial": "/tutoriais/casos/storage-partitions/",
+      "how_to": "/guias/casos/storage-partitions/",
+      "reference": "/referencia/casos/storage-partitions/"
+    }
+  },
+  {
+    "case_id": "safe-release",
+    "path": "content/referencia/casos/safe-release/index.mdx",
+    "sha256": "e1bcf3f7f895a5bd1c566b9bb1fcd9cf97aaee4ea42b0bc7d2241281aadb490d",
+    "probes": 4,
+    "receipt_observed_utc": "2026-10-15T01:35:31.012444+00:00",
+    "links": {
+      "journey": "/jornadas/safe-release/",
+      "explanation": "/explicacoes/casos/safe-release/",
+      "tutorial": "/tutoriais/casos/safe-release/",
+      "how_to": "/guias/casos/safe-release/",
+      "reference": "/referencia/casos/safe-release/"
+    }
+  },
+  {
+    "case_id": "access-policy",
+    "path": "content/referencia/casos/access-policy/index.mdx",
+    "sha256": "a777aaa40ae8802ea9dde9056d160b0bfd7a44847f504e9034cb9f01fbb7af7d",
+    "probes": 4,
+    "receipt_observed_utc": "2026-10-15T01:35:31.080405+00:00",
+    "links": {
+      "journey": "/jornadas/access-policy/",
+      "explanation": "/explicacoes/casos/access-policy/",
+      "tutorial": "/tutoriais/casos/access-policy/",
+      "how_to": "/guias/casos/access-policy/",
+      "reference": "/referencia/casos/access-policy/"
+    }
+  },
+  {
+    "case_id": "diagnostics",
+    "path": "content/referencia/casos/diagnostics/index.mdx",
+    "sha256": "391fdfc7c120b43f4b0a928a290d099a938d0cf94581f88315e475ad0b0372bb",
+    "probes": 3,
+    "receipt_observed_utc": "2026-10-15T01:35:31.161418+00:00",
+    "links": {
+      "journey": "/jornadas/diagnostics/",
+      "explanation": "/explicacoes/casos/diagnostics/",
+      "tutorial": "/tutoriais/casos/diagnostics/",
+      "how_to": "/guias/casos/diagnostics/",
+      "reference": "/referencia/casos/diagnostics/"
+    }
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "repo": "keycloak/keycloak",
+    "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba"
+  },
+  {
+    "repo": "knative/serving",
+    "revision": "2e9262972905a5572c9831905ef9193057e0fc95"
+  },
+  {
+    "repo": "kubernetes/client-go",
+    "revision": "7aade4e921f65cb51c990ab0557a5556fd67a1be"
+  },
+  {
+    "repo": "kubernetes/kubernetes",
+    "revision": "4f2dd0c8498c5ca4640ba1586ef8627aac738a4f"
+  },
+  {
+    "repo": "libp2p/go-libp2p",
+    "revision": "3c2c902122cb6fae3897f729a3dbb9d4665ae90d"
+  },
+  {
+    "repo": "n8n-io/n8n",
+    "revision": "e2529a849432bdb3082615c04b1702df61cb91d5"
+  },
+  {
+    "repo": "ncats/blackboard",
+    "revision": "b06a98b26e807e9ea3eab9a107ec24d2393f5040"
+  },
+  {
+    "repo": "openfga/openfga",
+    "revision": "526995eb202464e2cace266fb5be56c212af9ecf"
+  },
+  {
+    "repo": "playframework/playframework",
+    "revision": "01bc6d08bacb80835edd4e45fe3ce706151e35c0"
+  }
+]

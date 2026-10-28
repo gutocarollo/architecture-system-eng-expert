@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "source": "sources.json",
+  "archive": "sources.json.gz",
+  "encoding": "gzip",
+  "contents_sha256": "1cac764cd16b3d03dbfe658a96870dd0f6160cd2b81e2389eb0f7e226f40ec6f",
+  "archive_sha256": "82cc3da725838de9f0edc48a43cb29ace960a463623312f9dcf69ae235ad33f3",
+  "source_bytes": 3122988,
+  "archive_bytes": 619226
+}

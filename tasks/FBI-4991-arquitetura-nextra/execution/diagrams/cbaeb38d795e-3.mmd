@@ -1,0 +1,6 @@
+flowchart LR
+    Before[Anel proposto com A e B] --> Join[Nó C entra em parte do anel]
+    Join --> Keep[Parte das chaves permanece em A e B]
+    Join --> Move[Chaves do intervalo passam a C]
+    Move --> Copy[Migração ou recomputação segundo o contrato]
+    Copy -->|nó falha durante transição| Recovery[Retomada com membership e versões definidos]

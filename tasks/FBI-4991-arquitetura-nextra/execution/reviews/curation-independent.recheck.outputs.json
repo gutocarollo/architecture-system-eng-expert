@@ -1,0 +1,26 @@
+{
+  "observed_utc": "2026-10-15T17:28:49.992814+00:00",
+  "matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+  "outputs": [
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.recheck.json",
+      "sha256": "54e5e2d374d19bc8150ad961b126f8ad3b29f66a22d7fbfff251562d85751bdc"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.recheck.md",
+      "sha256": "833a7c4599b515b0aec6de3ebd43dc71f0c559a4beca49c21bbb6dc91d9a9c7c"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.recheck.guard.json",
+      "sha256": "9a87f346374ead13710911144364e503a99673e2556ba28730f1726c36c2cdaa"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.recheck.mdx.json",
+      "sha256": "eea8e594c26c89440a9f2b19994f05127c4c9c83fc038738df489b13105e82a9"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.recheck.build.py",
+      "sha256": "aa476b3ae5221fcd9b221321f319e35781dedac0e1c653c4be0107dd1a9b2c2d"
+    }
+  ]
+}

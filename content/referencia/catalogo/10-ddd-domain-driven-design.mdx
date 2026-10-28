@@ -1,0 +1,250 @@
+---
+title: "DDD: 21 conceitos para dar significado ao modelo"
+description: "Vocabulário, identidade, invariantes e relações entre contextos, com fontes e lacunas explícitas."
+diataxis: reference
+---
+
+# DDD: 21 conceitos para dar significado ao modelo
+
+Domain-Driven Design organiza o modelo em torno das decisões e da linguagem do negócio. Esta referência distingue padrões de código e acordos entre contextos. Um nome de classe pode mostrar intenção; a regra, sua fronteira e o acordo entre os responsáveis exigem outras provas.
+
+Os exemplos locais pertencem ao checkout MakersHub `e233fb046ec333982cd1547171b0f0bd8d8d92ee` e às mudanças históricas identificadas. MyMeetings e Wild Workouts são aplicações **REF**, não operações financeiras internas ou prova de adoção em produção. Os conceitos organizacionais mantêm lacunas quando um arquivo de código não pode demonstrar a relação entre equipes.
+
+{/* current-curation:ddd */}
+
+A [curadoria de DDD](/referencia/curadoria/10-ddd-domain-driven-design/#ddd) reúne a modelagem, o aplicativo financeiro, a skill pública e as provas de código e licença do conceito que organiza esta família.
+
+## Bounded Context
+
+O conceito Bounded Context é a fronteira em que um modelo e seus termos têm significado consistente. O ADR de MyMeetings divide Meetings, Administration, Payments e User Access em quatro módulos/contextos ([ADR 0004](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/docs/architecture-decision-log/0004-divide-the-system-into-4-modules.md)). Em MakersHub, Qualificação e Seguros são apenas candidatos para mapa futuro; pastas não provam contextos. O limite exige linguagem e regras confirmadas com o negócio. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos), [domain-modeling](/referencia/skills-e-projetos). Quanto à base técnica, nenhum runtime é obrigatório; Spring Modulith pode verificar fronteiras modulares. A referência didática é ADR de MyMeetings, não evidência de MakersHub.
+
+A fronteira permite que um termo tenha um significado claro dentro de um modelo, sem impor esse significado aos demais.
+
+{/* current-curation:bounded-context */}
+
+A [curadoria de Bounded Context](/referencia/curadoria/10-ddd-domain-driven-design/#bounded-context) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Ubiquitous Language
+
+O conceito Ubiquitous Language é vocabulário compartilhado, validado por especialistas e expresso em conversa, documento e código. Lead, Account, Opportunity e assessor aparecem no fluxo de qualificação observado; não foi verificado que esse vocabulário foi acordado com o negócio. Proposta: distinguir “assessor habilitado”, “elegível para a faixa” e “livre no horário”. Nome de classe não prova linguagem ubíqua. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos), [domain-modeling](/referencia/skills-e-projetos). Quanto à base técnica, EventStorming e Example Mapping, sem biblioteca obrigatória. A referência didática é [DDD by Examples — README](https://github.com/ddd-by-examples/library), que documenta descoberta do domínio antes do modelo.
+
+A equipe encontra o mesmo conceito na conversa, no documento e no código, reduzindo traduções e decisões ambíguas.
+
+A instrução de trabalho aplicável é [domain-driven-design](/referencia/skills-e-projetos); a skill orienta o trabalho e não comprova a presença do padrão no checkout.
+
+{/* current-curation:ubiquitous-language */}
+
+A [curadoria de Ubiquitous Language](/referencia/curadoria/10-ddd-domain-driven-design/#ubiquitous-language) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Entity
+
+O conceito Entity é objeto cuja identidade continua a mesma apesar de mudanças nos atributos. A Opportunity histórica de `8206752...` é reutilizada pelo próprio ID; em MakersHub ela ainda chega como registro externo/dicionário, não como entidade de domínio rica. A proposta é usar identidade tipada e separar regras locais do schema Salesforce. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, objeto simples/ORM opcional. A referência didática é [Meeting.cs](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/Meetings/Meeting.cs), que declara identidade `MeetingId` e comportamento.
+
+A identidade evita confundir alteração de atributos com criação de outro objeto.
+
+A instrução de trabalho aplicável é [domain-driven-design](/referencia/skills-e-projetos); a skill orienta o trabalho e não comprova a presença do padrão no checkout.
+
+{/* current-curation:entity */}
+
+A [curadoria de Entity](/referencia/curadoria/10-ddd-domain-driven-design/#entity) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Value Object
+
+O conceito Value Object é definido pelos valores, sem identidade independente, e protege validade. O patch de Seguros separa formato de data, mas não cria VO. Uma proposta seria `ScheduledSlot(date, time, duration)` imutável, se as três partes formarem uma regra indivisível. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, classe/record da linguagem, sem biblioteca. A referência didática é [MeetingLimits.cs](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/Meetings/MeetingLimits.cs) valida limites e herda `ValueObject`.
+
+A validade pode ser protegida na construção, evitando que cada consumidor repita verificações sobre os mesmos valores.
+
+{/* current-curation:value-object */}
+
+A [curadoria de Value Object](/referencia/curadoria/10-ddd-domain-driven-design/#value-object) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Aggregate
+
+O conceito Aggregate é um conjunto pequeno atualizado sob uma única fronteira de consistência. MyMeetings mantém `Meeting` e seus participantes/regras no mesmo agregado ([Meeting.cs](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/Meetings/Meeting.cs)). Para a linha pendente D+1, um agregado só é proposta até a lane de consistência decidir quais invariantes cabem na transação PostgreSQL. Salesforce e PostgreSQL não viram um agregado transacional por compartilharem um fluxo. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, objetos de domínio e uma transação de armazenamento; framework opcional. A referência didática é MyMeetings.
+
+Uma fronteira pequena permite verificar e atualizar suas invariantes como uma unidade de consistência.
+
+{/* current-curation:aggregate */}
+
+A [curadoria de Aggregate](/referencia/curadoria/10-ddd-domain-driven-design/#aggregate) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Aggregate Root
+
+O conceito Aggregate Root é o único ponto público que protege invariantes do agregado. `MeetingGroup` valida pagamento e associação de anfitriões antes de criar `Meeting` ([MeetingGroup.cs](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/MeetingGroups/MeetingGroup.cs)). Para MakersHub, `PendingD1Routing` poderia ser raiz somente se for confirmado como a unidade das regras e da transação; não se deve incluir Opportunity do Salesforce como objeto navegável. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, classe de domínio; EF Core pode persistir. A referência didática é MyMeetings.
+
+O consumidor passa por uma entrada que protege as regras, em vez de alterar livremente partes internas.
+
+{/* current-curation:aggregate-root */}
+
+A [curadoria de Aggregate Root](/referencia/curadoria/10-ddd-domain-driven-design/#aggregate-root) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Domain Service
+
+Um Domain Service expressa uma regra que não pertence naturalmente a uma entidade; a regra precisa continuar distinguível da coordenação de infraestrutura. A classe `MeetingGroupExpirationDatePolicy` no domínio é um cálculo estático sobre vários grupos ([fonte no upstream](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/MeetingGroups/Policies/MeetingGroupExpirationDatePolicy.cs)); é um exemplo pequeno, não modelo universal. A proposta `AdvisorEligibleForSlot` pode servir como Domain Service se sua responsabilidade for a regra de elegibilidade e suas dependências conservarem o contrato do modelo. A presença de uma consulta Salesforce ou PostgreSQL, sozinha, não comprova nem elimina esse papel; o caso de uso completo também precisa de coordenação de aplicação. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, classe simples. A referência didática é MyMeetings.
+
+Uma regra que envolve vários objetos pode ter um nome próprio sem ser escondida em uma entidade inadequada.
+
+{/* current-curation:domain-service */}
+
+A [curadoria de Domain Service](/referencia/curadoria/10-ddd-domain-driven-design/#domain-service) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Application Service
+
+Um Application Service coordena um caso de uso, suas dependências e persistência; não deve esconder toda a regra no fluxo. `post_qualify` / `_qualify_regular_d1` orquestram o agendamento observado no SHA `e233fb...`; `CreateMeetingCommandHandler` mostra o padrão na referência ([handler](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Application/Meetings/CreateMeeting/CreateMeetingCommandHandler.cs)). O limite é não chamar essa camada de domínio só porque o método trata negócio. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos), [backend-layered-architecture](/referencia/skills-e-projetos). Quanto à base técnica, FastAPI na API local; MyMeetings usa handler próprio, sem exigir framework. A referência didática é MyMeetings.
+
+O caso de uso coordena o trabalho necessário e permite distinguir decisão de negócio de integração e persistência.
+
+A instrução de trabalho aplicável é [domain-driven-design](/referencia/skills-e-projetos); a skill orienta o trabalho e não comprova a presença do padrão no checkout.
+
+{/* current-curation:application-service */}
+
+A [curadoria de Application Service](/referencia/curadoria/10-ddd-domain-driven-design/#application-service) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Repository
+
+Um Repository oferece ao domínio/aplicação operações de coleção persistente em linguagem do modelo. `RoutingRepository.insert_pending_d1_routing` é observado gravando o pedido, mas a criação concreta dentro do serviço não prova uma abstração DDD de domínio. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, SQLAlchemy no fluxo observado; EF Core na referência. A referência didática é [IMeetingRepository](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/Meetings/IMeetingRepository.cs), com implementação em Infrastructure. O limite é o seguinte: evitar expor query genérica de banco como vocabulário do domínio.
+
+O consumidor usa operações nomeadas segundo o modelo, enquanto os detalhes de armazenamento ficam atrás da fronteira.
+
+{/* current-curation:repository */}
+
+A [curadoria de Repository](/referencia/curadoria/10-ddd-domain-driven-design/#repository) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Factory
+
+Uma Factory cria objeto válido quando a construção tem regras/associação não trivial. `MeetingGroup.CreateBasedOnProposal` e `Meeting.CreateNew` controlam criação na referência ([MeetingGroup.cs](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/MeetingGroups/MeetingGroup.cs), [Meeting.cs](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/Meetings/Meeting.cs)). Em MakersHub, uma factory para agendamento é proposta e só vale se centralizar criação válida, não apenas renomear o construtor. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, método de fábrica da linguagem. A referência didática é MyMeetings.
+
+A construção centralizada evita espalhar combinações inválidas de valores e associações.
+
+{/* current-curation:factory */}
+
+A [curadoria de Factory](/referencia/curadoria/10-ddd-domain-driven-design/#factory) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Domain Event
+
+O conceito Domain Event é fato imutável que ocorreu e interessa ao modelo, dentro do contexto que o produziu. MyMeetings emite `MeetingCreatedDomainEvent` na criação ([evento](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/Meetings/Events/MeetingCreatedDomainEvent.cs)). A linha pendente D+1 atual, por si só, não prova que haja evento de domínio; um evento local só é proposta. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, eventos de domínio próprios; Spring Modulith ou Axon podem cuidar de publicação/registro, com custos de persistência e entrega. A referência didática é MyMeetings.
+
+Um fato de domínio pode comunicar uma mudança relevante sem embutir todas as reações no produtor.
+
+{/* current-curation:domain-event */}
+
+A [curadoria de Domain Event](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#domain-event) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Domain Policy
+
+O conceito Domain Policy é regra explícita de decisão de domínio, aplicada em contexto e tempo definidos. A recusa de Lead convertido no caminho D+1 aparece no serviço atual; MyMeetings expressa regra semelhante em `MeetingCanBeOrganizedOnlyByPayedGroupRule` ([fonte](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Meetings/Domain/MeetingGroups/Rules/MeetingCanBeOrganizedOnlyByPayedGroupRule.cs)). Uma classe de policy comum é proposta, não uma característica do código atual. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, classe simples/`IBusinessRule`; sem lib obrigatória. A referência didática é MyMeetings.
+
+A decisão ganha nome, contexto e tempo de aplicação, facilitando discutir a regra com o negócio.
+
+A instrução de trabalho aplicável é [domain-driven-design](/referencia/skills-e-projetos); a skill orienta o trabalho e não comprova a presença do padrão no checkout.
+
+{/* current-curation:domain-policy */}
+
+A [curadoria de Domain Policy](/referencia/curadoria/10-ddd-domain-driven-design/#domain-policy) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Specification
+
+O conceito Specification é critério nomeado e reutilizável, que pode ser aplicado por memória ou consulta. Proposta: “assessor elegível para esta faixa e horário”; `get_pool_spec` atual descreve configuração de pool, não prova o pattern Specification. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos). Quanto à base técnica, Ardalis.Specification para EF Core ou Spring Data JPA Specification para critérios de query; não confundir predicate de banco com invariant de domínio. A referência didática é [Ardalis sample `Program.cs`](https://github.com/ardalis/Specification/blob/main/samples/Ardalis.Sample.App1/Program.cs), que passa `CustomerSpec` ao repositório.
+
+O mesmo critério pode ser reutilizado e combinado sem copiar sua expressão em cada chamada.
+
+{/* current-curation:specification */}
+
+A [curadoria de Specification](/referencia/curadoria/10-ddd-domain-driven-design/#specification) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Anti-Corruption Layer
+
+Traduz modelo externo para o vocabulário local e impede que ele se espalhe. O fluxo atual manipula registros Salesforce diretamente; a proposta é adaptar Opportunity/contato antes da regra de qualificação. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos), [backend-api-design](/referencia/skills-e-projetos). Quanto à base técnica, adaptador/mapper opcional, como MapStruct. A referência didática é [Wild Workouts `users_grpc.go`](https://github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/blob/master/internal/trainings/adapters/users_grpc.go) e [UserAccessGateway do MyMeetings](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Registrations/Infrastructure/Users/UserAccessGateway.cs) são fronteiras/adaptadores; só o mapeamento semântico deliberado autoriza chamá-los de ACL.
+
+A tradução protege o significado local quando um fornecedor usa identidades, estados ou unidades diferentes.
+
+{/* current-curation:anti-corruption-layer */}
+
+A [curadoria de Anti-Corruption Layer](/referencia/curadoria/09-apis-e-integracao/#anti-corruption-layer) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Context Map
+
+Registra contextos e a relação/integração entre eles. O ADR 0004 do MyMeetings declara quatro módulos e sua divisão; para MakersHub, mapa de Qualificação, Salesforce e lote D+1 é proposta até dono e contratos serem verificados. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos), [domain-modeling](/referencia/skills-e-projetos). Quanto à base técnica, mapa/diagrama e acordos, sem lib; Spring Modulith verifica algumas fronteiras de módulo, não decide o mapa de negócio. A referência didática é [ADR 0004](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/docs/architecture-decision-log/0004-divide-the-system-into-4-modules.md).
+
+A equipe enxerga quem fornece dados, quem depende deles e qual tradução ou acordo existe em cada fronteira.
+
+{/* current-curation:context-map */}
+
+A [curadoria de Context Map](/referencia/curadoria/10-ddd-domain-driven-design/#context-map) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Shared Kernel
+
+Shared Kernel é um subconjunto do modelo que dois contextos compartilham e precisam alterar de forma coordenada. O benefício é evitar versões incompatíveis da mesma regra; o custo é a governança conjunta. Uma classe utilitária genérica ou uma igualdade de tipos não demonstra esse acordo.
+
+A base de modelagem é [Context Mapper e sua linguagem CML](https://contextmapper.org/docs/context-map/). A referência **REF de modelo declarado** é o [mapa do próprio Context Mapper](https://github.com/ContextMapper/context-mapper-examples/blob/3c28b419e965e74aa3bfe616467cf5ebfff261a8/src/main/cml/context-mapper-example/ContextMapper-Example-Stage-2.cml#L24-L27): `LanguageCore` e `ArchitecturalRefactorings` recebem os papéis `SK`. O comentário explica que o modelo semântico da linguagem é o núcleo compartilhado. O mapa contém **cinco contextos e quatro relações**, incluindo essa relação Shared Kernel. Há, portanto, um subconjunto nomeado e uma declaração explícita; a referência deixou de depender de `ValueObject.cs` do MyMeetings como simples contraste.
+
+O arquivo foi lido no commit `3c28b419e965e74aa3bfe616467cf5ebfff261a8`. A declaração do projeto demonstra a escolha modelada, sem verificar a negociação ou rotina de trabalho de equipes. No MakersHub, compartilhar `ScheduledSlot` continua sendo proposta condicionada à confirmação de significado e responsabilidade comuns. As skills [domain-driven-design](/referencia/skills-e-projetos) e [domain-modeling](/referencia/skills-e-projetos) ajudam a discutir esse acordo; a CML registra a decisão e não a cria.
+
+{/* current-curation:shared-kernel */}
+
+A [curadoria de Shared Kernel](/referencia/curadoria/10-ddd-domain-driven-design/#shared-kernel) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Customer/Supplier
+
+Customer/Supplier descreve uma relação em que as necessidades do consumidor downstream participam do planejamento do fornecedor upstream. O benefício é tornar prioridades e expectativas negociáveis. O custo é manter esse compromisso; apenas consumir uma API não demonstra que o fornecedor considere as prioridades do consumidor.
+
+A base para registrar a relação é [Context Mapper/CML](https://contextmapper.org/docs/context-map/). O modelo **REF** [Insurance-Example-Stage-2.cml](https://github.com/ContextMapper/context-mapper-examples/blob/3c28b419e965e74aa3bfe616467cf5ebfff261a8/src/main/cml/insurance-example/Insurance-Example-Stage-2.cml#L16) declara `CustomerSelfServiceContext` com os papéis `D,C` e `CustomerManagementContext` com `U,S`. Essa é **uma relação Customer/Supplier entre as sete relações do mapa de seis contextos**. O exemplo representa uma seguradora fictícia e seu estado é `TO_BE`; demonstra uma escolha explícita de modelagem, sem provar um acordo humano realizado ou uma aplicação em produção.
+
+No exercício MakersHub, Qualificação e processamento D+1 só receberiam essa classificação se seus responsáveis confirmassem quem fornece, quem consome e como as prioridades são atendidas. Não há biblioteca que produza esse acordo automaticamente. As skills [domain-driven-design](/referencia/skills-e-projetos) e [domain-modeling](/referencia/skills-e-projetos) apoiam a análise. A fonte substitui o ADR genérico de divisão de módulos, que não declarava essa relação.
+
+{/* current-curation:customer-supplier */}
+
+A [curadoria de Customer/Supplier](/referencia/curadoria/10-ddd-domain-driven-design/#customer-supplier) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Conformist
+
+Conformist descreve um consumidor que aceita o modelo do fornecedor e suas mudanças, com pouca ou nenhuma capacidade de negociar sua forma. A decisão pode reduzir o esforço de tradução, mas vincula o consumidor ao vocabulário externo. Manipular um dicionário Salesforce diretamente é um indício técnico de acoplamento, não prova de que esse compromisso foi escolhido pelo negócio.
+
+A base de modelagem é [Context Mapper/CML](https://contextmapper.org/docs/context-map/). No modelo **REF** [Insurance-Example-Stage-2.cml](https://github.com/ContextMapper/context-mapper-examples/blob/3c28b419e965e74aa3bfe616467cf5ebfff261a8/src/main/cml/insurance-example/Insurance-Example-Stage-2.cml#L24), `PolicyManagementContext` recebe os papéis `D,CF` diante de `CustomerManagementContext`, que publica `U,OHS,PL`. É **uma relação com Conformist no mapa de seis contextos e sete relações**. O exemplo fictício está marcado `TO_BE`, portanto a prova é da intenção declarada no modelo, e não de equipes ou sistemas de produção.
+
+As skills [domain-driven-design](/referencia/skills-e-projetos) e [domain-modeling](/referencia/skills-e-projetos) ajudam a comparar essa escolha com uma camada de tradução. O limite para MakersHub continua sendo a falta de um acordo local confirmado: o exemplo OSS completa a referência de estudo sem atribuir a relação ao checkout observado.
+
+{/* current-curation:conformist */}
+
+A [curadoria de Conformist](/referencia/curadoria/10-ddd-domain-driven-design/#conformist) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Open Host Service
+
+Open Host Service é um protocolo estável que um contexto oferece a diferentes consumidores, mantendo um contrato comum. O benefício é permitir integração sem um protocolo especial para cada consumidor; o custo é documentar, versionar e sustentar esse contrato. Ter uma rota FastAPI ou um OpenAPI não comprova, sozinho, a decisão nem o conjunto de consumidores.
+
+A base de modelagem é [Context Mapper/CML](https://contextmapper.org/docs/context-map/). O modelo **REF** [Insurance-Example-Stage-2.cml](https://github.com/ContextMapper/context-mapper-examples/blob/3c28b419e965e74aa3bfe616467cf5ebfff261a8/src/main/cml/insurance-example/Insurance-Example-Stage-2.cml#L18-L26) declara `PrintingContext` como `U,OHS,PL` para **três consumidores**: `CustomerManagementContext`, `PolicyManagementContext` e `DebtCollection`. A mesma linguagem registra explicitamente o papel de serviço publicado e a linguagem de integração. Esse arquivo é um modelo de seguradora fictícia em estado `TO_BE`, sem afirmar que os três serviços foram executados.
+
+O mapa completo possui seis contextos e sete relações. Para implementar um contrato publicado, FastAPI e OpenAPI podem apoiar uma API, mas não substituem o acordo modelado. No MakersHub, classificar `POST /api/v1/super-r1/qualify` como Open Host Service permanece condicionado ao inventário de consumidores e à estabilidade do contrato. As skills [domain-driven-design](/referencia/skills-e-projetos) e [backend-api-design](/referencia/skills-e-projetos) orientam essa avaliação.
+
+{/* current-curation:open-host-service */}
+
+A [curadoria de Open Host Service](/referencia/curadoria/10-ddd-domain-driven-design/#open-host-service) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Published Language
+
+O conceito Published Language é formato compartilhado e documentado de mensagens entre contextos. `NewUserRegisteredIntegrationEvent` no MyMeetings é contrato nomeado compartilhado no monólito ([evento](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Registrations/IntegrationEvents/NewUserRegisteredIntegrationEvent.cs)); seu alcance de rede não foi provado. Para MakersHub, publicar schema versionado de qualificação/lote é proposta. As instruções de trabalho aplicáveis são [domain-driven-design](/referencia/skills-e-projetos), [backend-api-design](/referencia/skills-e-projetos). Quanto à base técnica, OpenAPI, JSON Schema ou Protobuf, com versionamento. A referência didática é MyMeetings.
+
+O significado de uma mensagem pode ser entendido por produtores e consumidores, com documentação e evolução deliberadas.
+
+A instrução de trabalho aplicável é [domain-driven-design](/referencia/skills-e-projetos); a skill orienta o trabalho e não comprova a presença do padrão no checkout.
+
+{/* current-curation:published-language */}
+
+A [curadoria de Published Language](/referencia/curadoria/10-ddd-domain-driven-design/#published-language) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Separate Ways
+
+Separate Ways é a decisão explícita de manter modelos sem uma relação de integração de domínio quando essa relação não oferece benefício suficiente. O ganho é permitir soluções especializadas e evolução independente; o custo é abrir mão da coordenação que uma integração poderia oferecer. A ausência de imports ou de uma seta no desenho, por si só, não comprova essa escolha.
+
+A aplicação OSS **REF** é [DcaShop](https://github.com/domain-centric-development/dca-ecommerce-sample-dotnet/blob/640268e41f34a045554de4a134d3b850d9a0ba21/product/domain.md#L71-L72). Seu documento de domínio classifica `Portal` e `Backoffice` como Separate Ways. O [fonte `BackofficeContext.cs`](https://github.com/domain-centric-development/dca-ecommerce-sample-dotnet/blob/640268e41f34a045554de4a134d3b850d9a0ba21/src/DcaShop.Backoffice/BackofficeContext.cs#L10-L19) declara a mesma intenção: o contexto trabalha com seu próprio vocabulário de publicação de eventos e não negocia contratos de domínio com os contextos de negócio. A declaração limita sua responsabilidade; páginas administrativas específicas de um produto ficam no contexto daquele produto.
+
+A base executável de modelagem é **DomainCentric.BuildingBlocks** com **DomainCentric.ArchRules**, usada pelo sample .NET. O [projeto de verificações arquiteturais](https://github.com/domain-centric-development/dca-ecommerce-sample-dotnet/blob/640268e41f34a045554de4a134d3b850d9a0ba21/tests/DcaShop.ArchitectureTests/DcaShop.ArchitectureTests.csproj#L5-L9) referencia `DomainCentric.ArchRules.Xunit`, e [`ContextMapDocumentationTest`](https://github.com/domain-centric-development/dca-ecommerce-sample-dotnet/blob/640268e41f34a045554de4a134d3b850d9a0ba21/tests/DcaShop.ArchitectureTests/ContextMapDocumentationTest.cs#L21-L36) gera o mapa a partir das declarações. Não executei esse teste. O [mapa publicado](https://github.com/domain-centric-development/dca-ecommerce-sample-dotnet/blob/640268e41f34a045554de4a134d3b850d9a0ba21/docs/architecture/context-map.md#L16-L27) contém **oito contextos**; o documento de domínio nomeia **dois casos Separate Ways**, Portal e Backoffice.
+
+A prova é da decisão documentada pelo projeto no commit `640268e41f34a045554de4a134d3b850d9a0ba21`, sem confirmar acordos entre equipes de produção. O alcance também é restrito: Backoffice usa infraestrutura compartilhada e lê o log operacional; Separate Ways aqui se refere à ausência de relações de modelo upstream declaradas, não a isolamento físico ou ausência de qualquer dependência técnica. Essa distinção deve ser considerada ao comparar o exemplo com outra aplicação. Para MakersHub, manter Seguros e Qualificação independentes continua sendo proposta a validar. As skills [domain-driven-design](/referencia/skills-e-projetos) e [domain-modeling](/referencia/skills-e-projetos) ajudam a registrar o critério e a responsabilidade pela decisão.
+
+A explicação [sobre regras e significado](/explicacoes/business-rules) desenvolve ativo, elegível e disponível, a identidade da Opportunity e os limites de agregados. A tradução com Salesforce continua em [APIs e integração](/explicacoes/api-integration).
+
+{/* current-curation:separate-ways */}
+
+A [curadoria de Separate Ways](/referencia/curadoria/10-ddd-domain-driven-design/#separate-ways) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

@@ -1,0 +1,17 @@
+flowchart TB
+    subgraph Backend[Uma aplicação proposta]
+        Qualification[API pública de Qualificação]
+        QualificationPrivate[Regras e persistência internas]
+        Telephony[API pública de Telefonia]
+        TelephonyPrivate[Ciclo de chamadas interno]
+        Insurance[API pública de Indicadores de Seguros]
+        InsurancePrivate[Consultas internas]
+        Qualification --> QualificationPrivate
+        Telephony --> TelephonyPrivate
+        Insurance --> InsurancePrivate
+        Telephony -. contrato público necessário .-> Qualification
+    end
+    Request[Pedido de integração] --> Qualification
+    Qualification --> Decision{Pedido permitido?}
+    Decision -->|Sim| QualificationPrivate
+    Decision -->|Não| Refusal[Devolver recusa sem executar o caso]

@@ -1,0 +1,17 @@
+{
+  "document_id": "explicacoes/concurrency/index",
+  "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "s5",
+    "l5c",
+    "task-worker-code",
+    "original-request"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "context_sha256": "36ab9c69e1e3bec5823a14786e2327c6a2049a391dd87612a112fc61a31ebf11"
+}

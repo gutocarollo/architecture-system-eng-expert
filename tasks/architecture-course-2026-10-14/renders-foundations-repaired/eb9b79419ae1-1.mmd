@@ -1,0 +1,9 @@
+flowchart LR
+    Import[Pedido de importação] --> Write[ReportPersistenceService.persist_report]
+    Write --> Policy[Política e lock de escrita]
+    Policy --> Result{Persistência aceita?}
+    Result -->|sim| Commit[Commit no banco]
+    Result -->|não ou exceção| Rollback[Rollback]
+    Screen[Consulta da tela] --> Read[ReportReadService.read]
+    Read --> Repo[ReportReadRepository.read]
+    Repo --> Queries[Consultas de linhas, total e resumo]

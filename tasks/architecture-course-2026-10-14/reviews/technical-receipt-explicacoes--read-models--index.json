@@ -1,0 +1,27 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "explicacoes/read-models/index",
+  "document_sha256": "6bc44cc3081e0ead62a977ade0cd53240f639308b7f5f725761f0a097d738126",
+  "context_sha256": "1c76e68802c95157c6618aeef53fe2b4579c3f0bf11795fd08e09525fe74c424",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [
+    "report-api-service",
+    "report-service-repository"
+  ],
+  "evidence_ids": [
+    "bootstrap",
+    "inflow-query",
+    "l4a",
+    "l4c",
+    "original-catalog",
+    "original-request",
+    "report-api",
+    "report-repository",
+    "report-service",
+    "s4",
+    "s4-reference-repair"
+  ]
+}

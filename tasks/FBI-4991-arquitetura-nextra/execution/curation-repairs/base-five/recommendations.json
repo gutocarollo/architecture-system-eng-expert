@@ -1,0 +1,1657 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-10-15T03:56:50.460157+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "checkout_sha": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "purpose": "Primary-source investigator recommendations for five assigned HIGH source repairs. Only this subfolder is written; curator owns incorporation and independent reviewer owns verdict.",
+  "rows": [
+    {
+      "concept_id": "branch-by-abstraction",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "open-feature/js-sdk",
+          "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+          "path": "packages/server/src/provider/multi-provider/multi-provider.ts",
+          "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts",
+          "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:25.962085+00:00",
+          "http_status": 200,
+          "sha256": "8be025f67fc0b8a3554093cd8c1bc70dd73c085248aebf2d7c9d29e07fda8edd",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cce792b7b76ec0a18100fbb892674d5ddde96543941bbc2619af7f3c02c457f1.txt",
+          "line_count": 375,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "open-feature/js-sdk",
+            "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+            "path": "LICENSE",
+            "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+            "observed_utc": "2026-10-15T03:50:25.962916+00:00",
+            "http_status": 200,
+            "sha256": "f964c4c458fcc3741ac1639dc28bef1e42c016b37cab9fe84400fc3b597dc5ab",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a7c438b5d70a3c98c62ca092fe0d15d2f326cacc11207d47491d53da7a88c9d7.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 285,
+            "archived": false,
+            "pushed_at": "2026-10-14T13:25:57Z",
+            "observed_utc": "2026-10-15T03:50:39.071941+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/open-feature--js-sdk-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "open-feature/js-sdk",
+          "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+          "path": "packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts",
+          "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts",
+          "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:25.962549+00:00",
+          "http_status": 200,
+          "sha256": "2163066fc0351586d5021aeedd47d891716c7fbc51277e8ee0aa9c1993773476",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/181ee96b52e0178680759b3e4dc47cfd4d0a5c139784402d410197cbda840ed8.txt",
+          "line_count": 36,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "open-feature/js-sdk",
+            "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+            "path": "LICENSE",
+            "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+            "observed_utc": "2026-10-15T03:50:25.962916+00:00",
+            "http_status": 200,
+            "sha256": "f964c4c458fcc3741ac1639dc28bef1e42c016b37cab9fe84400fc3b597dc5ab",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a7c438b5d70a3c98c62ca092fe0d15d2f326cacc11207d47491d53da7a88c9d7.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 285,
+            "archived": false,
+            "pushed_at": "2026-10-14T13:25:57Z",
+            "observed_utc": "2026-10-15T03:50:39.071941+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/open-feature--js-sdk-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "open-feature/js-sdk",
+          "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+          "path": "packages/server/src/provider/provider.ts",
+          "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/provider.ts",
+          "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/provider.ts",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:25.962814+00:00",
+          "http_status": 200,
+          "sha256": "d9174d6feb71b48d47a898f46a2c7e28911158ebbdf5d2ac0ac5a58a97a10aa6",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/d66335381be12cb89d301bb30f75c02f154128908b80c275f5519bb92979011b.txt",
+          "line_count": 61,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "open-feature/js-sdk",
+            "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+            "path": "LICENSE",
+            "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+            "observed_utc": "2026-10-15T03:50:25.962916+00:00",
+            "http_status": 200,
+            "sha256": "f964c4c458fcc3741ac1639dc28bef1e42c016b37cab9fe84400fc3b597dc5ab",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a7c438b5d70a3c98c62ca092fe0d15d2f326cacc11207d47491d53da7a88c9d7.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 285,
+            "archived": false,
+            "pushed_at": "2026-10-14T13:25:57Z",
+            "observed_utc": "2026-10-15T03:50:39.071941+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/open-feature--js-sdk-metadata.json"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/redis/multi_store.rb",
+          "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/master/lib/gitlab/redis/multi_store.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:26:25.582062Z",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "line_count": 519,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: module Gitlab\n4:   module Redis\n5:     class MultiStore\n6:       include Gitlab::Utils::StrongMemoize\n7: \n8:       class PipelinedDiffError < StandardError\n9:         def initialize(non_default_store_result, default_store_result)\n10:           @non_default_store_result = non_default_store_result\n11:           @default_store_result = default_store_result\n12:         end\n13: \n14:         def message\n15:           \"Pipelined command executed on both stores successfully but results differ between them. \" \\\n16:             \"Result from the non-default store: #{@non_default_store_result.inspect}. \" \\\n17:             \"Result from the default store: #{@default_store_result.inspect}.\"\n18:         end\n19:       end\n20: \n21:       class MethodMissingError < StandardError\n22:         def initialize(cmd)\n23:           @cmd = cmd\n24:         end\n25: \n26:         def message\n27:           \"Method missing #{@cmd}. Falling back to execute method on the redis default store in Rails.env.production.\"\n28:         end\n29:       end\n30: \n31:       class NestedReadonlyPipelineError < StandardError\n32:         def message\n33:           'Nested use of with_readonly_pipeline is detected.'\n34:         end\n35:       end\n36: \n37:       attr_reader :primary_pool, :secondary_pool, :instance_name, :primary_store, :secondary_store\n38: \n39:       FAILED_TO_READ_ERROR_MESSAGE = 'Failed to read from the redis default_store.'\n40:       FAILED_TO_WRITE_ERROR_MESSAGE = 'Failed to write to the redis non_default_store.'",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "MIT",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "path": "LICENSE"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/redis/wrapper.rb",
+          "revision": "2b79d1b09471e0f43ace3d37ff417919a5fe7092",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/wrapper.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/wrapper.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/wrapper.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:11.246246Z",
+          "sha256": "f14929c51892749fa83575d2307482b3884f204b553c9d976957f13ca08bbb31",
+          "line_count": 289,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a906410a4737032e94077356ca9d0f388f8c406357906fe786b25a55b247c524.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: # This file should only be used by sub-classes, not directly by any clients of the sub-classes\n4: \n5: # Explicitly load parts of ActiveSupport because MailRoom does not load\n6: # Rails.\n7: require 'active_support/core_ext/hash/keys'\n8: require 'active_support/core_ext/module/delegation'\n9: require 'active_support/core_ext/object/blank'\n10: require 'active_support/core_ext/string/inflections'\n11: \n12: # Explicitly load Redis::Store::Factory so we can read Redis configuration in\n13: # TestEnv\n14: require 'redis/store/factory'\n15: \n16: module Gitlab\n17:   module Redis\n18:     class Wrapper\n19:       class << self\n20:         delegate :url, :store, :encrypted_secrets, to: :new\n21: \n22:         def params\n23:           @params ||= new.params.freeze\n24:         end\n25: \n26:         def with\n27:           pool.with { |redis| yield redis }\n28:         end\n29:         alias_method :then, :with\n30: \n31:         def version\n32:           with do |redis|\n33:             info = redis.info\n34:             if info['server_name'] == 'valkey'\n35:               info['valkey_version']\n36:             else\n37:               info['redis_version']\n38:             end\n39:           end\n40:         end",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "MIT",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "path": "LICENSE"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "pairing_relationship": "PARALLEL_PRIMARY_MECHANISM_EXAMPLES_NOT_A_DEPENDENCY_CLAIM",
+      "base_scope": "OpenFeature MultiProvider implements the Provider interface, forwards the same evaluation operation to interchangeable providers and selects the final result by a concrete strategy. FirstMatch continues to the next provider only when FLAG_NOT_FOUND is reported.",
+      "application_scope": "GitLab Redis MultiStore keeps its Redis command surface while feature flags select default/nondefault storage or enable both stores. Wrapper supplies the pooled call boundary.",
+      "mechanism": "O MultiProvider do OpenFeature conserva a interface Provider enquanto consulta implementações selecionadas por uma estratégia. A estratégia FirstMatch tenta a próxima implementação quando a flag não existe na anterior. No caso real do GitLab, MultiStore conserva as operações Redis, e flags escolhem qual armazenamento responde como padrão e quando os dois recebem trabalho. Os chamadores continuam usando a abstração enquanto a seleção da implementação muda.",
+      "limits": "A base mostra a substituição de provedores de flags atrás de uma interface; o GitLab mostra a substituição de armazenamentos Redis. Estas são referências independentes do mesmo mecanismo, e não há afirmação de que o GitLab usa o SDK OpenFeature. A interface e a seleção não demonstram paridade de dados entre os armazenamentos nem uma migração concluída. FirstMatch não trata todo erro como motivo para fallback: o avanço demonstrado ocorre em FLAG_NOT_FOUND.",
+      "classification_basis": "Pattern correspondence is inferred from the actual common interface, concrete provider dispatch and implementation-selection code; upstream naming alone was not used as proof.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cce792b7b76ec0a18100fbb892674d5ddde96543941bbc2619af7f3c02c457f1.txt",
+          "sha256": "8be025f67fc0b8a3554093cd8c1bc70dd73c085248aebf2d7c9d29e07fda8edd",
+          "hits": [
+            {
+              "term": "stable evaluation method",
+              "start_line": 119,
+              "end_line": 125,
+              "excerpt": "  resolveBooleanEvaluation(\n    flagKey: string,\n    defaultValue: boolean,\n    context: EvaluationContext,\n  ): Promise<ResolutionDetails<boolean>> {\n    return this.flagResolutionProxy<boolean>(flagKey, 'boolean', defaultValue, context);\n  }",
+              "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts#L119-L125"
+            },
+            {
+              "term": "iterate implementations and select result",
+              "start_line": 164,
+              "end_line": 192,
+              "excerpt": "    const tasks: Promise<[boolean, BaseProviderResolutionResult<T, ProviderStatus, Provider> | null]>[] = [];\n\n    for (const providerEntry of this.providerEntries) {\n      const task = this.evaluateProviderEntry(\n        flagKey,\n        flagType,\n        defaultValue,\n        providerEntry,\n        hookContext,\n        hookHints,\n        context,\n      );\n\n      tasks.push(task);\n\n      if (this.evaluationStrategy.runMode === 'sequential') {\n        const [shouldEvaluateNext] = await task;\n        if (!shouldEvaluateNext) {\n          break;\n        }\n      }\n    }\n\n    const results = await Promise.all(tasks);\n    const resolutions = results\n      .map(([, resolution]) => resolution)\n      .filter((r): r is BaseProviderResolutionResult<T, ProviderStatus, Provider> => Boolean(r));\n\n    const finalResult = this.evaluationStrategy.determineFinalResult({ flagKey, flagType }, context, resolutions);",
+              "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts#L164-L192"
+            },
+            {
+              "term": "dispatch through Provider interface",
+              "start_line": 292,
+              "end_line": 306,
+              "excerpt": "  private async callProviderResolve<T extends boolean | string | number | JsonValue>(\n    provider: Provider,\n    flagKey: string,\n    defaultValue: T,\n    context: EvaluationContext,\n  ) {\n    switch (typeof defaultValue) {\n      case 'string':\n        return await provider.resolveStringEvaluation(flagKey, defaultValue, context, this.logger);\n      case 'number':\n        return await provider.resolveNumberEvaluation(flagKey, defaultValue, context, this.logger);\n      case 'object':\n        return await provider.resolveObjectEvaluation(flagKey, defaultValue, context, this.logger);\n      case 'boolean':\n        return await provider.resolveBooleanEvaluation(flagKey, defaultValue, context, this.logger);",
+              "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts#L292-L306"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/181ee96b52e0178680759b3e4dc47cfd4d0a5c139784402d410197cbda840ed8.txt",
+          "sha256": "2163066fc0351586d5021aeedd47d891716c7fbc51277e8ee0aa9c1993773476",
+          "hits": [
+            {
+              "term": "concrete implementation-selection policy",
+              "start_line": 10,
+              "end_line": 34,
+              "excerpt": "export class FirstMatchStrategy<TProviderStatus, TProvider> extends BaseEvaluationStrategy<TProviderStatus, TProvider> {\n  override shouldEvaluateNextProvider<T extends FlagValue>(\n    strategyContext: BaseStrategyPerProviderContext<TProviderStatus, TProvider>,\n    context: EvaluationContext,\n    result: BaseProviderResolutionResult<T, TProviderStatus, TProvider>,\n  ): boolean {\n    if (this.hasErrorWithCode(result, ErrorCode.FLAG_NOT_FOUND)) {\n      return true;\n    }\n    if (this.hasError(result)) {\n      return false;\n    }\n    return false;\n  }\n\n  override determineFinalResult<T extends FlagValue>(\n    strategyContext: BaseStrategyPerProviderContext<TProviderStatus, TProvider>,\n    context: EvaluationContext,\n    resolutions: BaseProviderResolutionResult<T, TProviderStatus, TProvider>[],\n  ): BaseFinalResult<T, TProviderStatus, TProvider> {\n    const finalResolution = resolutions[resolutions.length - 1];\n    if (this.hasError(finalResolution)) {\n      return this.collectProviderErrors(resolutions);\n    }\n    return this.resolutionToFinalResult(finalResolution);",
+              "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts#L10-L34"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "hits": [
+            {
+              "term": "preserved Redis command surface",
+              "start_line": 235,
+              "end_line": 240,
+              "excerpt": "      def method_missing(...)\n        return @instance.send(...) if @instance\n\n        log_method_missing(...)\n\n        default_store.send(...)",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L235-L240"
+            },
+            {
+              "term": "feature-selected migration mode",
+              "start_line": 284,
+              "end_line": 303,
+              "excerpt": "      def use_primary_and_secondary_stores?\n        # We interpolate the feature flag name within `Feature.enabled?` instead of defining a variable to allow\n        # `RuboCop::Cop::Gitlab::MarkUsedFeatureFlags`'s optimistic matching to work.\n        feature_table_exists? &&\n          Feature.enabled?( # rubocop:disable Cop/FeatureFlagUsage -- The flags are dynamic\n            \"use_primary_and_secondary_stores_for_#{instance_name.underscore}\",\n            type: feature_flag_type(\"use_primary_and_secondary_stores_for_#{instance_name.underscore}\")\n          ) &&\n          !same_redis_store?\n      end\n\n      def use_primary_store_as_default?\n        # We interpolate the feature flag name within `Feature.enabled?` instead of defining a variable to allow\n        # `RuboCop::Cop::Gitlab::MarkUsedFeatureFlags`'s optimistic matching to work.\n        feature_table_exists? &&\n          Feature.enabled?( # rubocop:disable Cop/FeatureFlagUsage -- The flags are dynamic\n            \"use_primary_store_as_default_for_#{instance_name.underscore}\",\n            type: feature_flag_type(\"use_primary_store_as_default_for_#{instance_name.underscore}\")\n          ) &&\n          !same_redis_store?",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L284-L303"
+            },
+            {
+              "term": "selected default implementation",
+              "start_line": 331,
+              "end_line": 336,
+              "excerpt": "      def default_store\n        use_primary_store_as_default? ? primary_store : secondary_store\n      end\n\n      def non_default_store\n        use_primary_store_as_default? ? secondary_store : primary_store",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L331-L336"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/wrapper.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a906410a4737032e94077356ca9d0f388f8c406357906fe786b25a55b247c524.txt",
+          "sha256": "f14929c51892749fa83575d2307482b3884f204b553c9d976957f13ca08bbb31",
+          "hits": [
+            {
+              "term": "stable pooled caller interface",
+              "start_line": 26,
+              "end_line": 29,
+              "excerpt": "        def with\n          pool.with { |redis| yield redis }\n        end\n        alias_method :then, :with",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/wrapper.rb#L26-L29"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "cdc-migration",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "debezium/debezium",
+          "revision": "2f84b29c03638d261823172d1d8bfa9ca3a99824",
+          "path": "debezium-connector-common/src/main/java/io/debezium/pipeline/ChangeEventSourceCoordinator.java",
+          "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-common/src/main/java/io/debezium/pipeline/ChangeEventSourceCoordinator.java",
+          "raw_url": "https://raw.githubusercontent.com/debezium/debezium/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-common/src/main/java/io/debezium/pipeline/ChangeEventSourceCoordinator.java",
+          "query": "Actual CDC coordinator path resolved from existing pinned repository tree.",
+          "observed_utc": "2026-10-15T03:53:33.116883+00:00",
+          "http_status": 200,
+          "sha256": "7fcf87f394fbfcaf1419c1e9292d53c6edd765e2bf64c8e4b894c10af5ec0817",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/263fdb4ead7c5a176aa0ee22ec20b782435a25506cda40b6c65b83265783d935.txt",
+          "line_count": 559,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "debezium/debezium",
+            "revision": "2f84b29c03638d261823172d1d8bfa9ca3a99824",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/debezium/debezium/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt",
+            "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+            "observed_utc": "2026-10-15T03:52:40.967089+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/48371009812e12311cf2d83c3f86d12c61ae411523947cca4532ffc171cfcaaf.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "debezium/debezium",
+          "revision": "2f84b29c03638d261823172d1d8bfa9ca3a99824",
+          "path": "debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresSnapshotChangeEventSource.java",
+          "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresSnapshotChangeEventSource.java",
+          "raw_url": "https://raw.githubusercontent.com/debezium/debezium/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresSnapshotChangeEventSource.java",
+          "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+          "observed_utc": "2026-10-15T03:52:40.711735+00:00",
+          "http_status": 200,
+          "sha256": "8603471db79ffc4e3af44812f0cbf131452cb04c9840813024eef6aad659a6f8",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4af9655e1e8483579fb87f8243513ae34f1810a9bd7f79832adc96d95e6930b6.txt",
+          "line_count": 335,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "debezium/debezium",
+            "revision": "2f84b29c03638d261823172d1d8bfa9ca3a99824",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/debezium/debezium/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt",
+            "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+            "observed_utc": "2026-10-15T03:52:40.967089+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/48371009812e12311cf2d83c3f86d12c61ae411523947cca4532ffc171cfcaaf.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "debezium/debezium",
+          "path": "debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresStreamingChangeEventSource.java",
+          "revision": "bc0b683ebe84648a96ee2532a7be31d4cc14b6df",
+          "original_url": "https://github.com/debezium/debezium/blob/v2.7.3.Final/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresStreamingChangeEventSource.java",
+          "url": "https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresStreamingChangeEventSource.java",
+          "raw_url": "https://raw.githubusercontent.com/debezium/debezium/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresStreamingChangeEventSource.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.087178Z",
+          "sha256": "280f591e05eb7543fb594659ed15404c2ef27887de621ab897682b3f91a0ac1b",
+          "line_count": 480,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2c20125bc644ab25383d9b3eaa3016d6827994f216a9708d6b0799e7f8b43478.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /*\n2:  * Copyright Debezium Authors.\n3:  *\n4:  * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0\n5:  */\n6: package io.debezium.connector.postgresql;\n7: \n8: import java.sql.SQLException;\n9: import java.util.Map;\n10: import java.util.Objects;\n11: import java.util.OptionalLong;\n12: import java.util.concurrent.atomic.AtomicReference;\n13: \n14: import org.apache.kafka.connect.errors.ConnectException;\n15: import org.postgresql.core.BaseConnection;\n16: import org.slf4j.Logger;\n17: import org.slf4j.LoggerFactory;\n18: \n19: import io.debezium.DebeziumException;\n20: import io.debezium.connector.postgresql.connection.LogicalDecodingMessage;\n21: import io.debezium.connector.postgresql.connection.Lsn;\n22: import io.debezium.connector.postgresql.connection.PostgresConnection;\n23: import io.debezium.connector.postgresql.connection.ReplicationConnection;\n24: import io.debezium.connector.postgresql.connection.ReplicationMessage;\n25: import io.debezium.connector.postgresql.connection.ReplicationMessage.Operation;\n26: import io.debezium.connector.postgresql.connection.ReplicationStream;\n27: import io.debezium.connector.postgresql.connection.WalPositionLocator;\n28: import io.debezium.heartbeat.Heartbeat;\n29: import io.debezium.pipeline.ErrorHandler;\n30: import io.debezium.pipeline.source.spi.StreamingChangeEventSource;\n31: import io.debezium.relational.TableId;\n32: import io.debezium.snapshot.SnapshotterService;\n33: import io.debezium.util.Clock;\n34: import io.debezium.util.DelayStrategy;\n35: import io.debezium.util.ElapsedTimeStrategy;\n36: import io.debezium.util.Threads;\n37: \n38: /**\n39:  *\n40:  * @author Horia Chiorean (hchiorea@redhat.com), Jiri Pechanec",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "debezium/debezium",
+            "revision": "2f84b29c03638d261823172d1d8bfa9ca3a99824",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/debezium/debezium/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt",
+            "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+            "observed_utc": "2026-10-15T03:52:40.967089+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/48371009812e12311cf2d83c3f86d12c61ae411523947cca4532ffc171cfcaaf.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "the4thdoctor/pg_chameleon",
+          "path": "pg_chameleon/lib/mysql_lib.py",
+          "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+          "original_url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py",
+          "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py",
+          "raw_url": "https://raw.githubusercontent.com/the4thdoctor/pg_chameleon/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:14.459419Z",
+          "sha256": "a948777ad32eed5af65afff8246c2bc54ece526ae4f43e75803205af3aa41fe7",
+          "line_count": 1599,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/73acfa31c9d811d0af1893c183dd7dc3bce8cdcfbc437962108df72433413370.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: import time\n2: import sys\n3: import io\n4: import pymysql\n5: import codecs\n6: import binascii\n7: from pymysqlreplication import BinLogStreamReader\n8: from pymysqlreplication.event import QueryEvent, GtidEvent, HeartbeatLogEvent\n9: from pymysqlreplication.row_event import DeleteRowsEvent,UpdateRowsEvent,WriteRowsEvent\n10: from pymysqlreplication.event import RotateEvent\n11: from pg_chameleon import sql_token\n12: from os import remove\n13: import re\n14: class mysql_source(object):\n15:     def __init__(self):\n16:         \"\"\"\n17:             Class constructor, the method sets the class variables and configure the\n18:             operating parameters from the args provided t the class.\n19:         \"\"\"\n20:         self.statement_skip = ['BEGIN', 'COMMIT']\n21:         self.schema_tables = {}\n22:         self.schema_mappings = {}\n23:         self.schema_loading = {}\n24:         self.schema_list = []\n25:         self.hexify_always = ['blob', 'tinyblob', 'mediumblob','longblob','binary','varbinary']\n26:         self.spatial_datatypes = ['point','geometry','linestring','polygon', 'multipoint', 'multilinestring', 'geometrycollection']\n27:         self.schema_only = {}\n28:         self.gtid_mode = False\n29:         self.gtid_enable = False\n30:         self.copy_table_data = True\n31: \n32: \n33: \n34:     def __del__(self):\n35:         \"\"\"\n36:             Class destructor, tries to disconnect the mysql connection.\n37:         \"\"\"\n38:         self.disconnect_db_unbuffered()\n39:         self.disconnect_db_buffered()\n40: ",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "BSD-2-Clause",
+            "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/LICENSE.txt",
+            "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+            "path": "LICENSE.txt"
+          },
+          "repository_metadata": {
+            "stars": 443,
+            "observed_utc": "2026-10-15T01:13:48.790546Z",
+            "archived": false,
+            "pushed_at": "2026-08-31T09:09:06Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "the4thdoctor/pg_chameleon",
+          "path": "pg_chameleon/lib/pg_lib.py",
+          "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+          "original_url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/pg_lib.py",
+          "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/pg_lib.py",
+          "raw_url": "https://raw.githubusercontent.com/the4thdoctor/pg_chameleon/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/pg_lib.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:14.494174Z",
+          "sha256": "bc2853e4739242ef50db2efaacdc1ed4eac550f4810be2d6d8dedee5985df2e7",
+          "line_count": 4218,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e762f36ac79ad5e3e593e64cac57e8b50555c1f92b8b291d3daeed098eb83dd6.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: import io\n2: import psycopg2\n3: from psycopg2 import sql\n4: from psycopg2.extras import RealDictCursor\n5: import sys\n6: import json\n7: import datetime\n8: import decimal\n9: import time\n10: import os\n11: import binascii\n12: from distutils.sysconfig import get_python_lib\n13: import multiprocessing as mp\n14: \n15: class pg_encoder(json.JSONEncoder):\n16:     def default(self, obj):\n17:         if \tisinstance(obj, datetime.time) or \\\n18:             isinstance(obj, datetime.datetime) or  \\\n19:             isinstance(obj, datetime.date) or \\\n20:             isinstance(obj, decimal.Decimal) or \\\n21:             isinstance(obj, datetime.timedelta) or \\\n22:             isinstance(obj, set) or\\\n23:             isinstance(obj, frozenset) or\\\n24:             isinstance(obj, bytes):\n25: \n26:             return str(obj)\n27:         return json.JSONEncoder.default(self, obj)\n28: \n29: class pgsql_source(object):\n30:     def __init__(self):\n31:         \"\"\"\n32:             Class constructor, the method sets the class variables and configure the\n33:             operating parameters from the args provided t the class.\n34:         \"\"\"\n35:         self.schema_tables = {}\n36:         self.schema_mappings = {}\n37:         self.schema_loading = {}\n38:         self.schema_list = []\n39:         self.schema_only = {}\n40: ",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "BSD-2-Clause",
+            "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/LICENSE.txt",
+            "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+            "path": "LICENSE.txt"
+          },
+          "repository_metadata": {
+            "stars": 443,
+            "observed_utc": "2026-10-15T01:13:48.790546Z",
+            "archived": false,
+            "pushed_at": "2026-08-31T09:09:06Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "the4thdoctor/pg_chameleon",
+          "path": "README.rst",
+          "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+          "original_url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/README.rst",
+          "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/README.rst",
+          "raw_url": "https://raw.githubusercontent.com/the4thdoctor/pg_chameleon/5458575165565b4593d33af912e7fdbeb4db49f8/README.rst",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:14:14.422223Z",
+          "sha256": "7b47ad986318b0c0b25b5eaaaacfc91475f1fdbd954e0414a5c41809affd4956",
+          "line_count": 155,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/6ac4e17780d0af8924444432b317fe8db17fead364aae38cf217f58e71b8cbdf.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: .. image:: https://img.shields.io/github/issues/the4thdoctor/pg_chameleon.svg\n2:         :target: https://github.com/the4thdoctor/pg_chameleon/issues\n3: \n4: .. image:: https://img.shields.io/github/forks/the4thdoctor/pg_chameleon.svg\n5:         :target: https://github.com/the4thdoctor/pg_chameleon/network\n6: \n7: .. image:: https://img.shields.io/github/stars/the4thdoctor/pg_chameleon.svg\n8:         :target: https://github.com/the4thdoctor/pg_chameleon/stargazers\n9: \n10: .. image:: https://img.shields.io/badge/license-BSD-blue.svg\n11:         :target: https://raw.githubusercontent.com/the4thdoctor/pg_chameleon/main/LICENSE.txt\n12: \n13: .. image:: https://img.shields.io/github/release/the4thdoctor/pg_chameleon\n14: \t\t:target: https://github.com/the4thdoctor/pg_chameleon/releases\n15: \n16: .. image:: https://img.shields.io/pypi/dm/pg_chameleon.svg\n17:     :target: https://pypi.org/project/pg_chameleon\n18: \n19: \n20: pg_chameleon is a MySQL to PostgreSQL replica system written in Python 3.\n21: The system use the library mysql-replication to pull the row images from MySQL which are stored into PostgreSQL as JSONB.\n22: A pl/pgsql function decodes the jsonb values and replays the changes against the PostgreSQL database.\n23: \n24: pg_chameleon  2.0 `is available on pypi <https://pypi.org/project/pg_chameleon/>`_\n25: \n26: The documentation `is available on read the docs <https://pg-chameleon.readthedocs.io/en/main/>`_\n27: \n28: Please submit your `bug reports on GitHub <https://github.com/the4thdoctor/pg_chameleon>`_.\n29: \n30: \n31: Requirements\n32: ******************\n33: \n34: Replica host\n35: ..............................\n36: \n37: Operating system: Linux, FreeBSD, OpenBSD\n38: Python: CPython 3.7+\n39: \n40: * `PyMySQL <https://pypi.python.org/pypi/PyMySQL>`_",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "BSD-2-Clause",
+            "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/LICENSE.txt",
+            "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+            "path": "LICENSE.txt"
+          },
+          "repository_metadata": {
+            "stars": 443,
+            "observed_utc": "2026-10-15T01:13:48.790546Z",
+            "archived": false,
+            "pushed_at": "2026-08-31T09:09:06Z"
+          }
+        }
+      ],
+      "supplemental_direct_dependency_sources": [
+        {
+          "kind": "FILE",
+          "repo": "julien-duponchelle/python-mysql-replication",
+          "revision": "d1de0487c4009fda8fa5e51a859614dbea1b8197",
+          "path": "pymysqlreplication/binlogstream.py",
+          "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/binlogstream.py",
+          "raw_url": "https://raw.githubusercontent.com/julien-duponchelle/python-mysql-replication/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/binlogstream.py",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:25.963098+00:00",
+          "http_status": 200,
+          "sha256": "981a7d1eeeb38cb332971f40975810a0907cd46d9817cbf1a5d5899466cd0938",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/02424fe37f8a9ccbbaa93e84485ff5422400fa8488fcbc830e22b4e320f12043.txt",
+          "line_count": 804,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "repository_metadata": {
+            "stars": 2415,
+            "archived": false,
+            "pushed_at": "2026-09-25T10:24:51Z",
+            "observed_utc": "2026-10-15T03:50:39.072301+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/julien-duponchelle--python-mysql-replication-metadata.json"
+          },
+          "license": {
+            "status": "DECLARED_PRIMARY_PACKAGE_METADATA_NO_LICENSE_TEXT_FOUND",
+            "license_declared": "Apache 2",
+            "license_spdx_inference": "Apache-2.0",
+            "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/setup.py#L45-L51",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/2e05e55bdf16f50c393c47c3f099f91a7c61346d9b24bea2efe8d2640245b6ae.txt",
+            "sha256": "b5d7cf50c473693850ea82813abc0cae7703c5ce004765b740db91e0dfc29b5c",
+            "excerpt": "        \"build on top of PyMYSQL.\"\n    ),\n    long_description=long_description,\n    long_description_content_type=\"text/markdown\",\n    license=\"Apache 2\",\n    packages=[\n        \"pymysqlreplication\",",
+            "caveat": "Pinned root tree has no license file; API repository metadata returned license=null. Preserve this disclosure. Do not label full license text READ."
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "the4thdoctor/pg_chameleon",
+          "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+          "path": "setup.py",
+          "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/setup.py",
+          "raw_url": "https://raw.githubusercontent.com/the4thdoctor/pg_chameleon/5458575165565b4593d33af912e7fdbeb4db49f8/setup.py",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:26.585192+00:00",
+          "http_status": 200,
+          "sha256": "d8cf7d331780c65e8f902f2a61e0e2baa2ee6c0a55519d642665f91d88915b20",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/61bd11dffa36075333769a5c3e68bc7db5d1bb30560e057330f553372d8cb046.txt",
+          "line_count": 68,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "BSD-2-Clause",
+            "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/LICENSE.txt",
+            "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+            "path": "LICENSE.txt"
+          },
+          "repository_metadata": {
+            "stars": 443,
+            "observed_utc": "2026-10-15T01:13:48.790546Z",
+            "archived": false,
+            "pushed_at": "2026-08-31T09:09:06Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "julien-duponchelle/python-mysql-replication",
+          "revision": "d1de0487c4009fda8fa5e51a859614dbea1b8197",
+          "path": "setup.py",
+          "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/setup.py",
+          "raw_url": "https://raw.githubusercontent.com/julien-duponchelle/python-mysql-replication/d1de0487c4009fda8fa5e51a859614dbea1b8197/setup.py",
+          "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+          "observed_utc": "2026-10-15T03:52:40.711182+00:00",
+          "http_status": 200,
+          "sha256": "b5d7cf50c473693850ea82813abc0cae7703c5ce004765b740db91e0dfc29b5c",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/2e05e55bdf16f50c393c47c3f099f91a7c61346d9b24bea2efe8d2640245b6ae.txt",
+          "line_count": 61,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "repository_metadata": {
+            "stars": 2415,
+            "archived": false,
+            "pushed_at": "2026-09-25T10:24:51Z",
+            "observed_utc": "2026-10-15T03:50:39.072301+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/julien-duponchelle--python-mysql-replication-metadata.json"
+          }
+        }
+      ],
+      "pairing_relationship": "DEBEZIUM_IS_A_PARALLEL_CDC_FRAMEWORK_EXAMPLE; PG_CHAMELEON_DIRECTLY_IMPORTS_BINLOGSTREAMREADER",
+      "base_scope": "Debezium coordinator completes or skips the snapshot and passes its offset to the streaming source. PostgreSQL snapshot captures the WAL starting position; the streaming source consumes the replication stream. This is an implementing CDC framework rather than generic CRUD.",
+      "application_scope": "pg_chameleon copies initial tables and resumes MySQL binlog events using log_file/log_pos or GTID and resume_stream=True, then maintains PostgreSQL destination replication state.",
+      "mechanism": "O coordenador do Debezium executa o snapshot e, quando ele termina ou é dispensado, passa sua posição à leitura contínua das mudanças. No conector PostgreSQL, essa posição considera o ponto de WAL da transação ou do slot. A ferramenta real pg_chameleon aplica o mesmo princípio em MySQL para PostgreSQL: copia o conjunto inicial e depois lê o binlog desde a posição ou o GTID conservado. O código do leitor BinLogStreamReader, importado pela ferramenta, confirma a retomada desde a posição fornecida.",
+      "limits": "Debezium e pg_chameleon são exemplos independentes; o pg_chameleon usa python-mysql-replication, não Debezium. Snapshot e leitura contínua fornecem a base de captura, mas estes recortes não provam reconciliação completa, drenagem final, troca de autoridade da aplicação ou CDC habilitado em algum banco da Faz. O setup.py do pg_chameleon declara mysql-replication>=0.31; ele não fixa uma versão instalada. O leitor suplementar foi consultado em um commit fixo, e sua licença foi encontrada apenas como declaração Apache 2 no setup.py. As três fontes principais do Debezium têm licença Apache-2.0 integral capturada.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-common/src/main/java/io/debezium/pipeline/ChangeEventSourceCoordinator.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/263fdb4ead7c5a176aa0ee22ec20b782435a25506cda40b6c65b83265783d935.txt",
+          "sha256": "7fcf87f394fbfcaf1419c1e9292d53c6edd765e2bf64c8e4b894c10af5ec0817",
+          "hits": [
+            {
+              "term": "snapshot offset flows into streaming",
+              "start_line": 209,
+              "end_line": 227,
+              "excerpt": "    protected void executeChangeEventSources(CdcSourceTaskContext taskContext, SnapshotChangeEventSource<P, O> snapshotSource, Offsets<P, O> previousOffsets,\n                                             AtomicReference<LoggingContext.PreviousContext> previousLogContext, ChangeEventSourceContext context)\n            throws InterruptedException {\n        final P partition = previousOffsets.getTheOnlyPartition();\n        final O previousOffset = previousOffsets.getTheOnlyOffset();\n\n        previousLogContext.set(taskContext.configureLoggingContext(\"snapshot\", partition));\n        SnapshotResult<O> snapshotResult = doSnapshot(snapshotSource, context, partition, previousOffset);\n\n        getSignalProcessor(previousOffsets).ifPresent(s -> s.setContext(Offsets.of(partition, snapshotResult.getOffset())));\n\n        LOGGER.debug(\"Snapshot result {}\", snapshotResult);\n\n        if (running && snapshotResult.isCompletedOrSkipped()) {\n            if (snapshotResult.isCompleted()) {\n                delayStreamingIfNeeded(context);\n            }\n            previousLogContext.set(taskContext.configureLoggingContext(\"streaming\", partition));\n            streamEvents(context, partition, snapshotResult.getOffset());",
+              "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-common/src/main/java/io/debezium/pipeline/ChangeEventSourceCoordinator.java#L209-L227"
+            },
+            {
+              "term": "streaming executes from supplied offset",
+              "start_line": 333,
+              "end_line": 347,
+              "excerpt": "    }\n\n    protected void streamEvents(ChangeEventSourceContext context, P partition, O offsetContext) throws InterruptedException {\n        try {\n            initStreamEvents(partition, offsetContext);\n            getSignalProcessor(previousOffsets).ifPresent(signalProcessor -> registerSignalActionsAndStartProcessor(signalProcessor,\n                    eventDispatcher, this, connectorConfig));\n\n            if (snapshotterService != null && !snapshotterService.getSnapshotter().shouldStream()) {\n                LOGGER.info(\"Streaming is disabled for snapshot mode {}\", snapshotterService.getSnapshotter().name());\n                return;\n            }\n\n            LOGGER.info(\"Starting streaming\");\n            streamingSource.execute(context, partition, offsetContext);",
+              "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-common/src/main/java/io/debezium/pipeline/ChangeEventSourceCoordinator.java#L333-L347"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresSnapshotChangeEventSource.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4af9655e1e8483579fb87f8243513ae34f1810a9bd7f79832adc96d95e6930b6.txt",
+          "sha256": "8603471db79ffc4e3af44812f0cbf131452cb04c9840813024eef6aad659a6f8",
+          "hits": [
+            {
+              "term": "capture WAL snapshot boundary",
+              "start_line": 194,
+              "end_line": 214,
+              "excerpt": "    private void updateOffsetForSnapshot(PostgresOffsetContext offset) throws SQLException {\n        final Lsn xlogStart = getTransactionStartLsn();\n        final Long txId = jdbcConnection.currentTransactionId();\n        LOGGER.info(\"Read xlogStart at '{}' from transaction '{}'\", xlogStart, txId);\n\n        // use the old xmin, as we don't want to update it if in xmin recovery\n        offset.updateWalPosition(xlogStart, offset.lastCompletelyProcessedLsn(), clock.currentTime(), txId, offset.xmin(), null, null);\n    }\n\n    protected void updateOffsetForPreSnapshotCatchUpStreaming(PostgresOffsetContext offset) throws SQLException {\n        updateOffsetForSnapshot(offset);\n        offset.setStreamingStoppingLsn(Lsn.valueOf(jdbcConnection.currentXLogLocation()));\n    }\n\n    private Lsn getTransactionStartLsn() throws SQLException {\n        if (slotCreatedInfo != null) {\n            // When performing an exported snapshot based on a newly created replication slot, the txLogStart position\n            // should be based on the replication slot snapshot transaction point. This is crucial so that if any\n            // SQL operations occur mid-snapshot that they'll be properly captured when streaming begins; otherwise\n            // they'll be lost.\n            return slotCreatedInfo.startLsn();",
+              "url": "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresSnapshotChangeEventSource.java#L194-L214"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/pg_lib.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e762f36ac79ad5e3e593e64cac57e8b50555c1f92b8b291d3daeed098eb83dd6.txt",
+          "sha256": "bc2853e4739242ef50db2efaacdc1ed4eac550f4810be2d6d8dedee5985df2e7",
+          "hits": [
+            {
+              "term": "initial copy and destination setup",
+              "start_line": 507,
+              "end_line": 528,
+              "excerpt": "    def init_replica(self):\n        \"\"\"\n            The method performs a full init replica for the given source\n        \"\"\"\n        self.logger.debug(\"starting init replica for source %s\" % self.source)\n        self.__init_sync()\n        self.schema_list = [schema for schema in self.schema_mappings]\n        self.__build_table_exceptions()\n        self.__get_table_list()\n        self.__create_destination_schemas()\n        self.pg_engine.schema_loading = self.schema_loading\n        self.pg_engine.set_source_status(\"initialising\")\n        try:\n            self.__create_destination_tables()\n            self.__copy_tables()\n            self.__create_indices()\n            self.pg_engine.grant_select()\n            self.pg_engine.swap_schemas()\n            self.__drop_loading_schemas()\n            self.pg_engine.set_source_status(\"initialised\")\n            fake_master = [{'File': None, 'Position': None }]\n            self.pg_engine.set_source_highwatermark(fake_master, consistent=self.consistent)",
+              "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/pg_lib.py#L507-L528"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/73acfa31c9d811d0af1893c183dd7dc3bce8cdcfbc437962108df72433413370.txt",
+          "sha256": "a948777ad32eed5af65afff8246c2bc54ece526ae4f43e75803205af3aa41fe7",
+          "hits": [
+            {
+              "term": "actual BinLogStreamReader import",
+              "start_line": 4,
+              "end_line": 10,
+              "excerpt": "import pymysql\nimport codecs\nimport binascii\nfrom pymysqlreplication import BinLogStreamReader\nfrom pymysqlreplication.event import QueryEvent, GtidEvent, HeartbeatLogEvent\nfrom pymysqlreplication.row_event import DeleteRowsEvent,UpdateRowsEvent,WriteRowsEvent\nfrom pymysqlreplication.event import RotateEvent",
+              "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py#L4-L10"
+            },
+            {
+              "term": "persisted position and resumed row-event consumption",
+              "start_line": 1258,
+              "end_line": 1284,
+              "excerpt": "        id_batch = batch_data[0][0]\n        log_file = batch_data[0][1]\n        log_position = batch_data[0][2]\n        log_table = batch_data[0][3]\n        master_data[\"log_table\"] = log_table\n        if self.gtid_mode:\n            gtid_position = batch_data[0][4]\n            gtid_pack = gtid_position.split(\",\\n\")\n            for gtid in gtid_pack:\n                gtid  = gtid.split(':')\n                next_gtid[gtid [0]]  = gtid [1].split(\"-\")[-1]\n                gtid_set = self.__build_gtid_set(next_gtid)\n        else:\n            gtid_set = None\n        stream_connected = False\n        my_stream = BinLogStreamReader(\n            connection_settings = self.replica_conn,\n            server_id = self.my_server_id,\n            only_events = [RotateEvent, DeleteRowsEvent, WriteRowsEvent, UpdateRowsEvent, QueryEvent, GtidEvent, HeartbeatLogEvent],\n            log_file = log_file,\n            log_pos = log_position,\n            auto_position = gtid_set,\n            resume_stream = True,\n            only_schemas = self.schema_replica,\n            slave_heartbeat = self.sleep_loop,\n\n        )",
+              "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py#L1258-L1284"
+            }
+          ]
+        },
+        {
+          "role": "supplemental_base",
+          "source_url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/binlogstream.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/02424fe37f8a9ccbbaa93e84485ff5422400fa8488fcbc830e22b4e320f12043.txt",
+          "sha256": "981a7d1eeeb38cb332971f40975810a0907cd46d9817cbf1a5d5899466cd0938",
+          "hits": [
+            {
+              "term": "replication protocol resumes from caller position",
+              "start_line": 414,
+              "end_line": 444,
+              "excerpt": "                # only when log_file and log_pos both provided, the position info is\n                # valid, if not, get the current position from master\n                if self.log_file is None or self.log_pos is None:\n                    cur = self._stream_connection.cursor()\n                    try:\n                        master_status = self.__show_binary_log_status(cur)\n                        if master_status is None:\n                            raise BinLogNotEnabled()\n                        self.log_file, self.log_pos = master_status[:2]\n                    finally:\n                        cur.close()\n\n                prelude = struct.pack(\"<i\", len(self.log_file) + 11) + bytes(\n                    bytearray([COM_BINLOG_DUMP])\n                )\n\n                if self.__resume_stream:\n                    prelude += struct.pack(\"<I\", self.log_pos)\n                else:\n                    prelude += struct.pack(\"<I\", 4)\n\n                flags = 0\n\n                if not self.__blocking:\n                    flags |= 0x01  # BINLOG_DUMP_NON_BLOCK\n\n                prelude += struct.pack(\"<H\", flags)\n\n                prelude += struct.pack(\"<I\", self.__server_id)\n\n                prelude += self.log_file.encode()",
+              "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/binlogstream.py#L414-L444"
+            },
+            {
+              "term": "stream consumes and decodes replication packets",
+              "start_line": 598,
+              "end_line": 639,
+              "excerpt": "    def fetchone(self):\n        while True:\n            if self.end_log_pos and self.is_past_end_log_pos:\n                return None\n\n            if not self.__connected_stream:\n                self.__connect_to_stream()\n\n            if not self.__connected_ctl:\n                self.__connect_to_ctl()\n\n            try:\n                if PYMYSQL_VERSION_LT_06:\n                    pkt = self._stream_connection.read_packet()\n                else:\n                    pkt = self._stream_connection._read_packet()\n            except pymysql.OperationalError as error:\n                code, message = error.args\n                if code in MYSQL_EXPECTED_ERROR_CODES:\n                    self._stream_connection.close()\n                    self.__connected_stream = False\n                    logger.warning(\n                        \"\"\"\n                          A pymysql.OperationalError error occurred, Re-request the connection.\n                        \"\"\",\n                    )\n                    continue\n                raise\n\n            if pkt.is_eof_packet():\n                self.close()\n                return None\n\n            if not pkt.is_ok_packet():\n                continue\n\n            binlog_event = BinLogPacketWrapper(\n                pkt,\n                self.table_map,\n                self._ctl_connection,\n                self.mysql_version,\n                self.__use_checksum,",
+              "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/binlogstream.py#L598-L639"
+            }
+          ]
+        },
+        {
+          "role": "version_contract",
+          "source_url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/setup.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/61bd11dffa36075333769a5c3e68bc7db5d1bb30560e057330f553372d8cb046.txt",
+          "sha256": "d8cf7d331780c65e8f902f2a61e0e2baa2ee6c0a55519d642665f91d88915b20",
+          "hits": [
+            {
+              "term": "dependency declared by real product",
+              "start_line": 48,
+              "end_line": 55,
+              "excerpt": "        \"scripts/chameleon\"\n    ],\n    install_requires=[\n        'PyMySQL>=0.10.0',\n        'mysql-replication>=0.31',\n        'psycopg2-binary>=2.8.3',\n        'PyYAML>=3.13',\n        'tabulate>=0.8.1',",
+              "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/setup.py#L48-L55"
+            }
+          ]
+        },
+        {
+          "role": "license_declaration",
+          "source_url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/setup.py",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/2e05e55bdf16f50c393c47c3f099f91a7c61346d9b24bea2efe8d2640245b6ae.txt",
+          "sha256": "b5d7cf50c473693850ea82813abc0cae7703c5ce004765b740db91e0dfc29b5c",
+          "hits": [
+            {
+              "term": "primary package license declaration",
+              "start_line": 45,
+              "end_line": 51,
+              "excerpt": "        \"build on top of PyMYSQL.\"\n    ),\n    long_description=long_description,\n    long_description_content_type=\"text/markdown\",\n    license=\"Apache 2\",\n    packages=[\n        \"pymysqlreplication\",",
+              "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/setup.py#L45-L51"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "dark-launch",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "github/scientist",
+          "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+          "path": "lib/scientist/experiment.rb",
+          "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+          "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:26.319068+00:00",
+          "http_status": 200,
+          "sha256": "7179870045960ffc150277d93d1244e2bf10edcac1f73cf5094eacef417c8379",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/21a7a3da804585d5a00705d5ce4886ffb6ab91fdf91cd8e6c8852215abf7adc6.txt",
+          "line_count": 351,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "github/scientist",
+            "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+            "observed_utc": "2026-10-15T03:52:40.711575+00:00",
+            "http_status": 200,
+            "sha256": "4db6ecff4859ffd352fe66d20c66808f3d2b6536cbca144bf3b6a737d9b0551b",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/41d254ee8d08d6ec9b9fa9a2ac778c4e0c3e0de28e391654eb747f599041e73e.txt",
+            "line_count": 22,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 7769,
+            "archived": false,
+            "pushed_at": "2026-10-02T02:22:26Z",
+            "observed_utc": "2026-10-15T03:50:39.123430+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/github--scientist-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "github/scientist",
+          "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+          "path": "lib/scientist/observation.rb",
+          "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+          "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+          "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs.",
+          "observed_utc": "2026-10-15T03:50:26.327737+00:00",
+          "http_status": 200,
+          "sha256": "8b7b90d1ecf937687580efeb9d3e58d8b9e2e5bf879be268b63ae1ff51ffe329",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/c5b675177a339e14d7c5fa14c0e9621b2f843b3550acda46d555585cebacefdd.txt",
+          "line_count": 114,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "github/scientist",
+            "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE.txt",
+            "query": "Primary license declaration or alternate CDC framework snapshot/stream factory.",
+            "observed_utc": "2026-10-15T03:52:40.711575+00:00",
+            "http_status": 200,
+            "sha256": "4db6ecff4859ffd352fe66d20c66808f3d2b6536cbca144bf3b6a737d9b0551b",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/41d254ee8d08d6ec9b9fa9a2ac778c4e0c3e0de28e391654eb747f599041e73e.txt",
+            "line_count": 22,
+            "status": "READ",
+            "license_spdx": "MIT",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 7769,
+            "archived": false,
+            "pushed_at": "2026-10-02T02:22:26Z",
+            "observed_utc": "2026-10-15T03:50:39.123430+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/github--scientist-metadata.json"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/redis/multi_store.rb",
+          "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/master/lib/gitlab/redis/multi_store.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:26:25.582062Z",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "line_count": 519,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: module Gitlab\n4:   module Redis\n5:     class MultiStore\n6:       include Gitlab::Utils::StrongMemoize\n7: \n8:       class PipelinedDiffError < StandardError\n9:         def initialize(non_default_store_result, default_store_result)\n10:           @non_default_store_result = non_default_store_result\n11:           @default_store_result = default_store_result\n12:         end\n13: \n14:         def message\n15:           \"Pipelined command executed on both stores successfully but results differ between them. \" \\\n16:             \"Result from the non-default store: #{@non_default_store_result.inspect}. \" \\\n17:             \"Result from the default store: #{@default_store_result.inspect}.\"\n18:         end\n19:       end\n20: \n21:       class MethodMissingError < StandardError\n22:         def initialize(cmd)\n23:           @cmd = cmd\n24:         end\n25: \n26:         def message\n27:           \"Method missing #{@cmd}. Falling back to execute method on the redis default store in Rails.env.production.\"\n28:         end\n29:       end\n30: \n31:       class NestedReadonlyPipelineError < StandardError\n32:         def message\n33:           'Nested use of with_readonly_pipeline is detected.'\n34:         end\n35:       end\n36: \n37:       attr_reader :primary_pool, :secondary_pool, :instance_name, :primary_store, :secondary_store\n38: \n39:       FAILED_TO_READ_ERROR_MESSAGE = 'Failed to read from the redis default_store.'\n40:       FAILED_TO_WRITE_ERROR_MESSAGE = 'Failed to write to the redis non_default_store.'",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "MIT",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "path": "LICENSE"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "pairing_relationship": "PARALLEL_PRIMARY_MECHANISM_EXAMPLES_NOT_A_DEPENDENCY_CLAIM",
+      "base_scope": "Scientist registers control and candidate behaviors, actually executes them through Observation, publishes comparison information and by default returns control.value.",
+      "application_scope": "GitLab sends writes to the storage selected as default and to the nondefault storage while returning only the default result. This is a hidden launch of a storage destination.",
+      "mechanism": "Scientist permite executar um comportamento candidato junto com o comportamento de controle. A execução observa os dois, publica o resultado do experimento e, na chamada run() padrão, devolve o valor do controle. No GitLab, o armazenamento secundário recebe uma escrita real antes de assumir a resposta ao chamador: write_both devolve o resultado do armazenamento padrão. Assim, o trabalho novo pode ser exercitado sem escolher seu resultado como resposta principal.",
+      "limits": "Scientist e o MultiStore do GitLab são exemplos independentes; não se afirma que esse recorte do GitLab usa Scientist. Scientist executa blocos no mesmo processo e não isola efeitos colaterais. O exemplo não é um teste A/B nem uma interface desligada. O padrão devolve o controle, mas a API também aceita o nome de outro comportamento e uma configuração de divergência pode lançar exceção. No GitLab, o destino secundário recebe efeitos reais, e sua falha é registrada sem tornar as duas escritas atômicas.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/21a7a3da804585d5a00705d5ce4886ffb6ab91fdf91cd8e6c8852215abf7adc6.txt",
+          "sha256": "7179870045960ffc150277d93d1244e2bf10edcac1f73cf5094eacef417c8379",
+          "hits": [
+            {
+              "term": "register control and candidate",
+              "start_line": 291,
+              "end_line": 305,
+              "excerpt": "  # Register a named behavior for this experiment, default \"candidate\".\n  def try(name = nil, &block)\n    name = (name || \"candidate\").to_s\n\n    if behaviors.include?(name)\n      raise Scientist::BehaviorNotUnique.new(self, name)\n    end\n\n    behaviors[name] = block\n  end\n\n  # Register the control behavior for this experiment.\n  def use(&block)\n    try \"control\", &block\n  end",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb#L291-L305"
+            },
+            {
+              "term": "actually run each registered behavior",
+              "start_line": 322,
+              "end_line": 333,
+              "excerpt": "  # Internal: Generate the observations and create the result from those and the control.\n  def generate_result(name)\n    observations = []\n\n    behaviors.keys.shuffle.each do |key|\n      block = behaviors[key]\n      fabricated_duration = @_scientist_fabricated_durations && @_scientist_fabricated_durations[key]\n      observations << Scientist::Observation.new(key, self, fabricated_duration: fabricated_duration, &block)\n    end\n\n    control = observations.detect { |o| o.name == name }\n    Scientist::Result.new(self, observations, control)",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb#L322-L333"
+            },
+            {
+              "term": "publish observations and return control value",
+              "start_line": 241,
+              "end_line": 263,
+              "excerpt": "    result = generate_result(name)\n\n    if @_scientist_after_run\n      @_scientist_after_run.call(result)\n    end\n\n    begin\n      publish(result)\n    rescue StandardError => ex\n      raised :publish, ex\n    end\n\n    if raise_on_mismatches? && result.mismatched?\n      if @_scientist_custom_mismatch_error\n        raise @_scientist_custom_mismatch_error.new(self.name, result)\n      else\n        raise MismatchError.new(self.name, result)\n      end\n    end\n\n    control = result.control\n    raise control.exception if control.raised?\n    control.value",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb#L241-L263"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/c5b675177a339e14d7c5fa14c0e9621b2f843b3550acda46d555585cebacefdd.txt",
+          "sha256": "8b7b90d1ecf937687580efeb9d3e58d8b9e2e5bf879be268b63ae1ff51ffe329",
+          "hits": [
+            {
+              "term": "candidate block is executed and observed",
+              "start_line": 26,
+              "end_line": 36,
+              "excerpt": "  def initialize(name, experiment, fabricated_duration: nil, &block)\n    @name       = name\n    @experiment = experiment\n\n    start_wall_time, start_cpu_time = capture_times unless fabricated_duration\n\n    begin\n      @value = block.call\n    rescue *RESCUES => e\n      @exception = e\n    end",
+              "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb#L26-L36"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "hits": [
+            {
+              "term": "default response authority",
+              "start_line": 331,
+              "end_line": 336,
+              "excerpt": "      def default_store\n        use_primary_store_as_default? ? primary_store : secondary_store\n      end\n\n      def non_default_store\n        use_primary_store_as_default? ? secondary_store : primary_store",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L331-L336"
+            },
+            {
+              "term": "hidden secondary write, default result returned",
+              "start_line": 425,
+              "end_line": 437,
+              "excerpt": "      def write_both(command_name, ...)\n        result = send_command(default_store, command_name, ...)\n\n        # write to the non-default store only if write on default store is successful\n        begin\n          send_command(non_default_store, command_name, ...)\n        rescue StandardError => e\n          log_error(e, command_name,\n            multi_store_error_message: FAILED_TO_WRITE_ERROR_MESSAGE)\n        end\n\n        result\n      end",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L425-L437"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "dual-write-migration",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/migrations/op_alter_column.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.921225+00:00",
+          "http_status": 200,
+          "sha256": "365d6694326966810a7c74b42e0cc07f27a597fe9b43a76e2c8c6518ef14d394",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4f607812c499614bd14d60e4201508d6ccc0a3384990083464957007b55b8d82.txt",
+          "line_count": 342,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "archived": false,
+            "pushed_at": "2026-09-21T08:39:12Z",
+            "observed_utc": "2026-10-15T03:50:39.086680+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/xataio--pgroll-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/backfill/templates/trigger.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.944788+00:00",
+          "http_status": 200,
+          "sha256": "244b07de1299418949373e342e076d94bbeb85855fc9f58f5ff3c7614f85b066",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/d458a3b449f6c9d78583b5d9c6d344dcf9f565aab2c046174f3afc80e183a1d9.txt",
+          "line_count": 10,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "archived": false,
+            "pushed_at": "2026-09-21T08:39:12Z",
+            "observed_utc": "2026-10-15T03:50:39.086680+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/xataio--pgroll-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/backfill/templates/function.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:07.229827+00:00",
+          "http_status": 200,
+          "sha256": "9d8f87185c64fdda2c498a092b8b1c88dd1082d0f7086ff0c739eb6f847a2fed",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cc4d6f7770a1f5950bafc8dc3b6aaafd267d33d1ce78b5df64dd013ff6a32c8c.txt",
+          "line_count": 31,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "archived": false,
+            "pushed_at": "2026-09-21T08:39:12Z",
+            "observed_utc": "2026-10-15T03:50:39.086680+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/xataio--pgroll-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "xataio/pgroll",
+          "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+          "path": "pkg/roll/execute.go",
+          "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "query": "Pinned primary caller connecting aggregate construction or dual-write migration phases.",
+          "observed_utc": "2026-10-15T03:51:43.430109+00:00",
+          "http_status": 200,
+          "sha256": "a8172cdaf819e4eaa85cb1b625e001a1591950c27945603f0782b5e5fd230068",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/b63a2e685aad4a44e2aaee64f88d4ab97d9d242658239a89a31cd21c5abb9118.txt",
+          "line_count": 393,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "xataio/pgroll",
+            "revision": "777a5350e09012b29d26b9611122046d8a96fc1c",
+            "path": "LICENSE",
+            "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/xataio/pgroll/777a5350e09012b29d26b9611122046d8a96fc1c/LICENSE",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:07.230127+00:00",
+            "http_status": 200,
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1a8bdef8613f760c4973382a5688a6b254674dc885601a22c17be9a9fb19b602.txt",
+            "line_count": 201,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 6602,
+            "archived": false,
+            "pushed_at": "2026-09-21T08:39:12Z",
+            "observed_utc": "2026-10-15T03:50:39.086680+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/xataio--pgroll-metadata.json"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "gitlabhq/gitlabhq",
+          "path": "lib/gitlab/redis/multi_store.rb",
+          "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+          "original_url": "https://github.com/gitlabhq/gitlabhq/blob/master/lib/gitlab/redis/multi_store.rb",
+          "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "raw_url": "https://raw.githubusercontent.com/gitlabhq/gitlabhq/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:26:25.582062Z",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "line_count": 519,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: # frozen_string_literal: true\n2: \n3: module Gitlab\n4:   module Redis\n5:     class MultiStore\n6:       include Gitlab::Utils::StrongMemoize\n7: \n8:       class PipelinedDiffError < StandardError\n9:         def initialize(non_default_store_result, default_store_result)\n10:           @non_default_store_result = non_default_store_result\n11:           @default_store_result = default_store_result\n12:         end\n13: \n14:         def message\n15:           \"Pipelined command executed on both stores successfully but results differ between them. \" \\\n16:             \"Result from the non-default store: #{@non_default_store_result.inspect}. \" \\\n17:             \"Result from the default store: #{@default_store_result.inspect}.\"\n18:         end\n19:       end\n20: \n21:       class MethodMissingError < StandardError\n22:         def initialize(cmd)\n23:           @cmd = cmd\n24:         end\n25: \n26:         def message\n27:           \"Method missing #{@cmd}. Falling back to execute method on the redis default store in Rails.env.production.\"\n28:         end\n29:       end\n30: \n31:       class NestedReadonlyPipelineError < StandardError\n32:         def message\n33:           'Nested use of with_readonly_pipeline is detected.'\n34:         end\n35:       end\n36: \n37:       attr_reader :primary_pool, :secondary_pool, :instance_name, :primary_store, :secondary_store\n38: \n39:       FAILED_TO_READ_ERROR_MESSAGE = 'Failed to read from the redis default_store.'\n40:       FAILED_TO_WRITE_ERROR_MESSAGE = 'Failed to write to the redis non_default_store.'",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "MIT",
+            "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE",
+            "revision": "b7a1f67aa40446467440af3751675dbd5140b999",
+            "path": "LICENSE"
+          },
+          "repository_metadata": {
+            "stars": 24550,
+            "observed_utc": "2026-10-15T01:13:45.162069Z",
+            "archived": false,
+            "pushed_at": "2026-10-15T00:42:08Z"
+          }
+        }
+      ],
+      "pairing_relationship": "PARALLEL_PRIMARY_MECHANISM_EXAMPLES_WITH_DIFFERENT_TRANSACTION_BOUNDARIES",
+      "base_scope": "pgroll OpAlterColumn duplicates a column, builds up/down synchronization triggers, backfills existing rows, and Complete drops the old representation and trigger functions and renames the new column. SQL templates show actual BEFORE INSERT/UPDATE synchronization.",
+      "application_scope": "GitLab MultiStore writes sequentially to default and nondefault Redis storage and retains the default result. Pipeline comparison exposes divergence; secondary write failures are logged.",
+      "mechanism": "O pgroll mantém duas representações de uma coluna durante a migração. A operação cria a coluna nova e triggers que propagam valores em ambos os sentidos; o executor instala os triggers antes de preencher as linhas antigas. A conclusão remove a representação antiga e os auxiliares da migração. O GitLab demonstra a variante em que a aplicação escreve em dois armazenamentos: ela grava no padrão, tenta o secundário e conserva a resposta da primeira gravação.",
+      "limits": "O pgroll sincroniza duas representações dentro do PostgreSQL por triggers na alteração da linha. O GitLab faz duas chamadas Redis sequenciais, que podem divergir. São referências independentes, e não uma afirmação de dependência do GitLab em pgroll. A garantia transacional local do trigger não se transfere para duas bases ou serviços separados. O recorte do GitLab registra falha secundária e diferenças de pipeline, mas não fornece reconciliação automática de todas as divergências. A fase Complete do pgroll é explícita; a pesquisa não executou uma migração nem demonstrou um cutover de produção.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/4f607812c499614bd14d60e4201508d6ccc0a3384990083464957007b55b8d82.txt",
+          "sha256": "365d6694326966810a7c74b42e0cc07f27a597fe9b43a76e2c8c6518ef14d394",
+          "hits": [
+            {
+              "term": "duplicate physical column and add forward synchronization",
+              "start_line": 34,
+              "end_line": 60,
+              "excerpt": "\t// Duplicate the column on the underlying table.\n\td := duplicatorForOperations(ops, conn, table, column).\n\t\tWithName(column.Name, TemporaryName(o.Column))\n\tif err := d.Execute(ctx); err != nil {\n\t\treturn nil, fmt.Errorf(\"failed to duplicate column: %w\", err)\n\t}\n\n\t// Copy the columns from table columns, so we can use it later\n\t// in the down trigger with the physical name\n\tupColumns := make(map[string]*schema.Column)\n\tfor name, col := range table.Columns {\n\t\tupColumns[name] = col\n\t}\n\n\t// Add a trigger to copy values from the old column to the new, rewriting values using the `up` SQL.\n\ttriggers := make([]backfill.OperationTrigger, 0, 2)\n\ttriggers = append(\n\t\ttriggers,\n\t\tbackfill.OperationTrigger{\n\t\t\tName:           backfill.TriggerName(o.Table, o.Column),\n\t\t\tDirection:      backfill.TriggerDirectionUp,\n\t\t\tTableName:      table.Name,\n\t\t\tColumns:        upColumns,\n\t\t\tPhysicalColumn: TemporaryName(o.Column),\n\t\t\tSQL:            o.upSQLForOperations(ops),\n\t\t},\n\t)",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L34-L60"
+            },
+            {
+              "term": "backward synchronization and backfill task",
+              "start_line": 76,
+              "end_line": 101,
+              "excerpt": "\t// Add a trigger to copy values from the new column to the old.\n\ttriggers = append(\n\t\ttriggers,\n\t\tbackfill.OperationTrigger{\n\t\t\tName:           backfill.TriggerName(o.Table, TemporaryName(o.Column)),\n\t\t\tDirection:      backfill.TriggerDirectionDown,\n\t\t\tTableName:      table.Name,\n\t\t\tColumns:        table.Columns,\n\t\t\tPhysicalColumn: oldPhysicalColumn,\n\t\t\tSQL:            o.downSQLForOperations(ops),\n\t\t},\n\t)\n\ttask := backfill.NewTask(table, triggers...)\n\n\tvar dbActions []DBAction\n\t// perform any operation specific start steps\n\tfor _, op := range ops {\n\t\tstartOp, err := op.Start(ctx, l, conn, s)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\ttask.AddTriggers(startOp.BackfillTask)\n\t\tdbActions = append(dbActions, startOp.Actions...)\n\t}\n\n\treturn &StartResult{Actions: dbActions, BackfillTask: task}, nil",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L76-L101"
+            },
+            {
+              "term": "complete removes old representation and triggers",
+              "start_line": 127,
+              "end_line": 140,
+              "excerpt": "\ttable.Name = o.Table\n\n\t// Rename the new column to the old column name\n\treturn append(dbActions, []DBAction{\n\t\tNewAlterSequenceOwnerAction(conn, table.Name, column.Name, TemporaryName(column.Name)),\n\t\tNewDropColumnAction(conn, table.Name, o.Column),\n\t\tNewDropFunctionAction(\n\t\t\tconn,\n\t\t\tbackfill.TriggerFunctionName(o.Table, o.Column),\n\t\t\tbackfill.TriggerFunctionName(o.Table, TemporaryName(o.Column)),\n\t\t),\n\t\tNewDropColumnAction(conn, o.Table, backfill.CNeedsBackfillColumn),\n\t\tNewRenameDuplicatedColumnAction(conn, table, o.Column),\n\t}...), nil",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go#L127-L140"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/d458a3b449f6c9d78583b5d9c6d344dcf9f565aab2c046174f3afc80e183a1d9.txt",
+          "sha256": "244b07de1299418949373e342e076d94bbeb85855fc9f58f5ff3c7614f85b066",
+          "hits": [
+            {
+              "term": "actual insert/update trigger",
+              "start_line": 5,
+              "end_line": 9,
+              "excerpt": "const Trigger = `CREATE OR REPLACE TRIGGER {{ .Name | qi }}\n    BEFORE UPDATE OR INSERT\n    ON {{ .TableName | qi }}\n    FOR EACH ROW\n    EXECUTE PROCEDURE {{ .Name | qi }}();",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go#L5-L9"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/cc4d6f7770a1f5950bafc8dc3b6aaafd267d33d1ce78b5df64dd013ff6a32c8c.txt",
+          "sha256": "9d8f87185c64fdda2c498a092b8b1c88dd1082d0f7086ff0c739eb6f847a2fed",
+          "hits": [
+            {
+              "term": "actual conditional second-representation assignment",
+              "start_line": 17,
+              "end_line": 29,
+              "excerpt": "    BEGIN\n      SELECT current_setting\n        INTO search_path\n        FROM current_setting('search_path');\n\n      IF search_path {{- if eq .Direction \"up\" }} != {{- else }} = {{- end }} {{ .LatestSchema | ql }} THEN\n      {{- $physicalColumn := .PhysicalColumn | qi  }}{{ range $s := .SQL }}\n        NEW.{{ $physicalColumn  }} = {{ $s }};\n      {{- end }}\n        NEW.{{ .NeedsBackfillColumn | qi }} = false;\n      END IF;\n\n      RETURN NEW;",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go#L17-L29"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/b63a2e685aad4a44e2aaee64f88d4ab97d9d242658239a89a31cd21c5abb9118.txt",
+          "sha256": "a8172cdaf819e4eaa85cb1b625e001a1591950c27945603f0782b5e5fd230068",
+          "hits": [
+            {
+              "term": "triggers precede backfill",
+              "start_line": 368,
+              "end_line": 386,
+              "excerpt": "func (m *Roll) performBackfills(ctx context.Context, job *backfill.Job, cfg *backfill.Config) error {\n\tbf := backfill.New(m.pgConn, cfg)\n\n\tbf.CreateTriggers(ctx, job)\n\n\tfor _, table := range job.Tables {\n\t\tm.logger.LogBackfillStart(table.Name)\n\n\t\tif err := bf.Start(ctx, table); err != nil {\n\t\t\terrRollback := m.Rollback(ctx)\n\n\t\t\treturn errors.Join(\n\t\t\t\tfmt.Errorf(\"unable to backfill table %q: %w\", table.Name, err),\n\t\t\t\terrRollback,\n\t\t\t)\n\t\t}\n\n\t\tm.logger.LogBackfillComplete(table.Name)\n\t}",
+              "url": "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go#L368-L386"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f6b1f5d2d1546e4c2fa919a430ec35b2b181eb7548a7d5eb2e9da20170bf82d6.txt",
+          "sha256": "810ef1097d9ea059f5abf2eeb604fb0d210534da3a8b0b5f776fae9663b9ef28",
+          "hits": [
+            {
+              "term": "sequential double write and partial failure",
+              "start_line": 425,
+              "end_line": 437,
+              "excerpt": "      def write_both(command_name, ...)\n        result = send_command(default_store, command_name, ...)\n\n        # write to the non-default store only if write on default store is successful\n        begin\n          send_command(non_default_store, command_name, ...)\n        rescue StandardError => e\n          log_error(e, command_name,\n            multi_store_error_message: FAILED_TO_WRITE_ERROR_MESSAGE)\n        end\n\n        result\n      end",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L425-L437"
+            },
+            {
+              "term": "pipeline divergence is observed without changing authority",
+              "start_line": 439,
+              "end_line": 458,
+              "excerpt": "      # Run the entire pipeline on both stores. We assume that `&block` is idempotent.\n      def pipelined_both(command_name, ...)\n        result_default = send_command(default_store, command_name, ...)\n\n        begin\n          result_non_default = send_command(non_default_store, command_name, ...)\n        rescue StandardError => e\n          log_error(e, command_name, multi_store_error_message: FAILED_TO_RUN_PIPELINE)\n        end\n\n        # Pipelined commands return an array with all results. If they differ, log an error\n        if result_non_default && result_non_default != result_default\n          error = PipelinedDiffError.new(result_non_default, result_default)\n          error.set_backtrace(Thread.current.backtrace[1..]) # Manually set backtrace, since the error is not `raise`d\n\n          log_error(error, command_name)\n          increment_pipelined_command_error_count(command_name)\n        end\n\n        result_default",
+              "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L439-L458"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "factory",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_AFTER_REPAIR",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.585128+00:00",
+          "http_status": 200,
+          "sha256": "238211b202afe288a4f67f19e1b1ec542c3de05c521d73ee48869dec5182a846",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/0f81fd8df835215f84dfaf52de67f3a5158c3c9c4450c79b19dd4bb8ec892062.txt",
+          "line_count": 101,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 3625,
+            "archived": false,
+            "pushed_at": "2026-10-15T01:07:30Z",
+            "observed_utc": "2026-10-15T03:50:39.745995+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/AxonFramework--AxonFramework-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.585284+00:00",
+          "http_status": 200,
+          "sha256": "f4862c63f12e04865f1279f0fe106105f44af5bd74922ac33d8af8aba04c34f6",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/e65943b48cf73c600e4362e7a717262a5f837dfcbe134895af4343d237c8647a.txt",
+          "line_count": 609,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 3625,
+            "archived": false,
+            "pushed_at": "2026-10-15T01:07:30Z",
+            "observed_utc": "2026-10-15T03:50:39.745995+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/AxonFramework--AxonFramework-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/GenericJpaRepository.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/GenericJpaRepository.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/GenericJpaRepository.java",
+          "query": "Concrete Repository caller connects factory API to AnnotatedAggregate initialization.",
+          "observed_utc": "2026-10-15T03:56:29.648699+00:00",
+          "http_status": 200,
+          "sha256": "f8cad194d2794e34b66a90b0bbbb75e3859a07eeda1b63f2ab1aa2da0cc8c375",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1d22d42aa7149a6490243a626f6dab46666bf5d32e5bd1e5b5b4d7f9cd412bbb.txt",
+          "line_count": 372,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 3625,
+            "archived": false,
+            "pushed_at": "2026-10-15T01:07:30Z",
+            "observed_utc": "2026-10-15T03:50:39.745995+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/AxonFramework--AxonFramework-metadata.json"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "AxonFramework/AxonFramework",
+          "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+          "path": "modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+          "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+          "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+          "query": "Pinned primary caller connecting aggregate construction or dual-write migration phases.",
+          "observed_utc": "2026-10-15T03:51:43.429420+00:00",
+          "http_status": 200,
+          "sha256": "88f5d518de25415840148d4345c134f8a544d0224ef23881e044fdb6efdd9d63",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/70b805389c60ce4d67fd624b60651909444736669a189c9d79a837396782cf12.txt",
+          "line_count": 587,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "kind": "FILE",
+            "repo": "AxonFramework/AxonFramework",
+            "revision": "3cb0254e037070da22e21ff589c8b001dc0d63e6",
+            "path": "LICENSE.txt",
+            "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/3cb0254e037070da22e21ff589c8b001dc0d63e6/LICENSE.txt",
+            "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+            "observed_utc": "2026-10-15T03:51:06.585592+00:00",
+            "http_status": 200,
+            "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/a814c041d80f8b8599d02e4bd7970dafbe3ff756e3d7734c4f4cbc4177df1047.txt",
+            "line_count": 202,
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "license_text_read_utc": "2026-10-15T03:56:50.460157+00:00"
+          },
+          "repository_metadata": {
+            "stars": 3625,
+            "archived": false,
+            "pushed_at": "2026-10-15T01:07:30Z",
+            "observed_utc": "2026-10-15T03:50:39.745995+00:00",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/AxonFramework--AxonFramework-metadata.json"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "apache/fineract",
+          "path": "fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+          "original_url": "https://github.com/apache/fineract/blob/HEAD/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T01:19:05.055108Z",
+          "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+          "line_count": 1860,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /**\n2:  * Licensed to the Apache Software Foundation (ASF) under one\n3:  * or more contributor license agreements. See the NOTICE file\n4:  * distributed with this work for additional information\n5:  * regarding copyright ownership. The ASF licenses this file\n6:  * to you under the Apache License, Version 2.0 (the\n7:  * \"License\"); you may not use this file except in compliance\n8:  * with the License. You may obtain a copy of the License at\n9:  *\n10:  * http://www.apache.org/licenses/LICENSE-2.0\n11:  *\n12:  * Unless required by applicable law or agreed to in writing,\n13:  * software distributed under the License is distributed on an\n14:  * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n15:  * KIND, either express or implied. See the License for the\n16:  * specific language governing permissions and limitations\n17:  * under the License.\n18:  */\n19: package org.apache.fineract.portfolio.loanaccount.domain;\n20: \n21: import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.CUMULATIVE;\n22: import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;\n23: \n24: import jakarta.persistence.CascadeType;\n25: import jakarta.persistence.Column;\n26: import jakarta.persistence.Convert;\n27: import jakarta.persistence.Embedded;\n28: import jakarta.persistence.Entity;\n29: import jakarta.persistence.Enumerated;\n30: import jakarta.persistence.FetchType;\n31: import jakarta.persistence.JoinColumn;\n32: import jakarta.persistence.JoinTable;\n33: import jakarta.persistence.ManyToOne;\n34: import jakarta.persistence.OneToMany;\n35: import jakarta.persistence.OneToOne;\n36: import jakarta.persistence.OrderBy;\n37: import jakarta.persistence.Table;\n38: import jakarta.persistence.UniqueConstraint;\n39: import jakarta.persistence.Version;\n40: import jakarta.validation.constraints.NotNull;",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "path": "LICENSE_RELEASE"
+          },
+          "repository_metadata": {
+            "stars": 2550,
+            "observed_utc": "2026-10-15T01:18:55.658481Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T16:42:29Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "apache/fineract",
+          "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+          "path": "fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssemblerImpl.java",
+          "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssemblerImpl.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssemblerImpl.java",
+          "query": "Pinned primary mechanism implementation and license capture; follow-up actual path.",
+          "observed_utc": "2026-10-15T03:51:06.909962+00:00",
+          "http_status": 200,
+          "sha256": "6684c612788ea012dd1f0d4686b2bf885a8b43434827d9f2f9202732dc309fb9",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/c2ba67cd0562060fb364cb77d4456f55591fc77e0a9558fc95f5878b2a1b4956.txt",
+          "line_count": 937,
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "path": "LICENSE_RELEASE"
+          },
+          "repository_metadata": {
+            "stars": 2550,
+            "observed_utc": "2026-10-15T01:18:55.658481Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T16:42:29Z"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "apache/fineract",
+          "path": "fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+          "original_url": "https://github.com/apache/fineract/blob/HEAD/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:57:59.374873Z",
+          "sha256": "53ba2fb0b2202b8d05f54ae381920664af1f023112f91d8ae641e7c74bd78fe1",
+          "line_count": 897,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b731dbeb13fd3fe2614e9d1c68ecab75785b0f1b4a55ef626bce8c4ff4cc0f48.txt",
+          "excerpt_lines": [
+            1,
+            40
+          ],
+          "excerpt": "1: /**\n2:  * Licensed to the Apache Software Foundation (ASF) under one\n3:  * or more contributor license agreements. See the NOTICE file\n4:  * distributed with this work for additional information\n5:  * regarding copyright ownership. The ASF licenses this file\n6:  * to you under the Apache License, Version 2.0 (the\n7:  * \"License\"); you may not use this file except in compliance\n8:  * with the License. You may obtain a copy of the License at\n9:  *\n10:  * http://www.apache.org/licenses/LICENSE-2.0\n11:  *\n12:  * Unless required by applicable law or agreed to in writing,\n13:  * software distributed under the License is distributed on an\n14:  * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n15:  * KIND, either express or implied. See the License for the\n16:  * specific language governing permissions and limitations\n17:  * under the License.\n18:  */\n19: package org.apache.fineract.portfolio.loanaccount.service;\n20: \n21: import static org.apache.fineract.portfolio.loanaccount.domain.Loan.APPROVED_ON_DATE;\n22: import static org.apache.fineract.portfolio.loanaccount.domain.Loan.PARAM_STATUS;\n23: import static org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD;\n24: \n25: import com.google.gson.JsonArray;\n26: import com.google.gson.JsonElement;\n27: import com.google.gson.JsonObject;\n28: import jakarta.persistence.PersistenceException;\n29: import java.math.BigDecimal;\n30: import java.time.LocalDate;\n31: import java.time.temporal.ChronoField;\n32: import java.util.ArrayList;\n33: import java.util.HashMap;\n34: import java.util.LinkedHashMap;\n35: import java.util.List;\n36: import java.util.Map;\n37: import java.util.Optional;\n38: import java.util.Set;\n39: import lombok.RequiredArgsConstructor;\n40: import lombok.extern.slf4j.Slf4j;",
+          "cache_inspected_utc": "2026-10-15T03:56:50.460157+00:00",
+          "hash_valid": true,
+          "license": {
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE",
+            "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+            "path": "LICENSE_RELEASE"
+          },
+          "repository_metadata": {
+            "stars": 2550,
+            "observed_utc": "2026-10-15T01:18:55.658481Z",
+            "archived": false,
+            "pushed_at": "2026-10-14T16:42:29Z"
+          }
+        }
+      ],
+      "pairing_relationship": "PARALLEL_DDD_AGGREGATE_CONSTRUCTION_REFERENCES_NOT_A_FRAMEWORK_DEPENDENCY_CLAIM",
+      "base_scope": "Axon Repository.newInstance accepts a factory callable for an aggregate root; AbstractRepository manages construction in a UnitOfWork and rejects an unsuitable aggregate type; AnnotatedAggregate.initialize/registerRoot actually invokes the callable and assigns the root.",
+      "application_scope": "Fineract submitApplication invokes LoanAssemblerImpl after request validation. The assembler resolves required product/client/group objects, selects named Loan creation methods, rejects missing client/group association, initializes the schedule, and returns the aggregate. The private Loan constructor associates children and assigns initial state. Additional business validation occurs after assembly and before persistence.",
+      "mechanism": "A fábrica concentra uma construção que exige mais do que chamar um construtor vazio. No Axon, newInstance recebe a função que cria a raiz do agregado, executa essa função no ciclo de vida gerenciado e confere se o tipo criado corresponde ao repositório. No Fineract, o serviço de criação chama LoanAssemblerImpl. O montador resolve o produto e as partes do empréstimo, escolhe a criação individual ou em grupo e rejeita o pedido quando não há cliente nem grupo. Os métodos nomeados de Loan chamam um construtor privado que associa os componentes e inicia o empréstimo como submetido e pendente de aprovação.",
+      "limits": "Axon fornece o ciclo de construção gerenciada e os controles técnicos do agregado; ele não define as regras de crédito do Fineract. Não se afirma que o Fineract usa Axon. O montador e os métodos de Loan representam a fábrica de domínio neste recorte, enquanto o serviço aplica validações antes e depois da montagem. Portanto, não se atribui a toda chamada direta de um método estático a garantia de satisfazer todas as regras do empréstimo, nem se usa a persistência JPA como prova de Factory.",
+      "classification_basis": "The construction responsibility is established by the named creation API, real assembler invocation, private constructor, association initialization and caller validation boundary. A marker annotation, generic bean factory or entity name alone is not used as proof.",
+      "source_evidence": [
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/0f81fd8df835215f84dfaf52de67f3a5158c3c9c4450c79b19dd4bb8ec892062.txt",
+          "sha256": "238211b202afe288a4f67f19e1b1ec542c3de05c521d73ee48869dec5182a846",
+          "hits": [
+            {
+              "term": "aggregate-specific factory API",
+              "start_line": 61,
+              "end_line": 70,
+              "excerpt": "    /**\n     * Creates a new managed instance for the aggregate, using the given {@code factoryMethod}\n     * to instantiate the aggregate's root.\n     *\n     * @param factoryMethod The method to create the aggregate's root instance\n     * @return an Aggregate instance describing the aggregate's state\n     *\n     * @throws Exception when the factoryMethod throws an exception\n     */\n    Aggregate<T> newInstance(@Nonnull Callable<T> factoryMethod) throws Exception;",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java#L61-L70"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/e65943b48cf73c600e4362e7a717262a5f837dfcbe134895af4343d237c8647a.txt",
+          "sha256": "f4862c63f12e04865f1279f0fe106105f44af5bd74922ac33d8af8aba04c34f6",
+          "hits": [
+            {
+              "term": "construction failure and type boundary in managed lifecycle",
+              "start_line": 93,
+              "end_line": 121,
+              "excerpt": "    public A newInstance(@Nonnull Callable<T> factoryMethod,\n                         @Nonnull Consumer<Aggregate<T>> initMethod) throws Exception {\n        UnitOfWork<?> uow = currentUnitOfWork();\n        AtomicReference<A> aggregateReference = new AtomicReference<>();\n        // a constructor may apply events, and the persistence of an aggregate must take precedence over publishing its events.\n        uow.onPrepareCommit(x -> {\n            A aggregate = aggregateReference.get();\n            // Aggregate construction may have failed with an exception (aggregate == null)\n            //  or the handler decided not to create the aggregate (identifier == null).\n            // In that case, no action is required on commit.\n            if (aggregate != null && aggregate.identifier() != null) {\n                prepareForCommit(aggregate);\n            }\n        });\n\n        A aggregate;\n        try {\n            aggregate = doCreateNew(factoryMethod);\n        } catch (Exception e) {\n            logger.warn(\"Exception occurred while trying to create an aggregate.\", e);\n            throw e;\n        }\n\n        initMethod.accept(aggregate);\n        aggregateReference.set(aggregate);\n        Assert.isTrue(aggregateModel.entityClass().isAssignableFrom(aggregate.rootType()),\n                      () -> \"Unsuitable aggregate for this repository: wrong type\");\n        Map<String, A> aggregates = managedAggregates(uow);\n        Assert.isTrue(aggregates.putIfAbsent(aggregate.identifierAsString(), aggregate) == null,",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java#L93-L121"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/GenericJpaRepository.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/1d22d42aa7149a6490243a626f6dab46666bf5d32e5bd1e5b5b4d7f9cd412bbb.txt",
+          "sha256": "f8cad194d2794e34b66a90b0bbbb75e3859a07eeda1b63f2ab1aa2da0cc8c375",
+          "hits": [
+            {
+              "term": "concrete repository calls aggregate initializer with factory",
+              "start_line": 148,
+              "end_line": 156,
+              "excerpt": "    @Override\n    protected AnnotatedAggregate<T> doCreateNewForLock(Callable<T> factoryMethod) throws Exception {\n        // generate sequence numbers in events when using an Event Store\n        return AnnotatedAggregate.initialize(factoryMethod,\n                                             aggregateModel(),\n                                             eventBus,\n                                             repositoryProvider,\n                                             shouldGenerateSequences());\n    }",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/GenericJpaRepository.java#L148-L156"
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "source_url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/70b805389c60ce4d67fd624b60651909444736669a189c9d79a837396782cf12.txt",
+          "sha256": "88f5d518de25415840148d4345c134f8a544d0224ef23881e044fdb6efdd9d63",
+          "hits": [
+            {
+              "term": "aggregate factory initializes real root",
+              "start_line": 205,
+              "end_line": 216,
+              "excerpt": "    public static <T> AnnotatedAggregate<T> initialize(Callable<T> aggregateFactory,\n                                                       AggregateModel<T> aggregateModel,\n                                                       EventBus eventBus,\n                                                       RepositoryProvider repositoryProvider,\n                                                       boolean generateSequences) throws Exception {\n        AnnotatedAggregate<T> aggregate =\n                new AnnotatedAggregate<>(aggregateModel, eventBus, repositoryProvider);\n        if (generateSequences) {\n            aggregate.initSequence();\n        }\n        aggregate.registerRoot(aggregateFactory);\n        return aggregate;",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java#L205-L216"
+            },
+            {
+              "term": "factory callable is actually executed",
+              "start_line": 276,
+              "end_line": 288,
+              "excerpt": "     * <p>\n     * This is method is commonly called while an aggregate is being initialized.\n     *\n     * @param aggregateFactory the factory to create the aggregate root\n     * @throws Exception if the aggregate factory fails to create the aggregate root\n     */\n    protected void registerRoot(Callable<T> aggregateFactory) throws Exception {\n        this.aggregateRoot = executeWithResult(aggregateFactory);\n        execute(() -> {\n            while (!delayedTasks.isEmpty()) {\n                delayedTasks.remove().run();\n            }\n        });",
+              "url": "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java#L276-L288"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a562bd1212e7064409ccfc492f965682a1eb2a4f24a826d3469094e446907773.txt",
+          "sha256": "bba0e65293d032909c46e4bc8bf463accea61e3add8b0f0ee11080c44b92c8e6",
+          "hits": [
+            {
+              "term": "named domain construction with private constructor",
+              "start_line": 438,
+              "end_line": 454,
+              "excerpt": "    public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final AccountType loanType,\n            final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,\n            final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy,\n            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,\n            final Set<LoanCollateralManagement> collateral, final BigDecimal fixedEmiAmount,\n            final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,\n            final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,\n            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,\n            final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final Boolean enableInstallmentLevelDelinquency,\n            final LocalDate submittedOnDate, final Boolean allowFullTermForTranche) {\n        return new Loan(accountNo, client, null, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,\n                loanRepaymentScheduleDetail, null, loanCharges, collateral, null, fixedEmiAmount, disbursementDetails,\n                maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,\n                fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, enableInstallmentLevelDelinquency,\n                submittedOnDate, allowFullTermForTranche);\n    }\n",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L438-L454"
+            },
+            {
+              "term": "private construction and component association",
+              "start_line": 489,
+              "end_line": 526,
+              "excerpt": "    protected Loan() {\n        // empty\n    }\n\n    private Loan(final String accountNo, final Client client, final Group group, final AccountType loanType, final Fund fund,\n            final Staff loanOfficer, final CodeValue loanPurpose,\n            final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy, final LoanProduct loanProduct,\n            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus, final Set<LoanCharge> loanCharges,\n            final Set<LoanCollateralManagement> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,\n            final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,\n            final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,\n            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,\n            final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final Boolean enableInstallmentLevelDelinquency,\n            final LocalDate submittedOnDate, final Boolean allowFullTermForTranche) {\n        this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;\n\n        this.isFloatingInterestRate = isFloatingInterestRate;\n        this.interestRateDifferential = interestRateDifferential;\n\n        if (StringUtils.isBlank(accountNo)) {\n            this.accountNumber = new RandomPasswordGenerator(19).generate();\n        } else {\n            this.accountNumber = accountNo;\n        }\n        this.client = client;\n        this.group = group;\n        this.loanType = loanType;\n        this.fund = fund;\n        this.loanOfficer = loanOfficer;\n        this.loanPurpose = loanPurpose;\n\n        this.transactionProcessingStrategyCode = transactionProcessingStrategy.getCode();\n        this.transactionProcessingStrategyName = transactionProcessingStrategy.getName();\n\n        this.loanProduct = loanProduct;\n        this.loanStatus = loanStatus;\n        if (loanCharges != null && !loanCharges.isEmpty()) {\n            this.charges = associateChargesWithThisLoan(loanCharges);",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L489-L526"
+            },
+            {
+              "term": "initial submitted aggregate state",
+              "start_line": 543,
+              "end_line": 575,
+              "excerpt": "        if (disbursementDetails != null) {\n            this.disbursementDetails = disbursementDetails;\n            for (final LoanDisbursementDetails loanDisbursementDetails : disbursementDetails) {\n                loanDisbursementDetails.updateLoan(this);\n            }\n        }\n        this.approvedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();\n        this.createStandingInstructionAtDisbursement = createStandingInstructionAtDisbursement;\n\n        /*\n         * During loan origination stage and before loan is approved principal_amount, approved_principal and\n         * principal_amount_demanded will same amount and that amount is same as applicant loan demanded amount.\n         */\n\n        this.proposedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();\n\n        // rates added here\n        this.rates = rates;\n        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;\n\n        // Add net get net disbursal amount from charges and principal\n        this.netDisbursalAmount = this.approvedPrincipal.subtract(deriveSumTotalOfChargesDueAtDisbursement());\n        this.loanStatus = LoanStatus.SUBMITTED_AND_PENDING_APPROVAL;\n        this.externalId = externalId;\n        this.termFrequency = loanApplicationTerms.getLoanTermFrequency();\n        this.termPeriodFrequencyType = loanApplicationTerms.getLoanTermPeriodFrequencyType();\n        this.expectedDisbursementDate = loanApplicationTerms.getExpectedDisbursementDate();\n        this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();\n        this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();\n        this.submittedOnDate = submittedOnDate != null ? submittedOnDate : DateUtils.getBusinessLocalDate();\n        this.repaymentStartDateType = loanApplicationTerms.getRepaymentStartDateType();\n\n        updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L543-L575"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssemblerImpl.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/raw/c2ba67cd0562060fb364cb77d4456f55591fc77e0a9558fc95f5878b2a1b4956.txt",
+          "sha256": "6684c612788ea012dd1f0d4686b2bf885a8b43434827d9f2f9202732dc309fb9",
+          "hits": [
+            {
+              "term": "required product resolution",
+              "start_line": 163,
+              "end_line": 185,
+              "excerpt": "    public Loan assembleFrom(final JsonCommand command) {\n        final JsonElement element = command.parsedJson();\n\n        final Long clientId = this.fromApiJsonHelper.extractLongNamed(\"clientId\", element);\n        final Long groupId = this.fromApiJsonHelper.extractLongNamed(\"groupId\", element);\n        final String accountNo = this.fromApiJsonHelper.extractStringNamed(\"accountNo\", element);\n        final Long productId = this.fromApiJsonHelper.extractLongNamed(\"productId\", element);\n        final Long fundId = this.fromApiJsonHelper.extractLongNamed(\"fundId\", element);\n        final Long loanOfficerId = this.fromApiJsonHelper.extractLongNamed(\"loanOfficerId\", element);\n        final Long loanPurposeId = this.fromApiJsonHelper.extractLongNamed(\"loanPurposeId\", element);\n        final Boolean syncDisbursementWithMeeting = this.fromApiJsonHelper.extractBooleanNamed(\"syncDisbursementWithMeeting\", element);\n        final Boolean createStandingInstructionAtDisbursement = this.fromApiJsonHelper\n                .extractBooleanNamed(\"createStandingInstructionAtDisbursement\", element);\n\n        final LoanProduct loanProduct = this.loanProductRepository.findById(productId)\n                .orElseThrow(() -> new LoanProductNotFoundException(productId));\n        final Boolean allowOverridingTransactionProcessingStrategy = loanProduct.getLoanConfigurableAttributes()\n                .getTransactionProcessingStrategyBoolean();\n        final String transactionProcessingStrategyCode = allowOverridingTransactionProcessingStrategy\n                ? this.fromApiJsonHelper.extractStringNamed(\"transactionProcessingStrategyCode\", element)\n                : loanProduct.getTransactionProcessingStrategyCode();\n        final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy = this.loanRepaymentScheduleTransactionProcessorFactory\n                .determineProcessor(transactionProcessingStrategyCode);",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssemblerImpl.java#L163-L185"
+            },
+            {
+              "term": "choose valid association-specific factory or reject",
+              "start_line": 266,
+              "end_line": 296,
+              "excerpt": "        if (client != null && group != null) {\n            loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanAccountType, loanProduct, fund,\n                    loanOfficer, loanPurpose, transactionProcessingStrategy, loanProductRelatedDetail, loanCharges,\n                    syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,\n                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,\n                    fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, isEnableInstallmentLevelDelinquency,\n                    submittedOnDate, allowFullTermForTranche);\n        } else if (group != null) {\n            loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanAccountType, loanProduct, fund, loanOfficer, loanPurpose,\n                    transactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting, fixedEmiAmount,\n                    disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,\n                    interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms,\n                    isEnableInstallmentLevelDelinquency, submittedOnDate, allowFullTermForTranche);\n        } else if (client != null) {\n            loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanAccountType, loanProduct, fund, loanOfficer,\n                    loanPurpose, transactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral, fixedEmiAmount,\n                    disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,\n                    interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms,\n                    isEnableInstallmentLevelDelinquency, submittedOnDate, allowFullTermForTranche);\n        } else {\n            throw new IllegalStateException(\"No loan application exists for either a client or group (or both).\");\n        }\n\n        loanSchedule.updateLoanSchedule(loanApplication, loanScheduleModel);\n\n        copyAdvancedPaymentRulesIfApplicable(transactionProcessingStrategyCode, loanProduct, loanApplication);\n        // TODO: review\n        loanChargeService.recalculateAllCharges(loanApplication);\n        topUpLoanConfiguration(element, loanApplication);\n        loanAccrualsProcessingService.reprocessExistingAccruals(loanApplication, false);\n        return loanApplication;",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssemblerImpl.java#L266-L296"
+            }
+          ]
+        },
+        {
+          "role": "application",
+          "source_url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b731dbeb13fd3fe2614e9d1c68ecab75785b0f1b4a55ef626bce8c4ff4cc0f48.txt",
+          "sha256": "53ba2fb0b2202b8d05f54ae381920664af1f023112f91d8ae641e7c74bd78fe1",
+          "hits": [
+            {
+              "term": "real caller validates, assembles, validates and persists",
+              "start_line": 134,
+              "end_line": 145,
+              "excerpt": "    @Transactional\n    @Override\n    public CommandProcessingResult submitApplication(final JsonCommand command) {\n        try {\n            // Validations (prior assembling)\n            this.loanApplicationValidator.validateForCreate(command);\n            // Assembling loan\n            final Loan loan = this.loanAssembler.assembleFrom(command);\n            // Validations (further validations which requires the assembling first)\n            this.loanApplicationValidator.validateForCreate(loan);\n            // Need to flush to gather loan id\n            this.loanRepositoryWrapper.saveAndFlush(loan);",
+              "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java#L134-L145"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "capture_inventory": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/captures.json",
+  "frozen_files_mutated": false,
+  "review_boundary": "Research/source recommendations only. No matrix, shared source cache, MDX, gzip, global repository, Jira, production service or implementation test was changed. Candidate adoption still needs curator integration and independent HIGH recheck.",
+  "method": "Reused selected application captures and pinned metadata before adding actual framework/library implementations. Every cited raw source was read and its stored SHA256 measured. Base/app references explicitly distinguish a direct dependency from independent examples of the same mechanism."
+}

@@ -1,0 +1,37 @@
+{
+  "query": "repo:yugabyte/yugabyte-db \"row-level-geo-partitioning\"",
+  "observed_utc": "2026-10-15T02:40:24.160001Z",
+  "total_count": 49,
+  "items": [
+    {
+      "repo": "yugabyte/yugabyte-db",
+      "path": "docs/content/stable/explore/multi-region-deployments/_index.md",
+      "url": "https://github.com/yugabyte/yugabyte-db/blob/8fa481a6cdcba7f0b76ffcb10b079624784a3127/docs/content/stable/explore/multi-region-deployments/_index.md"
+    },
+    {
+      "repo": "yugabyte/yugabyte-db",
+      "path": "docs/content/v2025.2/explore/multi-region-deployments/_index.md",
+      "url": "https://github.com/yugabyte/yugabyte-db/blob/8fa481a6cdcba7f0b76ffcb10b079624784a3127/docs/content/v2025.2/explore/multi-region-deployments/_index.md"
+    },
+    {
+      "repo": "yugabyte/yugabyte-db",
+      "path": "docs/content/v2025.1/explore/multi-region-deployments/_index.md",
+      "url": "https://github.com/yugabyte/yugabyte-db/blob/8fa481a6cdcba7f0b76ffcb10b079624784a3127/docs/content/v2025.1/explore/multi-region-deployments/_index.md"
+    },
+    {
+      "repo": "yugabyte/yugabyte-db",
+      "path": "docs/content/v2024.2/explore/multi-region-deployments/_index.md",
+      "url": "https://github.com/yugabyte/yugabyte-db/blob/8fa481a6cdcba7f0b76ffcb10b079624784a3127/docs/content/v2024.2/explore/multi-region-deployments/_index.md"
+    },
+    {
+      "repo": "yugabyte/yugabyte-db",
+      "path": "docs/content/stable/api/ysql/exprs/geo_partitioning_helper_functions/_index.md",
+      "url": "https://github.com/yugabyte/yugabyte-db/blob/8fa481a6cdcba7f0b76ffcb10b079624784a3127/docs/content/stable/api/ysql/exprs/geo_partitioning_helper_functions/_index.md"
+    },
+    {
+      "repo": "yugabyte/yugabyte-db",
+      "path": "docs/content/v2024.2/api/ysql/exprs/geo_partitioning_helper_functions/_index.md",
+      "url": "https://github.com/yugabyte/yugabyte-db/blob/8fa481a6cdcba7f0b76ffcb10b079624784a3127/docs/content/v2024.2/api/ysql/exprs/geo_partitioning_helper_functions/_index.md"
+    }
+  ]
+}

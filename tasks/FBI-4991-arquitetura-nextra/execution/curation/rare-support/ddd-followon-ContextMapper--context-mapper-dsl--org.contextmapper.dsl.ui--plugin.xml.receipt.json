@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-mapper-dsl",
+  "path": "org.contextmapper.dsl.ui/plugin.xml",
+  "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+  "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/plugin.xml",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/plugin.xml",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:19:28.477530+00:00",
+  "sha256": "3f44c978fb0f6c12b6ba917e81ccc06562a6e92708765234054b66c4ad8a4b7d",
+  "line_count": 1010,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--org.contextmapper.dsl.ui--plugin.xml"
+}

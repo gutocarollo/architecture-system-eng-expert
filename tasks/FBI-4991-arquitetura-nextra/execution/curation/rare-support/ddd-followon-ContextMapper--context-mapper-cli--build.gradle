@@ -1,0 +1,175 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'application'
+    id 'maven-publish'
+    id 'signing'
+    id 'nebula.release' version '19.0.10'
+}
+
+group = 'org.contextmapper'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.contextmapper:context-mapper-dsl:${cmlVersion}"
+    implementation "info.picocli:picocli:${picocliVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:${jUnitVersion}"
+    testImplementation "org.assertj:assertj-core:${assertJVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+}
+
+application {
+    mainClass = 'org.contextmapper.cli.ContextMapperCLI'
+    applicationName = 'cm'
+}
+
+javadoc {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    failOnError false
+}
+
+jar {
+    manifest {
+        attributes (
+                'Implementation-Title': 'Context Mapper Command Line Interface (CLI)',
+                'Implementation-Version': project.version,
+                'Main-Class': 'org.contextmapper.cli.ContextMapperCLI'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude('META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/DEPENDENCIES')
+    exclude('META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/services/**')
+}
+
+if (!project.hasProperty('signing.secretKeyRingFile')) {
+    project.ext.'signing.secretKeyRingFile' = "${rootDir}/secret-key.gpg"
+}
+
+test {
+    testLogging {
+        showExceptions = true
+        exceptionFormat = "full"
+
+        showCauses = true
+        showStackTraces = true
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+check.dependsOn jacocoTestReport
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = "${project.name}"
+            groupId = "${project.group}"
+            version = "${project.version}"
+            from components.java
+            artifact javadocJar
+            artifact sourcesJar
+            artifact distZip
+            artifact distTar
+
+            pom {
+                name = 'Context Map Generator'
+                description = 'Context Mapper Command Line Interface (CLI)'
+                url = 'https://github.com/ContextMapper/context-mapper-cli'
+                organization {
+                    name = 'Context Mapper'
+                    url = 'https://contextmapper.org/'
+                }
+                licenses {
+                    license {
+                        name = 'Apache License 2.0'
+                        url = 'https://github.com/ContextMapper/context-mapper-cli/blob/master/LICENSE'
+                    }
+                }
+                issueManagement {
+                    system = 'GitHub'
+                    url = 'https://github.com/ContextMapper/context-mapper-cli/issues'
+                }
+                scm {
+                    url = 'https://github.com/ContextMapper/context-mapper-cli'
+                    connection = 'scm:git:git://github.com/ContextMapper/context-mapper-cli.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:ContextMapper/context-mapper-cli.git'
+                }
+                developers {
+                    developer {
+                        name = 'Stefan Kapferer'
+                        email = 'stefan@contextmapper.org'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "${ossReleaseStagingRepository}"
+            def snapshotsRepoUrl = "${ossSnapshotRepository}"
+            url = project.version.toString().endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            credentials {
+                username = System.getenv('OSSRH_USERNAME')
+                password = System.getenv('OSSRH_PASSWORD')
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications)
+}
+
+testing {
+    suites {
+        test(JvmTestSuite) {
+            useJUnitJupiter(jUnitVersion)
+        }
+    }
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
+tasks.withType(CreateStartScripts).configureEach {
+    doLast {
+        String text = windowsScript.text
+        text = text.replaceFirst(/(set CLASSPATH=%APP_HOME%\\lib\\).*/, { "${it[1]}*" })
+        windowsScript.text = text
+    }
+}

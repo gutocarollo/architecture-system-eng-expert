@@ -1,0 +1,60 @@
+{
+  "brief_version": 2,
+  "project_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "mode": "REVIEW",
+  "adapter": "generic",
+  "workspace": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "bounded_anchor": "Comparar a jornada Diátaxis do curso de arquitetura com o Nextra do MakersHub em casos delimitados e acrescentar à FBI-4991 critérios verificáveis de ligação entre conceito, caso real, prática antes/depois, Jira, PR, commits e fallback financeiro identificado; preservar os conteúdos auditados.",
+  "PROTOCOL_ROOT": null,
+  "method_skill": null,
+  "provided_packet": null,
+  "preparation": {
+    "kind": "metadata",
+    "classification": "METADATA_ONLY",
+    "receipt_path": null,
+    "receipt_sha256": null
+  },
+  "review_contract": null,
+  "sources": [
+    {
+      "id": "project",
+      "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+      "required": true
+    },
+    {
+      "id": "makershub-help",
+      "root": "/Users/augustocarollo/.superset/worktrees/makershub/paint-bistro",
+      "required": true
+    },
+    {
+      "id": "workflow-evidence",
+      "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/evidence",
+      "required": true
+    }
+  ],
+  "output_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/FBI-4991-arquitetura-nextra/comparison",
+  "selected_skills": [
+    "diataxis",
+    "mapping",
+    "orchestrator"
+  ],
+  "context_skill_ids": [],
+  "dispatch_owner": "principal",
+  "permissions": {
+    "read_roots": [
+      "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+      "/Users/augustocarollo/.superset.noindex/worktrees/makershub/paint-bistro",
+      "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/evidence"
+    ],
+    "artifact_write_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/FBI-4991-arquitetura-nextra/comparison/prepared",
+    "source_writes": false,
+    "domain_writes": false,
+    "dispatch_children": false
+  },
+  "limitations": [
+    "Preparation does not execute source commands or dispatch agents.",
+    "Runtime evidence must be supplied as a versioned snapshot.",
+    "selected_skills is run-level inventory, not permission to load author or orchestration roles in a context lane.",
+    "The principal applies project protocols and owns all dispatch; delegated context lanes return evidence only."
+  ]
+}

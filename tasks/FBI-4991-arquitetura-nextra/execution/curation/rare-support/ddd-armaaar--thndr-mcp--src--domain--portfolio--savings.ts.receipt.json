@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/portfolio/savings.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/portfolio/savings.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:07:04.526473+00:00",
+  "sha256": "ba4433930d9bd4a768a53ea2086199576543b717757692cab4231d2f803b7f99",
+  "line_count": 44,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--portfolio--savings.ts"
+}

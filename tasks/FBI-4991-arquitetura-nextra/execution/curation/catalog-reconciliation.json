@@ -1,0 +1,2017 @@
+{
+  "entries_linked": 335,
+  "unique_concepts_linked": 310,
+  "concepts_without_catalog_link": [],
+  "entries": [
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Layered / N-Tier",
+      "concept_id": "layered-n-tier",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#layered-n-tier"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Modular Monolith",
+      "concept_id": "modular-monolith",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#modular-monolith"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Microservices",
+      "concept_id": "microservices",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#microservices"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "SOA",
+      "concept_id": "soa",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#soa"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Serverless",
+      "concept_id": "serverless",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#serverless"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Microkernel / Plugin Architecture",
+      "concept_id": "microkernel-plugin-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#microkernel-plugin-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Hexagonal / Ports & Adapters",
+      "concept_id": "hexagonal-ports-adapters",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#hexagonal-ports-adapters"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Clean Architecture",
+      "concept_id": "clean-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#clean-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Onion Architecture",
+      "concept_id": "onion-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#onion-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Vertical Slice Architecture",
+      "concept_id": "vertical-slice-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#vertical-slice-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "MVC",
+      "concept_id": "mvc",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#mvc"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "MVP",
+      "concept_id": "mvp",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#mvp"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "MVVM",
+      "concept_id": "mvvm",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#mvvm"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "PAC",
+      "concept_id": "pac",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#pac"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Component-Based Architecture",
+      "concept_id": "component-based-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#component-based-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Space-Based Architecture",
+      "concept_id": "space-based-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#space-based-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Cell-Based Architecture",
+      "concept_id": "cell-based-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#cell-based-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Actor Model",
+      "concept_id": "actor-model",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#actor-model"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Peer-to-Peer",
+      "concept_id": "peer-to-peer",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#peer-to-peer"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Blackboard Architecture",
+      "concept_id": "blackboard-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#blackboard-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Pipe and Filter",
+      "concept_id": "pipe-and-filter",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#pipe-and-filter"
+    },
+    {
+      "file": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "heading": "Event-Driven Architecture",
+      "concept_id": "event-driven-architecture",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#event-driven-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Dual Write",
+      "concept_id": "dual-write",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#dual-write"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Transactional Outbox",
+      "concept_id": "transactional-outbox",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#transactional-outbox"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Transactional Inbox",
+      "concept_id": "transactional-inbox",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#transactional-inbox"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Outbox + CDC",
+      "concept_id": "outbox-cdc",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#outbox-cdc"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Change Data Capture (CDC)",
+      "concept_id": "change-data-capture-cdc",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#change-data-capture-cdc"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Saga",
+      "concept_id": "saga",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#saga"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Choreography Saga",
+      "concept_id": "choreography-saga",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#choreography-saga"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Orchestration Saga",
+      "concept_id": "orchestration-saga",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#orchestration-saga"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Two-Phase Commit / 2PC",
+      "concept_id": "two-phase-commit-2pc",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#two-phase-commit-2pc"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Three-Phase Commit / 3PC",
+      "concept_id": "three-phase-commit-3pc",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#three-phase-commit-3pc"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "TCC — Try/Confirm/Cancel",
+      "concept_id": "tcc-try-confirm-cancel",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#tcc-try-confirm-cancel"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Compensating Transaction",
+      "concept_id": "compensating-transaction",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#compensating-transaction"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Reservation Pattern",
+      "concept_id": "reservation-pattern",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#reservation-pattern"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Idempotency",
+      "concept_id": "idempotency",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#idempotency"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Idempotency Key",
+      "concept_id": "idempotency-key",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#idempotency-key"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Deduplication",
+      "concept_id": "deduplication",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#deduplication"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Exactly Once Semantics",
+      "concept_id": "exactly-once-semantics",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#exactly-once-semantics"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "At-Least-Once Delivery",
+      "concept_id": "at-least-once-delivery",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#at-least-once-delivery"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "At-Most-Once Delivery",
+      "concept_id": "at-most-once-delivery",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#at-most-once-delivery"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Eventual Consistency",
+      "concept_id": "eventual-consistency",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#eventual-consistency"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Strong Consistency",
+      "concept_id": "strong-consistency",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#strong-consistency"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Read-your-writes",
+      "concept_id": "read-your-writes",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#read-your-writes"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Monotonic Reads",
+      "concept_id": "monotonic-reads",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#monotonic-reads"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Optimistic Concurrency Control",
+      "concept_id": "optimistic-concurrency-control",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#optimistic-concurrency-control"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Pessimistic Locking",
+      "concept_id": "pessimistic-locking",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#pessimistic-locking"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Distributed Lock",
+      "concept_id": "distributed-lock",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#distributed-lock"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Lease",
+      "concept_id": "lease",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#lease"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Fencing Token",
+      "concept_id": "fencing-token",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#fencing-token"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Compare-and-Swap / CAS",
+      "concept_id": "compare-and-swap-cas",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#compare-and-swap-cas"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Version Vector",
+      "concept_id": "version-vector",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#version-vector"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Lamport Clock",
+      "concept_id": "lamport-clock",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#lamport-clock"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Hybrid Logical Clock",
+      "concept_id": "hybrid-logical-clock",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#hybrid-logical-clock"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Quorum Read/Write",
+      "concept_id": "quorum-read-write",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#quorum-read-write"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Leader Election",
+      "concept_id": "leader-election",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#leader-election"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Consensus",
+      "concept_id": "consensus",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#consensus"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Raft",
+      "concept_id": "raft",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#raft"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Paxos",
+      "concept_id": "paxos",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#paxos"
+    },
+    {
+      "file": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "heading": "Gossip Protocol",
+      "concept_id": "gossip-protocol",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#gossip-protocol"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Publish/Subscribe",
+      "concept_id": "publish-subscribe",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#publish-subscribe"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Message Queue",
+      "concept_id": "message-queue",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#message-queue"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Competing Consumers",
+      "concept_id": "competing-consumers",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#competing-consumers"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Producer/Consumer",
+      "concept_id": "producer-consumer",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#producer-consumer"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Request/Reply",
+      "concept_id": "request-reply",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#request-reply"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Fire-and-Forget",
+      "concept_id": "fire-and-forget",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#fire-and-forget"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Fan-out",
+      "concept_id": "fan-out",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#fan-out"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Fan-in",
+      "concept_id": "fan-in",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#fan-in"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Message Router",
+      "concept_id": "message-router",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#message-router"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Content-Based Router",
+      "concept_id": "content-based-router",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#content-based-router"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Message Filter",
+      "concept_id": "message-filter",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#message-filter"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Message Translator",
+      "concept_id": "message-translator",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#message-translator"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Message Enricher",
+      "concept_id": "message-enricher",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#message-enricher"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Splitter",
+      "concept_id": "splitter",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#splitter"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Aggregator",
+      "concept_id": "aggregator",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#aggregator"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Resequencer",
+      "concept_id": "resequencer",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#resequencer"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Correlation ID",
+      "concept_id": "correlation-id",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#correlation-id"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Dead Letter Queue",
+      "concept_id": "dead-letter-queue",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#dead-letter-queue"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Retry Queue",
+      "concept_id": "retry-queue",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#retry-queue"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Delayed Queue",
+      "concept_id": "delayed-queue",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#delayed-queue"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Priority Queue",
+      "concept_id": "priority-queue",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#priority-queue"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Poison Message Handling",
+      "concept_id": "poison-message-handling",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#poison-message-handling"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Event Notification",
+      "concept_id": "event-notification",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#event-notification"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Event-Carried State Transfer",
+      "concept_id": "event-carried-state-transfer",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#event-carried-state-transfer"
+    },
+    {
+      "file": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "heading": "Event Streaming",
+      "concept_id": "event-streaming",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#event-streaming"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "CQRS",
+      "concept_id": "cqrs",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#cqrs"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Event Sourcing",
+      "concept_id": "event-sourcing",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#event-sourcing"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Projection",
+      "concept_id": "projection",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#projection"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Materialized View",
+      "concept_id": "materialized-view",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#materialized-view"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Read Model",
+      "concept_id": "read-model",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#read-model"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Write Model",
+      "concept_id": "write-model",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#write-model"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Snapshotting",
+      "concept_id": "snapshotting",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#snapshotting"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Command Handler",
+      "concept_id": "command-handler",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#command-handler"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Query Handler",
+      "concept_id": "query-handler",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#query-handler"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Domain Events",
+      "concept_id": "domain-event",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#domain-event"
+    },
+    {
+      "file": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "heading": "Integration Events",
+      "concept_id": "integration-event",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#integration-event"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Primary/Replica",
+      "concept_id": "primary-replica",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#primary-replica"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Leader/Follower",
+      "concept_id": "leader-follower",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#leader-follower"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Multi-Leader",
+      "concept_id": "multi-leader",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#multi-leader"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Multi-Primary",
+      "concept_id": "multi-primary",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#multi-primary"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Active/Passive",
+      "concept_id": "active-passive",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#active-passive"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Active/Active",
+      "concept_id": "active-active",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#active-active"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Read Replica — replicação",
+      "concept_id": "read-replica",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#read-replica"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Cascading Replication",
+      "concept_id": "cascading-replication",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#cascading-replication"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Synchronous Replication",
+      "concept_id": "synchronous-replication",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#synchronous-replication"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Asynchronous Replication",
+      "concept_id": "asynchronous-replication",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#asynchronous-replication"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Horizontal Partitioning",
+      "concept_id": "horizontal-partitioning",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#horizontal-partitioning"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Vertical Partitioning",
+      "concept_id": "vertical-partitioning",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#vertical-partitioning"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Sharding",
+      "concept_id": "sharding",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#sharding"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Range Sharding",
+      "concept_id": "range-sharding",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#range-sharding"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Hash Sharding",
+      "concept_id": "hash-sharding",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#hash-sharding"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Directory-Based Sharding",
+      "concept_id": "directory-based-sharding",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#directory-based-sharding"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Geographic Sharding",
+      "concept_id": "geographic-sharding",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#geographic-sharding"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Consistent Hashing",
+      "concept_id": "consistent-hashing",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#consistent-hashing"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Write-Ahead Log (WAL)",
+      "concept_id": "write-ahead-log-wal",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#write-ahead-log-wal"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Append-Only Log",
+      "concept_id": "append-only-log",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#append-only-log"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Copy-on-Write",
+      "concept_id": "copy-on-write",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#copy-on-write"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Log Structured Storage",
+      "concept_id": "log-structured-storage",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#log-structured-storage"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Write Amplification Control",
+      "concept_id": "write-amplification-control",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#write-amplification-control"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Read Replica — leitura",
+      "concept_id": "read-replica",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#read-replica"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Materialized View",
+      "concept_id": "materialized-view",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#materialized-view"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Indexing",
+      "concept_id": "indexing",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#indexing"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Covering Index",
+      "concept_id": "covering-index",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#covering-index"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Denormalization",
+      "concept_id": "denormalization",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#denormalization"
+    },
+    {
+      "file": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "heading": "Precomputation",
+      "concept_id": "precomputation",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#precomputation"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Cache Aside",
+      "concept_id": "cache-aside",
+      "curation_url": "/referencia/curadoria/06-cache/#cache-aside"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Read Through",
+      "concept_id": "read-through",
+      "curation_url": "/referencia/curadoria/06-cache/#read-through"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Write Through",
+      "concept_id": "write-through",
+      "curation_url": "/referencia/curadoria/06-cache/#write-through"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Write Behind / Write Back",
+      "concept_id": "write-behind-write-back",
+      "curation_url": "/referencia/curadoria/06-cache/#write-behind-write-back"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Refresh Ahead",
+      "concept_id": "refresh-ahead",
+      "curation_url": "/referencia/curadoria/06-cache/#refresh-ahead"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "TTL Cache",
+      "concept_id": "ttl-cache",
+      "curation_url": "/referencia/curadoria/06-cache/#ttl-cache"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Negative Caching",
+      "concept_id": "negative-caching",
+      "curation_url": "/referencia/curadoria/06-cache/#negative-caching"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Distributed Cache",
+      "concept_id": "distributed-cache",
+      "curation_url": "/referencia/curadoria/06-cache/#distributed-cache"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Local Cache",
+      "concept_id": "local-cache",
+      "curation_url": "/referencia/curadoria/06-cache/#local-cache"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Two-Level Cache",
+      "concept_id": "two-level-cache",
+      "curation_url": "/referencia/curadoria/06-cache/#two-level-cache"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Cache Stampede Protection",
+      "concept_id": "cache-stampede-protection",
+      "curation_url": "/referencia/curadoria/06-cache/#cache-stampede-protection"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Single Flight",
+      "concept_id": "single-flight",
+      "curation_url": "/referencia/curadoria/06-cache/#single-flight"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Cache Warming",
+      "concept_id": "cache-warming",
+      "curation_url": "/referencia/curadoria/06-cache/#cache-warming"
+    },
+    {
+      "file": "content/referencia/catalogo/06-cache.mdx",
+      "heading": "Cache Invalidation",
+      "concept_id": "cache-invalidation",
+      "curation_url": "/referencia/curadoria/06-cache/#cache-invalidation"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Retry",
+      "concept_id": "retry",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#retry"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Exponential Backoff",
+      "concept_id": "exponential-backoff",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#exponential-backoff"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Jitter",
+      "concept_id": "jitter",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#jitter"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Circuit Breaker",
+      "concept_id": "circuit-breaker",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#circuit-breaker"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Bulkhead",
+      "concept_id": "bulkhead",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#bulkhead"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Timeout",
+      "concept_id": "timeout",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#timeout"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Deadline Propagation",
+      "concept_id": "deadline-propagation",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#deadline-propagation"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Fallback",
+      "concept_id": "fallback",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#fallback"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Fail Fast",
+      "concept_id": "fail-fast",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#fail-fast"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Graceful Degradation",
+      "concept_id": "graceful-degradation",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#graceful-degradation"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Load Shedding",
+      "concept_id": "load-shedding",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#load-shedding"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Backpressure",
+      "concept_id": "backpressure",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#backpressure"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Rate Limiting",
+      "concept_id": "rate-limiting",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#rate-limiting"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Throttling",
+      "concept_id": "throttling",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#throttling"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Health Check",
+      "concept_id": "health-check",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#health-check"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Heartbeat",
+      "concept_id": "heartbeat",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#heartbeat"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Watchdog",
+      "concept_id": "watchdog",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#watchdog"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Self-Healing",
+      "concept_id": "self-healing",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#self-healing"
+    },
+    {
+      "file": "content/referencia/catalogo/07-resiliencia.mdx",
+      "heading": "Chaos Engineering",
+      "concept_id": "chaos-engineering",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#chaos-engineering"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Mutex",
+      "concept_id": "mutex",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#mutex"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Semaphore",
+      "concept_id": "semaphore",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#semaphore"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Reader/Writer Lock",
+      "concept_id": "reader-writer-lock",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#reader-writer-lock"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Spinlock",
+      "concept_id": "spinlock",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#spinlock"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Optimistic Locking",
+      "concept_id": "optimistic-concurrency-control",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#optimistic-concurrency-control"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Pessimistic Locking",
+      "concept_id": "pessimistic-locking",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#pessimistic-locking"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Lock-Free",
+      "concept_id": "lock-free",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#lock-free"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Wait-Free",
+      "concept_id": "wait-free",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#wait-free"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Compare-and-Swap",
+      "concept_id": "compare-and-swap-cas",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#compare-and-swap-cas"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Actor Model",
+      "concept_id": "actor-model",
+      "curation_url": "/referencia/curadoria/01-arquiteturas-de-aplicacao/#actor-model"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Thread Pool",
+      "concept_id": "thread-pool",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#thread-pool"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Worker Pool",
+      "concept_id": "worker-pool",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#worker-pool"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Producer/Consumer",
+      "concept_id": "producer-consumer",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#producer-consumer"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Work Stealing",
+      "concept_id": "work-stealing",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#work-stealing"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Fork/Join",
+      "concept_id": "fork-join",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#fork-join"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Futures/Promises",
+      "concept_id": "futures-promises",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#futures-promises"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Async/Await",
+      "concept_id": "async-await",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#async-await"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Reactive Streams",
+      "concept_id": "reactive-streams",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#reactive-streams"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Backpressure",
+      "concept_id": "backpressure",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#backpressure"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Single Writer Principle",
+      "concept_id": "single-writer-principle",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#single-writer-principle"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Immutable Data",
+      "concept_id": "immutable-data",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#immutable-data"
+    },
+    {
+      "file": "content/referencia/catalogo/08-concorrencia.mdx",
+      "heading": "Copy-on-Write",
+      "concept_id": "copy-on-write",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#copy-on-write"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "API Gateway",
+      "concept_id": "api-gateway",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#api-gateway"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Backend for Frontend (BFF)",
+      "concept_id": "backend-for-frontend-bff",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#backend-for-frontend-bff"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Gateway Aggregation",
+      "concept_id": "gateway-aggregation",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#gateway-aggregation"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Gateway Routing",
+      "concept_id": "gateway-routing",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#gateway-routing"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Gateway Offloading",
+      "concept_id": "gateway-offloading",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#gateway-offloading"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Reverse Proxy",
+      "concept_id": "reverse-proxy",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#reverse-proxy"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Service Mesh",
+      "concept_id": "service-mesh",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#service-mesh"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Sidecar",
+      "concept_id": "sidecar",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#sidecar"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Ambassador",
+      "concept_id": "ambassador",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#ambassador"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Adapter",
+      "concept_id": "adapter",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#adapter"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Anti-Corruption Layer",
+      "concept_id": "anti-corruption-layer",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#anti-corruption-layer"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Facade",
+      "concept_id": "facade",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#facade"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Proxy",
+      "concept_id": "proxy",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#proxy"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "API Composition",
+      "concept_id": "api-composition",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#api-composition"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "GraphQL Federation",
+      "concept_id": "graphql-federation",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#graphql-federation"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "RPC",
+      "concept_id": "rpc",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#rpc"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "REST",
+      "concept_id": "rest",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#rest"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "HATEOAS",
+      "concept_id": "hateoas",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#hateoas"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Webhook",
+      "concept_id": "webhook",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#webhook"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Polling",
+      "concept_id": "polling",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#polling"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Long Polling",
+      "concept_id": "long-polling",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#long-polling"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "Server-Sent Events",
+      "concept_id": "server-sent-events",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#server-sent-events"
+    },
+    {
+      "file": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "heading": "WebSocket",
+      "concept_id": "websocket",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#websocket"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Page introduction: DDD",
+      "concept_id": "ddd",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#ddd"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Bounded Context",
+      "concept_id": "bounded-context",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#bounded-context"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Ubiquitous Language",
+      "concept_id": "ubiquitous-language",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#ubiquitous-language"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Entity",
+      "concept_id": "entity",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#entity"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Value Object",
+      "concept_id": "value-object",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#value-object"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Aggregate",
+      "concept_id": "aggregate",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#aggregate"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Aggregate Root",
+      "concept_id": "aggregate-root",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#aggregate-root"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Domain Service",
+      "concept_id": "domain-service",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#domain-service"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Application Service",
+      "concept_id": "application-service",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#application-service"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Repository",
+      "concept_id": "repository",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#repository"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Factory",
+      "concept_id": "factory",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#factory"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Domain Event",
+      "concept_id": "domain-event",
+      "curation_url": "/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#domain-event"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Domain Policy",
+      "concept_id": "domain-policy",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#domain-policy"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Specification",
+      "concept_id": "specification",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#specification"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Anti-Corruption Layer",
+      "concept_id": "anti-corruption-layer",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#anti-corruption-layer"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Context Map",
+      "concept_id": "context-map",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#context-map"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Shared Kernel",
+      "concept_id": "shared-kernel",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#shared-kernel"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Customer/Supplier",
+      "concept_id": "customer-supplier",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#customer-supplier"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Conformist",
+      "concept_id": "conformist",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#conformist"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Open Host Service",
+      "concept_id": "open-host-service",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#open-host-service"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Published Language",
+      "concept_id": "published-language",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#published-language"
+    },
+    {
+      "file": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "heading": "Separate Ways",
+      "concept_id": "separate-ways",
+      "curation_url": "/referencia/curadoria/10-ddd-domain-driven-design/#separate-ways"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Strangler Fig",
+      "concept_id": "strangler-fig",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#strangler-fig"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Branch by Abstraction",
+      "concept_id": "branch-by-abstraction",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#branch-by-abstraction"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Parallel Run",
+      "concept_id": "parallel-run",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#parallel-run"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Shadow Traffic",
+      "concept_id": "shadow-traffic",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#shadow-traffic"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Dark Launch",
+      "concept_id": "dark-launch",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#dark-launch"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Feature Toggle",
+      "concept_id": "feature-flags",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#feature-flags"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Expand/Contract",
+      "concept_id": "expand-contract",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#expand-contract"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Transitional Architecture",
+      "concept_id": "transitional-architecture",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#transitional-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Modularization",
+      "concept_id": "modularization",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#modularization"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Service Extraction",
+      "concept_id": "service-extraction",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#service-extraction"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Database Decomposition",
+      "concept_id": "database-decomposition",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#database-decomposition"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "CDC Migration",
+      "concept_id": "cdc-migration",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#cdc-migration"
+    },
+    {
+      "file": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "heading": "Dual Write Migration",
+      "concept_id": "dual-write-migration",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#dual-write-migration"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Blue/Green Deployment",
+      "concept_id": "blue-green-deployment",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#blue-green-deployment"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Canary Release",
+      "concept_id": "canary-release",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#canary-release"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Rolling Deployment",
+      "concept_id": "rolling-deployment",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#rolling-deployment"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Recreate Deployment",
+      "concept_id": "recreate-deployment",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#recreate-deployment"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Shadow Deployment",
+      "concept_id": "shadow-deployment",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#shadow-deployment"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Dark Launch",
+      "concept_id": "dark-launch",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#dark-launch"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Feature Flags",
+      "concept_id": "feature-flags",
+      "curation_url": "/referencia/curadoria/11-padroes-para-decompor-sistemas/#feature-flags"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Progressive Delivery",
+      "concept_id": "progressive-delivery",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#progressive-delivery"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "A/B Deployment",
+      "concept_id": "a-b-deployment",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#a-b-deployment"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Immutable Infrastructure",
+      "concept_id": "immutable-infrastructure",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#immutable-infrastructure"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "Infrastructure as Code",
+      "concept_id": "infrastructure-as-code",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#infrastructure-as-code"
+    },
+    {
+      "file": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "heading": "GitOps",
+      "concept_id": "gitops",
+      "curation_url": "/referencia/curadoria/12-deploy-e-releases/#gitops"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Active/Active",
+      "concept_id": "active-active",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#active-active"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Active/Passive",
+      "concept_id": "active-passive",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#active-passive"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Hot Standby",
+      "concept_id": "hot-standby",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#hot-standby"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Warm Standby",
+      "concept_id": "warm-standby",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#warm-standby"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Cold Standby",
+      "concept_id": "cold-standby",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#cold-standby"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Multi-AZ",
+      "concept_id": "multi-az",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#multi-az"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Multi-Region",
+      "concept_id": "multi-region",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#multi-region"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Leader/Follower",
+      "concept_id": "leader-follower",
+      "curation_url": "/referencia/curadoria/05-banco-de-dados-e-armazenamento/#leader-follower"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Quorum",
+      "concept_id": "quorum",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#quorum"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Failover",
+      "concept_id": "failover",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#failover"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Automatic Failover",
+      "concept_id": "automatic-failover",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#automatic-failover"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Split-Brain Prevention",
+      "concept_id": "split-brain-prevention",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#split-brain-prevention"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Fencing",
+      "concept_id": "fencing",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#fencing"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Heartbeat",
+      "concept_id": "heartbeat",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#heartbeat"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Leader Election",
+      "concept_id": "leader-election",
+      "curation_url": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#leader-election"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Replication",
+      "concept_id": "replication",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#replication"
+    },
+    {
+      "file": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "heading": "Stateless Services",
+      "concept_id": "stateless-services",
+      "curation_url": "/referencia/curadoria/13-alta-disponibilidade/#stateless-services"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Zero Trust",
+      "concept_id": "zero-trust",
+      "curation_url": "/referencia/curadoria/14-seguranca/#zero-trust"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Defense in Depth",
+      "concept_id": "defense-in-depth",
+      "curation_url": "/referencia/curadoria/14-seguranca/#defense-in-depth"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Least Privilege",
+      "concept_id": "least-privilege",
+      "curation_url": "/referencia/curadoria/14-seguranca/#least-privilege"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "RBAC",
+      "concept_id": "rbac",
+      "curation_url": "/referencia/curadoria/14-seguranca/#rbac"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "ABAC",
+      "concept_id": "abac",
+      "curation_url": "/referencia/curadoria/14-seguranca/#abac"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "ReBAC",
+      "concept_id": "rebac",
+      "curation_url": "/referencia/curadoria/14-seguranca/#rebac"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Policy-Based Access Control",
+      "concept_id": "policy-based-access-control",
+      "curation_url": "/referencia/curadoria/14-seguranca/#policy-based-access-control"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "OAuth2",
+      "concept_id": "oauth2",
+      "curation_url": "/referencia/curadoria/14-seguranca/#oauth2"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "OIDC",
+      "concept_id": "oidc",
+      "curation_url": "/referencia/curadoria/14-seguranca/#oidc"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Token Exchange",
+      "concept_id": "token-exchange",
+      "curation_url": "/referencia/curadoria/14-seguranca/#token-exchange"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Short-Lived Credentials",
+      "concept_id": "short-lived-credentials",
+      "curation_url": "/referencia/curadoria/14-seguranca/#short-lived-credentials"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Secrets Rotation",
+      "concept_id": "secrets-rotation",
+      "curation_url": "/referencia/curadoria/14-seguranca/#secrets-rotation"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "mTLS",
+      "concept_id": "mtls",
+      "curation_url": "/referencia/curadoria/14-seguranca/#mtls"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "API Gateway Security",
+      "concept_id": "api-gateway-security",
+      "curation_url": "/referencia/curadoria/14-seguranca/#api-gateway-security"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Service-to-Service Identity",
+      "concept_id": "service-to-service-identity",
+      "curation_url": "/referencia/curadoria/14-seguranca/#service-to-service-identity"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Bastion Host",
+      "concept_id": "bastion-host",
+      "curation_url": "/referencia/curadoria/14-seguranca/#bastion-host"
+    },
+    {
+      "file": "content/referencia/catalogo/14-seguranca.mdx",
+      "heading": "Network Segmentation",
+      "concept_id": "network-segmentation",
+      "curation_url": "/referencia/curadoria/14-seguranca/#network-segmentation"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Structured Logging",
+      "concept_id": "structured-logging",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#structured-logging"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Centralized Logging",
+      "concept_id": "centralized-logging",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#centralized-logging"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Distributed Tracing",
+      "concept_id": "distributed-tracing",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#distributed-tracing"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Correlation ID",
+      "concept_id": "correlation-id",
+      "curation_url": "/referencia/curadoria/03-event-driven-messaging/#correlation-id"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Request ID",
+      "concept_id": "request-id",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#request-id"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Metrics",
+      "concept_id": "metrics",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#metrics"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "RED Method (Rate, Errors, Duration)",
+      "concept_id": "red-method-rate-errors-duration",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#red-method-rate-errors-duration"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "USE Method (Utilization, Saturation, Errors)",
+      "concept_id": "use-method-utilization-saturation-errors",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#use-method-utilization-saturation-errors"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Golden Signals",
+      "concept_id": "golden-signals",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#golden-signals"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "OpenTelemetry",
+      "concept_id": "opentelemetry",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#opentelemetry"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Health Checks",
+      "concept_id": "health-check",
+      "curation_url": "/referencia/curadoria/07-resiliencia/#health-check"
+    },
+    {
+      "file": "content/referencia/catalogo/15-observabilidade.mdx",
+      "heading": "Synthetic Monitoring",
+      "concept_id": "synthetic-monitoring",
+      "curation_url": "/referencia/curadoria/15-observabilidade/#synthetic-monitoring"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "State Machine",
+      "concept_id": "state-machine",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#state-machine"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Finite State Machine",
+      "concept_id": "finite-state-machine",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#finite-state-machine"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Workflow Engine",
+      "concept_id": "workflow-engine",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#workflow-engine"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "DAG",
+      "concept_id": "dag",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#dag"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Pipeline",
+      "concept_id": "pipeline",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#pipeline"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Orchestrator",
+      "concept_id": "orchestrator",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#orchestrator"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Choreography",
+      "concept_id": "choreography",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#choreography"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Job Queue",
+      "concept_id": "job-queue",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#job-queue"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Worker Pool",
+      "concept_id": "worker-pool",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#worker-pool"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Batch Processing",
+      "concept_id": "batch-processing",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#batch-processing"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Stream Processing",
+      "concept_id": "stream-processing",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#stream-processing"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Lambda Architecture",
+      "concept_id": "lambda-architecture",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#lambda-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Kappa Architecture",
+      "concept_id": "kappa-architecture",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#kappa-architecture"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "MapReduce",
+      "concept_id": "mapreduce",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#mapreduce"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Scatter/Gather",
+      "concept_id": "scatter-gather",
+      "curation_url": "/referencia/curadoria/16-workflow-e-processamento/#scatter-gather"
+    },
+    {
+      "file": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "heading": "Fork/Join",
+      "concept_id": "fork-join",
+      "curation_url": "/referencia/curadoria/08-concorrencia/#fork-join"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Singleton",
+      "concept_id": "singleton",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#singleton"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Factory Method",
+      "concept_id": "factory-method",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#factory-method"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Abstract Factory",
+      "concept_id": "abstract-factory",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#abstract-factory"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Builder",
+      "concept_id": "builder",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#builder"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Prototype",
+      "concept_id": "prototype",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#prototype"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Adapter",
+      "concept_id": "adapter",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#adapter"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Bridge",
+      "concept_id": "bridge",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#bridge"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Composite",
+      "concept_id": "composite",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#composite"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Decorator",
+      "concept_id": "decorator",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#decorator"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Facade",
+      "concept_id": "facade",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#facade"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Flyweight",
+      "concept_id": "flyweight",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#flyweight"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Proxy",
+      "concept_id": "proxy",
+      "curation_url": "/referencia/curadoria/09-apis-e-integracao/#proxy"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Chain of Responsibility",
+      "concept_id": "chain-of-responsibility",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#chain-of-responsibility"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Command",
+      "concept_id": "command",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#command"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Interpreter",
+      "concept_id": "interpreter",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#interpreter"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Iterator",
+      "concept_id": "iterator",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#iterator"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Mediator",
+      "concept_id": "mediator",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#mediator"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Memento",
+      "concept_id": "memento",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#memento"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Observer",
+      "concept_id": "observer",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#observer"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "State",
+      "concept_id": "state",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#state"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Strategy",
+      "concept_id": "strategy",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#strategy"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Template Method",
+      "concept_id": "template-method",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#template-method"
+    },
+    {
+      "file": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "heading": "Visitor",
+      "concept_id": "visitor",
+      "curation_url": "/referencia/curadoria/17-padroes-classicos-gof/#visitor"
+    }
+  ]
+}

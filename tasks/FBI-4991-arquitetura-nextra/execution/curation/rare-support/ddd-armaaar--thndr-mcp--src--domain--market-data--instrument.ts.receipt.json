@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/market-data/instrument.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/market-data/instrument.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:07:04.526239+00:00",
+  "sha256": "39c192743b36acdfba17d3d92fd8bd02905747fe6b8bb6f50c87d48ecf7d43cf",
+  "line_count": 79,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--market-data--instrument.ts"
+}

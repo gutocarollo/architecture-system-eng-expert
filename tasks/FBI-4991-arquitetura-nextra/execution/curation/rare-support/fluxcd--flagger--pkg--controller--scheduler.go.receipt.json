@@ -1,0 +1,12 @@
+{
+  "repo": "fluxcd/flagger",
+  "path": "pkg/controller/scheduler.go",
+  "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+  "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/controller/scheduler.go",
+  "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/controller/scheduler.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:43:04.357645+00:00",
+  "sha256": "a1787b39090b4e02f614028e43558290f515495078a471e620e72a4713bfd99b",
+  "line_count": 1088,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--pkg--controller--scheduler.go"
+}

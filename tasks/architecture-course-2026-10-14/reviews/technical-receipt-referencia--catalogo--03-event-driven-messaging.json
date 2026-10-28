@@ -1,0 +1,25 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/03-event-driven-messaging",
+  "document_sha256": "70f11bce55452388b8336feb9da707fab309a7cdf8586006b5f334646cfb181e",
+  "context_sha256": "91d424fa88458a3d8fc4271e6aaa0ef647fdef6c74616698137cd09c312a1d06",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "competing-claims-code",
+    "idempotency-code",
+    "l3a",
+    "l3b",
+    "l4a",
+    "l4b",
+    "original-catalog",
+    "original-request",
+    "s3",
+    "s4",
+    "s4-reference-repair",
+    "s6"
+  ]
+}

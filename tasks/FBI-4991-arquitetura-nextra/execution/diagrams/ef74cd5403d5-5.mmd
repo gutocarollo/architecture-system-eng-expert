@@ -1,0 +1,6 @@
+flowchart LR
+    GIT[Repositório de DAGs] --> SYNC[Container auxiliar git-sync]
+    subgraph POD[Pod do scheduler Airflow: snapshot RKE2]
+        SYNC --> VOLUME[Volume emptyDir com worktree sincronizada]
+        VOLUME --> SCHEDULER[Container do scheduler lê os arquivos]
+    end

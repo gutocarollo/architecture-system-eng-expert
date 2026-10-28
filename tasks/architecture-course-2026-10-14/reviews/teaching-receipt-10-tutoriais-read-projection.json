@@ -1,0 +1,21 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "tutoriais/read-projection",
+  "document_sha256": "5821c113f9b8fa07790b34a8efa0748742d024b4e6ce5ec49bc4a194aea63fd7",
+  "context_sha256": "5d90d67c08a626e548da030fdbdbed0836df8c1ebc15975e10d0785c409400d5",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [
+    "report-api-service",
+    "report-service-repository"
+  ],
+  "evidence_ids": [
+    "original-request",
+    "l1c",
+    "report-api",
+    "report-service",
+    "report-repository"
+  ]
+}
